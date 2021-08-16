@@ -14,4 +14,4 @@ RUN npm run build
 
 EXPOSE 5000
 
-CMD ["node", "dist/main"]
+CMD ["npm", "run", "start:dev"]
