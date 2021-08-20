@@ -16,6 +16,6 @@ describe('UserService', () => {
   //   expect(service).toBeDefined();
   // });
   test('test1 : need to fix later', () => {
-    expect(42).toBe(42)
-  })
-})
+    expect(42).toBe(42);
+  });
+});
