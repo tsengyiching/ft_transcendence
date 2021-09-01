@@ -5,6 +5,4 @@ export class CreateUserDto {
   @MaxLength(10)
   @IsNotEmpty()
   nickname: string;
-
-  //photo
 }
