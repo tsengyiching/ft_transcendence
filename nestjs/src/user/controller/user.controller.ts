@@ -31,12 +31,17 @@ export class UserController {
     return this.userService.createUser(createUserDto);
   }
 
-  @Put(':id')
-  updateUser(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() createUserDto: CreateUserDto,
-  ): Promise<User> {
-    return this.userService.updateUser(id, createUserDto);
+  // @Put(':id')
+  // updateUser(
+  //   @Param('id', ParseIntPipe) id: number,
+  //   @Body() createUserDto: CreateUserDto,
+  // ): Promise<User> {
+  //   return this.userService.updateUser(id, createUserDto);
+  // }
+
+  @Post(':id')
+  joinNewGame(@Param('id', ParseIntPipe) id: number): Promise<User> {
+    return this.userService.joinNewGame(id);
   }
 
   @Delete(':id') // can we delete user ?
