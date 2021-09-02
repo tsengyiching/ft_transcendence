@@ -4,7 +4,7 @@ import {
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToOne,
+  ManyToMany,
 } from 'typeorm';
 
 @Entity({ name: 'games' })
@@ -18,6 +18,6 @@ export class Game {
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
 
-  @ManyToOne(() => User, (user) => user.games)
-  user: User;
+  @ManyToMany(() => User, (user) => user.games)
+  players: User[];
 }

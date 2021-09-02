@@ -1,8 +1,16 @@
-import { Controller, Get, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+} from '@nestjs/common';
+import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
 
-@Controller('game')
+@Controller('games')
 export class GameController {
   constructor(private gameService: GameService) {}
 
@@ -16,8 +24,8 @@ export class GameController {
     return this.gameService.getOneById(id);
   }
 
-  //   @Post()
-  //   createGame(): Promise<Game> {
-  //     return this.gameService.createGame();
-  //   }
+  @Post()
+  createGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
+    return this.gameService.createGame(createGameDto);
+  }
 }

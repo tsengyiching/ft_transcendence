@@ -1,12 +1,15 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
+import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 
 @Injectable()
 export class GameService {
   constructor(
     @InjectRepository(Game) private gameRepository: Repository<Game>,
+    @Inject(UserService) private readonly userService: UserService,
   ) {}
 
   getAll(): Promise<Game[]> {
@@ -24,8 +27,15 @@ export class GameService {
     );
   }
 
-  createGame(): Promise<Game> {
-    const newGame = this.gameRepository.create();
+  async createGame(createGameDto: CreateGameDto): Promise<Game> {
+    const newGame = await this.gameRepository.create();
+    const leftUser = await this.userService.getOneById(
+      createGameDto.leftUserId,
+    );
+    const rightUser = await this.userService.getOneById(
+      createGameDto.rightUserId,
+    );
+    newGame.players = [leftUser, rightUser];
     return this.gameRepository.save(newGame);
   }
 }
