@@ -10,8 +10,11 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
+  /*
+   ** getAll returns all users with their game histories
+   */
   getAll(): Promise<User[]> {
-    return this.userRepository.find(/*{relations: ['']}*/);
+    return this.userRepository.find({ relations: ['games'] });
   }
 
   async getOneById(id: number): Promise<User> {

@@ -10,7 +10,7 @@ import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
 
-@Controller('games')
+@Controller('game')
 export class GameController {
   constructor(private gameService: GameService) {}
 

@@ -17,9 +17,9 @@ export class GameService {
   }
 
   async getOneById(id: number): Promise<Game> {
-    const user = await this.gameRepository.findOne(id);
-    if (user) {
-      return user;
+    const game = await this.gameRepository.findOne(id);
+    if (game) {
+      return game;
     }
     throw new HttpException(
       'Game with this id does not exist',

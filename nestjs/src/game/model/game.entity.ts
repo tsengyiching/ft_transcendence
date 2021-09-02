@@ -7,12 +7,12 @@ import {
   ManyToMany,
 } from 'typeorm';
 
-@Entity({ name: 'games' })
+@Entity()
 export class Game {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true }) // change type later
   mode: string;
 
   @CreateDateColumn() //{ select: false } not to show on query result
