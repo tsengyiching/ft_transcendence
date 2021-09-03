@@ -5,6 +5,7 @@ import {
   Column,
   CreateDateColumn,
   ManyToMany,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -18,6 +19,15 @@ export class Game {
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
 
+  // @Column()
+  // leftUserScore: number;
+
+  // @Column()
+  // rightUserScore: number;
+
   @ManyToMany(() => User, (user) => user.games)
-  players: User[];
+  users: User[];
+
+  @ManyToOne(() => User, (user) => user.winnings)
+  winner: User;
 }

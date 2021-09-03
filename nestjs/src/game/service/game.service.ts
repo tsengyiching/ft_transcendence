@@ -35,7 +35,7 @@ export class GameService {
     const rightUser = await this.userService.getOneById(
       createGameDto.rightUserId,
     );
-    newGame.players = [leftUser, rightUser];
+    newGame.users = [leftUser, rightUser];
     return this.gameRepository.save(newGame);
   }
 }

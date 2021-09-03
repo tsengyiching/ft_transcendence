@@ -5,6 +5,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -19,7 +20,10 @@ export class User {
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
 
-  @ManyToMany(() => Game, (game) => game.players)
-  @JoinTable({ name: 'userGameHistory' })
+  @ManyToMany(() => Game, (game) => game.users)
+  @JoinTable({ name: 'userGameRecords' })
   games: Game[];
+
+  @OneToMany(() => Game, (game) => game.winner)
+  winnings: Game[];
 }

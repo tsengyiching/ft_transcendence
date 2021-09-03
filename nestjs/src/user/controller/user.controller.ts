@@ -11,7 +11,6 @@ import {
 import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
 import { User } from '../model/user.entity';
-import { getManager } from 'typeorm';
 
 @Controller('user')
 export class UserController {
@@ -22,20 +21,11 @@ export class UserController {
     return this.userService.getAll();
   }
 
-  // @Get(':id')
-  // getUserById(@Param('id', ParseIntPipe) id: number): Promise<User> {
-  //   return this.userService.getOneById(id);
-  // }
-
   @Get(':id')
-  async getUserGameHistoryById(
+  async getUserGameRecordsById(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<User> {
-    const user = await getManager()
-      .createQueryBuilder(User, 'user')
-      .where('user.id = :id', { id })
-      .getOne();
-    return user;
+    return this.userService.getUserGameRecordsById(id);
   }
 
   @Post()
