@@ -34,13 +34,11 @@ export class UserService {
   /*
    ** getUserGameRecordsById returns the user's basic info and game records
    */
-  async getUserGameRecordsById(id: number): Promise<User> {
-    const user = await this.userRepository
-      .createQueryBuilder('user')
-      .leftJoinAndSelect('user.games', 'games')
-      .loadRelationCountAndMap('user.gamesCount', 'user.games')
-      .where('user.id = :id', { id })
-      .getOne();
+  async getUserGameRecordsById(id: number) {
+    const user = this.userRepository.find({
+      where: { id: id },
+      relations: ['games'],
+    });
     if (user) {
       return user;
     }

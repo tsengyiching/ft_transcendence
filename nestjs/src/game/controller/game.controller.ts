@@ -5,7 +5,9 @@ import {
   Param,
   ParseIntPipe,
   Post,
+  Put,
 } from '@nestjs/common';
+import { AddGameWinnerDto } from '../model/add-gameWinner.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
@@ -27,5 +29,13 @@ export class GameController {
   @Post()
   createGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
     return this.gameService.createGame(createGameDto);
+  }
+
+  @Put(':id')
+  addGameWinner(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() addGameWinnerDto: AddGameWinnerDto,
+  ): Promise<Game> {
+    return this.gameService.addGameWinner(id, addGameWinnerDto);
   }
 }

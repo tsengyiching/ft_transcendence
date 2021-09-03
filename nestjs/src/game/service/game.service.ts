@@ -2,6 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
+import { AddGameWinnerDto } from '../model/add-gameWinner.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 
@@ -37,5 +38,17 @@ export class GameService {
     );
     newGame.users = [leftUser, rightUser];
     return this.gameRepository.save(newGame);
+  }
+
+  async addGameWinner(
+    id: number,
+    addGameWinnerDto: AddGameWinnerDto,
+  ): Promise<Game> {
+    const game = await this.getOneById(id);
+    const winner = await this.userService.getOneById(
+      addGameWinnerDto.winnerUserId,
+    );
+    game.winner = winner;
+    return this.gameRepository.save(game);
   }
 }

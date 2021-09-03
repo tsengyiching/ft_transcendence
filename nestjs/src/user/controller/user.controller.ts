@@ -22,9 +22,7 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUserGameRecordsById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<User> {
+  async getUserGameRecordsById(@Param('id', ParseIntPipe) id: number) {
     return this.userService.getUserGameRecordsById(id);
   }
 
