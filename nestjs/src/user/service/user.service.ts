@@ -33,6 +33,7 @@ export class UserService {
 
   /*
    ** getUserProfileById returns the user's game records, friend list and status
+   ** add a query to get the user's competitors
    */
   async getUserProfileById(id: number) {
     const user = this.userRepository.find({

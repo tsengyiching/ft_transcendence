@@ -64,7 +64,6 @@ export class GameService {
 
   /*
    ** insertGameResult inserts game result with scores and a winner
-   ** need to check if it should add the winner automatically
    */
   async insertGameResult(
     id: number,
@@ -76,9 +75,12 @@ export class GameService {
     await this.userGameRecords.save(gameRecord);
 
     const game = await this.getOneById(id);
-    const winner = await this.userService.getOneById(
-      insertGameResultDto.winnerUserId,
-    );
+    let winner;
+    if (gameRecord[0].score > gameRecord[1].score) {
+      winner = await this.userService.getOneById(gameRecord[0].userId);
+    } else {
+      winner = await this.userService.getOneById(gameRecord[1].userId);
+    }
     game.winner = winner;
     return this.gameRepository.save(game);
   }
