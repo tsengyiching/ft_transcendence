@@ -9,6 +9,11 @@ import {
   OneToMany,
 } from 'typeorm';
 
+export enum GameStatus {
+  ON = 1,
+  OFF = 0,
+}
+
 @Entity()
 export class Game {
   @PrimaryGeneratedColumn()
@@ -19,6 +24,13 @@ export class Game {
 
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
+
+  @Column({
+    type: 'enum',
+    enum: GameStatus,
+    default: GameStatus.ON,
+  })
+  status: GameStatus;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.game)
   public userGameRecords!: UserGameRecords[];

@@ -64,6 +64,8 @@ export class GameService {
 
   /*
    ** insertGameResult inserts game result with scores and a winner
+   ** sets game status off
+   ** returns game
    */
   async insertGameResult(
     id: number,
@@ -82,6 +84,7 @@ export class GameService {
       winner = await this.userService.getOneById(gameRecord[1].userId);
     }
     game.winner = winner;
+    game.status = 0;
     return this.gameRepository.save(game);
   }
 }
