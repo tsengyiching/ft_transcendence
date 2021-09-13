@@ -7,7 +7,7 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
-import { AddGameWinnerDto } from '../model/add-gameWinner.dto';
+import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
@@ -32,10 +32,10 @@ export class GameController {
   }
 
   @Put(':id')
-  addGameWinner(
+  insertGameResult(
     @Param('id', ParseIntPipe) id: number,
-    @Body() addGameWinnerDto: AddGameWinnerDto,
+    @Body() insertGameResultDto: InsertGameResultDto,
   ): Promise<Game> {
-    return this.gameService.addGameWinner(id, addGameWinnerDto);
+    return this.gameService.insertGameResult(id, insertGameResultDto);
   }
 }

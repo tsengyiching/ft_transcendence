@@ -1,11 +1,12 @@
 import { User } from 'src/user/model/user.entity';
+import UserGameRecords from 'src/game/model/userGameRecords.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
 } from 'typeorm';
 
 @Entity()
@@ -13,21 +14,15 @@ export class Game {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true }) // change type later
-  mode: string;
+  @Column() // change type later
+  mode: number;
 
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
 
-  // @Column()
-  // leftUserScore: number;
+  @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.game)
+  public userGameRecords!: UserGameRecords[];
 
-  // @Column()
-  // rightUserScore: number;
-
-  @ManyToMany(() => User, (user) => user.games)
-  users: User[];
-
-  @ManyToOne(() => User, (user) => user.winnings)
+  @ManyToOne(() => User, (user) => user.victories)
   winner: User;
 }

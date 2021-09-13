@@ -3,11 +3,10 @@ import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinTable,
-  ManyToMany,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import UserGameRecords from '../../game/model/userGameRecords.entity';
 
 @Entity()
 export class User {
@@ -20,10 +19,16 @@ export class User {
   @CreateDateColumn() //{ select: false } not to show on query result
   createDate: Date;
 
-  @ManyToMany(() => Game, (game) => game.users)
-  @JoinTable({ name: 'userGameRecords' })
-  games: Game[];
+  @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
+  public userGameRecords!: UserGameRecords[];
 
   @OneToMany(() => Game, (game) => game.winner)
-  winnings: Game[];
+  victories: Game[];
+
+  // @ManyToMany(() => User, (user) => user.following)
+  // @JoinTable()
+  // followers: User[];
+
+  // @ManyToMany(() => User, (user) => user.followers)
+  // following: User[];
 }
