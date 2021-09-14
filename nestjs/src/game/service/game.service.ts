@@ -5,7 +5,7 @@ import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
-import { Game } from '../model/game.entity';
+import { Game, GameStatus } from '../model/game.entity';
 
 @Injectable()
 export class GameService {
@@ -84,7 +84,7 @@ export class GameService {
       winner = await this.userService.getOneById(gameRecord[1].userId);
     }
     game.winner = winner;
-    game.status = 0;
+    game.status = GameStatus.FINISH;
     return this.gameRepository.save(game);
   }
 }

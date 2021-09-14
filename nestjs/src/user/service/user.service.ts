@@ -35,9 +35,8 @@ export class UserService {
    ** getUserProfileById returns the user's game records, friend list and status
    ** add a query to get the user's competitors
    */
-  async getUserProfileById(id: number) {
-    const user = this.userRepository.find({
-      where: { id: id },
+  async getUserProfileById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne(id, {
       relations: ['userGameRecords', 'victories'],
     });
     if (user) {
@@ -65,34 +64,4 @@ export class UserService {
     user.nickname = CreateUserDto.nickname;
     return this.userRepository.save(user);
   }
-
-  // async deleteUser(id: number): Promise<User> {
-  //   const user = await this.getOneById(id);
-  //   return this.userRepository.remove(user);
-  // }
-
-  // async follow(id: number, addFriendDto: AddFriendDto): Promise<User> {
-  //   const user = await this.getOneById(id);
-  //   const following = await this.getOneById(addFriendDto.friendId);
-  //   user.following = [following];
-  //   return this.userRepository.save(user);
-  // }
-
-  // async getFollower(id: number): Promise<User> {
-  //   const user = await this.userRepository.findOne(id, {
-  //     relations: ['followers'],
-  //   });
-  //   return user;
-  // }
-
-  // async getFollowing(id: number): Promise<User> {
-  //   const user = await this.userRepository.findOne(id, {
-  //     relations: ['following'],
-  //   });
-  //   return user;
-  // }
-  // getHello(id: number): string {
-  //   console.log(id);
-  //   return 'Hello World!';
-  // }
 }

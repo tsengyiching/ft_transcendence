@@ -24,11 +24,4 @@ export class User {
 
   @OneToMany(() => Game, (game) => game.winner)
   victories: Game[];
-
-  // @ManyToMany(() => User, (user) => user.following)
-  // @JoinTable()
-  // followers: User[];
-
-  // @ManyToMany(() => User, (user) => user.followers)
-  // following: User[];
 }

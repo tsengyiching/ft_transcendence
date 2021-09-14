@@ -10,8 +10,8 @@ import {
 } from 'typeorm';
 
 export enum GameStatus {
-  ON = 1,
-  OFF = 0,
+  ONGOING = 1,
+  FINISH = 0,
 }
 
 @Entity()
@@ -19,7 +19,7 @@ export class Game {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column() // change type later
+  @Column() // need to define number meaning later, such as NORMAL = 1
   mode: number;
 
   @CreateDateColumn() //{ select: false } not to show on query result
@@ -28,7 +28,7 @@ export class Game {
   @Column({
     type: 'enum',
     enum: GameStatus,
-    default: GameStatus.ON,
+    default: GameStatus.ONGOING,
   })
   status: GameStatus;
 

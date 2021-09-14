@@ -10,7 +10,6 @@ import {
 import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
 import { User } from '../model/user.entity';
-import { AddFriendDto } from '../model/add-friend.dto';
 
 @Controller('profile')
 export class UserController {
@@ -25,7 +24,9 @@ export class UserController {
   }
 
   @Get(':id')
-  async getUserProfileById(@Param('id', ParseIntPipe) id: number) {
+  async getUserProfileById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<User> {
     return this.userService.getUserProfileById(id);
   }
 
@@ -41,27 +42,4 @@ export class UserController {
   ): Promise<User> {
     return this.userService.updateUserNickname(id, createUserDto);
   }
-
-  // @Delete(':id') // can we delete user ?
-  // delete(@Param('id', ParseIntPipe) id: number): Promise<User> {
-  //   return this.userService.deleteUser(id);
-  // }
-
-  // @Put(':id/following')
-  // follow(
-  //   @Param('id', ParseIntPipe) id: number,
-  //   @Body() addFriendDto: AddFriendDto,
-  // ): Promise<User> {
-  //   return this.userService.follow(id, addFriendDto);
-  // }
-
-  // @Get(':id/follower')
-  // getFollower(@Param('id', ParseIntPipe) id: number): Promise<User> {
-  //   return this.userService.getFollower(id);
-  // }
-
-  // @Get(':id/following')
-  // getFollowing(@Param('id', ParseIntPipe) id: number): Promise<User> {
-  //   return this.userService.getFollowing(id);
-  // }
 }
