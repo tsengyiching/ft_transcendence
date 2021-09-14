@@ -1,19 +1,45 @@
-import { Body, Controller, Get, Post } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
+import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
-import { UserI } from '../models/user.interface';
+import { User } from '../model/user.entity';
 
-@Controller('users')
+@Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
 
-  @Post()
-  add(@Body() user: UserI): Observable<UserI> {
-    return this.userService.add(user);
+  /*
+   ** delete later
+   */
+  @Get()
+  getUsers(): Promise<User[]> {
+    return this.userService.getAll();
   }
 
-  @Get()
-  findAll(): Observable<UserI[]> {
-    return this.userService.findAll();
+  @Get(':id')
+  async getUserProfileById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<User> {
+    return this.userService.getUserProfileById(id);
+  }
+
+  @Post()
+  createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
+    return this.userService.createUser(createUserDto);
+  }
+
+  @Put(':id/name')
+  updateUserNickname(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() createUserDto: CreateUserDto,
+  ): Promise<User> {
+    return this.userService.updateUserNickname(id, createUserDto);
   }
 }

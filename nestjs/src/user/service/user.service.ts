@@ -1,22 +1,67 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../models/user.entity';
+import { User } from '../model/user.entity';
+import { CreateUserDto } from '../model/create-user.dto';
 import { Repository } from 'typeorm';
-import { from, Observable } from 'rxjs';
-import { UserI } from '../models/user.interface';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  add(user: UserI): Observable<UserI> {
-    return from(this.userRepository.save(user));
+  /*
+   ** getAll returns users with details
+   */
+  getAll(): Promise<User[]> {
+    return this.userRepository.find({ relations: ['userGameRecords'] });
   }
 
-  findAll(): Observable<UserI[]> {
-    return from(this.userRepository.find());
+  /*
+   ** getOneById returns the user
+   */
+  async getOneById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne(id);
+    if (user) {
+      return user;
+    }
+    throw new HttpException(
+      'User with this id does not exist',
+      HttpStatus.NOT_FOUND,
+    );
+  }
+
+  /*
+   ** getUserProfileById returns the user's game records, friend list and status
+   ** add a query to get the user's competitors
+   */
+  async getUserProfileById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne(id, {
+      relations: ['userGameRecords', 'victories'],
+    });
+    if (user) {
+      return user;
+    }
+    throw new HttpException('This user does not exist', HttpStatus.NOT_FOUND);
+  }
+
+  /*
+   ** createUser returns the new user (still have to modify with auth)
+   */
+  createUser(createUserDto: CreateUserDto): Promise<User> {
+    const newUser = this.userRepository.create({ ...createUserDto });
+    return this.userRepository.save(newUser);
+  }
+
+  /*
+   ** updateUserNickname modifies the user's nickname which should be unique
+   */
+  async updateUserNickname(
+    id: number,
+    CreateUserDto: CreateUserDto,
+  ): Promise<User> {
+    const user = await this.getOneById(id);
+    user.nickname = CreateUserDto.nickname;
+    return this.userRepository.save(user);
   }
 }
