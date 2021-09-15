@@ -4,13 +4,13 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: number; //42 id ?
 
   @Column({ unique: true }) //handle error 500 later

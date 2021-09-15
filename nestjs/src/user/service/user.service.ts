@@ -21,14 +21,14 @@ export class UserService {
    ** getOneById returns the user
    */
   async getOneById(id: number): Promise<User> {
-    const user = await this.userRepository.findOne(id);
-    if (user) {
-      return user;
-    }
-    throw new HttpException(
-      'User with this id does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+    return this.userRepository.findOne(id);
+    // if (user) {
+    //   return user;
+    // }
+    // throw new HttpException(
+    //   'User with this id does not exist',
+    //   HttpStatus.NOT_FOUND,
+    // );
   }
 
   /*

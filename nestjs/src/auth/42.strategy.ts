@@ -1,74 +1,58 @@
-// import { FortyTwoStrategy } from 'passport-42';
-// import { PassportStrategy } from '@nestjs/passport';
-// import { Injectable, UnauthorizedException } from '@nestjs/common';
-// import { AuthService } from './auth.service';
-
-// @Injectable()
-// export class LocalStrategy extends PassportStrategy(FortyTwoStrategy) {
-//   constructor(private authService: AuthService) {
-//     super();
-//   }
-// }
-
-
-// passport.use(new FortyTwoStrategy({
-//   clientID: process.env.OAUTH_42_APP_ID,
-//   clientSecret: process.env.OAUTH_42_APP_SECRET,
-//   callbackURL: "http://127.0.0.1:8080/auth/42/callback"
-// },
-
-// function(accessToken, refreshToken, profile, cb) {
-//   User.findOrCreate({ fortytwoId: profile.id }, function (err, user) {
-//     return cb(err, user);
-//   });
-// }
-// ));
-
-
 import { PassportStrategy } from '@nestjs/passport';
+import { HttpService } from '@nestjs/axios';
 import {
-	HttpService,
-	Injectable,
+	Injectable, UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { Strategy } from 'passport-oauth2';
 import { stringify } from 'querystring';
+import { lastValueFrom } from 'rxjs';
+import { UserService } from 'src/user/service/user.service';
+import { User } from 'src/user/model/user.entity';
+import { AuthService } from './auth.service';
 
-// change these to be your Discord client ID and secret
-const clientID = 'insert-client-id';
-const clientSecret = 'insert-client-secret';
-const callbackURL = 'http://localhost:8080/auth/42/callback';
+// change these to be your 42 client ID and secret
+const clientID = process.env.OAUTH_42_APP_ID;
+const clientSecret = process.env.OAUTH_42_APP_SECRET;
+const callbackURL = 'http://127.0.0.1:8080/auth/42/callback';
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two')
 {
 	constructor(
-		private authService: AuthService,
+		private UserServices: UserService,
+		private AuthServices: AuthService,
 		private http: HttpService,
 	) {
+		// https://api.intra.42.fr/oauth/authorize?client_id=your_very_long_client_id&redirect_uri=http%3A%2F%2Flocalhost%3A1919%2Fusers%2Fauth%2Fft%2Fcallback&response_type=code&scope=public&state=a_very_long_random_string_witchmust_be_unguessable'
 		super({
-			authorizationURL: `https://discordapp.com/api/oauth2/authorize?${ stringify({
-				client_id    : clientID,
-				redirect_uri : callbackURL,
-				response_type: 'code',
-				scope        : 'identify',
+			authorizationURL:	`https://api.intra.42.fr/oauth/authorize?${ stringify({
+				client_id		: clientID,
+				redirect_uri	: callbackURL,
+				response_type	: 'code',
+				scope			: 'public',
+				state			: '54v4646v54dsdfjkhjksdjskfnjksdjkfds8f2s'
 			}) }`,
-			tokenURL        : 'https://discordapp.com/api/oauth2/token',
-			scope           : 'identify',
+			tokenURL		: 'https://api.intra.42.fr/oauth/token',
+			scope			: 'public',
 			clientID,
 			clientSecret,
-			callbackURL,
+			callbackURL
 		});
 	}
 
 	async validate(
 		accessToken: string,
 	): Promise<any> {
-		const { data } = await this.http.get('https://discordapp.com/api/users/@me', {
+		const { data } = await lastValueFrom(this.http.get('https://api.intra.42.fr/v2/me', {
 				headers: { Authorization: `Bearer ${ accessToken }` },
-			})
-			.toPromise();
+			}));
+			
+		if (!data)
+			throw new UnauthorizedException();
 
-		return this.authService.findUserFromDiscordId(data.id);
+		let user = await this.UserServices.getOneById(data.id);
+		if (!user)
+			user = await this.AuthServices.createUser(data);
+		return (user);
 	}
 }

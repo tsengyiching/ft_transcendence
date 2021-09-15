@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/model/user.entity';
 import { Repository } from 'typeorm';
@@ -20,13 +20,14 @@ export class AuthService {
 		@InjectRepository(User) private userRepository: Repository<User>,
 	) {}
 
-	createUser(accessToken: string, refreshToken: string, profile: any, cb :any): Promise<User> {
+	createUser(profile: any): Promise<User>
+	{
 		const newUser = this.userRepository.create();
+
 		newUser.id = profile.id;
-		newUser.nickname = profile.username;
+		newUser.nickname = profile.login;
 		// newUser.avatar = profile.photos;
 
-		return this.userRepository.save(newUser);
+		return (this.userRepository.save(newUser));
 	}
-
 }
