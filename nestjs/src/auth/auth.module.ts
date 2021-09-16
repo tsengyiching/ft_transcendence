@@ -12,13 +12,33 @@ import { HttpModule } from '@nestjs/axios';
 
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/user/model/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './jwt.strategy';
 
 
 @Module({
-  imports: [HttpModule, UserModule, PassportModule, TypeOrmModule.forFeature([User])],
+  imports: [
+		HttpModule,
+		UserModule,
+		PassportModule,
+		TypeOrmModule.forFeature([User]),
+		JwtModule.registerAsync({
+		useFactory: async (configService: ConfigService) => {
+			return {
+				secret: configService.get<string>('JWT_SECRET'),
+				signOptions: {
+				expiresIn: configService.get<string>('JWT_EXPIRES_IN'),
+				},
+		  };
+		},
+		inject: [ConfigService],
+	  }),
+	],
 
-  providers: [AuthService, FortyTwoStrategy],
-  controllers: [AuthController]
+	providers: [AuthService, FortyTwoStrategy, JwtStrategy],
+	controllers: [AuthController],
+	exports: [JwtModule, AuthModule]
 })
 
 export class AuthModule {

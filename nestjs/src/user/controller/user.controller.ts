@@ -6,11 +6,14 @@ import {
   ParseIntPipe,
   Post,
   Put,
+  UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
 import { User } from '../model/user.entity';
+import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
