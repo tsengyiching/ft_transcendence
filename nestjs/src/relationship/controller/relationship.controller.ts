@@ -1,14 +1,17 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
   Post,
+  Put,
 } from '@nestjs/common';
 import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
+import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
 
 @Controller('relationship')
 export class RelationshipController {
@@ -24,10 +27,25 @@ export class RelationshipController {
     return this.relationshipService.getOneById(id);
   }
 
-  @Post('/addFriend')
+  @Post('/add')
   addFriend(
     @Body() createRelationshipDto: CreateRelationshipDto,
   ): Promise<Relationship> {
     return this.relationshipService.addFriend(createRelationshipDto);
+  }
+
+  @Put(':id/accept')
+  acceptFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
+    return this.relationshipService.acceptFriend(id);
+  }
+
+  @Delete(':id/reject')
+  rejectFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
+    return this.relationshipService.rejectFriend(id);
+  }
+
+  @Get(':id/delete')
+  deleteFriend(@Param('id', ParseIntPipe) id: number) {
+    return this.relationshipService.deleteFriend(id);
   }
 }

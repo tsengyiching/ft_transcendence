@@ -7,15 +7,6 @@ import {
 } from 'typeorm';
 import UserRelationship from './userRelationship.entity';
 
-export enum RelationshipAction {
-  ADDFRIEND = 0,
-  ACCEPT = 1,
-  REJECT = 2,
-  UNFRIEND = 3,
-  BLOCK = 4,
-  UNBLOCK = 5,
-}
-
 export enum RelationshipStatus {
   NOTCONFIRMED = 0,
   FRIEND = 1,
@@ -26,9 +17,6 @@ export enum RelationshipStatus {
 export class Relationship {
   @PrimaryGeneratedColumn()
   id: number;
-
-  @Column({ type: 'enum', enum: RelationshipAction })
-  action: RelationshipAction;
 
   @CreateDateColumn()
   createDate: Date;
@@ -42,6 +30,9 @@ export class Relationship {
   @OneToMany(
     () => UserRelationship,
     (userRelationship) => userRelationship.relationship,
+    {
+      cascade: true,
+    },
   )
   public userRelationship!: UserRelationship[];
 }

@@ -1,13 +1,11 @@
+import { number } from '@hapi/joi';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
-import {
-  Relationship,
-  RelationshipAction,
-  RelationshipStatus,
-} from '../model/relationship.entity';
+import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
+import { Relationship, RelationshipStatus } from '../model/relationship.entity';
 import UserRelationship from '../model/userRelationship.entity';
 
 @Injectable()
@@ -44,13 +42,12 @@ export class RelationshipService {
   }
 
   /*
-   ** createRelationship returns the new relationship
+   ** addFriend returns the new relationship
    */
   async addFriend(
     creatRelationshipDto: CreateRelationshipDto,
   ): Promise<Relationship> {
     const newRelationship = await this.relationshipRepository.create();
-    newRelationship.action = RelationshipAction.ADDFRIEND;
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
     await this.relationshipRepository.save(newRelationship);
     await this.setNewRelation(creatRelationshipDto, newRelationship.id);
@@ -73,5 +70,29 @@ export class RelationshipService {
     addressee.userId = creatRelationshipDto.addresseeUserId;
     addressee.relationshipId = id;
     await this.userRelationship.save(addressee);
+  }
+
+  /*
+   ** acceptFriend returns the new relationship
+   */
+  async acceptFriend(id: number): Promise<Relationship> {
+    const relationship = await this.getOneById(id);
+    relationship.status = RelationshipStatus.FRIEND;
+    return this.relationshipRepository.save(relationship);
+  }
+
+  /*
+   ** rejectFriend returns the rejected relationship
+   */
+  async rejectFriend(id: number): Promise<Relationship> {
+    const relationship = await this.getOneById(id);
+    return this.relationshipRepository.remove(relationship);
+  }
+
+  /*
+   ** deleteFriend returns the deleted relationship
+   */
+  async deleteFriend(id: number) {
+    return this.userRelationship.find({ userId: id });
   }
 }

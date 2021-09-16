@@ -19,6 +19,9 @@ class UserRelationship {
   @ManyToOne(
     () => Relationship,
     (relationship) => relationship.userRelationship,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   public relationship!: Relationship;
 }
