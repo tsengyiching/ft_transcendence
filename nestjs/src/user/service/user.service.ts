@@ -30,7 +30,7 @@ export class UserService {
    */
   async getUserProfileById(id: number): Promise<User> {
     const user = await this.userRepository.findOne(id, {
-      relations: ['userGameRecords', 'victories'],
+      relations: ['userGameRecords', 'victories', 'userRelationship'],
     });
     if (user) {
       return user;
