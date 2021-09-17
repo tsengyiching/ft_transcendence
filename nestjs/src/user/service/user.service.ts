@@ -14,7 +14,9 @@ export class UserService {
    ** getAll returns users with details
    */
   getAll(): Promise<User[]> {
-    return this.userRepository.find({ relations: ['userGameRecords'] });
+    return this.userRepository.find({
+      relations: ['userGameRecords', 'victories'],
+    });
   }
 
   /*
@@ -25,12 +27,11 @@ export class UserService {
   }
 
   /*
-   ** getUserProfileById returns the user's game records, friend list and status
-   ** add a query to get the user's competitors
+   ** getUserProfileById returns the user's basic information with game victories
    */
-  async getUserProfileById(id: number): Promise<User> {
+  async getUserProfileById(id: number) {
     const user = await this.userRepository.findOne(id, {
-      relations: ['userGameRecords', 'victories', 'userRelationship'],
+      relations: ['victories'],
     });
     if (user) {
       return user;

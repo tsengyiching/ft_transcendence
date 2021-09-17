@@ -27,6 +27,7 @@ export class GameService {
 
   /*
    ** getOneById returns the game with details
+   ** parameter id : game's id
    */
   async getOneById(id: number): Promise<Game> {
     const game = await this.gameRepository.findOne(id, {
@@ -39,6 +40,18 @@ export class GameService {
       'Game with this id does not exist',
       HttpStatus.NOT_FOUND,
     );
+  }
+
+  /*
+   ** getUserGameRecords returns user's game with details
+   ** parameter id : user's id
+   */
+  getUserGameRecords(id: number): Promise<UserGameRecords[]> {
+    return this.userGameRecords.find({
+      where: { userId: id },
+      relations: ['game', 'game.userGameRecords'],
+      order: { gameId: 'DESC' },
+    });
   }
 
   /*

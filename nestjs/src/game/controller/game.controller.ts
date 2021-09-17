@@ -11,6 +11,7 @@ import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
+import UserGameRecords from '../model/userGameRecords.entity';
 
 @Controller('game')
 export class GameController {
@@ -24,6 +25,13 @@ export class GameController {
   @Get(':id')
   getGameById(@Param('id', ParseIntPipe) id: number): Promise<Game> {
     return this.gameService.getOneById(id);
+  }
+
+  @Get('/userRecords/:id')
+  getUserGameRecords(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserGameRecords[]> {
+    return this.gameService.getUserGameRecords(id);
   }
 
   @Post()
