@@ -1,8 +1,8 @@
-import { number } from '@hapi/joi';
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
-import { Repository } from 'typeorm';
+import { getManager, Repository } from 'typeorm';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
 import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
@@ -22,7 +22,9 @@ export class RelationshipService {
    ** getAll returns relationship with details
    */
   getAll(): Promise<Relationship[]> {
-    return this.relationshipRepository.find();
+    return this.relationshipRepository.find({
+      relations: ['userRelationship'],
+    });
   }
 
   /*
@@ -89,6 +91,23 @@ export class RelationshipService {
     return this.relationshipRepository.remove(relationship);
   }
 
+  async getFriends(id: number) {
+    const user = await getManager()
+      .getRepository(User)
+      .findOne({
+        where: { id },
+        relations: [
+          'userRelationship',
+          'userRelationship.relationship',
+          'userRelationship.relationship.userRelationship',
+        ],
+      });
+    return user;
+    // return this.userRelationship.find({
+    //   where: { userId: id },
+    //   relations: ['relationship', 'relationship.userRelationship'],
+    // });
+  }
   /*
    ** deleteFriend returns the deleted relationship
    */

@@ -33,8 +33,8 @@ export class Game {
   status: GameStatus;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.game)
-  public userGameRecords!: UserGameRecords[];
+  public userGameRecords!: Promise<UserGameRecords[]>;
 
   @ManyToOne(() => User, (user) => user.victories)
-  winner: User;
+  winner: Promise<User>;
 }

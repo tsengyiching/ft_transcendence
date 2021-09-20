@@ -17,10 +17,10 @@ class UserGameRecords {
   public score?: number;
 
   @ManyToOne(() => User, (user) => user.userGameRecords)
-  public user!: User;
+  public user!: Promise<User>;
 
   @ManyToOne(() => Game, (game) => game.userGameRecords)
-  public game!: Game;
+  public game!: Promise<Game>;
 }
 
 export default UserGameRecords;

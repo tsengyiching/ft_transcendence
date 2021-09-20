@@ -22,9 +22,14 @@ export class RelationshipController {
     return this.relationshipService.getAll();
   }
 
-  @Get(':id')
-  getGameById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
-    return this.relationshipService.getOneById(id);
+  // @Get(':id')
+  // getGameById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
+  //   return this.relationshipService.getOneById(id);
+  // }
+
+  @Get(':id/getFriends')
+  getFriends(@Param('id', ParseIntPipe) id: number) {
+    return this.relationshipService.getFriends(id);
   }
 
   @Post('/add')

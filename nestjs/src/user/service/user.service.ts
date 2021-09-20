@@ -27,11 +27,19 @@ export class UserService {
   }
 
   /*
-   ** getUserProfileById returns the user's basic information with game victories
+   ** getUserProfileById returns the user's full information
    */
   async getUserProfileById(id: number) {
-    const user = await this.userRepository.findOne(id, {
-      relations: ['victories'],
+    const user = await this.userRepository.findOne({
+      where: { id },
+      relations: [
+        'userGameRecords',
+        'userGameRecords.game',
+        'userGameRecords.game.userGameRecords',
+        'userRelationship',
+        'userRelationship.relationship',
+        'userRelationship.relationship.userRelationship',
+      ],
     });
     if (user) {
       return user;
