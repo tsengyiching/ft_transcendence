@@ -48,10 +48,16 @@ export class UserService {
   /*
    ** createUser returns the new user (still have to modify with auth)
    */
-  createUser(createUserDto: CreateUserDto): Promise<User> {
-    const newUser = this.userRepository.create({ ...createUserDto });
-    return this.userRepository.save(newUser);
-  }
+   createUser(profile: any): Promise<User>
+   {
+	   const newUser = this.userRepository.create();
+
+	   newUser.id = profile.id;
+	   newUser.nickname = profile.login;
+	// newUser.avatar = profile.photos;  // ! Add later
+
+	   return (this.userRepository.save(newUser));
+   }
 
   /*
    ** updateUserNickname modifies the user's nickname which should be unique

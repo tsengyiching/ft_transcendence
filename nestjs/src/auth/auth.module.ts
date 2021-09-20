@@ -10,8 +10,6 @@ import { FortyTwoStrategy } from './42.strategy';
 import { UserService } from 'src/user/service/user.service';
 import { HttpModule } from '@nestjs/axios';
 
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/user/model/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { JwtAuthStrategy } from './jwt.strategy';
@@ -22,7 +20,6 @@ import { JwtAuthStrategy } from './jwt.strategy';
 		HttpModule,
 		UserModule,
 		PassportModule,
-		TypeOrmModule.forFeature([User]),
 		JwtModule.registerAsync({
 		useFactory: async (configService: ConfigService) => {
 			return {
@@ -38,7 +35,7 @@ import { JwtAuthStrategy } from './jwt.strategy';
 
 	providers: [AuthService, FortyTwoStrategy, JwtAuthStrategy],
 	controllers: [AuthController],
-	exports: [JwtModule, AuthModule]
+	exports: [AuthModule]
 })
 
 export class AuthModule {

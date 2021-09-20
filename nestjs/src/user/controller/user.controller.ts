@@ -12,17 +12,25 @@ import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
 import { User } from '../model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { CurrentUser } from 'src/auth/currrent.user.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
 
+
+  @Get('me')
+  getUser(@CurrentUser() user: User): Promise<User> {
+	return this.userService.getUserProfileById(user.id);
+  }
+
   /*
    ** delete later
    */
-  @Get()
+  @Get('all')
   getUsers(): Promise<User[]> {
+	
     return this.userService.getAll();
   }
 
