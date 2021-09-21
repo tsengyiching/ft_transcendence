@@ -22,13 +22,6 @@ export class UserService {
    */
   async getOneById(id: number): Promise<User> {
     return this.userRepository.findOne(id);
-    // if (user) {
-    //   return user;
-    // }
-    // throw new HttpException(
-    //   'User with this id does not exist',
-    //   HttpStatus.NOT_FOUND,
-    // );
   }
 
   /*
@@ -55,6 +48,11 @@ export class UserService {
     newUser.nickname = profile.login;
     // newUser.avatar = profile.photos;  // ! Add later
 
+    return this.userRepository.save(newUser);
+  }
+
+  createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
+    const newUser = this.userRepository.create({ ...createUserDto });
     return this.userRepository.save(newUser);
   }
 
