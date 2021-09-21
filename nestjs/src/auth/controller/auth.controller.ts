@@ -14,8 +14,8 @@ import { Request, Response } from 'express';
 import { User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
   
-import { AuthService } from './auth.service';
-import { FortyTwoAuthGuard as FortyTwoGuard } from './guard/42.guard';
+import { AuthService } from '../service/auth.service';
+import { FortyTwoAuthGuard as FortyTwoGuard } from '../guard/42.guard';
   
 @Controller('auth')
 export class AuthController {

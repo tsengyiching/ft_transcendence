@@ -3,18 +3,16 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/user/model/user.entity';
 import { Repository } from 'typeorm';
-import { JwtPayload } from './jwt.strategy';
+import { JwtPayload } from '../../strategy/jwt.strategy';
 
 @Injectable()
 export class AuthService {
-	constructor(
-		private jwtService: JwtService,
-	) {}
+  constructor(private jwtService: JwtService) {}
 
-	login(user: User) {
-		const payload: JwtPayload = { username: user.nickname, sub: user.id };
-		return {
-			accessToken: this.jwtService.sign(payload),
-		};
-	}
+  login(user: User) {
+    const payload: JwtPayload = { username: user.nickname, sub: user.id };
+    return {
+      accessToken: this.jwtService.sign(payload),
+    };
+  }
 }
