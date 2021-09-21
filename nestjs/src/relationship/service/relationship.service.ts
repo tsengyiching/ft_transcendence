@@ -91,27 +91,22 @@ export class RelationshipService {
     return this.relationshipRepository.remove(relationship);
   }
 
+  /*
+   ** getFriends returns the user's friend
+   ** parameter user's id
+   */
   async getFriends(id: number) {
-    const user = await getManager()
-      .getRepository(User)
-      .findOne({
-        where: { id },
-        relations: [
-          'userRelationship',
-          'userRelationship.relationship',
-          'userRelationship.relationship.userRelationship',
-        ],
-      });
+    const user = await this.userRelationship.find({
+      where: { userId: id, relationship: { status: 0 } },
+      relations: ['relationship', 'relationship.userRelationship'],
+    });
     return user;
-    // return this.userRelationship.find({
-    //   where: { userId: id },
-    //   relations: ['relationship', 'relationship.userRelationship'],
-    // });
   }
+
   /*
    ** deleteFriend returns the deleted relationship
    */
-  async deleteFriend(id: number) {
-    return this.userRelationship.find({ userId: id });
-  }
+  // async deleteFriend(id: number) {
+  //   return this.userRelationship.find({ userId: id });
+  // }
 }

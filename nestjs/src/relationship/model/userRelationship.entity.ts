@@ -23,7 +23,7 @@ class UserRelationship {
       onDelete: 'CASCADE',
     },
   )
-  public relationship!: Relationship;
+  public relationship!: Promise<Relationship>;
 }
 
 export default UserRelationship;

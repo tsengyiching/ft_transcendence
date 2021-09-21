@@ -30,5 +30,5 @@ export class User {
     () => UserRelationship,
     (userRelationship) => userRelationship.user,
   )
-  public userRelationship!: UserRelationship[];
+  public userRelationship!: Promise<UserRelationship[]>;
 }

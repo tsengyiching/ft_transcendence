@@ -11,7 +11,6 @@ import {
 import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
-import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
 
 @Controller('relationship')
 export class RelationshipController {
@@ -22,10 +21,10 @@ export class RelationshipController {
     return this.relationshipService.getAll();
   }
 
-  // @Get(':id')
-  // getGameById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
-  //   return this.relationshipService.getOneById(id);
-  // }
+  @Get(':id')
+  getGameById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
+    return this.relationshipService.getOneById(id);
+  }
 
   @Get(':id/getFriends')
   getFriends(@Param('id', ParseIntPipe) id: number) {
@@ -47,10 +46,5 @@ export class RelationshipController {
   @Delete(':id/reject')
   rejectFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
     return this.relationshipService.rejectFriend(id);
-  }
-
-  @Get(':id/delete')
-  deleteFriend(@Param('id', ParseIntPipe) id: number) {
-    return this.relationshipService.deleteFriend(id);
   }
 }
