@@ -21,14 +21,7 @@ export class UserService {
    ** getOneById returns the user
    */
   async getOneById(id: number): Promise<User> {
-    const user = await this.userRepository.findOne(id);
-    if (user) {
-      return user;
-    }
-    throw new HttpException(
-      'User with this id does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+    return this.userRepository.findOne(id);
   }
 
   /*
@@ -48,7 +41,17 @@ export class UserService {
   /*
    ** createUser returns the new user (still have to modify with auth)
    */
-  createUser(createUserDto: CreateUserDto): Promise<User> {
+  createUser(profile: any): Promise<User> {
+    const newUser = this.userRepository.create();
+
+    newUser.id = profile.id;
+    newUser.nickname = profile.login;
+    // newUser.avatar = profile.photos;  // ! Add later
+
+    return this.userRepository.save(newUser);
+  }
+
+  createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
     return this.userRepository.save(newUser);
   }
