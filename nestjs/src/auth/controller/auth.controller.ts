@@ -15,6 +15,7 @@ import { UserService } from 'src/user/service/user.service';
 
 import { AuthService } from '../service/auth.service';
 import { FortyTwoAuthGuard as FortyTwoGuard } from '../guard/42.guard';
+import { reduce } from 'rxjs';
 
 @Controller('auth')
 export class AuthController {
@@ -40,7 +41,6 @@ export class AuthController {
     const user: User = await this.userService.getOneById(id);
     const { accessToken } = this.authService.login(user);
     res.cookie('jwt', accessToken);
-    //   res.send(user); // ! Bad thing to fix later
     return user;
   }
 
@@ -67,8 +67,7 @@ export class AuthController {
   ): Promise<User> {
     const { accessToken } = this.authService.login(req.user); // get jwt token
     res.cookie('jwt', accessToken); // Creating cookies (jwt token)
-    res.location('http://localhost:3000/'); // redirect to front
-    // res.send(req.user); // ! Bad thing to fix later
+    res.redirect('http://localhost:3000/'); // redirect to front
     return req.user;
   }
 }
