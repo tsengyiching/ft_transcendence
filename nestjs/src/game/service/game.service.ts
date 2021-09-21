@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserGameRecords from 'src/game/model/userGameRecords.entity';
 import { UserService } from 'src/user/service/user.service';
@@ -16,47 +16,35 @@ export class GameService {
     @Inject(UserService) private readonly userService: UserService,
   ) {}
 
-  /*
-   ** getAll returns games with details
-   */
   getAll(): Promise<Game[]> {
     return this.gameRepository.find({
       relations: ['userGameRecords', 'winner'],
+      order: { createDate: 'DESC' },
     });
   }
 
-  /*
-   ** getOneById returns the game with details
-   ** parameter id : game's id
-   */
-  async getOneById(id: number): Promise<Game> {
-    const game = await this.gameRepository.findOne(id, {
+  getOngoingGames(): Promise<Game[]> {
+    return this.gameRepository.find({
+      where: { status: GameStatus.ONGOING },
+      relations: ['userGameRecords'],
+      order: { createDate: 'DESC' },
+    });
+  }
+
+  getOneById(id: number): Promise<Game> {
+    return this.gameRepository.findOne(id, {
       relations: ['userGameRecords', 'winner'],
     });
-    if (game) {
-      return game;
-    }
-    throw new HttpException(
-      'Game with this id does not exist',
-      HttpStatus.NOT_FOUND,
-    );
   }
 
-  /*
-   ** getUserGameRecords returns user's game with details
-   ** parameter id : user's id
-   */
   getUserGameRecords(id: number): Promise<UserGameRecords[]> {
     return this.userGameRecords.find({
-      where: { userId: id },
+      where: { userId: id, game: { status: GameStatus.FINISH } },
       relations: ['game', 'game.userGameRecords'],
       order: { gameId: 'DESC' },
     });
   }
 
-  /*
-   ** createGame returns the new game
-   */
   async createGame(createGameDto: CreateGameDto): Promise<Game> {
     const newGame = await this.gameRepository.create();
     newGame.mode = createGameDto.mode;
@@ -75,11 +63,6 @@ export class GameService {
     return newGame;
   }
 
-  /*
-   ** insertGameResult inserts game result with scores and a winner
-   ** sets game status off
-   ** returns game
-   */
   async insertGameResult(
     id: number,
     insertGameResultDto: InsertGameResultDto,

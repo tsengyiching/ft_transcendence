@@ -44,11 +44,11 @@ export class UserController {
     return this.userService.createUserWithDto(createUserDto);
   }
 
-  @Put(':id/name')
+  @Put('/updateNickname')
   updateUserNickname(
-    @Param('id', ParseIntPipe) id: number,
+    @CurrentUser() user: User,
     @Body() createUserDto: CreateUserDto,
   ): Promise<User> {
-    return this.userService.updateUserNickname(id, createUserDto);
+    return this.userService.updateUserNickname(user.id, createUserDto);
   }
 }
