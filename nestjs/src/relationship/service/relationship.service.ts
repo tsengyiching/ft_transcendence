@@ -1,8 +1,7 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
-import { getManager, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
 import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
@@ -18,18 +17,12 @@ export class RelationshipService {
     @Inject(UserService) private readonly userService: UserService,
   ) {}
 
-  /*
-   ** getAll returns relationship with details
-   */
   getAll(): Promise<Relationship[]> {
     return this.relationshipRepository.find({
       relations: ['userRelationship'],
     });
   }
 
-  /*
-   ** getOneById returns the relationship with details
-   */
   async getOneById(id: number): Promise<Relationship> {
     const relationship = await this.relationshipRepository.findOne(id, {
       relations: ['userRelationship'],
@@ -43,9 +36,31 @@ export class RelationshipService {
     );
   }
 
-  /*
-   ** addFriend returns the new relationship
-   */
+  async getFriends(id: number): Promise<any> {
+    const data = await this.userRelationship.find({
+      where: {
+        userId: id,
+        relationship: { status: RelationshipStatus.FRIEND },
+      },
+      relations: ['relationship', 'relationship.userRelationship'],
+    });
+    const friendList = data.map((obj) => {
+      const relation = obj.relationship.userRelationship.filter(
+        (obj) => obj.userId !== id,
+      );
+      const newObj = {
+        friendId: relation[0].userId,
+        relationshipId: relation[0].relationshipId,
+      };
+      return newObj;
+    });
+    return friendList;
+  }
+
+  // async getRelationshipId() {
+
+  // }
+
   async addFriend(
     creatRelationshipDto: CreateRelationshipDto,
   ): Promise<Relationship> {
@@ -74,33 +89,15 @@ export class RelationshipService {
     await this.userRelationship.save(addressee);
   }
 
-  /*
-   ** acceptFriend returns the new relationship
-   */
   async acceptFriend(id: number): Promise<Relationship> {
     const relationship = await this.getOneById(id);
     relationship.status = RelationshipStatus.FRIEND;
     return this.relationshipRepository.save(relationship);
   }
 
-  /*
-   ** rejectFriend returns the rejected relationship
-   */
   async rejectFriend(id: number): Promise<Relationship> {
     const relationship = await this.getOneById(id);
     return this.relationshipRepository.remove(relationship);
-  }
-
-  /*
-   ** getFriends returns the user's friend
-   ** parameter user's id
-   */
-  async getFriends(id: number) {
-    const user = await this.userRelationship.find({
-      where: { userId: id, relationship: { status: 0 } },
-      relations: ['relationship', 'relationship.userRelationship'],
-    });
-    return user;
   }
 
   /*

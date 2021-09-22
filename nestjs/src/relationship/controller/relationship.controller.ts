@@ -16,21 +16,35 @@ import { CreateRelationshipDto } from '../model/create-Relationship.dto';
 export class RelationshipController {
   constructor(private relationshipService: RelationshipService) {}
 
-  @Get()
-  getRelationship(): Promise<Relationship[]> {
+  /*
+   ** getAll returns relationship with details
+   */
+  @Get('all')
+  getAll(): Promise<Relationship[]> {
     return this.relationshipService.getAll();
   }
 
+  /*
+   ** getOneById returns the relationship with details
+   ** parameter relationship's id
+   */
   @Get(':id')
-  getGameById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
+  getOneById(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
     return this.relationshipService.getOneById(id);
   }
 
+  /*
+   ** getFriends returns the user's friend
+   ** parameter user's id
+   */
   @Get(':id/getFriends')
-  getFriends(@Param('id', ParseIntPipe) id: number) {
+  getFriends(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return this.relationshipService.getFriends(id);
   }
 
+  /*
+   ** addFriend returns the new relationship's id
+   */
   @Post('/add')
   addFriend(
     @Body() createRelationshipDto: CreateRelationshipDto,
@@ -38,12 +52,18 @@ export class RelationshipController {
     return this.relationshipService.addFriend(createRelationshipDto);
   }
 
-  @Put(':id/accept')
+  /*
+   ** acceptFriend returns the new relationship
+   */
+  @Put('accept/:id')
   acceptFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
     return this.relationshipService.acceptFriend(id);
   }
 
-  @Delete(':id/reject')
+  /*
+   ** rejectFriend returns the rejected relationship
+   */
+  @Delete('reject/:id')
   rejectFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
     return this.relationshipService.rejectFriend(id);
   }

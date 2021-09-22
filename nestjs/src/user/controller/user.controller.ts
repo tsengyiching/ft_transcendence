@@ -14,7 +14,7 @@ import { User } from '../model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 
-@UseGuards(JwtAuthGuard)
+//@UseGuards(JwtAuthGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}

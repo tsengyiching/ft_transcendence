@@ -34,5 +34,5 @@ export class Relationship {
       cascade: true,
     },
   )
-  public userRelationship!: Promise<UserRelationship[]>;
+  public userRelationship!: UserRelationship[];
 }
