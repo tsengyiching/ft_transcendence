@@ -1,7 +1,3 @@
-/*
-https://docs.nestjs.com/websockets/gateways#gateways
-*/
-
 import {
   MessageBody,
   SubscribeMessage,
@@ -12,17 +8,18 @@ import {
   OnGatewayInit,
 } from '@nestjs/websockets';
 
-@WebSocketGateway()
+@WebSocketGateway({
+  namespace: 'chanel',
+  cors: {
+    origin: 'http://localhost:3000',
+    methods: ['GET', 'POST'],
+    credentials: true,
+  },
+})
 export class ChanelGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
-  @WebSocketServer()
-  server: any;
-
-  @SubscribeMessage('events')
-  handleEvent(@MessageBody() data: string) {
-    this.server.emit('events', data);
-  }
+  @WebSocketServer() server: any;
 
   afterInit(server: any) {
     console.log('Socket is live');
@@ -34,5 +31,10 @@ export class ChanelGateway
 
   handleDisconnect(client: any) {
     console.log('User disconnected');
+  }
+
+  @SubscribeMessage('message') handleEvent(@MessageBody() messages: string) {
+    this.server.emit('message', messages);
+    console.log(messages);
   }
 }
