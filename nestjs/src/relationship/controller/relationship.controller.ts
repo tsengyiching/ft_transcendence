@@ -11,6 +11,7 @@ import {
 import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
 import { CreateRelationshipDto } from '../model/create-Relationship.dto';
+import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
 
 @Controller('relationship')
 export class RelationshipController {
@@ -34,11 +35,11 @@ export class RelationshipController {
   }
 
   /*
-   ** getFriends returns the user's friend
+   ** getFriends returns an array with user friends' id
    ** parameter user's id
    */
-  @Get(':id/getFriends')
-  getFriends(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  @Get(':id/friendlist')
+  getFriends(@Param('id', ParseIntPipe) id: number): Promise<number[]> {
     return this.relationshipService.getFriends(id);
   }
 
@@ -66,5 +67,48 @@ export class RelationshipController {
   @Delete('reject/:id')
   rejectFriend(@Param('id', ParseIntPipe) id: number): Promise<Relationship> {
     return this.relationshipService.rejectFriend(id);
+  }
+
+  /*
+   ** unfriend returns the deleted relationship
+   */
+  @Delete('unfriend/:id')
+  unfriend(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() deleteRelationshipDto: DeleteRelationshipDto,
+  ) {
+    return this.relationshipService.deleteFriend(id, deleteRelationshipDto);
+  }
+
+  /*
+   ** getBlocklist returns an array with user's blocklist
+   ** parameter user's id
+   */
+  @Get(':id/blocklist')
+  getBlocklist(@Param('id', ParseIntPipe) id: number) {
+    return this.relationshipService.getBlocklist(id);
+  }
+
+  /*
+   ** blockUser returns the block relationship
+   ** if the users are friends, they'll be unfriend first
+   ** than create the block relationship
+   */
+  @Post('/block')
+  blockUser(
+    @Body() createRelationshipDto: CreateRelationshipDto,
+  ): Promise<Relationship> {
+    return this.relationshipService.blockUser(createRelationshipDto);
+  }
+
+  /*
+   ** unblock returns the deleted relationship
+   */
+  @Delete('unblock/:id')
+  unblock(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() deleteRelationshipDto: DeleteRelationshipDto,
+  ) {
+    return this.relationshipService.deleteBlockUser(id, deleteRelationshipDto);
   }
 }

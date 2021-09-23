@@ -24,9 +24,6 @@ export class UserController {
     return this.userService.getUserProfileById(user.id);
   }
 
-  /*
-   ** delete later
-   */
   @Get('all')
   getUsers(): Promise<User[]> {
     return this.userService.getAll();
