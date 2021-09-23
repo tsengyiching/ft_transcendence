@@ -76,7 +76,7 @@ export class RelationshipController {
   unfriend(
     @Param('id', ParseIntPipe) id: number,
     @Body() deleteRelationshipDto: DeleteRelationshipDto,
-  ) {
+  ): Promise<Relationship> {
     return this.relationshipService.deleteFriend(id, deleteRelationshipDto);
   }
 
@@ -85,7 +85,7 @@ export class RelationshipController {
    ** parameter user's id
    */
   @Get(':id/blocklist')
-  getBlocklist(@Param('id', ParseIntPipe) id: number) {
+  getBlocklist(@Param('id', ParseIntPipe) id: number): Promise<number[]> {
     return this.relationshipService.getBlocklist(id);
   }
 
@@ -108,7 +108,7 @@ export class RelationshipController {
   unblock(
     @Param('id', ParseIntPipe) id: number,
     @Body() deleteRelationshipDto: DeleteRelationshipDto,
-  ) {
+  ): Promise<Relationship> {
     return this.relationshipService.deleteBlockUser(id, deleteRelationshipDto);
   }
 }

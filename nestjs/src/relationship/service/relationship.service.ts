@@ -47,7 +47,7 @@ export class RelationshipService {
     return friendList;
   }
 
-  async getBlocklist(id: number) {
+  async getBlocklist(id: number): Promise<number[]> {
     const data = await this.getFullData(id, RelationshipStatus.BLOCK);
     const blocked = data.map((obj) => {
       const relation = obj.relationship.userRelationship;
@@ -136,7 +136,10 @@ export class RelationshipService {
     return this.relationshipRepository.remove(relationship);
   }
 
-  async deleteFriend(id: number, deleteRelationshipDto: DeleteRelationshipDto) {
+  async deleteFriend(
+    id: number,
+    deleteRelationshipDto: DeleteRelationshipDto,
+  ): Promise<Relationship> {
     const relationshipiId = await this.getRelationshipId(
       id,
       deleteRelationshipDto.addresseeUserId,
@@ -168,13 +171,12 @@ export class RelationshipService {
   async deleteBlockUser(
     id: number,
     deleteRelationshipDto: DeleteRelationshipDto,
-  ) {
+  ): Promise<Relationship> {
     const relationshipiId = await this.getRelationshipId(
       id,
       deleteRelationshipDto.addresseeUserId,
       RelationshipStatus.BLOCK,
     );
-    console.log(relationshipiId);
     const delRelationship = await this.getOneById(relationshipiId);
     return this.relationshipRepository.remove(delRelationship);
   }
