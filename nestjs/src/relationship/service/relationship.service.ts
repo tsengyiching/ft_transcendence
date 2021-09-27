@@ -2,8 +2,7 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
-import { CreateRelationshipDto } from '../model/create-Relationship.dto';
-import { DeleteRelationshipDto } from '../model/delete-Relationship.dto';
+import { RelationshipDto } from '../model/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
 import UserRelationship from '../model/userRelationship.entity';
 
@@ -47,7 +46,7 @@ export class RelationshipService {
     return friendList;
   }
 
-  async getBlocklist(id: number): Promise<number[]> {
+  async getBlockList(id: number): Promise<number[]> {
     const data = await this.getFullData(id, RelationshipStatus.BLOCK);
     const blocked = data.map((obj) => {
       const relation = obj.relationship.userRelationship;
@@ -63,17 +62,18 @@ export class RelationshipService {
    ** setNewRelation save data in userRelationship table
    */
   async setNewRelation(
-    creatRelationshipDto: CreateRelationshipDto,
     id: number,
+    relationshipDto: RelationshipDto,
+    newId: number,
   ): Promise<void> {
     const requester = await this.userRelationship.create();
-    requester.userId = creatRelationshipDto.requesterUserId;
-    requester.relationshipId = id;
+    requester.userId = id;
+    requester.relationshipId = newId;
     await this.userRelationship.save(requester);
 
     const addressee = await this.userRelationship.create();
-    addressee.userId = creatRelationshipDto.addresseeUserId;
-    addressee.relationshipId = id;
+    addressee.userId = relationshipDto.addresseeUserId;
+    addressee.relationshipId = newId;
     await this.userRelationship.save(addressee);
   }
 
@@ -116,12 +116,13 @@ export class RelationshipService {
   }
 
   async addFriend(
-    creatRelationshipDto: CreateRelationshipDto,
+    id: number,
+    relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
     await this.relationshipRepository.save(newRelationship);
-    await this.setNewRelation(creatRelationshipDto, newRelationship.id);
+    await this.setNewRelation(id, relationshipDto, newRelationship.id);
     return newRelationship;
   }
 
@@ -138,7 +139,7 @@ export class RelationshipService {
 
   async deleteFriend(
     id: number,
-    deleteRelationshipDto: DeleteRelationshipDto,
+    deleteRelationshipDto: RelationshipDto,
   ): Promise<Relationship> {
     const relationshipiId = await this.getRelationshipId(
       id,
@@ -150,11 +151,12 @@ export class RelationshipService {
   }
 
   async blockUser(
-    creatRelationshipDto: CreateRelationshipDto,
+    id: number,
+    relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
     const relationExistId = await this.getRelationshipId(
-      creatRelationshipDto.requesterUserId,
-      creatRelationshipDto.addresseeUserId,
+      id,
+      relationshipDto.addresseeUserId,
       RelationshipStatus.FRIEND,
     );
     if (relationExistId !== 0) {
@@ -164,17 +166,17 @@ export class RelationshipService {
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.BLOCK;
     await this.relationshipRepository.save(newRelationship);
-    await this.setNewRelation(creatRelationshipDto, newRelationship.id);
+    await this.setNewRelation(id, relationshipDto, newRelationship.id);
     return newRelationship;
   }
 
   async deleteBlockUser(
     id: number,
-    deleteRelationshipDto: DeleteRelationshipDto,
+    relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
     const relationshipiId = await this.getRelationshipId(
       id,
-      deleteRelationshipDto.addresseeUserId,
+      relationshipDto.addresseeUserId,
       RelationshipStatus.BLOCK,
     );
     const delRelationship = await this.getOneById(relationshipiId);

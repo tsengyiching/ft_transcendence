@@ -4,8 +4,8 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
 } from '@nestjs/common';
 import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
@@ -68,7 +68,7 @@ export class GameController {
    ** returns game
    ** parameter game id and see insertGameResultDto to insert scores
    */
-  @Put(':id')
+  @Patch(':id')
   insertGameResult(
     @Param('id', ParseIntPipe) id: number,
     @Body() insertGameResultDto: InsertGameResultDto,

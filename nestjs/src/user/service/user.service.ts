@@ -11,9 +11,6 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  /*
-   ** getAll returns users with details
-   */
   getAll(): Promise<User[]> {
     return this.userRepository.find({ order: { createDate: 'ASC' } });
   }
@@ -26,7 +23,6 @@ export class UserService {
   }
 
   /*
-   ** getUserProfileById returns the user's id, nickname and createDate
    ** ! add avatar and status later
    */
   async getUserProfileById(id: number) {
@@ -37,9 +33,6 @@ export class UserService {
     throw new HttpException('This user does not exist', HttpStatus.NOT_FOUND);
   }
 
-  /*
-   ** createUser returns the new user
-   */
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
 
@@ -50,18 +43,11 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
-  /*
-   ** createUser locally, it returns the new user
-   ** have to delete later
-   */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
     return this.userRepository.save(newUser);
   }
 
-  /*
-   ** updateUserNickname modifies the user's nickname which should be unique
-   */
   async changeUserName(
     id: number,
     changeUserNameDto: ChangeUserNameDto,

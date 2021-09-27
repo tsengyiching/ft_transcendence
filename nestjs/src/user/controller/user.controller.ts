@@ -20,28 +20,42 @@ import { ChangeUserNameDto } from '../model/change-username.dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
+  /*
+   ** getCurrentUser returns current User with id, nickname and createDate
+   */
   @Get('me')
-  getUser(@CurrentUser() user: User): Promise<User> {
+  getCurrentUser(@CurrentUser() user: User): Promise<User> {
     return this.userService.getUserProfileById(user.id);
   }
 
+  /*
+   ** getAll returns all users
+   */
   @Get('all')
   getUsers(): Promise<User[]> {
     return this.userService.getAll();
   }
 
+  /*
+   ** getUserProfileById returns the user with id, nickname and createDate
+   */
   @Get(':id')
-  async getUserProfileById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<User> {
+  getUserProfileById(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.getUserProfileById(id);
   }
 
+  /*
+   ** createUser locally, it returns the new user
+   ** have to delete later
+   */
   @Post()
   createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.createUserWithDto(createUserDto);
   }
 
+  /*
+   ** changeUserName modifies the user's nickname which should be unique
+   */
   @Patch('name')
   changeUserName(
     @CurrentUser() user: User,

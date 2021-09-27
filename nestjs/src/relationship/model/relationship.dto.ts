@@ -1,8 +1,6 @@
 import { IsInt } from 'class-validator';
 
-export class CreateRelationshipDto {
-  @IsInt()
-  requesterUserId: number;
+export class RelationshipDto {
   @IsInt()
   addresseeUserId: number;
 }
