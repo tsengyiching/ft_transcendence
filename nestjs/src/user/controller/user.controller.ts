@@ -4,8 +4,8 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
-  Put,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from '../model/create-user.dto';
@@ -13,8 +13,9 @@ import { UserService } from '../service/user.service';
 import { User } from '../model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
+import { ChangeUserNameDto } from '../model/change-username.dto';
 
-//@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -41,11 +42,11 @@ export class UserController {
     return this.userService.createUserWithDto(createUserDto);
   }
 
-  @Put('/updateNickname')
-  updateUserNickname(
+  @Patch('name')
+  changeUserName(
     @CurrentUser() user: User,
-    @Body() createUserDto: CreateUserDto,
+    @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    return this.userService.updateUserNickname(user.id, createUserDto);
+    return this.userService.changeUserName(user.id, changeUserNameDto);
   }
 }

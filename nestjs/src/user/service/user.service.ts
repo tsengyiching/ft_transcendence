@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository } from 'typeorm';
+import { ChangeUserNameDto } from '../model/change-username.dto';
 
 @Injectable()
 export class UserService {
@@ -37,7 +38,7 @@ export class UserService {
   }
 
   /*
-   ** createUser returns the new user (still have to modify with auth)
+   ** createUser returns the new user
    */
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
@@ -49,6 +50,10 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
+  /*
+   ** createUser locally, it returns the new user
+   ** have to delete later
+   */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
     return this.userRepository.save(newUser);
@@ -57,12 +62,12 @@ export class UserService {
   /*
    ** updateUserNickname modifies the user's nickname which should be unique
    */
-  async updateUserNickname(
+  async changeUserName(
     id: number,
-    CreateUserDto: CreateUserDto,
+    changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
     const user = await this.getOneById(id);
-    user.nickname = CreateUserDto.nickname;
+    user.nickname = changeUserNameDto.nickname;
     return this.userRepository.save(user);
   }
 }
