@@ -1,3 +1,4 @@
+import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
@@ -7,7 +8,11 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
+import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
+import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { User } from 'src/user/model/user.entity';
 
+@UseGuards(JwtAuthGuard)
 @WebSocketGateway({
   namespace: 'chanel',
   cors: {
@@ -21,11 +26,10 @@ export class ChanelGateway
 {
   @WebSocketServer() server: any;
 
-  afterInit(server: any) {
-    console.log('Socket is live');
-  }
+  afterInit(server: any) {}
 
   handleConnection(client: any, ...args: any[]) {
+    this.server.emit('message', 'User left');
     console.log('User connected');
   }
 

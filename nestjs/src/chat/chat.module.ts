@@ -7,10 +7,11 @@ import { ChanelGateway } from './gateway/chanel.gateway';
 import { ChatGateway } from './gateway/chat.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Chanel } from './model/chanel.entity';
+import { Message } from './model/messages.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chanel]),
+    TypeOrmModule.forFeature([Chanel, Message]),
     UserModule,
     GameModule,
     AuthModule,

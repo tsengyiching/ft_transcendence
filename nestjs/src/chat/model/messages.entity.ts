@@ -3,6 +3,7 @@ import {
   Column,
   CreateDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
 } from 'typeorm';
@@ -16,9 +17,9 @@ export class Message {
   @ManyToOne(() => Chanel, (chanel) => chanel)
   chanel: Chanel;
 
-  // Check if need to change
-  //   @ManyToOne(() => User, (user) => user.messages)
-  //   author: User;
+  @ManyToOne((user) => User)
+  @JoinColumn({ name: 'author' })
+  author: User;
 
   @Column()
   messages: string;
