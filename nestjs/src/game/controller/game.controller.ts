@@ -6,13 +6,18 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  UseGuards,
 } from '@nestjs/common';
 import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
 import UserGameRecords from '../model/userGameRecords.entity';
+import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
+import { User } from 'src/user/model/user.entity';
+import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('game')
 export class GameController {
   constructor(private gameService: GameService) {}
@@ -46,7 +51,16 @@ export class GameController {
    ** getUserGameRecords returns user's finish game
    ** parameter id : user's id
    */
-  @Get('/userRecords/:id')
+  @Get('me/records')
+  getMyGameRecords(@CurrentUser() user: User): Promise<UserGameRecords[]> {
+    return this.gameService.getUserGameRecords(user.id);
+  }
+
+  /*
+   ** getUserGameRecords returns user's finish game
+   ** parameter id : user's id
+   */
+  @Get(':id/records')
   getUserGameRecords(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<UserGameRecords[]> {

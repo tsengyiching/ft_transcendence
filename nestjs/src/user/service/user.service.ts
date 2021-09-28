@@ -18,7 +18,7 @@ export class UserService {
   /*
    ** getOneById returns the user
    */
-  async getOneById(id: number): Promise<User> {
+  getOneById(id: number): Promise<User> {
     return this.userRepository.findOne(id);
   }
 

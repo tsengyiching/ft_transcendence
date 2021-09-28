@@ -21,10 +21,10 @@ export class User {
   createDate: Date;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
-  public userGameRecords!: Promise<UserGameRecords[]>;
+  public userGameRecords!: UserGameRecords[];
 
   @OneToMany(() => Game, (game) => game.winner)
-  victories: Promise<Game[]>;
+  victories: Game[];
 
   @OneToMany(
     () => UserRelationship,

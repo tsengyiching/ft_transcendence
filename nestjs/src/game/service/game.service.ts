@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import UserGameRecords from 'src/game/model/userGameRecords.entity';
 import { UserService } from 'src/user/service/user.service';
@@ -6,6 +6,7 @@ import { Repository } from 'typeorm';
 import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game, GameStatus } from '../model/game.entity';
+import { User } from 'src/user/model/user.entity';
 
 @Injectable()
 export class GameService {
@@ -40,7 +41,7 @@ export class GameService {
   getUserGameRecords(id: number): Promise<UserGameRecords[]> {
     return this.userGameRecords.find({
       where: { userId: id, game: { status: GameStatus.FINISH } },
-      relations: ['game', 'game.userGameRecords'],
+      relations: ['game', 'game.userGameRecords', 'game.winner'],
       order: { gameId: 'DESC' },
     });
   }
@@ -49,6 +50,7 @@ export class GameService {
     const newGame = await this.gameRepository.create();
     newGame.mode = createGameDto.mode;
     await this.gameRepository.save(newGame);
+
     const leftUser = await this.userGameRecords.create();
     leftUser.gameId = newGame.id;
     leftUser.userId = createGameDto.leftUserId;
@@ -67,16 +69,23 @@ export class GameService {
     id: number,
     insertGameResultDto: InsertGameResultDto,
   ): Promise<Game> {
+    const game = await this.getOneById(id);
+    if (game.status === GameStatus.FINISH) {
+      throw new HttpException(
+        'This game has already inserted results, can not modify scores again.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     const gameRecord = await this.userGameRecords.find({ gameId: id });
     gameRecord[0].score = insertGameResultDto.leftUserScore;
     gameRecord[1].score = insertGameResultDto.rightUserScore;
     await this.userGameRecords.save(gameRecord);
 
-    const game = await this.getOneById(id);
-    let winner;
+    let winner: User;
     if (gameRecord[0].score > gameRecord[1].score) {
       winner = await this.userService.getOneById(gameRecord[0].userId);
-    } else {
+    } else if (gameRecord[0].score < gameRecord[1].score) {
       winner = await this.userService.getOneById(gameRecord[1].userId);
     }
     game.winner = winner;
