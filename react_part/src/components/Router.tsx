@@ -1,8 +1,8 @@
 import { BrowserRouter, Route, Switch } from "react-router-dom";
-import ButtonConnexion from './ConnexionPage';
-import Accueil from './Accueil';
+import ButtonConnexion from './PageConnexion';
+import Accueil from './Home';
 import Profile from './Profile';
-import Parametres from './Parametres';
+import Parametres from './Parameters';
 
 function Router() {
     return (
