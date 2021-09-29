@@ -152,9 +152,10 @@ export class GameService {
     } else if (gameRecord[0].score < gameRecord[1].score) {
       winner = await this.userService.getOneById(gameRecord[1].userId);
     }
-    game.winner = winner;
-    game.status = GameStatus.FINISH;
-    return this.gameRepository.save(game);
+    const gameFinish = await this.getOneById(id);
+    gameFinish.winner = winner;
+    gameFinish.status = GameStatus.FINISH;
+    return this.gameRepository.save(gameFinish);
   }
 
   /*

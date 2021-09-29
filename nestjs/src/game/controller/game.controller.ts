@@ -12,7 +12,6 @@ import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { Game } from '../model/game.entity';
 import { GameService } from '../service/game.service';
-import UserGameRecords from '../model/userGameRecords.entity';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { User } from 'src/user/model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
