@@ -16,6 +16,9 @@ import UserGameRecords from '../model/userGameRecords.entity';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { User } from 'src/user/model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
+import { SendGameDto } from '../model/send-game.dto';
+import { SendOngoingGameDto } from '../model/send-ongoging-game.dto';
+import { SendUserGameRecordsDto } from '../model/send-user-game-records.dto';
 
 @UseGuards(JwtAuthGuard)
 @Controller('game')
@@ -26,7 +29,7 @@ export class GameController {
    ** getAll returns all game records
    */
   @Get('all')
-  getGames(): Promise<Game[]> {
+  getGames(): Promise<SendGameDto[]> {
     return this.gameService.getAll();
   }
 
@@ -34,17 +37,17 @@ export class GameController {
    ** getOngoingGames returns current games
    */
   @Get('ongoing')
-  getOngoingGames(): Promise<Game[]> {
+  getOngoingGames(): Promise<SendOngoingGameDto[]> {
     return this.gameService.getOngoingGames();
   }
 
   /*
-   ** getOneById returns the game with details
+   ** getGameById returns the game with details
    ** parameter id : game's id
    */
   @Get(':id')
-  getGameById(@Param('id', ParseIntPipe) id: number): Promise<Game> {
-    return this.gameService.getOneById(id);
+  getGameById(@Param('id', ParseIntPipe) id: number): Promise<SendGameDto> {
+    return this.gameService.getGameById(id);
   }
 
   /*
@@ -52,7 +55,9 @@ export class GameController {
    ** parameter id : user's id
    */
   @Get('me/records')
-  getMyGameRecords(@CurrentUser() user: User): Promise<UserGameRecords[]> {
+  getMyGameRecords(
+    @CurrentUser() user: User,
+  ): Promise<SendUserGameRecordsDto[]> {
     return this.gameService.getUserGameRecords(user.id);
   }
 
@@ -63,7 +68,7 @@ export class GameController {
   @Get(':id/records')
   getUserGameRecords(
     @Param('id', ParseIntPipe) id: number,
-  ): Promise<UserGameRecords[]> {
+  ): Promise<SendUserGameRecordsDto[]> {
     return this.gameService.getUserGameRecords(id);
   }
 
