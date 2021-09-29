@@ -8,9 +8,9 @@ import {
 import UserRelationship from './userRelationship.entity';
 
 export enum RelationshipStatus {
-  NOTCONFIRMED = 0,
-  FRIEND = 1,
-  BLOCK = 2,
+  NOTCONFIRMED = 'Not confirmed',
+  FRIEND = 'Friend',
+  BLOCK = 'Block',
 }
 
 @Entity()

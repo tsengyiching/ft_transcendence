@@ -4,6 +4,7 @@ import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { RelationshipDto } from '../model/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
+import { SendRelationshipDto } from '../model/send-relationship.dto';
 import UserRelationship from '../model/userRelationship.entity';
 
 @Injectable()
@@ -16,26 +17,29 @@ export class RelationshipService {
     @Inject(UserService) private readonly userService: UserService,
   ) {}
 
-  getAll(): Promise<Relationship[]> {
-    return this.relationshipRepository.find({
+  async getAll(): Promise<SendRelationshipDto[]> {
+    const relationship = await this.relationshipRepository.find({
       relations: ['userRelationship'],
     });
+    return this.getRelationshipReturnObj(relationship);
   }
 
-  async getOneById(id: number): Promise<Relationship> {
-    const relationship = await this.relationshipRepository.findOne(id, {
+  async getRelationshipById(id: number): Promise<SendRelationshipDto> {
+    const relationship = await this.relationshipRepository.find({
+      where: { id: id },
       relations: ['userRelationship'],
     });
-    if (relationship) {
-      return relationship;
+    if (relationship.length === 0) {
+      throw new HttpException(
+        'Relationship with this id does not exist.',
+        HttpStatus.NOT_FOUND,
+      );
     }
-    throw new HttpException(
-      'relationship with this id does not exist',
-      HttpStatus.NOT_FOUND,
-    );
+    const relation = await this.getRelationshipReturnObj(relationship);
+    return relation[0];
   }
 
-  async getFriends(id: number): Promise<number[]> {
+  async getFriendList(id: number): Promise<number[]> {
     const data = await this.getFullData(id, RelationshipStatus.FRIEND);
     const friendList = data.map((obj) => {
       const relation = obj.relationship.userRelationship.filter(
@@ -52,67 +56,10 @@ export class RelationshipService {
       const relation = obj.relationship.userRelationship;
       return relation[1];
     });
-    const blocklist = blocked
+    const blockList = blocked
       .filter((obj) => obj.userId !== id)
       .map((obj) => obj.userId);
-    return blocklist;
-  }
-
-  /*
-   ** setNewRelation save data in userRelationship table
-   */
-  async setNewRelation(
-    id: number,
-    relationshipDto: RelationshipDto,
-    newId: number,
-  ): Promise<void> {
-    const requester = await this.userRelationship.create();
-    requester.userId = id;
-    requester.relationshipId = newId;
-    await this.userRelationship.save(requester);
-
-    const addressee = await this.userRelationship.create();
-    addressee.userId = relationshipDto.addresseeUserId;
-    addressee.relationshipId = newId;
-    await this.userRelationship.save(addressee);
-  }
-
-  /*
-   ** getFullData returns user's friend full information
-   */
-  async getFullData(id: number, status: number): Promise<UserRelationship[]> {
-    const data = await this.userRelationship.find({
-      where: {
-        userId: id,
-        relationship: { status: status },
-      },
-      relations: ['relationship', 'relationship.userRelationship'],
-    });
-    return data;
-  }
-
-  /*
-   ** getRelationshipId returns user and his friend's relationshipId
-   */
-  async getRelationshipId(
-    userId: number,
-    friendId: number,
-    status: number,
-  ): Promise<number> {
-    const data = await this.getFullData(userId, status);
-    const found = data
-      .map((obj) => {
-        const relation = obj.relationship.userRelationship
-          .filter((obj) => obj.userId === friendId)
-          .map((obj) => obj.relationshipId);
-        return relation;
-      })
-      .filter((obj) => obj.length !== 0);
-    if (found.length === 0) {
-      return 0;
-    }
-    const relationshipId = found[0].values().next().value;
-    return relationshipId;
+    return blockList;
   }
 
   async addFriend(
@@ -126,15 +73,35 @@ export class RelationshipService {
     return newRelationship;
   }
 
-  async acceptFriend(id: number): Promise<Relationship> {
-    const relationship = await this.getOneById(id);
-    relationship.status = RelationshipStatus.FRIEND;
-    return this.relationshipRepository.save(relationship);
+  async acceptFriend(id: number): Promise<SendRelationshipDto> {
+    const old = await this.getOneById(id);
+    if (!old) {
+      throw new HttpException(
+        'Relationship with this id does not exist.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    old.status = RelationshipStatus.FRIEND;
+    const newStatus = await this.relationshipRepository.save(old);
+    return this.getNewRelationship(newStatus);
   }
 
-  async rejectFriend(id: number): Promise<Relationship> {
+  async rejectFriend(id: number): Promise<SendRelationshipDto> {
     const relationship = await this.getOneById(id);
-    return this.relationshipRepository.remove(relationship);
+    if (!relationship) {
+      throw new HttpException(
+        'Relationship with this id does not exist.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    if (relationship.status === RelationshipStatus.FRIEND) {
+      throw new HttpException(
+        'Relationship has been confirmed already, cannot modify again.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const rm = await this.relationshipRepository.remove(relationship);
+    return this.getNewRelationship(rm);
   }
 
   async deleteFriend(
@@ -181,5 +148,114 @@ export class RelationshipService {
     );
     const delRelationship = await this.getOneById(relationshipiId);
     return this.relationshipRepository.remove(delRelationship);
+  }
+
+  /****************************************************************************/
+  /*                                 utils                                    */
+  /****************************************************************************/
+
+  /*
+   ** getOneById returns the relationship detail
+   */
+  getOneById(id: number): Promise<Relationship> {
+    return this.relationshipRepository.findOne(id, {
+      relations: ['userRelationship'],
+    });
+  }
+
+  /*
+   ** getRelationshipReturnObj returns SendRelationshipDto[]
+   */
+  async getRelationshipReturnObj(
+    relationship: Relationship[],
+  ): Promise<SendRelationshipDto[]> {
+    const ret: SendRelationshipDto[] = relationship.map((data) => {
+      const obj: SendRelationshipDto = {
+        id: data.id,
+        createDate: data.createDate,
+        status: data.status,
+        users: [
+          data.userRelationship[0].userId,
+          data.userRelationship[1].userId,
+        ],
+      };
+      return obj;
+    });
+    return ret;
+  }
+
+  /*
+   ** getRelationshipReturnObj returns SendRelationshipDto[]
+   */
+  async getNewRelationship(
+    relationship: Relationship,
+  ): Promise<SendRelationshipDto> {
+    const obj: SendRelationshipDto = {
+      id: relationship.id,
+      createDate: relationship.createDate,
+      status: relationship.status,
+      users: [
+        relationship.userRelationship[0].userId,
+        relationship.userRelationship[1].userId,
+      ],
+    };
+    return obj;
+  }
+
+  /*
+   ** setNewRelation save data in userRelationship table
+   */
+  async setNewRelation(
+    id: number,
+    relationshipDto: RelationshipDto,
+    newId: number,
+  ): Promise<void> {
+    const requester = await this.userRelationship.create();
+    requester.userId = id;
+    requester.relationshipId = newId;
+    await this.userRelationship.save(requester);
+
+    const addressee = await this.userRelationship.create();
+    addressee.userId = relationshipDto.addresseeUserId;
+    addressee.relationshipId = newId;
+    await this.userRelationship.save(addressee);
+  }
+
+  /*
+   ** getFullData returns user's friend full information
+   */
+  async getFullData(id: number, status: string): Promise<UserRelationship[]> {
+    const data = await this.userRelationship.find({
+      where: {
+        userId: id,
+        relationship: { status: status },
+      },
+      relations: ['relationship', 'relationship.userRelationship'],
+    });
+    return data;
+  }
+
+  /*
+   ** getRelationshipId returns user and his friend's relationshipId
+   */
+  async getRelationshipId(
+    userId: number,
+    friendId: number,
+    status: string,
+  ): Promise<number> {
+    const data = await this.getFullData(userId, status);
+    const found = data
+      .map((obj) => {
+        const relation = obj.relationship.userRelationship
+          .filter((obj) => obj.userId === friendId)
+          .map((obj) => obj.relationshipId);
+        return relation;
+      })
+      .filter((obj) => obj.length !== 0);
+    if (found.length === 0) {
+      return 0;
+    }
+    const relationshipId = found[0].values().next().value;
+    return relationshipId;
   }
 }
