@@ -1,4 +1,5 @@
 import { Game } from 'src/game/model/game.entity';
+import UserRelationship from 'src/relationship/model/userRelationship.entity';
 import {
   Column,
   CreateDateColumn,
@@ -24,4 +25,10 @@ export class User {
 
   @OneToMany(() => Game, (game) => game.winner)
   victories: Game[];
+
+  @OneToMany(
+    () => UserRelationship,
+    (userRelationship) => userRelationship.user,
+  )
+  public userRelationship!: UserRelationship[];
 }

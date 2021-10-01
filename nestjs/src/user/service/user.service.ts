@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository } from 'typeorm';
+import { ChangeUserNameDto } from '../model/change-username.dto';
 
 @Injectable()
 export class UserService {
@@ -10,37 +11,31 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
-  /*
-   ** getAll returns users with details
-   */
   getAll(): Promise<User[]> {
-    return this.userRepository.find({ relations: ['userGameRecords'] });
+    return this.userRepository.find({ order: { createDate: 'ASC' } });
   }
 
   /*
    ** getOneById returns the user
    */
-  async getOneById(id: number): Promise<User> {
+  getOneById(id: number): Promise<User> {
     return this.userRepository.findOne(id);
   }
 
   /*
-   ** getUserProfileById returns the user's game records, friend list and status
-   ** add a query to get the user's competitors
+   ** ! add avatar and status later
    */
-  async getUserProfileById(id: number): Promise<User> {
-    const user = await this.userRepository.findOne(id, {
-      relations: ['userGameRecords', 'victories'],
-    });
+  async getUserProfileById(id: number) {
+    const user = await this.userRepository.findOne(id);
     if (user) {
       return user;
     }
-    throw new HttpException('This user does not exist', HttpStatus.NOT_FOUND);
+    throw new HttpException(
+      `This user ${id} does not exist.`,
+      HttpStatus.NOT_FOUND,
+    );
   }
 
-  /*
-   ** createUser returns the new user (still have to modify with auth)
-   */
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
 
@@ -56,15 +51,12 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
-  /*
-   ** updateUserNickname modifies the user's nickname which should be unique
-   */
-  async updateUserNickname(
+  async changeUserName(
     id: number,
-    CreateUserDto: CreateUserDto,
+    changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
     const user = await this.getOneById(id);
-    user.nickname = CreateUserDto.nickname;
+    user.nickname = changeUserNameDto.nickname;
     return this.userRepository.save(user);
   }
 }

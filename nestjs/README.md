@@ -1,73 +1,44 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
-</p>
+# API
+In this file, you'll find the list of api created in the back-end.
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ npm install
-```
-
-## Running the app
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+## /auth/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|GET| login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000(frond-end)*|
+## /profile/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|GET|me|-|an object<br />`{"id":1,"nickname":"Foo","createDate":"xxx"}`|
+|GET|all|-|an array contains objects<br />`[{"id":1,"nickname":"Foo","createDate":"xxx"}, {...}, {...}...]`|
+|GET|:id|user id|an object<br />`{"id":1,"nickname":"Foo","createDate":"xxx"}`|
+|POST||Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object<br />`{"id":2,"nickname":"Bar","createDate":"xxx"}`<br /> *For testing only, delete later*|
+|PATCH|name|Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object with user's new nickname<br />`{"id":2,"nickname":"lolo","createDate":"xxx"}`|
+## /game/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|GET|all|-|an array contains objects<br />`[{"id": 5, "mode": 1, "status": "Ongoing/Finish", "createDate": "xxx", "updateDate": "xxx", "leftUserId": 3, "leftUserScore": 10, "rightUserId": 1, "rightUserScore": 2,"winnerId": 3}, {}...]`<br />*If a game hasn't finished yet, winner value is null.*|
+|GET|ongoing|-|an array contains objects<br />`[{"id": 5, "mode": 1, "createDate": "xxx", "leftUserId": 2, "rightUserId": 1}, {}...]`|
+|GET|:id|game id|an object<br />`{"id": 5, "mode": 1, "status": "Ongoing/Finish", "createDate": "xxx", "updateDate": "xxx", "leftUserId": 3, "leftUserScore": 10, "rightUserId": 1, "rightUserScore": 2,"winnerId": 3}`<br />*If a game hasn't finished yet, winner value is null.*|
+|GET|me/records|-|an array contains objects<br />`[{"gameId": 2, "mode": 1, "createDate": "xxx", "updateDate": "xxx", "userScore": 10, "opponentId": 4, "opponentScore": 1, "userGameStatus": "Won/Lost"}, {}...]`|
+|GET|:id/records|user id|an array contains objects<br />`[{"gameId": 2, "mode": 1, "createDate": "xxx", "updateDate": "xxx", "userScore": 10, "opponentId": 4, "opponentScore": 1, "userGameStatus": "Won/Lost"}, {}...]`|
+|POST||Body<br />`{"mode": 1, "leftUserId": number, "rightUserId": number}`<br />*mode: number (enum ?) modify later*|an object with game's mode, id, create time and ongoing status. <br />`{"mode": 1, "id": 7, "createDate": "xxx", "status": 1}`|
+|PATCH|:id|game id<br />`{"leftUserScore": number, "rightUserScore": number}`|an object with all details<br />`{"id": 9, "mode": 1, "createDate": "xxx", "updateDate": "xxx", "status": 0, "userGameRecords": [{"id": 16, "userId": 5678, "gameId": 9, "score": 9},{"id": 17,"userId": 60191,  "gameId": 9, "score": 6}], "winner": {"id": 5678, "nickname": "Tim","createDate": "xxx"}}`<br />*If the game has result already, throw HttpStatus:Bad_Request*|
+## /relationship/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
+|GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
+|GET|me/friendlist|-|an array contains friends id`[1, 2...]`|
+|GET|:id/friendlist|user id|an array contains friends id`[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
+|GET|me/blocklist|-|an array contains blocking users id `[1, 2...]`|
+|GET|:id/blocklist|user id|an array contains blocking users id `[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
+|POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend/block, throw HttpStatus:Bad_Request*|
+|POST|add/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
+|DELETE|reject/:id|relationship id|an object that was deleted <br />`{"createDate": "xxx", "status": "Not confirmed", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
+|DELETE|unfriend|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />Users should be friends, other situation would throw HttpStatus:Bad_Request|
+|DELETE|unfriend/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|POST|block|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Block", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend, it will be remove and create the new relationship with status Block.<br />If users already in status Block, throw HttpStatus:Bad_Request.*|
+|POST|block/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|DELETE|unblock|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />User id should be on the blocklist, other situation would throw HttpStatus:Bad_Request|
+|DELETE|unblock/:id|Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|

@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   OneToMany,
+  UpdateDateColumn,
 } from 'typeorm';
 
 export enum GameStatus {
@@ -22,8 +23,11 @@ export class Game {
   @Column() // need to define number meaning later, such as NORMAL = 1
   mode: number;
 
-  @CreateDateColumn() //{ select: false } not to show on query result
+  @CreateDateColumn()
   createDate: Date;
+
+  @UpdateDateColumn()
+  updateDate: Date;
 
   @Column({
     type: 'enum',
