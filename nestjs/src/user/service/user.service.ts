@@ -30,7 +30,10 @@ export class UserService {
     if (user) {
       return user;
     }
-    throw new HttpException('This user does not exist', HttpStatus.NOT_FOUND);
+    throw new HttpException(
+      `This user ${id} does not exist.`,
+      HttpStatus.NOT_FOUND,
+    );
   }
 
   createUser(profile: any): Promise<User> {

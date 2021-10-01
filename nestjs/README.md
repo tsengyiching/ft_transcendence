@@ -29,9 +29,16 @@ In this file, you'll find the list of api created in the back-end.
 |GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
 |GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
 |GET|me/friendlist|-|an array contains friends id`[1, 2...]`|
-|GET|:id/friendlist|user id|an array contains friends id`[1, 2...]`|
+|GET|:id/friendlist|user id|an array contains friends id`[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
 |GET|me/blocklist|-|an array contains blocking users id `[1, 2...]`|
-|GET|:id/blocklist|user id|an array contains blocking users id `[1, 2...]`|
-|POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`|
-|Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found*|
-|DELETE|reject/:id|relationship id|an object that was deleted <br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found*<br />If users are friends already, throw HttpStatus:Bad_Request|
+|GET|:id/blocklist|user id|an array contains blocking users id `[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
+|POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend/block, throw HttpStatus:Bad_Request*|
+|POST|add/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
+|DELETE|reject/:id|relationship id|an object that was deleted <br />`{"createDate": "xxx", "status": "Not confirmed", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
+|DELETE|unfriend|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />Users should be friends, other situation would throw HttpStatus:Bad_Request|
+|DELETE|unfriend/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|POST|block|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Block", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend, it will be remove and create the new relationship with status Block.<br />If users already in status Block, throw HttpStatus:Bad_Request.*|
+|POST|block/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
+|DELETE|unblock|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />User id should be on the blocklist, other situation would throw HttpStatus:Bad_Request|
+|DELETE|unblock/:id|Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|

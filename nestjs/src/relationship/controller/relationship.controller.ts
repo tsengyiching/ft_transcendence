@@ -79,12 +79,23 @@ export class RelationshipController {
   /*
    ** addFriend returns the new relationship's id
    */
-  @Post('/add')
+  @Post('add')
   addFriend(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
     return this.relationshipService.addFriend(user.id, relationshipDto);
+  }
+
+  /*
+   ** TESTER DELETE LATER
+   */
+  @Post('add/:id')
+  addFriendTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<Relationship> {
+    return this.relationshipService.addFriend(id, relationshipDto);
   }
 
   /*
@@ -114,8 +125,16 @@ export class RelationshipController {
   unfriend(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
+  ): Promise<SendRelationshipDto> {
     return this.relationshipService.deleteFriend(user.id, relationshipDto);
+  }
+
+  @Delete('unfriend/:id')
+  unfriendTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<SendRelationshipDto> {
+    return this.relationshipService.deleteFriend(id, relationshipDto);
   }
 
   /*
@@ -132,13 +151,35 @@ export class RelationshipController {
   }
 
   /*
+   ** TESTER DELETE LATER
+   */
+  @Post('block/:id')
+  blockUserTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<Relationship> {
+    return this.relationshipService.blockUser(id, relationshipDto);
+  }
+
+  /*
    ** unblock returns the deleted relationship
    */
   @Delete('unblock')
   unblock(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
+  ): Promise<SendRelationshipDto> {
     return this.relationshipService.deleteBlockUser(user.id, relationshipDto);
+  }
+
+  /*
+   ** TESTER DELETE LATER
+   */
+  @Delete('unblock/:id')
+  unblockTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<SendRelationshipDto> {
+    return this.relationshipService.deleteBlockUser(id, relationshipDto);
   }
 }
