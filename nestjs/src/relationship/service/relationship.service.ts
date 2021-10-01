@@ -78,11 +78,13 @@ export class RelationshipService {
   }
 
   async acceptFriend(id: number): Promise<SendRelationshipDto> {
-    const old = await this.getOneById(id);
-    await this.checkFriendshipStatus(old);
-    old.status = RelationshipStatus.FRIEND;
-    const newStatus = await this.relationshipRepository.save(old);
-    return this.reformSendingData(newStatus);
+    const relationship = await this.getOneById(id);
+    await this.checkFriendshipStatus(relationship);
+    relationship.status = RelationshipStatus.FRIEND;
+    const updateRelationship = await this.relationshipRepository.save(
+      relationship,
+    );
+    return this.reformSendingData(updateRelationship);
   }
 
   async rejectFriend(id: number): Promise<SendRelationshipDto> {
