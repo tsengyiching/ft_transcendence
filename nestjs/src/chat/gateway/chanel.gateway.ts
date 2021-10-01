@@ -1,18 +1,14 @@
-import { UseGuards } from '@nestjs/common';
 import {
   MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
-  OnGatewayConnection,
-  OnGatewayDisconnect,
-  OnGatewayInit,
 } from '@nestjs/websockets';
-import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
-import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
-import { User } from 'src/user/model/user.entity';
+import { Socket } from 'socket.io';
 
-@UseGuards(JwtAuthGuard)
+import { AuthService } from 'src/auth/service/auth.service';
+import { ChatService } from '../service/chat.service';
+
 @WebSocketGateway({
   namespace: 'chanel',
   cors: {
@@ -21,15 +17,18 @@ import { User } from 'src/user/model/user.entity';
     credentials: true,
   },
 })
-export class ChanelGateway
-  implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
-{
+export class ChanelGateway {
   @WebSocketServer() server: any;
 
-  afterInit(server: any) {}
+  constructor(
+    private readonly chatService: ChatService,
+    private authService: AuthService,
+  ) {}
 
-  handleConnection(client: any, ...args: any[]) {
+  handleConnection(client: Socket, ...args: any[]) {
     this.server.emit('message', 'User left');
+    const user = this.authService.getUserFromSocket(client);
+    console.log(user);
     console.log('User connected');
   }
 
