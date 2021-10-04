@@ -35,8 +35,6 @@ export class AuthService {
 
     if (!cookie) throw new WsException('Unauthorized');
 
-    // const { Authentication: authenticationToken } = parse(cookie);
-    // console.log(parse(cookie).jwt);
     const user: User = await this.getUserFromAuthenticationToken(
       parse(cookie).jwt,
     );

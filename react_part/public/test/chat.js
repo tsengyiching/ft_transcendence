@@ -13,6 +13,8 @@ const channelPassword = document.getElementById('channel_password')
 const message = document.getElementById('message');
 const messages = document.getElementById('messages');
 
+const channels = document.getElementById('channels');
+
 const handleSubmitNewMessage = () => {
 	socket.emit('message', { data: message.value })
 }
@@ -21,19 +23,14 @@ const handleCreateChannel = () => {
 	socket.emit('channel_create', { name: channelName.value, password: channelPassword.value })
 }
 
-socket.on('channel_new', ({ data }) => {
+socket.on('chanel_list')
+
+socket.on('channel_new', (data) => {
 console.log(data);
 	const li = document.createElement("li");
 	li.appendChild(document.createTextNode(data.name))
-	messages.appendChild(li);
+	channels.appendChild(li);
 })
-
-const handleNewChannel = (message) => {
-}
-	
-const buildNewChannel = (message) => {
-	return li;
-}
 
 socket.on('message', ({ data }) => {
 	handleNewMessage(data);

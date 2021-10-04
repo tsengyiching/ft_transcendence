@@ -11,8 +11,9 @@ import {
   OnGatewayDisconnect,
   OnGatewayInit,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
+import { User } from 'src/user/model/user.entity';
 import { CreateChannelDto } from '../model/channel.dto';
 import { ChatService } from '../service/chat.service';
 
@@ -28,7 +29,7 @@ export class ChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
   @WebSocketServer()
-  server: any;
+  server: Server;
 
   constructor(
     private readonly chatService: ChatService,
@@ -48,17 +49,20 @@ export class ChatGateway
    * @param client
    * @param args
    */
-  handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
-    const user = this.authService.getUserFromSocket(client);
-    this.server.emit('user-join', { user });
+    const user: User = await this.authService.getUserFromSocket(client);
+    const chanels = this.chatService.getAllChannel();
+    this.server.emit('user-join', user.id);
+    this.server.emit('chanel-list', chanels);
+    // console.log(await this.server.allSockets());
   }
 
   /**
    * Call After client leave
    * @param client
    */
-  handleDisconnect(client: any) {
+  handleDisconnect(client: Socket) {
     console.log('Remove active user');
   }
 
@@ -80,7 +84,7 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('channel_delete')
-  deleteChannel(@MessageBody() data: CreateChannelDto) {
+  deleteChannel(@MessageBody() data) {
     console.log('Channel Create');
     console.log(data);
     const channel = this.chatService.createChannelWithDto(data);
@@ -94,9 +98,18 @@ export class ChatGateway
    */
   @SubscribeMessage('join-channel')
   JoinChannel(@MessageBody() data: string) {
-    this.server.emit('events', data);
+    // this.server.emit('events', data);
   }
 
+  /**
+   * get channel message (with pagination systeme)
+   * @param data
+   */
+
+  /**
+   * channel send messages
+   * @param data
+   */
   @SubscribeMessage('message') handleEvent(@MessageBody() messages: string) {
     this.server.emit('message', messages);
     console.log(messages);

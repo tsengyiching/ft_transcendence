@@ -18,4 +18,8 @@ export class ChatService {
     const newChannel = this.channelRepository.create({ ...createChannelDto });
     return this.channelRepository.save(newChannel);
   }
+
+  getAllChannel(): Promise<Channel[]> {
+    return this.channelRepository.find({ order: { createDate: 'ASC' } });
+  }
 }
