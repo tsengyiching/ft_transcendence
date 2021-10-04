@@ -46,6 +46,9 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
+  /*
+   ** Test only, delete later
+   */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
     return this.userRepository.save(newUser);
@@ -56,7 +59,30 @@ export class UserService {
     changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
     const user = await this.getOneById(id);
+    if (user.nickname === changeUserNameDto.nickname) {
+      throw new HttpException(
+        `Same user nickname is entered !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const allUsers = await this.getUserNameList();
+    if (allUsers.includes(changeUserNameDto.nickname)) {
+      throw new HttpException(
+        `This nickname has been taken, please choose a new one !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     user.nickname = changeUserNameDto.nickname;
     return this.userRepository.save(user);
+  }
+
+  /****************************************************************************/
+  /*                                 utils                                    */
+  /****************************************************************************/
+
+  async getUserNameList(): Promise<string[]> {
+    const users = await this.getAll();
+    const names = users.map((obj) => obj.nickname);
+    return names;
   }
 }
