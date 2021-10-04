@@ -1,14 +1,14 @@
-// const socket_chanel = io("http://localhost:8080/chanel", {
+// const socket_channel = io("http://localhost:8080/channel", {
 // 	withCredentials: true,
 //	 });
 const socket = io("http://localhost:8080/chat", {
 	withCredentials: true,
 });
 
-// socket_namespace_chanel = socket.of('/chanel');
+// socket_namespace_channel = socket.of('/channel');
 
-const chanelName = document.getElementById('chanel_name');
-const chanelPassword = document.getElementById('chanel_password')
+const channelName = document.getElementById('channel_name');
+const channelPassword = document.getElementById('channel_password')
 
 const message = document.getElementById('message');
 const messages = document.getElementById('messages');
@@ -17,21 +17,21 @@ const handleSubmitNewMessage = () => {
 	socket.emit('message', { data: message.value })
 }
 
-const handleCreateChanel = () => {
-	socket.emit('chanel_create', { name: chanelName.value, password: chanelPassword.value })
+const handleCreateChannel = () => {
+	socket.emit('channel_create', { name: channelName.value, password: channelPassword.value })
 }
 
-socket.on('chanel-new', ({ data }) => {
+socket.on('channel_new', ({ data }) => {
 console.log(data);
 	const li = document.createElement("li");
 	li.appendChild(document.createTextNode(data.name))
 	messages.appendChild(li);
 })
 
-const handleNewChanel = (message) => {
+const handleNewChannel = (message) => {
 }
 	
-const buildNewChanel = (message) => {
+const buildNewChannel = (message) => {
 	return li;
 }
 

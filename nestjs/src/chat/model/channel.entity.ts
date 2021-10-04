@@ -7,13 +7,13 @@ import {
 } from 'typeorm';
 import { Message } from './messages.entity';
 
-export enum ChanelType {
+export enum ChannelType {
   PUBLIC = 1,
   PRIVATE = 0,
 }
 
 @Entity()
-export class Chanel {
+export class Channel {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -25,14 +25,14 @@ export class Chanel {
 
   @Column({
     type: 'enum',
-    enum: ChanelType,
-    default: ChanelType.PUBLIC,
+    enum: ChannelType,
+    default: ChannelType.PUBLIC,
   })
-  type: ChanelType;
+  type: ChannelType;
 
   @CreateDateColumn()
   createDate: Date;
 
-  @OneToMany(() => Message, (messages) => messages.chanel)
+  @OneToMany(() => Message, (messages) => messages.channel)
   messages: Message[];
 }

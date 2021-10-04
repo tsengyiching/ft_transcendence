@@ -7,15 +7,15 @@ import {
   ManyToOne,
   PrimaryColumn,
 } from 'typeorm';
-import { Chanel } from './chanel.entity';
+import { Channel } from './channel.entity';
 
 @Entity()
 export class Message {
   @PrimaryColumn()
   id: number;
 
-  @ManyToOne(() => Chanel, (chanel) => chanel)
-  chanel: Chanel;
+  @ManyToOne(() => Channel, (channel) => channel)
+  channel: Channel;
 
   @ManyToOne((user) => User)
   @JoinColumn({ name: 'author' })

@@ -5,17 +5,17 @@ https://docs.nestjs.com/providers#services
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChanelDto } from '../model/chanel.dto';
-import { Chanel } from '../model/chanel.entity';
+import { CreateChannelDto } from '../model/channel.dto';
+import { Channel } from '../model/channel.entity';
 
 @Injectable()
 export class ChatService {
   constructor(
-    @InjectRepository(Chanel) private chanelRepository: Repository<Chanel>,
+    @InjectRepository(Channel) private channelRepository: Repository<Channel>,
   ) {}
 
-  createChanelWithDto(createChanelDto: CreateChanelDto): Promise<Chanel> {
-    const newChanel = this.chanelRepository.create({ ...createChanelDto });
-    return this.chanelRepository.save(newChanel);
+  createChannelWithDto(createChannelDto: CreateChannelDto): Promise<Channel> {
+    const newChannel = this.channelRepository.create({ ...createChannelDto });
+    return this.channelRepository.save(newChannel);
   }
 }

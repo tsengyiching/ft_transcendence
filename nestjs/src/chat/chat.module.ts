@@ -3,20 +3,20 @@ import { Module } from '@nestjs/common';
 import { AuthModule } from 'src/auth/auth.module';
 import { GameModule } from 'src/game/game.module';
 import { UserModule } from 'src/user/user.module';
-import { ChanelGateway } from './gateway/chanel.gateway';
+import { ChannelGateway } from './gateway/channel.gateway';
 import { ChatGateway } from './gateway/chat.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Chanel } from './model/chanel.entity';
+import { Channel } from './model/channel.entity';
 import { Message } from './model/messages.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Chanel, Message]),
+    TypeOrmModule.forFeature([Channel, Message]),
     UserModule,
     GameModule,
     AuthModule,
   ],
-  providers: [ChatService, ChatGateway, ChanelGateway],
+  providers: [ChatService, ChatGateway, ChannelGateway],
   exports: [ChatModule],
 })
 export class ChatModule {}

@@ -13,7 +13,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
-import { CreateChanelDto } from '../model/chanel.dto';
+import { CreateChannelDto } from '../model/channel.dto';
 import { ChatService } from '../service/chat.service';
 
 @WebSocketGateway({
@@ -63,37 +63,37 @@ export class ChatGateway
   }
 
   /**
-   * create chanel
+   * create channel
    * @param data
    */
-  @SubscribeMessage('chanel_create')
-  async createChanel(@MessageBody() data: CreateChanelDto) {
-    console.log('Chanel Create');
+  @SubscribeMessage('channel_create')
+  async createChannel(@MessageBody() data: CreateChannelDto) {
+    console.log('Channel Create');
     console.log(data);
-    const chanel = await this.chatService.createChanelWithDto(data);
-    console.log(chanel);
-    this.server.emit('chanel_new', chanel);
+    const channel = await this.chatService.createChannelWithDto(data);
+    console.log(channel);
+    this.server.emit('channel_new', channel);
   }
 
   /**
-   * delete chanel
+   * delete channel
    * @param data
    */
-  @SubscribeMessage('chanel_delete')
-  deleteChanel(@MessageBody() data: CreateChanelDto) {
-    console.log('Chanel Create');
+  @SubscribeMessage('channel_delete')
+  deleteChannel(@MessageBody() data: CreateChannelDto) {
+    console.log('Channel Create');
     console.log(data);
-    const chanel = this.chatService.createChanelWithDto(data);
-    console.log(chanel);
-    this.server.emit('chanel-new', chanel);
+    const channel = this.chatService.createChannelWithDto(data);
+    console.log(channel);
+    this.server.emit('channel-new', channel);
   }
 
   /**
-   * join chanel
+   * join channel
    * @param data
    */
-  @SubscribeMessage('join-chanel')
-  JoinChanel(@MessageBody() data: string) {
+  @SubscribeMessage('join-channel')
+  JoinChannel(@MessageBody() data: string) {
     this.server.emit('events', data);
   }
 

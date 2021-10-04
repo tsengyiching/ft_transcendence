@@ -1,6 +1,6 @@
 import { IsAlphanumeric, IsNotEmpty, MaxLength } from 'class-validator';
 
-export class CreateChanelDto {
+export class CreateChannelDto {
   @IsAlphanumeric()
   @MaxLength(10)
   @IsNotEmpty()

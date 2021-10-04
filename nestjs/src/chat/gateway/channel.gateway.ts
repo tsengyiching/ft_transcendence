@@ -10,14 +10,14 @@ import { AuthService } from 'src/auth/service/auth.service';
 import { ChatService } from '../service/chat.service';
 
 @WebSocketGateway({
-  namespace: 'chanel',
+  namespace: 'channel',
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],
     credentials: true,
   },
 })
-export class ChanelGateway {
+export class ChannelGateway {
   @WebSocketServer() server: any;
 
   constructor(
