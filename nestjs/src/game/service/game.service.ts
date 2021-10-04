@@ -29,7 +29,7 @@ export class GameService {
       const obj = {
         id: data.id,
         mode: data.mode,
-        status: data.status === 1 ? 'Ongoing' : 'Finish',
+        status: data.status,
         createDate: data.createDate,
         updateDate: data.updateDate,
         leftUserId: data.userGameRecords[0].userId,
@@ -71,7 +71,7 @@ export class GameService {
       const obj = {
         id: data.id,
         mode: data.mode,
-        status: data.status === 1 ? 'Ongoing' : 'Finish',
+        status: data.status,
         createDate: data.createDate,
         updateDate: data.updateDate,
         leftUserId: data.userGameRecords[0].userId,
