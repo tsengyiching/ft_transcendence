@@ -1,10 +1,6 @@
-import { IsEnum, IsInt, IsNotEmpty, Max, Min } from 'class-validator';
-import { GameMode } from './game.entity';
+import { IsInt, IsNotEmpty, Max, Min } from 'class-validator';
 
 export class CreateGameDto {
-  @IsEnum(GameMode)
-  mode: GameMode;
-
   @IsNotEmpty()
   @IsInt()
   @Min(1)

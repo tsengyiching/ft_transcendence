@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import { InsertGameResultDto } from '../model/insert-gameResult.dto';
 import { CreateGameDto } from '../model/create-game.dto';
 import { SendGameDto } from '../model/send-game.dto';
-import { Game, GameStatus } from '../model/game.entity';
+import { Game, GameMode, GameStatus } from '../model/game.entity';
 import { User } from 'src/user/model/user.entity';
 import { SendOngoingGameDto } from '../model/send-ongoging-game.dto';
 import { SendUserGameRecordsDto } from '../model/send-user-game-records.dto';
@@ -67,6 +67,12 @@ export class GameService {
       where: { id: id },
       relations: ['userGameRecords', 'winner'],
     });
+    if (game.length === 0) {
+      throw new HttpException(
+        'Game with this id does not exist.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
     const ret = game.map((data) => {
       const obj = {
         id: data.id,
@@ -86,6 +92,7 @@ export class GameService {
   }
 
   async getUserGameRecords(id: number): Promise<SendUserGameRecordsDto[]> {
+    await this.userService.getUserProfileById(id);
     const games = await this.userGameRecords.find({
       where: { userId: id, game: { status: GameStatus.FINISH } },
       relations: ['game', 'game.userGameRecords', 'game.winner'],
@@ -110,22 +117,25 @@ export class GameService {
     return ret;
   }
 
-  async createGame(createGameDto: CreateGameDto): Promise<Game> {
+  // async getUserCurrentGameId(id: number) {
+  //   const game = this.getUserCurrentGame(id);
+  // }
+
+  async createNormalGame(dto: CreateGameDto) {
+    await this.checkPlayers(dto.leftUserId, dto.rightUserId);
     const newGame = await this.gameRepository.create();
-    newGame.mode = createGameDto.mode;
+    newGame.mode = GameMode.NORMAL;
     await this.gameRepository.save(newGame);
+    await this.addPlayers(newGame.id, dto);
+    return newGame;
+  }
 
-    const leftUser = await this.userGameRecords.create();
-    leftUser.gameId = newGame.id;
-    leftUser.userId = createGameDto.leftUserId;
-    leftUser.score = 0;
-    await this.userGameRecords.save(leftUser);
-
-    const rightUser = await this.userGameRecords.create();
-    rightUser.gameId = newGame.id;
-    rightUser.userId = createGameDto.rightUserId;
-    rightUser.score = 0;
-    await this.userGameRecords.save(rightUser);
+  async createBonusGame(dto: CreateGameDto) {
+    await this.checkPlayers(dto.leftUserId, dto.rightUserId);
+    const newGame = await this.gameRepository.create();
+    newGame.mode = GameMode.BONUS;
+    await this.gameRepository.save(newGame);
+    await this.addPlayers(newGame.id, dto);
     return newGame;
   }
 
@@ -158,13 +168,63 @@ export class GameService {
     return this.gameRepository.save(gameFinish);
   }
 
+  /****************************************************************************/
+  /*                                 utils                                    */
+  /****************************************************************************/
+
   /*
    ** getOneById returns the game detail
-   ** util only
    */
   getOneById(id: number): Promise<Game> {
     return this.gameRepository.findOne(id, {
       relations: ['userGameRecords', 'winner'],
     });
+  }
+
+  /*
+   ** addPlayers add two players to userGameRecords entity
+   */
+  async addPlayers(gameId: number, dto: CreateGameDto): Promise<void> {
+    const leftUser = await this.userGameRecords.create();
+    leftUser.gameId = gameId;
+    leftUser.userId = dto.leftUserId;
+    leftUser.score = 0;
+    await this.userGameRecords.save(leftUser);
+
+    const rightUser = await this.userGameRecords.create();
+    rightUser.gameId = gameId;
+    rightUser.userId = dto.rightUserId;
+    rightUser.score = 0;
+    await this.userGameRecords.save(rightUser);
+  }
+
+  /****************************************************************************/
+  /*                                 checkers                                 */
+  /****************************************************************************/
+
+  async checkPlayers(userOne: number, userTwo: number): Promise<void> {
+    if (userOne === userTwo) {
+      throw new HttpException('Same player ids !', HttpStatus.BAD_REQUEST);
+    }
+    await this.userService.getUserProfileById(userOne);
+    await this.userService.getUserProfileById(userTwo);
+    if (
+      (await this.getUserCurrentGame(userOne)) ||
+      (await this.getUserCurrentGame(userTwo))
+    ) {
+      throw new HttpException(
+        'One of the users is playing, cannot start a new game right now !',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  async getUserCurrentGame(id: number): Promise<UserGameRecords> {
+    await this.userService.getUserProfileById(id);
+    const game = await this.userGameRecords.find({
+      where: { userId: id, game: { status: GameStatus.ONGOING } },
+      relations: ['game'],
+    });
+    return game[0];
   }
 }

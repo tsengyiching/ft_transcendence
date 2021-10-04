@@ -85,4 +85,19 @@ export class UserService {
     const names = users.map((obj) => obj.nickname);
     return names;
   }
+
+  async getUserIdByName(name: string): Promise<number> {
+    const users = await this.getAll();
+    const id = users
+      .filter((obj) => obj.nickname === name)
+      .map((obj) => obj.id);
+
+    if (id.length === 0) {
+      throw new HttpException(
+        'User with this name does not exist.',
+        HttpStatus.NOT_FOUND,
+      );
+    }
+    return id[0];
+  }
 }
