@@ -2,6 +2,7 @@ import { Form, Button } from 'react-bootstrap'
 import React, {useState, useEffect} from 'react'
 import Talk from './Talk';
 import { io, Socket } from "socket.io-client";
+import CreateChannelButton from './create_channel';
 
 function JoinChannel() {
 
@@ -14,6 +15,7 @@ function Chat() {
     const [socket, setSocket] = useState(io("http://localhost:8080/chat"));
 
     function CreateChannel() {
+
         console.log(`React : Create Channel from ${socket.id}`);
         socket.emit('message', "hello");
         socket.on('message', (data) => {console.log(`response from backend : ${data}`)});
@@ -23,7 +25,7 @@ function Chat() {
 	<React.Fragment>
     <div style={{border:'1px solid black'}} ><h4>Chat</h4></div>
     <div>
-        <Button onClick={CreateChannel}>Create Channel </Button>
+        <CreateChannelButton />
         <Button>Create Private Message </Button>
     </div>
      <div>
