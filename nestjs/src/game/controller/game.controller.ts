@@ -72,12 +72,14 @@ export class GameController {
   }
 
   /*
-   ** getUserCurrentGame returns user's finish game
+   ** getUserCurrentGame returns user's current game
    */
-  // @Get(':id/current')
-  // getUserCurrentGameId(@Param('id', ParseIntPipe) id: number) {
-  //   return this.gameService.getUserCurrentGameId(id);
-  // }
+  @Get(':id/current')
+  getUserCurrentGameId(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<UserGameRecords> {
+    return this.gameService.getUserCurrentGameId(id);
+  }
 
   /*
    ** createNormalGame returns the new game

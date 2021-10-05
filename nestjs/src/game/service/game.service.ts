@@ -117,9 +117,14 @@ export class GameService {
     return ret;
   }
 
-  // async getUserCurrentGameId(id: number) {
-  //   const game = this.getUserCurrentGame(id);
-  // }
+  async getUserCurrentGameId(id: number): Promise<UserGameRecords> {
+    await this.userService.getUserProfileById(id);
+    const game = await this.userGameRecords.find({
+      where: { userId: id },
+      select: ['gameId'],
+    });
+    return game[0];
+  }
 
   async createNormalGame(dto: CreateGameDto) {
     await this.checkPlayers(dto.leftUserId, dto.rightUserId);
