@@ -14,7 +14,7 @@ import {
 import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/model/user.entity';
-import { CreateChannelDto } from '../model/channel.dto';
+import { CreateChannelDto } from '../dto/channel.dto';
 import { ChatService } from '../service/chat.service';
 
 @WebSocketGateway({
