@@ -20,6 +20,9 @@ export class Channel {
   @Column({ unique: true })
   name: string;
 
+  /**
+   * Contain Bcrypt hashed password of chanel if is private
+   */
   @Column()
   password: string;
 

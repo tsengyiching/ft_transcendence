@@ -1,12 +1,9 @@
-/*
-https://docs.nestjs.com/providers#services
-*/
-
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChannelDto } from '../model/channel.dto';
+import { CreateChannelDto } from '../dto/channel.dto';
 import { Channel } from '../model/channel.entity';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class ChatService {
@@ -14,8 +11,12 @@ export class ChatService {
     @InjectRepository(Channel) private channelRepository: Repository<Channel>,
   ) {}
 
-  createChannelWithDto(createChannelDto: CreateChannelDto): Promise<Channel> {
+  async createChannelWithDto(
+    createChannelDto: CreateChannelDto,
+  ): Promise<Channel> {
     const newChannel = this.channelRepository.create({ ...createChannelDto });
+    newChannel.password = await bcrypt.hash(newChannel.password, 10);
+
     return this.channelRepository.save(newChannel);
   }
 
