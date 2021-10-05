@@ -8,7 +8,7 @@ import { ChatGateway } from './gateway/chat.gateway';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Channel } from './model/channel.entity';
 import { Message } from './model/messages.entity';
-import { ChannelParticipant } from './model/ChannelParticipant.entity';
+import { ChannelParticipant } from './model/channelParticipant.entity';
 
 @Module({
   imports: [

@@ -14,7 +14,7 @@ export class Message {
   @PrimaryColumn()
   id: number;
 
-  @ManyToOne(() => Channel, (channel) => channel)
+  @ManyToOne(() => Channel, (channel) => channel.messages)
   channel: Channel;
 
   @ManyToOne((user) => User)
