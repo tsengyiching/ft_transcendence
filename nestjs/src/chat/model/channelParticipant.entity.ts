@@ -26,10 +26,10 @@ export class ChannelParticipant {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @ManyToOne((user) => User)
+  @ManyToOne(() => User)
   userId: User;
 
-  @ManyToOne((channel) => Channel)
+  @ManyToOne(() => Channel)
   channelId: Channel;
 
   @Column({
