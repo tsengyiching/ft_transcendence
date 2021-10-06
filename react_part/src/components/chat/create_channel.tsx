@@ -1,10 +1,12 @@
 import React, { useState } from "react";
+import { Socket } from "socket.io-client";
 import { Button, Modal, ToggleButton, ToggleButtonGroup, Form, } from "react-bootstrap";
 
 interface Props {
   show: boolean,
   onHide: () => void,
   backdrop: string,
+  socket: Socket
 }
 
 function CreateChannelModal(props: Props) {
@@ -15,8 +17,8 @@ function CreateChannelModal(props: Props) {
 
     function SubmitForm(event: any) {
   event.preventDefault();
-  console.log(name);
-  console.log(password);
+  let data = {name: name, password: password};
+  props.socket.emit('channel_create', data);
 }
 
     function ChangeName(e: React.ChangeEvent<HTMLInputElement>) { setName(e.currentTarget.value);}
@@ -68,7 +70,7 @@ function CreateChannelModal(props: Props) {
   );
 }
 
-function CreateChannelButton() {
+function CreateChannelButton(props: {socketid: Socket}) {
   const [modalShow, setModalShow] = React.useState(false);
 
   return (
@@ -80,6 +82,7 @@ function CreateChannelButton() {
         show={modalShow}
         onHide={() => setModalShow(false)}
         backdrop="static"
+        socket={props.socketid}
       />
     </React.Fragment>
   )

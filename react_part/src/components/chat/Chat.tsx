@@ -19,7 +19,7 @@ function Chat() {
 	<React.Fragment>
     <div style={{border:'1px solid black'}} ><h4>Chat</h4></div>
     <div>
-        <CreateChannelButton />
+        <CreateChannelButton socketid={socket}/>
         <Button>Create Private Message </Button>
     </div>
      <div>
