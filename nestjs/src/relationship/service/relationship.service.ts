@@ -68,7 +68,7 @@ export class RelationshipService {
     id: number,
     relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
-    await this.checkUsers(id, relationshipDto.addresseeUserId);
+    await this.checkIsSameUser(id, relationshipDto.addresseeUserId);
     await this.checkUsersRelation(id, relationshipDto.addresseeUserId);
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
@@ -98,7 +98,7 @@ export class RelationshipService {
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.checkUsers(id, delDto.addresseeUserId);
+    await this.checkIsSameUser(id, delDto.addresseeUserId);
     const relationId = await this.findUserRelationshipId(
       id,
       delDto.addresseeUserId,
@@ -116,7 +116,7 @@ export class RelationshipService {
   }
 
   async blockUser(id: number, dto: RelationshipDto): Promise<Relationship> {
-    await this.checkUsers(id, dto.addresseeUserId);
+    await this.checkIsSameUser(id, dto.addresseeUserId);
     await this.checkUserRelationBlock(id, dto.addresseeUserId);
     const blockRelationship = await this.relationshipRepository.create();
     blockRelationship.status = RelationshipStatus.BLOCK;
@@ -129,7 +129,7 @@ export class RelationshipService {
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.checkUsers(id, delDto.addresseeUserId);
+    await this.checkIsSameUser(id, delDto.addresseeUserId);
     const relationId = await this.findUserRelationshipId(
       id,
       delDto.addresseeUserId,
@@ -240,10 +240,10 @@ export class RelationshipService {
   }
 
   /*
-   ** checkUsers throws exception if user does not exist,
+   ** checkIsSameUser throws exception if user does not exist,
    ** or userOne and UserTwo have same id
    */
-  async checkUsers(userOne: number, userTwo: number): Promise<void> {
+  async checkIsSameUser(userOne: number, userTwo: number): Promise<void> {
     if (userOne === userTwo) {
       throw new HttpException(
         'User cannot add, unfriend, block, unblock her / himself !',

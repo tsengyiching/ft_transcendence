@@ -126,21 +126,12 @@ export class GameService {
     return game[0];
   }
 
-  async createNormalGame(dto: CreateGameDto) {
-    await this.checkPlayers(dto.leftUserId, dto.rightUserId);
+  async createGame(dto: CreateGameDto, mode: number) {
+    await this.checkUsersIdAndAvailability(dto.leftUserId, dto.rightUserId);
     const newGame = await this.gameRepository.create();
-    newGame.mode = GameMode.NORMAL;
+    newGame.mode = mode === 1 ? GameMode.NORMAL : GameMode.BONUS;
     await this.gameRepository.save(newGame);
-    await this.addPlayers(newGame.id, dto);
-    return newGame;
-  }
-
-  async createBonusGame(dto: CreateGameDto) {
-    await this.checkPlayers(dto.leftUserId, dto.rightUserId);
-    const newGame = await this.gameRepository.create();
-    newGame.mode = GameMode.BONUS;
-    await this.gameRepository.save(newGame);
-    await this.addPlayers(newGame.id, dto);
+    await this.addUsersToGame(newGame.id, dto);
     return newGame;
   }
 
@@ -187,9 +178,9 @@ export class GameService {
   }
 
   /*
-   ** addPlayers add two players to userGameRecords entity
+   ** addUsersToGame add two players to userGameRecords entity
    */
-  async addPlayers(gameId: number, dto: CreateGameDto): Promise<void> {
+  async addUsersToGame(gameId: number, dto: CreateGameDto): Promise<void> {
     const leftUser = await this.userGameRecords.create();
     leftUser.gameId = gameId;
     leftUser.userId = dto.leftUserId;
@@ -207,7 +198,10 @@ export class GameService {
   /*                                 checkers                                 */
   /****************************************************************************/
 
-  async checkPlayers(userOne: number, userTwo: number): Promise<void> {
+  async checkUsersIdAndAvailability(
+    userOne: number,
+    userTwo: number,
+  ): Promise<void> {
     if (userOne === userTwo) {
       throw new HttpException('Same player ids !', HttpStatus.BAD_REQUEST);
     }

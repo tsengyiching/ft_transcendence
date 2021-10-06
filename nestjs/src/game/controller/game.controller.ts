@@ -86,7 +86,7 @@ export class GameController {
    */
   @Post('normal')
   createNormalGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
-    return this.gameService.createNormalGame(createGameDto);
+    return this.gameService.createGame(createGameDto, 1);
   }
 
   /*
@@ -94,7 +94,7 @@ export class GameController {
    */
   @Post('bonus')
   createBonusGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
-    return this.gameService.createBonusGame(createGameDto);
+    return this.gameService.createGame(createGameDto, 2);
   }
 
   /*
