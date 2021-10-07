@@ -62,10 +62,9 @@ export class AuthController {
   async fortyTwoCallback(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
-  ): Promise<User> {
+  ) {
     const { accessToken } = this.authService.login(req.user); // get jwt token
     res.cookie('jwt', accessToken); // Creating cookies (jwt token)
     res.redirect('http://localhost:3000/'); // redirect to front
-    return req.user;
   }
 }
