@@ -24,28 +24,34 @@ export enum StatusInChanel {
 @Entity()
 export class ChannelParticipant {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id!: number;
 
-  @ManyToOne(() => User)
-  userId: User;
+  @Column()
+  public userId!: number;
 
-  @ManyToOne(() => Channel)
-  channelId: Channel;
+  @Column()
+  public channelId!: number;
+
+  @ManyToOne(() => User, (user) => user.channelParticipant)
+  public user!: User;
+
+  @ManyToOne(() => Channel, (channel) => channel.participant)
+  public channel!: Channel;
 
   @Column({
     type: 'enum',
     enum: ChannelRole,
     default: ChannelRole.USER,
   })
-  role: ChannelRole;
+  public role: ChannelRole;
 
   @Column({
     type: 'enum',
     enum: StatusInChanel,
     default: StatusInChanel.NORMAL,
   })
-  status: StatusInChanel;
+  public status: StatusInChanel;
 
   @CreateDateColumn()
-  createDate: Date;
+  public createDate: Date;
 }

@@ -17,7 +17,7 @@ export class Message {
   @ManyToOne(() => Channel, (channel) => channel.messages)
   channel: Channel;
 
-  @ManyToOne((user) => User)
+  @ManyToOne(() => User)
   @JoinColumn({ name: 'author' })
   author: User;
 

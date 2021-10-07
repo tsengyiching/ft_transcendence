@@ -6,8 +6,9 @@ export class CreateChannelParticipantDto {
   @IsOptional()
   @IsInt()
   userId: number;
+
   @IsInt()
-  channelID: number;
+  channelId: number;
 
   @IsOptional()
   @IsEnum(ChannelRole)

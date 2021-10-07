@@ -5,6 +5,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { ChannelParticipant } from './channelParticipant.entity';
 import { Message } from './messages.entity';
 
 export enum ChannelType {
@@ -15,27 +16,30 @@ export enum ChannelType {
 @Entity()
 export class Channel {
   @PrimaryGeneratedColumn()
-  id: number;
+  public id: number;
 
   @Column({ unique: true })
-  name: string;
+  public name!: string;
 
   /**
    * Contain Bcrypt hashed password of chanel if is private
    */
   @Column()
-  password: string;
+  public password?: string;
 
   @Column({
     type: 'enum',
     enum: ChannelType,
     default: ChannelType.PUBLIC,
   })
-  type: ChannelType;
+  public type!: ChannelType;
 
   @CreateDateColumn()
-  createDate: Date;
+  public createDate!: Date;
+
+  @OneToMany(() => ChannelParticipant, (participant) => participant.channel)
+  public participant!: ChannelParticipant[];
 
   @OneToMany(() => Message, (messages) => messages.channel)
-  messages: Message[];
+  public messages!: Message[];
 }

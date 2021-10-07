@@ -71,10 +71,10 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('channel_create')
-  async createChannel(@MessageBody() data: CreateChannelDto) {
+  async createChannel(client: Socket, data: CreateChannelDto) {
     console.log('Channel Create');
-    console.log(data);
-    const channel = await this.chatService.createChannelWithDto(data);
+    const user = await this.authService.getUserFromSocket(client);
+    const channel = await this.chatService.createChannelWithDto(user.id, data);
     console.log(channel);
     this.server.emit('channel_new', channel);
   }
@@ -87,9 +87,6 @@ export class ChatGateway
   deleteChannel(@MessageBody() data) {
     console.log('Channel Create');
     console.log(data);
-    const channel = this.chatService.createChannelWithDto(data);
-    console.log(channel);
-    this.server.emit('channel-new', channel);
   }
 
   /**
