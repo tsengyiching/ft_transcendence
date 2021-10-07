@@ -27,18 +27,12 @@ export class ChatService {
       newChannel.type = ChannelType.PRIVATE;
       newChannel.password = await bcrypt.hash(newChannel.password, 10);
     }
-    console.log('test');
-    const channel = await this.channelRepository.save(newChannel);
-    console.log('test');
-    const channelOwner = new CreateChannelParticipantDto();
-    console.log('test');
-    console.log(channelOwner);
-    channelOwner.channelId = channel.id;
-    // channelOwner.channel = channel;
+    await this.channelRepository.save(newChannel);
+    const channelOwner = this.channelParticipantRepository.create();
+    channelOwner.channelId = newChannel.id;
     channelOwner.userId = channelCreatorId;
     channelOwner.role = ChannelRole.OWNER;
-    console.log(channelOwner);
-    this.addChannelParticipant(channelOwner);
+    await this.channelParticipantRepository.save(channelOwner);
     return newChannel;
   }
 
