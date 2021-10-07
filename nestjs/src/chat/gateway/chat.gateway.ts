@@ -52,8 +52,9 @@ export class ChatGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
-    const chanels = this.chatService.getAllChannel();
+    const chanels = await this.chatService.getChannelUserParticipate(user.id);
     this.server.emit('user-join', user.id);
+    console.log(chanels);
     this.server.emit('chanel-list', chanels);
     // console.log(await this.server.allSockets());
   }
@@ -85,7 +86,7 @@ export class ChatGateway
    */
   @SubscribeMessage('channel_delete')
   deleteChannel(@MessageBody() data) {
-    console.log('Channel Create');
+    console.log('Channel Delete');
     console.log(data);
   }
 
