@@ -22,12 +22,14 @@ export class ChatService {
     channelCreatorId: number,
     createChannelDto: CreateChannelDto,
   ): Promise<Channel> {
+    // Creating Channel
     const newChannel = this.channelRepository.create({ ...createChannelDto });
     if (newChannel.password && newChannel.password.length != 0) {
       newChannel.type = ChannelType.PRIVATE;
       newChannel.password = await bcrypt.hash(newChannel.password, 10);
     }
     await this.channelRepository.save(newChannel);
+    //  Creating Channel Owner
     const channelOwner = this.channelParticipantRepository.create();
     channelOwner.channelId = newChannel.id;
     channelOwner.userId = channelCreatorId;
@@ -53,5 +55,24 @@ export class ChatService {
 
   getAllChannel(): Promise<Channel[]> {
     return this.channelRepository.find({ order: { createDate: 'ASC' } });
+  }
+
+  getChannelUserParticipate(id: number) {
+    return this.channelParticipantRepository
+      .createQueryBuilder('channel_participant')
+      .leftJoinAndSelect('channel_participant.channel', 'channel')
+      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
+      .where('channel_participant.userId = :Id', { Id: id })
+      .andWhere('role != :role', { role: ChannelRole.BAN })
+      .execute();
+    // return this.channelParticipantRepository.find({
+    //   select: ['role', 'status'],
+    //   relations: ['channel'],
+    //   where: {
+    //     userId: id,
+    //     role: Not(ChannelRole.BAN),
+    //   },
+    //   order: { createDate: 'ASC' },
+    // });
   }
 }
