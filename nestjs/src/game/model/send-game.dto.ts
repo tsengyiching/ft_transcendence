@@ -1,6 +1,6 @@
 export class SendGameDto {
   id: number;
-  mode: number;
+  mode: string;
   status: string;
   createDate: Date;
   updateDate: Date;

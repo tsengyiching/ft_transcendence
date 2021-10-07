@@ -12,12 +12,12 @@ import UserGameRecords from '../../game/model/userGameRecords.entity';
 @Entity()
 export class User {
   @PrimaryColumn()
-  id: number; //42 id ?
+  id: number;
 
-  @Column({ unique: true }) //handle error 500 later
+  @Column()
   nickname: string;
 
-  @CreateDateColumn() //{ select: false } not to show on query result
+  @CreateDateColumn()
   createDate: Date;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)

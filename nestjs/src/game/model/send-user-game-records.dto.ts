@@ -1,6 +1,6 @@
 export class SendUserGameRecordsDto {
   gameId: number;
-  mode: number;
+  mode: string;
   createDate: Date;
   updateDate: Date;
   userScore: number;

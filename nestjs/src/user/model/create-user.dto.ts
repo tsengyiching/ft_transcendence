@@ -1,3 +1,6 @@
+/*
+ ** Test only, delete later
+ */
 import { IsAlphanumeric, IsInt, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateUserDto {
