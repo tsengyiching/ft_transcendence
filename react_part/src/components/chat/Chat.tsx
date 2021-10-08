@@ -6,7 +6,7 @@ import CreateChannelButton from './create_channel';
 
 function Chat() {
 
-    const [socket, setSocket] = useState(io("http://localhost:8080/chat"));
+    const [socket, setSocket] = useState(io("http://localhost:8080/chat", {withCredentials: true,}));
 
     function CreateChannel() {
 
