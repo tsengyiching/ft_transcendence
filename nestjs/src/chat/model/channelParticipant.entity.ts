@@ -9,16 +9,16 @@ import { User } from 'src/user/model/user.entity';
 import { Channel } from './channel.entity';
 
 export enum ChannelRole {
-  OWNER = 0,
-  ADMIN = 1,
-  USER = 2,
-  BAN = 3,
+  OWNER = 'Owner',
+  ADMIN = 'Admin',
+  USER = 'User',
+  BAN = 'Ban',
 }
 
-export enum StatusInChanel {
-  NORMAL = 0,
-  MUTE = 1,
-  BLOCK = 2,
+export enum StatusInChannel {
+  NORMAL = 'Normal',
+  MUTE = 'Mute',
+  BLOCK = 'Block',
 }
 
 @Entity()
@@ -47,10 +47,10 @@ export class ChannelParticipant {
 
   @Column({
     type: 'enum',
-    enum: StatusInChanel,
-    default: StatusInChanel.NORMAL,
+    enum: StatusInChannel,
+    default: StatusInChannel.NORMAL,
   })
-  public status: StatusInChanel;
+  public status: StatusInChannel;
 
   @CreateDateColumn()
   public createDate: Date;

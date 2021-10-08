@@ -9,8 +9,8 @@ import { ChannelParticipant } from './channelParticipant.entity';
 import { Message } from './messages.entity';
 
 export enum ChannelType {
-  PUBLIC = 1,
-  PRIVATE = 0,
+  PUBLIC = 'Public',
+  PRIVATE = 'Private',
 }
 
 @Entity()
