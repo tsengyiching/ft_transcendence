@@ -1,13 +1,14 @@
 import './App.css';
 import Router from './components/Router';
 import Header from './components/Header';
+import { Container } from 'react-bootstrap';
 
 function App() {
   return (
-    <div className="App">
+    <Container fluid className="App">
       <Header/>
       <Router></Router>
-    </div>
+    </Container>
   );
 }
 

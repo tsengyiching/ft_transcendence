@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 
 function Talk() {
     return (
-        <div className="overflow-auto" style={{height: '300px'}}>
+        <div className="overflow-auto" style={{height: '675px', border:'1px solid black'}}>
            <div className="main">
                 <div className="px-2 scroll">
                     <div className="d-flex align-items-center">
