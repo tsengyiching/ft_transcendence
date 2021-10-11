@@ -76,9 +76,9 @@ function CreateChannelButton(props: {socketid: Socket}) {
 
   return (
     <React.Fragment>
-      <Button variant="primary" onClick={() => setModalShow(true)}>
+      <button className='ButtonCreate bg-danger' onClick={() => setModalShow(true)}>
         Create Channel
-      </Button>
+      </button>
       <CreateChannelModal
         show={modalShow}
         onHide={() => setModalShow(false)}

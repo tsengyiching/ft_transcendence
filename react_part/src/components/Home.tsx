@@ -1,12 +1,14 @@
-import { Form, Button, Row, Col } from 'react-bootstrap'
-import {useState, useEffect} from 'react'
-import {socket} from "./service/socket"
+import { Row, Col } from 'react-bootstrap'
+import {SocketContext} from "../context/socket"
+import { useContext } from 'react'
 import Chat from './chat/Chat'
 import Game from './Game'
 import Friends from './Friends'
 
 function Accueil() {
-   
+
+    let socket = useContext(SocketContext);
+
     return (
         <div>
             <h2>Accueil</h2>
