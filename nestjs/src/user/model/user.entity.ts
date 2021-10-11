@@ -21,6 +21,15 @@ export class User {
   @CreateDateColumn()
   createDate: Date;
 
+  @Column({ nullable: true })
+  public email: string;
+
+  @Column({ default: false })
+  public isTwoFactorAuthenticationEnabled: boolean;
+
+  @Column({ nullable: true })
+  public twoFactorAuthenticationSecret?: string;
+
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
   public userGameRecords!: UserGameRecords[];
 

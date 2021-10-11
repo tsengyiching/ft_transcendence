@@ -76,6 +76,18 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+    return this.userRepository.update(userId, {
+      twoFactorAuthenticationSecret: secret,
+    });
+  }
+
+  async turnOnTwoFactorAuthentication(userId: number) {
+    return this.userRepository.update(userId, {
+      isTwoFactorAuthenticationEnabled: true,
+    });
+  }
+
   /****************************************************************************/
   /*                                 utils                                    */
   /****************************************************************************/
