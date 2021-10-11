@@ -12,13 +12,12 @@ export enum ChannelRole {
   OWNER = 'Owner',
   ADMIN = 'Admin',
   USER = 'User',
-  BAN = 'Ban',
 }
 
 export enum StatusInChannel {
   NORMAL = 'Normal',
   MUTE = 'Mute',
-  BLOCK = 'Block',
+  BAN = 'Ban',
 }
 
 @Entity()
