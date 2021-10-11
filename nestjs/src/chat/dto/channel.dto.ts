@@ -2,7 +2,7 @@ import { IsAlphanumeric, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class CreateChannelDto {
   @IsAlphanumeric()
-  @MaxLength(10)
+  @MaxLength(32)
   @IsNotEmpty()
   name: string;
 

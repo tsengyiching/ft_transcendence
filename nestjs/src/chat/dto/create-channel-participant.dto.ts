@@ -1,16 +1,6 @@
-import { IsEnum, IsInt, IsOptional } from 'class-validator';
-import { ChannelRole } from '../model/channelParticipant.entity';
+import { IsInt } from 'class-validator';
 
 export class CreateChannelParticipantDto {
-  // Optional
-  @IsOptional()
-  @IsInt()
-  userId: number;
-
   @IsInt()
   channelId: number;
-
-  @IsOptional()
-  @IsEnum(ChannelRole)
-  role: ChannelRole;
 }
