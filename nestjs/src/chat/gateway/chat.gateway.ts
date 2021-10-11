@@ -15,6 +15,7 @@ import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/model/user.entity';
 import { CreateChannelDto } from '../dto/channel.dto';
+import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { ChatService } from '../service/chat.service';
 
 @WebSocketGateway({
@@ -52,10 +53,9 @@ export class ChatGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
-    const chanels = await this.chatService.getChannelUserParticipate(user.id);
+    const channels = await this.chatService.getChannelUserParticipate(user.id);
     this.server.emit('user-join', user.id);
-    console.log(chanels);
-    this.server.emit('chanel-list', chanels);
+    this.server.emit('channel-list', channels);
     // console.log(await this.server.allSockets());
   }
 
@@ -68,14 +68,14 @@ export class ChatGateway
   }
 
   /**
-   * create channel
+   * Create channel
    * @param data
    */
   @SubscribeMessage('channel_create')
   async createChannel(client: Socket, data: CreateChannelDto) {
     console.log('Channel Create');
     const user = await this.authService.getUserFromSocket(client);
-    const channel = await this.chatService.createChannelWithDto(user.id, data);
+    const channel = await this.chatService.createChannel(user.id, data);
     console.log(channel);
     this.server.emit('channel_new', channel);
   }
@@ -94,9 +94,13 @@ export class ChatGateway
    * join channel
    * @param data
    */
-  @SubscribeMessage('join-channel')
-  JoinChannel(@MessageBody() data: string) {
-    // this.server.emit('events', data);
+  @SubscribeMessage('channel-join')
+  async JoinChannel(
+    client: Socket,
+    @MessageBody() channelParticipant: CreateChannelParticipantDto,
+  ) {
+    const user = await this.authService.getUserFromSocket(client);
+    this.chatService.addChannelParticipant(user.id, channelParticipant);
   }
 
   /**
