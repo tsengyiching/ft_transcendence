@@ -39,9 +39,10 @@ export class UserService {
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
 
+    console.log(profile);
     newUser.id = profile.id;
     newUser.nickname = profile.login;
-    // newUser.avatar = profile.photos;  // ! Add later
+    newUser.avatar = profile.image_url;
 
     return this.userRepository.save(newUser);
   }

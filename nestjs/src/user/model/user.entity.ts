@@ -19,6 +19,9 @@ export class User {
   @Column()
   nickname: string;
 
+  @Column()
+  avatar: string;
+
   @CreateDateColumn()
   createDate: Date;
 
