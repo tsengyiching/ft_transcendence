@@ -1,38 +1,46 @@
-import { Form, Button, Row, Col } from 'react-bootstrap'
-import React from 'react'
+import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
+import {useState} from 'react'
 import Talk from './Talk';
 import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
+import ListChannel from "./ListChannel";
+import './ButtonCreate.css'
+
 
 function Chat(props: {socket: Socket}) {
 
-    function CreateChannel() {
+    const [radioValue, setRadioValue] = useState('1');
 
-        console.log(`React : Create Channel from ${props.socket.id}`);
-        props.socket.emit('message', "hello");
-        props.socket.on('message', (data) => {console.log(`response from backend : ${data}`)});
-    }
+    const radios = [
+        {name: 'Channels', value: '1'},
+        {name: 'private message', value: '2'},
+    ]
 
 	return (
 	<Row>
         <h4 style={{border:'1px solid black', height: "35px"}} > Chat </h4>
         <Col>
-            <Col>
-                <div className="col-4" style={{border:'1px solid black'}}>
-                <ul className="nav nav-tabs">
-                <li className="nav-item">
-                    <a className="nav-link active" aria-current="page" href="/accueil">Salons</a>
-                </li>
-                <li className="nav-item">
-                    <a className="nav-link" href="/accueil">Messages privés</a>
-                </li>
-                </ul>
-                </div>
-            </Col>
-            <Col>
-              <CreateChannelButton socketid={props.socket}/>
-              <Button>Create Private Conversation </Button>
-            </Col>
+            <Row>
+                <ButtonGroup className="mb-2">
+                    {radios.map((radio, idx) => (
+                        <ToggleButton
+                        key={idx}
+                        id={`radio-${idx}`}
+                        type='radio'
+                        variant={idx % 2 ? 'outline-success' : 'outline-danger'}
+                        name="radio"
+                        value={radio.value}
+                        checked={radioValue === radio.value}
+                        onChange={(e) => setRadioValue(e.currentTarget.value)}
+                        >
+                            {radio.name}
+                        </ToggleButton>
+                    ))}
+                </ButtonGroup>
+                <ListChannel />
+                <CreateChannelButton socketid={props.socket}/>
+                <button className="ButtonCreate bg-primary">Create Private Conversation </button>
+            </Row>
         </Col>
         <Col>
             <div className="col" >

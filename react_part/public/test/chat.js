@@ -23,7 +23,7 @@ const handleCreateChannel = () => {
 	socket.emit('channel_create', { name: channelName.value, password: channelPassword.value })
 }
 
-socket.on('chanel_list')
+socket.on('channel_list')
 
 socket.on('channel_new', (data) => {
 console.log(data);
