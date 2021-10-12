@@ -16,7 +16,9 @@ import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/model/user.entity';
 import { CreateChannelDto } from '../dto/channel.dto';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
+import { CreateMessageDto } from '../dto/create-message.dto';
 import { ChatService } from '../service/chat.service';
+import { MessageService } from '../service/message.service';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -34,6 +36,7 @@ export class ChatGateway
 
   constructor(
     private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
     private authService: AuthService,
   ) {}
 
@@ -56,7 +59,7 @@ export class ChatGateway
     const channels = await this.chatService.getChannelUserParticipate(user.id);
     this.server.emit('user-join', user.id);
     this.server.emit('channel-list', channels);
-    // console.log(await this.server.allSockets());
+    console.log(await this.messageService.getChannelMessages(user.id, 1));
   }
 
   /**
@@ -104,16 +107,34 @@ export class ChatGateway
   }
 
   /**
-   * get channel message (with pagination systeme)
+   * Load channel data (message) and register to the room event
    * @param data
    */
+  @SubscribeMessage('channel-load')
+  async loadChannel(client: Socket, @MessageBody() channelID: number) {
+    const user = await this.authService.getUserFromSocket(client);
+    client.join('channel-' + channelID);
+  }
+
+  /**
+   * Unload Channel data
+   * @param data
+   */
+  @SubscribeMessage('channel-unload')
+  async unloadChannel(client: Socket, @MessageBody() channelID: number) {
+    client.leave('channel-' + channelID);
+  }
 
   /**
    * channel send messages
    * @param data
    */
-  @SubscribeMessage('message') handleEvent(@MessageBody() messages: string) {
-    this.server.emit('message', messages);
-    console.log(messages);
+  @SubscribeMessage('channel-message')
+  async newChannelMessage(client: Socket, message: CreateMessageDto) {
+    const user: User = await this.authService.getUserFromSocket(client);
+    // Save message in db
+    this.messageService.createChannelMessage(user.id, message);
+    // Send message to all people connected in channel
+    this.server.to('channel-' + message.channelId).emit('message', message);
   }
 }
