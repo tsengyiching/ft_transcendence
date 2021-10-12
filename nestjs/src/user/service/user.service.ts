@@ -2,7 +2,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
 
 @Injectable()
@@ -38,9 +38,10 @@ export class UserService {
 
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
-
+    console.log(profile);
     newUser.id = profile.id;
     newUser.nickname = profile.login;
+    newUser.email = profile.email;
     // newUser.avatar = profile.photos;  // ! Add later
 
     return this.userRepository.save(newUser);
@@ -76,13 +77,16 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  async setTwoFactorAuthenticationSecret(secret: string, userId: number) {
+  async setTwoFactorAuthenticationSecret(
+    secret: string,
+    userId: number,
+  ): Promise<UpdateResult> {
     return this.userRepository.update(userId, {
       twoFactorAuthenticationSecret: secret,
     });
   }
 
-  async turnOnTwoFactorAuthentication(userId: number) {
+  async turnOnTwoFactorAuthentication(userId: number): Promise<UpdateResult> {
     return this.userRepository.update(userId, {
       isTwoFactorAuthenticationEnabled: true,
     });

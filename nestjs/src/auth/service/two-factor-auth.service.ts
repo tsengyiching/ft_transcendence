@@ -17,24 +17,28 @@ export class TwoFactorAuthService {
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(
       user.email,
-      this.configService.get('TWO_FACTOR_AUTHENTICATION_APP_NAME'),
+      'ft_trancendence',
       secret,
     );
     await this.userService.setTwoFactorAuthenticationSecret(secret, user.id);
     return { secret, otpauthUrl };
   }
 
-  public async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
+  public async pipeQrCodeStream(
+    stream: Response,
+    otpauthUrl: string,
+  ): Promise<any> {
     return toFileStream(stream, otpauthUrl);
   }
 
-  public isTwoFactorAuthenticationCodeValid(
+  public async isTwoFactorAuthenticationCodeValid(
     twoFactorAuthenticationCode: string,
     user: User,
-  ) {
+  ): Promise<boolean> {
+    const userData = await this.userService.getOneById(user.id);
     return authenticator.verify({
       token: twoFactorAuthenticationCode,
-      secret: user.twoFactorAuthenticationSecret,
+      secret: userData.twoFactorAuthenticationSecret,
     });
   }
 }
