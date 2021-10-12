@@ -84,6 +84,20 @@ export class ChatService {
   }
 
   /**
+   * getChannelUserParticipate returns the list of channels user dosen't participates.
+   * @param userId the id of user
+   * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
+   */
+  getChannelUserNotParticipate(userId: number): Promise<any> {
+    return this.channelParticipantRepository
+      .createQueryBuilder('channel_participant')
+      .leftJoinAndSelect('channel_participant.channel', 'channel')
+      .select(['channel.id', 'channel.type', 'channel.name'])
+      .where('channel_participant.userId != :Id', { Id: userId })
+      .execute();
+  }
+
+  /**
    * getChannelUserParticipate returns the list of channels in which a user participates.
    * @param userId the id of user
    * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]

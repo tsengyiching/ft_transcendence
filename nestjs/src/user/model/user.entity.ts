@@ -1,4 +1,5 @@
 import { ChannelParticipant } from 'src/chat/model/channelParticipant.entity';
+import { Message } from 'src/chat/model/messages.entity';
 import { Game } from 'src/game/model/game.entity';
 import UserRelationship from 'src/relationship/model/userRelationship.entity';
 import {
@@ -61,5 +62,8 @@ export class User {
     () => ChannelParticipant,
     (channelParticipant) => channelParticipant.user,
   )
-  channelParticipant!: ChannelParticipant[];
+  public channelParticipant!: ChannelParticipant[];
+
+  @OneToMany(() => Message, (message) => message.author)
+  public message!: Message[];
 }
