@@ -24,6 +24,7 @@ export class MessageService {
         'message.channelId',
         'message.authorId',
         'author.nickname',
+        'author.avatar',
         'message.createDate',
       ])
       .addSelect('message.message', 'message_content')

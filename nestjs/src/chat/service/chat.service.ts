@@ -112,7 +112,6 @@ export class ChatService {
       .execute();
   }
 
-  //   TODO Add avatar
   /**
    * getUserParticipateChannel get user participating to a specifique channel
    * @param channelId channel id
@@ -122,7 +121,7 @@ export class ChatService {
     return this.channelParticipantRepository
       .createQueryBuilder('channel_participant')
       .leftJoinAndSelect('channel_participant.user', 'user')
-      .select(['role', 'user.id', 'user.nickname'])
+      .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
       .where('channel_participant.channelId = :Id', { Id: channelId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
