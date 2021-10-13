@@ -56,9 +56,11 @@ export class ChatGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
-    const channels = await this.chatService.getChannelUserParticipate(user.id);
     this.server.emit('user-join', user.id);
-    this.server.emit('channel-list', channels);
+    const channels_in = this.chatService.getChannelUserParticipate(user.id);
+    const channels_out = this.chatService.getChannelUserParticipate(user.id);
+    this.server.emit('channels-user-in', await channels_in);
+    this.server.emit('channel-user-out', await channels_out);
     console.log(await this.messageService.getChannelMessages(user.id, 1));
   }
 
