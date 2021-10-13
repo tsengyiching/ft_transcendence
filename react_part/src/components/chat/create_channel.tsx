@@ -16,10 +16,18 @@ function CreateChannelModal(props: Props) {
     const [name, setName] = useState("");
 
     function SubmitForm(event: any) {
-  event.preventDefault();
-  let data = {name: name, password: password};
-  props.socket.emit('channel_create', data);
-}
+      event.preventDefault();
+      let data = {name: name, password: password};
+      props.socket.emit('channel_create', data);
+      setPassword("");
+      setPasswordLock(true);
+    }
+
+    function onHide(){
+      setPassword("");
+      setPasswordLock(true);
+      props.onHide();
+    }
 
     function ChangeName(e: React.ChangeEvent<HTMLInputElement>) { setName(e.currentTarget.value);}
     function ChangePassword(e: React.ChangeEvent<HTMLInputElement>) {
@@ -57,13 +65,13 @@ function CreateChannelModal(props: Props) {
             Password
           </Form.Label>
           <Form.Control type="password" className="mb-3" value={password} name="password" placeholder="Password (only for private)" onChange={ChangePassword} />
-          <Button variant="success" type="submit" onClick={props.onHide}>
+          <Button variant="success" type="submit" onClick={onHide}>
               Create Channel
           </Button>
         </Form>
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="secondary" onClick={props.onHide}>
+        <Button variant="secondary" onClick={onHide}>
             Cancel
         </Button>
       </Modal.Footer>
