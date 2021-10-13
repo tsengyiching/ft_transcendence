@@ -4,7 +4,7 @@ import Talk from './Talk';
 import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
-import './ButtonCreate.css'
+import './Chat.css'
 
 
 function Chat(props: {socket: Socket}) {

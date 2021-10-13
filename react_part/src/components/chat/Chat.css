@@ -1,0 +1,35 @@
+.ButtonCreate {
+	border-radius: none;
+	font-size: 2em;
+}
+
+.ScrollingListChannel {
+	margin: 10px;
+	display: list-item;
+	height: 600px;
+	width: 500px;
+	overflow: auto;
+}
+
+.MyChannel {
+	margin: 2px;
+	width: 450px;
+	height: 60px;
+	text-align: left;
+	font-size: x-large;
+	background-color: #DC7633;
+}
+
+.MyChannel:hover {
+	background-color: #D35400;
+}
+
+.LogoChannel {
+	width: 30px;
+	height: 30px;
+	margin: 7px;
+}
+
+.TextChannel {
+	text-align: left;
+}
