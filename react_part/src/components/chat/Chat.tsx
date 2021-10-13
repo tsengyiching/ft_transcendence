@@ -4,6 +4,7 @@ import Talk from './Talk';
 import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
+import ListMP from "./ListMP"
 import './Chat.css'
 
 
@@ -37,7 +38,7 @@ function Chat(props: {socket: Socket}) {
                         </ToggleButton>
                     ))}
                 </ButtonGroup>
-                <ListChannel />
+                {radioValue==='1' ? <ListChannel />: <ListMP/>}
                 <CreateChannelButton socketid={props.socket}/>
                 <button className="ButtonCreate bg-primary">Create Private Conversation </button>
             </Row>

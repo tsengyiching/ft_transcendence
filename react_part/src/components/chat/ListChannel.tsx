@@ -54,10 +54,10 @@ function ListChannel()
                 socket.on("channels-user-in", (data: IChannel[]) => SetChannels(data));
                 console.log(MyChannels);
         }, [MyChannels, socket]);
-
+        console.log(MyChannel);
 	return(
-                <Row className="ScrollingListChannel">
-                        { MyChannels !== [] ?
+                <Row className="ScrollingList">
+                        { MyChannels.length !== 0 ?
                                 MyChannels.map(
                                  MyChannel
                                 ) :
