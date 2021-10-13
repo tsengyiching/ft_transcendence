@@ -1,16 +1,29 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useHistory } from "react-router-dom";
+import axios from 'axios';
 
 import { Button } from 'react-bootstrap'
 
-function ButtonConnexion() {
+function PageConnexion() {
+
+    let history = useHistory();
+
+    useEffect(() => {
+        axios.get('http://localhost:8080/profile/me/',{
+            withCredentials:true,
+        })
+        .then(res => {
+            history.push("/accueil");
+        })
+        .catch(res => {
+            history.push("/connexion");
+        })
+    })
+
     return (
-        <div className=".col-xl-">
-            <Link to="/accueil">
-                <Button>Connexion</Button>
-            </Link>
-        </div>
+        <div>Connexion</div>
     )
 }
 
-export default ButtonConnexion;
+export default PageConnexion;
