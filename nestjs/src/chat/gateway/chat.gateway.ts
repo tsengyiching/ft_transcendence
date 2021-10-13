@@ -68,8 +68,10 @@ export class ChatGateway
    * Call After client leave
    * @param client
    */
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     console.log('Remove active user');
+    const user: User = await this.authService.getUserFromSocket(client);
+    this.server.emit('user-leave', user.id);
   }
 
   /**
