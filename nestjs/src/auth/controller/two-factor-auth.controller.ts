@@ -17,6 +17,7 @@ import { Response } from 'express';
 import { TwoFactorAuthCodeDto } from '../model/twoFactorAuthenticationCode.dto';
 import { UserService } from 'src/user/service/user.service';
 import { AuthService } from '../service/auth.service';
+import { JwtPayload } from '../strategy/jwt.strategy';
 
 @Controller('2fa')
 @UseGuards(JwtAuthGuard)
@@ -57,9 +58,11 @@ export class TwoFactorAuthController {
   @Post('authenticate')
   @HttpCode(200)
   async authenticate(
-    @CurrentUser() user: User,
+    @CurrentUser() userPayload: JwtPayload,
     @Body() twoFactorAuthCode: TwoFactorAuthCodeDto,
+    @Res({ passthrough: true }) res: Response,
   ) {
+    const user = await this.userService.getOneById(userPayload.id);
     const isCodeValid =
       this.twoFactorAuthService.isTwoFactorAuthenticationCodeValid(
         twoFactorAuthCode.twoFactorAuthenticationCode,
@@ -68,13 +71,11 @@ export class TwoFactorAuthController {
     if (!isCodeValid) {
       throw new UnauthorizedException('Wrong authentication code');
     }
-    // const accessTokenCookie = this.authService.getCookieWithJwtAccessToken(
-    //   user.id,
-    //   true,
-    // );
-
+    const { accessToken } = this.authService.login(user, true);
+    console.log({ accessToken });
+    res.cookie('jwt-two-factor', { accessToken });
+    userPayload.twoFA = true;
     //request.res.setHeader('Set-Cookie', [accessTokenCookie]);
-
-    return user;
+    return userPayload;
   }
 }

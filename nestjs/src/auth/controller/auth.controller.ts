@@ -65,6 +65,10 @@ export class AuthController {
   ) {
     const { accessToken } = this.authService.login(req.user); // get jwt token
     res.cookie('jwt', accessToken); // Creating cookies (jwt token)
-    res.redirect('http://localhost:3000/'); // redirect to front
+    if (req.user.isTwoFactorAuthenticationEnabled) {
+      res.redirect('http://localhost:3000/2fa');
+    } else {
+      res.redirect('http://localhost:3000/');
+    } // redirect to front}
   }
 }

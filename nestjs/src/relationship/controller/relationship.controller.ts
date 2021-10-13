@@ -16,8 +16,10 @@ import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { User } from 'src/user/model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { SendRelationshipDto } from '../model/send-relationship.dto';
+import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 
 @UseGuards(JwtAuthGuard)
+@UseGuards(JwtTwoFactorGuard)
 @Controller('relationship')
 export class RelationshipController {
   constructor(private relationshipService: RelationshipService) {}

@@ -10,6 +10,7 @@ import { FortyTwoStrategy } from './strategy/42.strategy';
 import { JwtAuthStrategy } from './strategy/jwt.strategy';
 import { TwoFactorAuthService } from './service/two-factor-auth.service';
 import { TwoFactorAuthController } from './controller/two-factor-auth.controller';
+import { JwtTwoFactorStrategy } from './strategy/jwt-two-factor.strategy';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { TwoFactorAuthController } from './controller/two-factor-auth.controller
     AuthService,
     FortyTwoStrategy,
     JwtAuthStrategy,
+    JwtTwoFactorStrategy,
     TwoFactorAuthService,
   ],
   controllers: [AuthController, TwoFactorAuthController],

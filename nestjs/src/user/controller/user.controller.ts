@@ -14,8 +14,10 @@ import { User } from '../model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { ChangeUserNameDto } from '../model/change-username.dto';
+import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 
 @UseGuards(JwtAuthGuard)
+@UseGuards(JwtTwoFactorGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
