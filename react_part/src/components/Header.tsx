@@ -24,6 +24,7 @@ function Header () {
                     <div className="col-">
                         <div className="row"><h4><a href="/me">Profil</a></h4></div>
                         <div className="row"><h4><a href="/parametres">Paramètres</a></h4></div>
+                        <div className="row"><h4><a href="/deconnexion">Deconnexion</a></h4></div>
                     </div>
                 </u>
             </nav>
