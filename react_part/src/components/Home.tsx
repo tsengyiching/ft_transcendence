@@ -1,9 +1,10 @@
 import { Form, Button } from 'react-bootstrap'
-import React from 'react'
+import { useEffect, useState } from 'react'
+import axios from 'axios'
 
 import Talk from './Talk';
-import { isOptionalTypeNode } from 'typescript';
 import Chat from './chat/Chat'
+
 
 function Game() {
 	return (
@@ -64,9 +65,24 @@ function AddFriend() {
 
 
 function Accueil() {
+    const [id, setId] = useState(0);
+    const [name, setName] = useState("");
+
+    useEffect(() => {
+
+        axios.get('http://localhost:8080/profile/me/',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setId(res.data.id)
+            setName(res.data.nickname)
+        })
+    })
     return (
         <div>
             <h2>Accueil</h2>
+            <h3>{id}</h3>
+            <h3>{name}</h3>
             <div className=".col-xl-">
                 <div className="row">
 					<Game />
