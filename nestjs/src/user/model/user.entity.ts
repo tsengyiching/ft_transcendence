@@ -1,3 +1,5 @@
+import { ChannelParticipant } from 'src/chat/model/channelParticipant.entity';
+import { Message } from 'src/chat/model/messages.entity';
 import { Game } from 'src/game/model/game.entity';
 import UserRelationship from 'src/relationship/model/userRelationship.entity';
 import {
@@ -12,12 +14,15 @@ import UserGameRecords from '../../game/model/userGameRecords.entity';
 @Entity()
 export class User {
   @PrimaryColumn()
-  id: number; //42 id ?
+  id: number;
 
-  @Column({ unique: true }) //handle error 500 later
+  @Column()
   nickname: string;
 
-  @CreateDateColumn() //{ select: false } not to show on query result
+  @Column()
+  avatar: string;
+
+  @CreateDateColumn()
   createDate: Date;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
@@ -31,4 +36,13 @@ export class User {
     (userRelationship) => userRelationship.user,
   )
   public userRelationship!: UserRelationship[];
+
+  @OneToMany(
+    () => ChannelParticipant,
+    (channelParticipant) => channelParticipant.user,
+  )
+  public channelParticipant!: ChannelParticipant[];
+
+  @OneToMany(() => Message, (message) => message.author)
+  public message!: Message[];
 }

@@ -15,7 +15,10 @@ import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { User } from 'src/user/model/user.entity';
 import { CreateChannelDto } from '../dto/channel.dto';
+import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
+import { CreateMessageDto } from '../dto/create-message.dto';
 import { ChatService } from '../service/chat.service';
+import { MessageService } from '../service/message.service';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -33,6 +36,7 @@ export class ChatGateway
 
   constructor(
     private readonly chatService: ChatService,
+    private readonly messageService: MessageService,
     private authService: AuthService,
   ) {}
 
@@ -52,10 +56,12 @@ export class ChatGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
-    const chanels = this.chatService.getAllChannel();
     this.server.emit('user-join', user.id);
-    this.server.emit('chanel-list', chanels);
-    // console.log(await this.server.allSockets());
+    const channels_in = this.chatService.getChannelUserParticipate(user.id);
+    const channels_out = this.chatService.getChannelUserParticipate(user.id);
+    this.server.emit('channels-user-in', await channels_in);
+    this.server.emit('channel-user-out', await channels_out);
+    console.log(await this.messageService.getChannelMessages(user.id, 1));
   }
 
   /**
@@ -67,14 +73,14 @@ export class ChatGateway
   }
 
   /**
-   * create channel
+   * Create channel
    * @param data
    */
   @SubscribeMessage('channel_create')
-  async createChannel(@MessageBody() data: CreateChannelDto) {
+  async createChannel(client: Socket, data: CreateChannelDto) {
     console.log('Channel Create');
-    console.log(data);
-    const channel = await this.chatService.createChannelWithDto(data);
+    const user = await this.authService.getUserFromSocket(client);
+    const channel = await this.chatService.createChannel(user.id, data);
     console.log(channel);
     this.server.emit('channel_new', channel);
   }
@@ -85,33 +91,52 @@ export class ChatGateway
    */
   @SubscribeMessage('channel_delete')
   deleteChannel(@MessageBody() data) {
-    console.log('Channel Create');
+    console.log('Channel Delete');
     console.log(data);
-    const channel = this.chatService.createChannelWithDto(data);
-    console.log(channel);
-    this.server.emit('channel-new', channel);
   }
 
   /**
    * join channel
    * @param data
    */
-  @SubscribeMessage('join-channel')
-  JoinChannel(@MessageBody() data: string) {
-    // this.server.emit('events', data);
+  @SubscribeMessage('channel-join')
+  async JoinChannel(
+    client: Socket,
+    @MessageBody() channelParticipant: CreateChannelParticipantDto,
+  ) {
+    const user = await this.authService.getUserFromSocket(client);
+    this.chatService.addChannelParticipant(user.id, channelParticipant);
   }
 
   /**
-   * get channel message (with pagination systeme)
+   * Load channel data (message) and register to the room event
    * @param data
    */
+  @SubscribeMessage('channel-load')
+  async loadChannel(client: Socket, @MessageBody() channelID: number) {
+    const user = await this.authService.getUserFromSocket(client);
+    client.join('channel-' + channelID);
+  }
+
+  /**
+   * Unload Channel data
+   * @param data
+   */
+  @SubscribeMessage('channel-unload')
+  async unloadChannel(client: Socket, @MessageBody() channelID: number) {
+    client.leave('channel-' + channelID);
+  }
 
   /**
    * channel send messages
    * @param data
    */
-  @SubscribeMessage('message') handleEvent(@MessageBody() messages: string) {
-    this.server.emit('message', messages);
-    console.log(messages);
+  @SubscribeMessage('channel-message')
+  async newChannelMessage(client: Socket, message: CreateMessageDto) {
+    const user: User = await this.authService.getUserFromSocket(client);
+    // Save message in db
+    this.messageService.createChannelMessage(user.id, message);
+    // Send message to all people connected in channel
+    this.server.to('channel-' + message.channelId).emit('message', message);
   }
 }

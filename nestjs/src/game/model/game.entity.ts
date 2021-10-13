@@ -10,9 +10,14 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 
+export enum GameMode {
+  NORMAL = 'Normal',
+  BONUS = 'Bonus',
+}
+
 export enum GameStatus {
-  ONGOING = 1,
-  FINISH = 0,
+  ONGOING = 'Ongoing',
+  FINISH = 'Finish',
 }
 
 @Entity()
@@ -20,8 +25,11 @@ export class Game {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column() // need to define number meaning later, such as NORMAL = 1
-  mode: number;
+  @Column({
+    type: 'enum',
+    enum: GameMode,
+  })
+  mode: GameMode;
 
   @CreateDateColumn()
   createDate: Date;

@@ -1,6 +1,6 @@
 export class SendOngoingGameDto {
   id: number;
-  mode: number;
+  mode: string;
   createDate: Date;
   leftUserId: number;
   rightUserId: number;

@@ -68,7 +68,7 @@ export class RelationshipService {
     id: number,
     relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
-    await this.userService.getUserProfileById(relationshipDto.addresseeUserId);
+    await this.checkIsSameUser(id, relationshipDto.addresseeUserId);
     await this.checkUsersRelation(id, relationshipDto.addresseeUserId);
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
@@ -78,11 +78,13 @@ export class RelationshipService {
   }
 
   async acceptFriend(id: number): Promise<SendRelationshipDto> {
-    const old = await this.getOneById(id);
-    await this.checkFriendshipStatus(old);
-    old.status = RelationshipStatus.FRIEND;
-    const newStatus = await this.relationshipRepository.save(old);
-    return this.reformSendingData(newStatus);
+    const relationship = await this.getOneById(id);
+    await this.checkFriendshipStatus(relationship);
+    relationship.status = RelationshipStatus.FRIEND;
+    const updateRelationship = await this.relationshipRepository.save(
+      relationship,
+    );
+    return this.reformSendingData(updateRelationship);
   }
 
   async rejectFriend(id: number): Promise<SendRelationshipDto> {
@@ -96,7 +98,7 @@ export class RelationshipService {
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.userService.getUserProfileById(delDto.addresseeUserId);
+    await this.checkIsSameUser(id, delDto.addresseeUserId);
     const relationId = await this.findUserRelationshipId(
       id,
       delDto.addresseeUserId,
@@ -114,7 +116,7 @@ export class RelationshipService {
   }
 
   async blockUser(id: number, dto: RelationshipDto): Promise<Relationship> {
-    await this.userService.getUserProfileById(dto.addresseeUserId);
+    await this.checkIsSameUser(id, dto.addresseeUserId);
     await this.checkUserRelationBlock(id, dto.addresseeUserId);
     const blockRelationship = await this.relationshipRepository.create();
     blockRelationship.status = RelationshipStatus.BLOCK;
@@ -127,7 +129,7 @@ export class RelationshipService {
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.userService.getUserProfileById(delDto.addresseeUserId);
+    await this.checkIsSameUser(id, delDto.addresseeUserId);
     const relationId = await this.findUserRelationshipId(
       id,
       delDto.addresseeUserId,
@@ -238,28 +240,39 @@ export class RelationshipService {
   }
 
   /*
+   ** checkIsSameUser throws exception if user does not exist,
+   ** or userOne and UserTwo have same id
+   */
+  async checkIsSameUser(userOne: number, userTwo: number): Promise<void> {
+    if (userOne === userTwo) {
+      throw new HttpException(
+        'User cannot add, unfriend, block, unblock her / himself !',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    await this.userService.getUserProfileById(userTwo);
+  }
+
+  /*
    ** checkUsersRelation see if there's an existing relationship between users,
    ** throws exception if it's true
    */
-  async checkUsersRelation(
-    userOneId: number,
-    userTwoId: number,
-  ): Promise<void> {
-    const friendlist = await this.getFriendList(userOneId);
-    if (friendlist.includes(userTwoId)) {
+  async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
+    const friendlist = await this.getFriendList(userOne);
+    if (friendlist.includes(userTwo)) {
       throw new HttpException(
         'Users are friends already.',
         HttpStatus.BAD_REQUEST,
       );
     }
     const unconfirm = await this.findUserRelationshipId(
-      userOneId,
-      userTwoId,
+      userOne,
+      userTwo,
       RelationshipStatus.NOTCONFIRMED,
     );
     const block = await this.findUserRelationshipId(
-      userOneId,
-      userTwoId,
+      userOne,
+      userTwo,
       RelationshipStatus.BLOCK,
     );
     if (unconfirm > 0 || block > 0) {
@@ -271,12 +284,12 @@ export class RelationshipService {
   }
 
   async checkUserRelationBlock(
-    userOneId: number,
-    userTwoId: number,
+    userOne: number,
+    userTwo: number,
   ): Promise<void> {
     const block = await this.findUserRelationshipId(
-      userOneId,
-      userTwoId,
+      userOne,
+      userTwo,
       RelationshipStatus.BLOCK,
     );
     if (block) {
@@ -286,8 +299,8 @@ export class RelationshipService {
       );
     }
     const friend = await this.findUserRelationshipId(
-      userOneId,
-      userTwoId,
+      userOne,
+      userTwo,
       RelationshipStatus.FRIEND,
     );
     if (friend) {
@@ -295,8 +308,8 @@ export class RelationshipService {
       await this.relationshipRepository.remove(delRelationship);
     }
     const unconfirm = await this.findUserRelationshipId(
-      userOneId,
-      userTwoId,
+      userOne,
+      userTwo,
       RelationshipStatus.NOTCONFIRMED,
     );
     if (unconfirm) {
@@ -304,6 +317,7 @@ export class RelationshipService {
       await this.relationshipRepository.remove(delRelationship);
     }
   }
+
   /****************************************************************************/
   /*                              Reform Objs                                 */
   /****************************************************************************/

@@ -129,6 +129,9 @@ export class RelationshipController {
     return this.relationshipService.deleteFriend(user.id, relationshipDto);
   }
 
+  /*
+   ** TESTER DELETE LATER
+   */
   @Delete('unfriend/:id')
   unfriendTest(
     @Param('id', ParseIntPipe) id: number,
