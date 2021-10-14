@@ -11,7 +11,7 @@ import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 
-interface IChannel {
+interface IMyChannel {
         channel_id: number,
         channel_name: string,
         channel_type: 'Private' | 'Public'
@@ -19,47 +19,73 @@ interface IChannel {
         status: 'Normal' | 'Mute' | 'Ban';
 }
 
-const MyChannel = (Channel: IChannel) => (
-        <div>
-                <Button className="MyChannel">
-                        {Channel.channel_type === 'Private' ?
-                        <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
-                        : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
-                        
-                        {Channel.role === 'Owner' ? 
-                        <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
-                        : Channel.role === "Admin" ?
-                        <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
-                        : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
-                        
-                        {Channel.status === 'Normal' ? 
-                        <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
-                        : Channel.status !== "Mute" ?
-                        <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
-                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
-                        
-                        {Channel.channel_name}
-                </Button>
-        </div>
-        )
+interface IOtherChannel {
+        channel_id: number,
+        channel_name: string,
+        channel_type: 'Private' | 'Public'
+}
 
-function ListChannel()
+interface IUseStateChannel {
+        channelSelected: {channel_id: number, channel_name: string} | undefined;
+        setChannelSelected: React.Dispatch<React.SetStateAction<{channel_id: number; channel_name: string;} | undefined>>
+}
+
+function ListChannel(props: IUseStateChannel)
 {
         let socket = useContext(SocketContext);
-        const [MyChannels, SetChannels] = useState<IChannel[]>([]);
+        const [MyChannels, SetMyChannels] = useState<IMyChannel[]>([]);
+        const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
+
+        function ButtonMyChannel(Channel: IMyChannel) {
+                let channel_id = Channel.channel_id;
+                let channel_name = Channel.channel_name;
+                
+                return (
+                <div key={channel_name}>
+                        <Button className="MyChannel" onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
+                                {Channel.channel_type === 'Private' ?
+                                <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
+                                : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
+                                
+                                {Channel.role === 'Owner' ? 
+                                <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
+                                : Channel.role === "Admin" ?
+                                <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
+                                : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
+                                
+                                {Channel.status === 'Normal' ? 
+                                <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
+                                : Channel.status !== "Mute" ?
+                                <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
+                                : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
+                                
+                                {Channel.channel_name}
+                        </Button>
+                </div>)
+        }
+
+
 
         useEffect(() => {
-                socket.on("channels-user-in", (data: IChannel[]) => SetChannels(data));
+                socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
+                socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
+
+                console.log("My Channels:")
                 console.log(MyChannels);
-        }, [MyChannels, socket]);
-        console.log(MyChannel);
+                console.log("Others Channels:")
+                console.log(OthersChannels);
+        }, [MyChannels, OthersChannels, socket]);
+
 	return(
                 <Row className="ScrollingList">
-                        { MyChannels.length !== 0 ?
-                                MyChannels.map(
-                                 MyChannel
-                                ) :
-                                <div className="NoChannel" > No Channel Joined</div>
+                        { MyChannels.length !== 0 
+                                ? MyChannels.map(ButtonMyChannel)
+                                : <div/>
+                        }
+                        { OthersChannels.length !== 0 
+                                ? <div></div>//OthersChannels.map(ButtonOtherChannel)
+                                : <div/>
+                                
                         }
                 </Row>
 	)

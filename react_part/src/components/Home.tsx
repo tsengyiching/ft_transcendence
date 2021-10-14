@@ -84,7 +84,6 @@ function Accueil() {
     })
     return (
         <div>
-            <h2>Home</h2>
                 <Row>
 					<Game />
                     <Col lg={5} style={{border:'1px solid black'}}>
