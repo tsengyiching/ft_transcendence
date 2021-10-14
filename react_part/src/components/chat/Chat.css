@@ -10,20 +10,22 @@
 
 .ButtonCreate {
 	border-radius: none;
-	font-size: 2em;
+	font-size: 25px;
+	height: 80px;
 }
 
 .ScrollingList {
-	margin: 10px;
+	margin: 2px;
 	display: list-item;
-	height: 600px;
+	height: 550px;
 	width: 500px;
 	overflow: auto;
 }
 
 .MyChannel {
-	margin-top: 2px;
-	width: 270px;
+	margin-top: 1px;
+	margin-bottom: 1px;
+	width: 220px;
 	height: 55px;
 	text-align: left;
 	font-size: medium;
