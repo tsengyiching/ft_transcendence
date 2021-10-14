@@ -20,7 +20,7 @@ export enum StatusInChannel {
   BAN = 'Ban',
 }
 
-@Entity()
+@Entity('channelParticipant')
 export class ChannelParticipant {
   @PrimaryGeneratedColumn()
   public id!: number;
