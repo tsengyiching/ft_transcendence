@@ -30,8 +30,7 @@ interface IUseStateChannel {
         setChannelSelected: React.Dispatch<React.SetStateAction<{channel_id: number; channel_name: string;} | undefined>>
 }
 
-function ListChannel(props: IUseStateChannel)
-{
+function ListChannel(props: IUseStateChannel) {
         let socket = useContext(SocketContext);
         const [MyChannels, SetMyChannels] = useState<IMyChannel[]>([]);
         const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
@@ -41,29 +40,38 @@ function ListChannel(props: IUseStateChannel)
                 let channel_name = Channel.channel_name;
                 
                 return (
-                <div key={channel_name}>
-                        <Button className="MyChannel" onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
-                                {Channel.channel_type === 'Private' ?
-                                <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
-                                : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
-                                
-                                {Channel.role === 'Owner' ? 
-                                <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
-                                : Channel.role === "Admin" ?
-                                <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
-                                : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
-                                
-                                {Channel.status === 'Normal' ? 
-                                <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
-                                : Channel.status !== "Mute" ?
-                                <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
-                                : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
-                                
-                                {Channel.channel_name}
-                        </Button>
-                </div>)
+                <Button key={channel_id} className="ButtonMyChannel" onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
+                        {Channel.channel_type === 'Private' ?
+                        <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
+                        : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
+                        
+                        {Channel.role === 'Owner' ? 
+                        <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
+                        : Channel.role === "Admin" ?
+                        <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
+                        : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
+                        
+                        {Channel.status === 'Normal' ? 
+                        <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
+                        : Channel.status !== "Mute" ?
+                        <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
+                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
+                        
+                        {Channel.channel_name}
+                </Button>
+                )
         }
 
+        function ButtonOtherChannel(Channel: IOtherChannel) {
+                let channel_id = Channel.channel_id;
+                let channel_name = Channel.channel_name;
+                
+                return (
+                        <Button key={channel_id}>
+                                {channel_name}
+                        </Button>
+                )
+        }
 
 
         useEffect(() => {
@@ -83,7 +91,7 @@ function ListChannel(props: IUseStateChannel)
                                 : <div/>
                         }
                         { OthersChannels.length !== 0 
-                                ? <div></div>//OthersChannels.map(ButtonOtherChannel)
+                                ? OthersChannels.map(ButtonOtherChannel)
                                 : <div/>
                                 
                         }

@@ -32,7 +32,7 @@
 	overflow: auto;
 }
 
-.MyChannel {
+.ButtonMyChannel {
 	margin-top: 1px;
 	margin-bottom: 1px;
 	width: 220px;
@@ -43,12 +43,12 @@
 	border: none;
 }
 
-.MyChannel:hover {
+.ButtonMyChannel:hover {
 	background-color: #D35400;
 	border: none;
 }
 
-.MyChannel:focus {
+.ButtonMyChannel:focus {
 	background-color: #D35400;
 }
 
