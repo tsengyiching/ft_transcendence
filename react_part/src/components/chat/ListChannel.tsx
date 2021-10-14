@@ -40,7 +40,7 @@ function ListChannel(props: IUseStateChannel) {
                 let channel_name = Channel.channel_name;
                 
                 return (
-                <Button key={channel_id} className="ButtonMyChannel" onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
+                <Button key={channel_id} className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
@@ -67,7 +67,7 @@ function ListChannel(props: IUseStateChannel) {
                 let channel_name = Channel.channel_name;
                 
                 return (
-                        <Button key={channel_id}>
+                        <Button className="ButtonChannel ButtonOtherChannel" key={channel_id}>
                                 {channel_name}
                         </Button>
                 )
@@ -86,15 +86,20 @@ function ListChannel(props: IUseStateChannel) {
 
 	return(
                 <Row className="ScrollingList">
-                        { MyChannels.length !== 0 
-                                ? MyChannels.map(ButtonMyChannel)
-                                : <div/>
-                        }
-                        { OthersChannels.length !== 0 
-                                ? OthersChannels.map(ButtonOtherChannel)
-                                : <div/>
-                                
-                        }
+                        <div className="ChannelsJoined">
+                                Channels Joined:
+                                { MyChannels.length !== 0 
+                                        ? MyChannels.map(ButtonMyChannel)
+                                        : <div/>
+                                }
+                        </div>
+                        <div className="ChannelNotJoinded">
+                                Channels not Joined:
+                                { OthersChannels.length !== 0 
+                                        ? OthersChannels.map(ButtonOtherChannel)
+                                        : <div/>                
+                                }
+                        </div>
                 </Row>
 	)
 
