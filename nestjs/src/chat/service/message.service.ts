@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Channel } from 'diagnostics_channel';
 import { Repository } from 'typeorm';
 import { CreateMessageDto } from '../dto/create-message.dto';
-import { DirectMessage } from '../model/directMessage.entity';
 import { Message } from '../model/messages.entity';
 import { ChatService } from './chat.service';
 
@@ -13,8 +11,6 @@ export class MessageService {
     private channelService: ChatService,
     @InjectRepository(Message)
     private messageRepository: Repository<Message>,
-    @InjectRepository(DirectMessage)
-    private directMessageRepository: Repository<DirectMessage>,
   ) {}
 
   async getChannelMessages(authorId: number, channelId: number) {
@@ -49,7 +45,7 @@ export class MessageService {
   }
 
   getDirectMessages(senderId: number, receiverId: number) {
-    return this.directMessageRepository.find({
+    return this.messageRepository.find({
       where: [
         { receiverId: receiverId, senderId: receiverId },
         { receiverId: senderId, senderId: senderId },
