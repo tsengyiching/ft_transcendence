@@ -26,10 +26,8 @@ function Chat(props: {socket: Socket}) {
                     {radios.map((radio, idx) => (
                         <ToggleButton
                         key={idx}
-                        id={`radio-${idx}`}
                         type='radio'
                         variant={idx % 2 ? 'outline-success' : 'outline-danger'}
-                        name="radio"
                         value={radio.value}
                         checked={radioValue === radio.value}
                         onChange={(e) => setRadioValue(e.currentTarget.value)}
@@ -45,6 +43,9 @@ function Chat(props: {socket: Socket}) {
         </Col>
         <Col className="ColumnChat">
             <div className="col" >
+                <Row>
+                    
+                </Row>
                 <Talk />
                 <div className="d-flex justify-content-center">
                     <Form className="w-75 p-3">

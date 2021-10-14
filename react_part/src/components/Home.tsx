@@ -33,7 +33,7 @@ function Accueil() {
             <h2>Home</h2>
                 <Row>
 					<Game />
-                    <Col style={{border:'1px solid black'}}>
+                    <Col lg={5} style={{border:'1px solid black'}}>
 						<Friends />
 						<Chat socket={socket}/>
 					</Col>
