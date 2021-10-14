@@ -90,10 +90,10 @@ export class ChatService {
    */
   getChannelUserNotParticipate(userId: number): Promise<any> {
     return this.channelParticipantRepository
-      .createQueryBuilder('channel_participant')
-      .leftJoinAndSelect('channel_participant.channel', 'channel')
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['channel.id', 'channel.type', 'channel.name'])
-      .where('channel_participant.userId != :Id', { Id: userId })
+      .where('channelParticipant.userId != :Id', { Id: userId })
       .execute();
   }
 
@@ -104,10 +104,10 @@ export class ChatService {
    */
   getChannelUserParticipate(userId: number): Promise<any> {
     return this.channelParticipantRepository
-      .createQueryBuilder('channel_participant')
-      .leftJoinAndSelect('channel_participant.channel', 'channel')
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
-      .where('channel_participant.userId = :Id', { Id: userId })
+      .where('channelParticipant.userId = :Id', { Id: userId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }
@@ -119,10 +119,10 @@ export class ChatService {
    */
   getUserParticipateChannel(channelId: number): Promise<any> {
     return this.channelParticipantRepository
-      .createQueryBuilder('channel_participant')
-      .leftJoinAndSelect('channel_participant.user', 'user')
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.user', 'user')
       .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
-      .where('channel_participant.channelId = :Id', { Id: channelId })
+      .where('channelParticipant.channelId = :Id', { Id: channelId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }

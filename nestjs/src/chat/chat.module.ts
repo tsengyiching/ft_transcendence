@@ -12,7 +12,7 @@ import { MessageService } from './service/message.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Channel, Message, ChannelParticipant]),
+    TypeOrmModule.forFeature([Channel, ChannelParticipant, Message]),
     UserModule,
     GameModule,
     AuthModule,
