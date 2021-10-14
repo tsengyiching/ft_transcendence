@@ -19,8 +19,7 @@ function CreateChannelModal(props: Props) {
       event.preventDefault();
       let data = {name: name, password: password};
       props.socket.emit('channel_create', data);
-      setPassword("");
-      setPasswordLock(true);
+      onHide();
     }
 
     function onHide(){
@@ -65,7 +64,7 @@ function CreateChannelModal(props: Props) {
             Password
           </Form.Label>
           <Form.Control type="password" className="mb-3" value={password} name="password" placeholder="Password (only for private)" onChange={ChangePassword} />
-          <Button variant="success" type="submit" onClick={onHide}>
+          <Button variant="success" type="submit">
               Create Channel
           </Button>
         </Form>

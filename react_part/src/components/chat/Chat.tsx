@@ -19,8 +19,8 @@ function Chat(props: {socket: Socket}) {
 
 	return (
 	<Row>
-        <h4 style={{border:'1px solid black', height: "35px"}} > Chat </h4>
-        <Col>
+        <text className="ChatTitle" > Chat </text>
+        <Col className="ColumnSelectChannel" lg={3}>
             <Row>
                 <ButtonGroup className="mb-2">
                     {radios.map((radio, idx) => (
@@ -43,7 +43,7 @@ function Chat(props: {socket: Socket}) {
                 <button className="ButtonCreate bg-primary">Create Private Conversation </button>
             </Row>
         </Col>
-        <Col>
+        <Col className="ColumnChat">
             <div className="col" >
                 <Talk />
                 <div className="d-flex justify-content-center">
