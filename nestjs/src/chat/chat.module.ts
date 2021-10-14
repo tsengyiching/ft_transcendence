@@ -9,10 +9,16 @@ import { Channel } from './model/channel.entity';
 import { Message } from './model/messages.entity';
 import { ChannelParticipant } from './model/channelParticipant.entity';
 import { MessageService } from './service/message.service';
+import { DirectMessage } from './model/directMessage.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Channel, Message, ChannelParticipant]),
+    TypeOrmModule.forFeature([
+      Channel,
+      ChannelParticipant,
+      Message,
+      DirectMessage,
+    ]),
     UserModule,
     GameModule,
     AuthModule,
