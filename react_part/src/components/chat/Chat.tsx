@@ -5,12 +5,14 @@ import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
 import ListMP from "./ListMP"
+import DdListUser from './DropdownListUser';
 import './Chat.css'
 
 
 function Chat(props: {socket: Socket}) {
 
     const [radioValue, setRadioValue] = useState('1');
+    const [channelSelected, setChannelSelected] = useState<{channel_id: number, channel_name: string} | undefined>();
 
     const radios = [
         {name: 'Channels', value: '1'},
@@ -19,12 +21,13 @@ function Chat(props: {socket: Socket}) {
 
 	return (
 	<Row>
-        <text className="ChatTitle" > Chat </text>
         <Col className="ColumnSelectChannel" lg={3}>
             <Row>
                 <ButtonGroup className="mb-2">
                     {radios.map((radio, idx) => (
                         <ToggleButton
+                        id={`radio-${idx}`}
+                        name="radio"
                         key={idx}
                         type='radio'
                         variant={idx % 2 ? 'outline-success' : 'outline-danger'}
@@ -36,15 +39,22 @@ function Chat(props: {socket: Socket}) {
                         </ToggleButton>
                     ))}
                 </ButtonGroup>
-                {radioValue==='1' ? <ListChannel />: <ListMP/>}
+                {radioValue==='1' ? <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> : <ListMP/>}
                 <CreateChannelButton socketid={props.socket}/>
-                <button className="ButtonCreate bg-primary">Create Private Conversation </button>
+                <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             </Row>
         </Col>
         <Col className="ColumnChat">
             <div className="col" >
-                <Row>
-                    
+                <Row className="TitleChannel">
+                        <Col>
+                            {channelSelected !== undefined
+                            ? <div> {channelSelected.channel_name} </div>
+                            : <div> No Channel selected </div>}
+                        </Col>
+                        <Col>
+                            <DdListUser/>
+                        </Col>
                 </Row>
                 <Talk />
                 <div className="d-flex justify-content-center">

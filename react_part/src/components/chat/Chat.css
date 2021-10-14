@@ -8,6 +8,15 @@
 	padding-top: 2px;
 }
 
+.TitleChannel {
+	font-size: large;
+	background-color: #A0B4D1;
+	text-align: center;
+	height: 40px;
+	width: 785px;
+	border: 1px solid black
+}
+
 .ButtonCreate {
 	border-radius: none;
 	font-size: 25px;
@@ -16,8 +25,9 @@
 
 .ScrollingList {
 	margin: 2px;
+	margin-bottom: 20px;
 	display: list-item;
-	height: 550px;
+	height: 600px;
 	width: 500px;
 	overflow: auto;
 }
@@ -30,9 +40,15 @@
 	text-align: left;
 	font-size: medium;
 	background-color: #DC7633;
+	border: none;
 }
 
 .MyChannel:hover {
+	background-color: #D35400;
+	border: none;
+}
+
+.MyChannel:focus {
 	background-color: #D35400;
 }
 
