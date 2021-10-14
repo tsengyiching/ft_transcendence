@@ -30,7 +30,6 @@ export class AuthController {
    * @returns Promise<User>
    */
   @Get('login/:id')
-  @UseGuards(FortyTwoGuard)
   async loginDebug(
     @Res({ passthrough: true }) res: Response,
     @Param('id', ParseIntPipe) id: number,
