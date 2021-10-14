@@ -30,11 +30,8 @@ function Accueil() {
     })
     return (
         <div>
-            <h2>Accueil</h2>
-            <h3>{id}</h3>
-            <h3>{name}</h3>
-            <div className=".col-xl-">
-                <div className="row">
+            <h2>Home</h2>
+                <Row>
 					<Game />
                     <Col style={{border:'1px solid black'}}>
 						<Friends />

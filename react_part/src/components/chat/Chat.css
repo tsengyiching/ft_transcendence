@@ -1,3 +1,13 @@
+
+
+.ChatTitle {
+	border: 1px solid black;
+	height: 50px;
+	text-align: center;
+	font-size: 2em;
+	padding-top: 2px;
+}
+
 .ButtonCreate {
 	border-radius: none;
 	font-size: 2em;
@@ -12,11 +22,11 @@
 }
 
 .MyChannel {
-	margin: 2px;
-	width: 450px;
-	height: 60px;
+	margin-top: 2px;
+	width: 270px;
+	height: 55px;
 	text-align: left;
-	font-size: x-large;
+	font-size: medium;
 	background-color: #DC7633;
 }
 
@@ -25,7 +35,7 @@
 }
 
 .LogoChannel {
-	width: 30px;
-	height: 30px;
-	margin: 7px;
+	width: 20px;
+	height: 20px;
+	margin: 5px;
 }

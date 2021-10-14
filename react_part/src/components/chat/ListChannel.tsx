@@ -45,8 +45,6 @@ const MyChannel = (Channel: IChannel) => (
 
 function ListChannel()
 {
-        let color = "warning";
-        let number = 50;
         let socket = useContext(SocketContext);
         const [MyChannels, SetChannels] = useState<IChannel[]>([]);
 
