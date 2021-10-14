@@ -1,12 +1,11 @@
-import { User } from 'src/user/model/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from 'src/user/model/user.entity';
 import { Channel } from './channel.entity';
 
 @Entity()
