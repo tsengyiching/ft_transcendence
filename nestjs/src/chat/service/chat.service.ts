@@ -60,7 +60,9 @@ export class ChatService {
     const newChannelParticipant = this.channelParticipantRepository.create({
       ...createChannelParticipantDto,
     });
-    const channel = this.getChannelById(createChannelParticipantDto.channelId);
+    const channel = await this.getChannelById(
+      createChannelParticipantDto.channelId,
+    );
     if (!channel)
       throw new WsException('The channel you wish to join does not exist.');
     const participant = this.getOneChannelParticipant(
@@ -69,6 +71,14 @@ export class ChatService {
     );
     if (participant)
       throw new WsException('You already participate in this channel.');
+    if (channel.type == ChannelType.PRIVATE)
+      if (
+        !(await bcrypt.compare(
+          createChannelParticipantDto.password,
+          channel.password,
+        ))
+      )
+        throw new WsException('You already participate in this channel.');
     newChannelParticipant.userId = userId;
     newChannelParticipant.role = ChannelRole.USER;
     newChannelParticipant.status = StatusInChannel.NORMAL;
