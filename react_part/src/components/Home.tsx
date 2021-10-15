@@ -73,7 +73,6 @@ function Accueil() {
     const [name, setName] = useState("");
 
     useEffect(() => {
-
         axios.get('http://localhost:8080/profile/me/',{
             withCredentials:true,
         })
