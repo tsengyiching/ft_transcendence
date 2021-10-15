@@ -73,7 +73,7 @@ export class ChatService {
       throw new WsException('You already participate in this channel.');
     if (channel.type == ChannelType.PRIVATE)
       if (
-        !(await bcrypt.bcrypt.compare(
+        !(await bcrypt.compare(
           createChannelParticipantDto.password,
           channel.password,
         ))
