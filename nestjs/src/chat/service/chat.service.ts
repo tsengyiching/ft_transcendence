@@ -65,7 +65,7 @@ export class ChatService {
     );
     if (!channel)
       throw new WsException('The channel you wish to join does not exist.');
-    const participant = this.getOneChannelParticipant(
+    const participant = await this.getOneChannelParticipant(
       userId,
       createChannelParticipantDto.channelId,
     );
@@ -78,11 +78,11 @@ export class ChatService {
           channel.password,
         ))
       )
-        throw new WsException('You already participate in this channel.');
+        throw new WsException('Invalid channel password !');
     newChannelParticipant.userId = userId;
     newChannelParticipant.role = ChannelRole.USER;
     newChannelParticipant.status = StatusInChannel.NORMAL;
-    return this.channelRepository.save(newChannelParticipant);
+    return this.channelParticipantRepository.save(newChannelParticipant);
   }
 
   /**
