@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { authenticator } from 'otplib';
 import { User } from 'src/user/model/user.entity';
@@ -13,7 +13,15 @@ export class TwoFactorAuthService {
     private readonly configService: ConfigService,
   ) {}
 
-  public async generateTwoFactorAuthenticationSecret(user: User) {
+  async generateTwoFactorAuthenticationSecret(
+    user: User,
+  ): Promise<{ secret: string; otpauthUrl: string }> {
+    if (await this.userService.isUserTwoFactorAuthEnabled(user.id)) {
+      throw new HttpException(
+        `User ${user.id} has already turned on two factor authentication.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const secret = authenticator.generateSecret();
     const otpauthUrl = authenticator.keyuri(
       user.email,
@@ -24,21 +32,25 @@ export class TwoFactorAuthService {
     return { secret, otpauthUrl };
   }
 
-  public async pipeQrCodeStream(
-    stream: Response,
-    otpauthUrl: string,
-  ): Promise<any> {
+  async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
     return toFileStream(stream, otpauthUrl);
   }
 
-  public async isTwoFactorAuthenticationCodeValid(
+  async isTwoFactorAuthenticationCodeValid(
     twoFactorAuthenticationCode: string,
     user: User,
   ): Promise<boolean> {
     const userData = await this.userService.getOneById(user.id);
-    return authenticator.verify({
+    if (userData.twoFactorAuthenticationSecret === null) {
+      throw new HttpException(
+        `User ${userData.id} has to scan two factor QrCode first.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const checkResult = authenticator.verify({
       token: twoFactorAuthenticationCode,
       secret: userData.twoFactorAuthenticationSecret,
     });
+    return checkResult;
   }
 }

@@ -92,6 +92,14 @@ export class UserService {
     });
   }
 
+  async isUserTwoFactorAuthEnabled(userId: number): Promise<boolean> {
+    const userData = await this.getOneById(userId);
+    if (userData.isTwoFactorAuthenticationEnabled === true) {
+      return true;
+    }
+    return false;
+  }
+
   /****************************************************************************/
   /*                                 utils                                    */
   /****************************************************************************/

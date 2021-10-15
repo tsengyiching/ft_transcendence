@@ -1,44 +1,39 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import { JwtPayload } from './jwt.strategy';
+import { UserService } from 'src/user/service/user.service';
 
 @Injectable()
 export class JwtTwoFactorStrategy extends PassportStrategy(
   Strategy,
   'jwt-two-factor',
 ) {
-  constructor(configService: ConfigService) {
-    const extractJwtFromCookie = (req: Request) => {
-      let token = null;
-      if (req && req.cookies) {
-        token = req.cookies['jwt-two-factor'];
-      }
-      return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    };
-
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
     super({
-      jwtFromRequest: extractJwtFromCookie,
+      jwtFromRequest: (req: Request): string => {
+        let tokenJwt = null;
+        let tokenJwtTwoFactor = null;
+
+        if (req && req.cookies) {
+          tokenJwt = req.cookies['jwt'];
+          tokenJwtTwoFactor = req.cookies['jwt-two-factor'];
+        }
+        return tokenJwtTwoFactor === undefined ? tokenJwt : tokenJwtTwoFactor;
+      },
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET'),
     });
   }
 
-  extractJwtFromCookie(req: Request) {
-    let token = null;
-    if (req && req.cookies) {
-      token = req.cookies['jwt-two-factor'];
-    }
-    return token;
-  }
-
-  async validate(payload: JwtPayload) {
-    if (!payload.twoFA) {
-      return payload;
-    }
-    if (payload.twoFA) {
+  async validate(payload: JwtPayload): Promise<JwtPayload> {
+    const user = await this.userService.getOneById(payload.id);
+    if (user.isTwoFactorAuthenticationEnabled === payload.twoFA) {
       return payload;
     }
   }

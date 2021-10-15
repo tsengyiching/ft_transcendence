@@ -8,6 +8,8 @@ import {
   HttpCode,
   Body,
   UnauthorizedException,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { User } from 'src/user/model/user.entity';
 import { CurrentUser } from '../decorator/currrent.user.decorator';
@@ -43,9 +45,15 @@ export class TwoFactorAuthController {
   async turnOnTwoFactorAuthentication(
     @CurrentUser() user: User,
     @Body() { twoFactorAuthenticationCode }: TwoFactorAuthCodeDto,
-  ) {
+  ): Promise<{ userId: number; twoFactorEnabled: boolean }> {
+    if (await this.userService.isUserTwoFactorAuthEnabled(user.id)) {
+      throw new HttpException(
+        `User ${user.id} has already turned on two factor authentication.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const isCodeValid =
-      this.twoFactorAuthService.isTwoFactorAuthenticationCodeValid(
+      await this.twoFactorAuthService.isTwoFactorAuthenticationCodeValid(
         twoFactorAuthenticationCode,
         user,
       );
@@ -53,6 +61,10 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     await this.userService.turnOnTwoFactorAuthentication(user.id);
+    return {
+      userId: user.id,
+      twoFactorEnabled: true,
+    };
   }
 
   @Post('authenticate')
@@ -61,10 +73,16 @@ export class TwoFactorAuthController {
     @CurrentUser() userPayload: JwtPayload,
     @Body() twoFactorAuthCode: TwoFactorAuthCodeDto,
     @Res({ passthrough: true }) res: Response,
-  ) {
+  ): Promise<JwtPayload> {
     const user = await this.userService.getOneById(userPayload.id);
+    if (user.isTwoFactorAuthenticationEnabled === false) {
+      throw new HttpException(
+        `User ${user.id} has not turned on two factor authentication yet.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     const isCodeValid =
-      this.twoFactorAuthService.isTwoFactorAuthenticationCodeValid(
+      await this.twoFactorAuthService.isTwoFactorAuthenticationCodeValid(
         twoFactorAuthCode.twoFactorAuthenticationCode,
         user,
       );
@@ -72,10 +90,8 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     const { accessToken } = this.authService.login(user, true);
-    console.log({ accessToken });
     res.cookie('jwt-two-factor', { accessToken });
     userPayload.twoFA = true;
-    //request.res.setHeader('Set-Cookie', [accessTokenCookie]);
     return userPayload;
   }
 }
