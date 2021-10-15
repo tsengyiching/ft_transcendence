@@ -79,8 +79,6 @@ export class ChatGateway
     console.log('Channel Create');
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.createChannel(user.id, data);
-
-	const sockets = this.server.
 	
     // const channels_in = this.chatService.getChannelUserParticipate(user.id);
     // const channels_out = this.chatService.getChannelUserNotParticipate(user.id);

@@ -17,7 +17,7 @@ function JoinChannelModal(props: Props) {
 
     function SubmitForm(event: any) {
       event.preventDefault();
-      let data = {password: password};
+      let data = {channelId: props.channel.channel_id, password: password};
       socket.emit('channel-join', data);
       onHide();
     }
@@ -52,7 +52,7 @@ function JoinChannelModal(props: Props) {
       }
       </Modal.Body>
       <Modal.Footer>
-        <Button variant="primary" onClick={onHide} >
+        <Button variant="primary" onClick={SubmitForm} >
             Yes
         </Button>
         <Button variant="secondary" onClick={onHide}>
