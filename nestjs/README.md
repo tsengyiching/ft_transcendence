@@ -4,7 +4,13 @@ In this file, you'll find the list of api created in the back-end.
 ## /auth/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
-|GET| login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000(frond-end)*|
+|GET|login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000(frond-end)*|
+
+## /2fa/
+|Post|generate|-|generate a qrcode<br />*If user has already turned on two factor auth, throw HttpStatus:Bad_Request*|
+|Post|turn-on|Body<br />{"twoFactorAuthenticationCode": "xxxxxx"}|an object<br />{"userId": 60191,"twoFactorEnabled": true}<br />*If user didn't scan qrcode first, or user has already turned on two factor auth, throw HttpStatus:Bad_Request*<br />*If user enters wrong code, throw UnauthorizedException*|
+|Post|authenticate|Body<br />{"twoFactorAuthenticationCode": "xxxxxx"}|an object<br />{"id": 1,"username": "yi","email": "yi@student.42lyon.fr","twoFA":true}<br />*If user doesn't active two factor auth, throw HttpStatus:Bad_Request*<br />*If user enters wrong code, throw UnauthorizedException*
+
 ## /profile/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
