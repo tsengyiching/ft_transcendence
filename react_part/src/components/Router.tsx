@@ -10,9 +10,9 @@ import { useEffect, useState } from "react";
 
 function Router() {
 
-  const [isConnected, setConnexion] = useState(false);
+  const [isConnected, setConnexion] = useState(true);
 
-  useEffect(() =>{
+  useEffect(() => {
     axios.get('http://localhost:8080/profile/me/',{
         withCredentials:true,
     })
@@ -22,7 +22,7 @@ function Router() {
     .catch(res => {
         setConnexion(false)
     })
-  });
+  }, []);
 
   function Authorized() {
     return (
@@ -38,12 +38,12 @@ function Router() {
   }
 
   function Unauthorized() {
+    
     return (
       <BrowserRouter>
         <Switch>
-          <Route exact path="/" component={PageConnexion} />
           <Route exact path="/connexion" component={Connexion} />
-          <Redirect to="/"/>
+          <Redirect to="/connexion"/>
         </Switch>
       </BrowserRouter>
     )

@@ -1,6 +1,22 @@
 import React, { useEffect, useState } from "react";
+import axios from 'axios';
 
 export default function Profile() {
+
+    const [name, setName] = useState("");
+    const [image, setImage] = useState("");
+
+    useEffect(() => {
+        axios.get('http://localhost:8080/profile/me/',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setName(res.data.nickname)
+        })
+        .catch(res => {
+            console.log("error connexion")
+        })
+    }, []);
     
     /*printMatchsScore () {
         return (
@@ -49,7 +65,7 @@ export default function Profile() {
         <div className="row">
             <div className="col">
                 <h3>Profil : </h3>
-                <h4>Nillem</h4>
+                <h4>{name}</h4>
                 <div className="row">
                     <div className="col">
                         <img src={`${"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKn2GIAH7auDdHRpZmNWQTzwAgZd-rWGynlg&usqp=CAU"}`} className="w-25" alt="singe"/>
