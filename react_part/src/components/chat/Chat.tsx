@@ -5,7 +5,7 @@ import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
 import ListMP from "./ListMP"
-import DdListUser from './DropdownListUser';
+import DropdownListUser from './DropdownListUser';
 import './Chat.css'
 
 
@@ -53,7 +53,7 @@ function Chat(props: {socket: Socket}) {
                             : <div> No Channel selected </div>}
                         </Col>
                         <Col>
-                            <DdListUser/>
+                            <DropdownListUser/>
                         </Col>
                 </Row>
                 <Talk />

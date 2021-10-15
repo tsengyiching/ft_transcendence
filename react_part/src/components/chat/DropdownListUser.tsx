@@ -1,6 +1,6 @@
 import {Dropdown} from 'react-bootstrap'
 
-function DdListUser() 
+function DropdownListUser() 
 {
 	return (
 	<Dropdown>
@@ -17,4 +17,4 @@ function DdListUser()
 	)
 }
 
-export default DdListUser;
+export default DropdownListUser;

@@ -37,6 +37,11 @@ function ListChannel(props: IUseStateChannel) {
         const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
         const [ShowJoinModal, setShowJoinModal] = useState(0);
 
+        useEffect( () => { 
+                console.log("into reload channel");
+                socket.emit("ask-reload-channel");
+                }, [])
+
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
