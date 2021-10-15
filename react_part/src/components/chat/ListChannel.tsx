@@ -10,6 +10,7 @@ import MSNImage from "../pictures/people.jpeg"
 import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
+import JoinChannelModal from "./JoinChannelModal"
 
 interface IMyChannel {
         channel_id: number,
@@ -19,7 +20,7 @@ interface IMyChannel {
         status: 'Normal' | 'Mute' | 'Ban';
 }
 
-interface IOtherChannel {
+export interface IOtherChannel {
         channel_id: number,
         channel_name: string,
         channel_type: 'Private' | 'Public'
@@ -34,6 +35,7 @@ function ListChannel(props: IUseStateChannel) {
         let socket = useContext(SocketContext);
         const [MyChannels, SetMyChannels] = useState<IMyChannel[]>([]);
         const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
+        const [ShowJoinModal, setShowJoinModal] = useState(0);
 
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;
@@ -65,11 +67,22 @@ function ListChannel(props: IUseStateChannel) {
         function ButtonOtherChannel(Channel: IOtherChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
-                
+
                 return (
-                        <Button className="ButtonChannel ButtonOtherChannel" key={channel_id}>
+                        <div key={channel_id}>
+                        <Button  className="ButtonChannel ButtonOtherChannel" onClick={() => {setShowJoinModal(channel_id); console.log(channel_name)}}>
+                                {Channel.channel_type === 'Private' ?
+                                <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
+                                : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
                                 {channel_name}
                         </Button>
+                        <JoinChannelModal
+                        show={ShowJoinModal === channel_id}
+                        onHide={() => {setShowJoinModal(0); console.log(channel_name)}}
+                        backdrop="static"
+                        channel={Channel}
+                        />
+                        </div>
                 )
         }
 
