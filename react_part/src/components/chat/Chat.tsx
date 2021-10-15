@@ -45,7 +45,6 @@ function Chat(props: {socket: Socket}) {
             </Row>
         </Col>
         <Col className="ColumnChat">
-            <div className="col" >
                 <Row className="TitleChannel">
                         <Col>
                             {channelSelected !== undefined
@@ -63,8 +62,10 @@ function Chat(props: {socket: Socket}) {
                         <Button type="submit">envoyer</Button>
                     </Form>
                 </div>
-            </div>
-
+                <Row>
+                    <Button > Modo Rights </Button>
+                    <Button > Owner Rights </Button>
+                </Row>
         </Col>
 
 	</Row>
