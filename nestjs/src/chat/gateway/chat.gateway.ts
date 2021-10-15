@@ -87,6 +87,21 @@ export class ChatGateway
   }
 
   /**
+   * Ask to Reload the Channels
+   * 
+   */
+  @SubscribeMessage('ask-reload-channel')
+  async ReloadChannel(client: Socket) {
+
+    const user: User = await this.authService.getUserFromSocket(client);
+    const channels_in = this.chatService.getChannelUserParticipate(user.id);
+    const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
+    client.emit('channels-user-in', await channels_in);
+    client.emit('channels-user-out', await channels_out);
+    console.log("reload channel");
+  }
+
+  /**
    * delete channel
    * @param data
    */
