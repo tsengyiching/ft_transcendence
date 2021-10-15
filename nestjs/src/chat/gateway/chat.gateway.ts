@@ -79,6 +79,9 @@ export class ChatGateway
     console.log('Channel Create');
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.createChannel(user.id, data);
+
+	const sockets = this.server.
+	
     // const channels_in = this.chatService.getChannelUserParticipate(user.id);
     // const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
     // this.server.emit('channels-user-in', await channels_in);
@@ -102,7 +105,7 @@ export class ChatGateway
   @SubscribeMessage('channel-join')
   async JoinChannel(
     client: Socket,
-    @MessageBody() channelParticipant: CreateChannelParticipantDto,
+    channelParticipant: CreateChannelParticipantDto,
   ) {
     const user = await this.authService.getUserFromSocket(client);
     this.chatService.addChannelParticipant(user.id, channelParticipant);
