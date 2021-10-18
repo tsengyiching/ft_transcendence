@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../model/user.entity';
+import { onlineStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
+import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
 
 @Injectable()
 export class UserService {
@@ -38,12 +39,11 @@ export class UserService {
 
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
-    console.log(profile);
     newUser.id = profile.id;
     newUser.nickname = profile.login;
     newUser.email = profile.email;
-    // newUser.avatar = profile.photos;  // ! Add later
-
+    newUser.avatar = profile.image_url;
+    newUser.userStatus = onlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 
@@ -52,6 +52,7 @@ export class UserService {
    */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
+    newUser.userStatus = onlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 
@@ -74,6 +75,15 @@ export class UserService {
       );
     }
     user.nickname = changeUserNameDto.nickname;
+    return this.userRepository.save(user);
+  }
+
+  async changeUserAvatar(
+    id: number,
+    changeUserAvatarDto: ChangeUserAvatarDto,
+  ): Promise<User> {
+    const user = await this.getOneById(id);
+    user.avatar = changeUserAvatarDto.avatar;
     return this.userRepository.save(user);
   }
 

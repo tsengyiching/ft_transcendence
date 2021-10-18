@@ -45,7 +45,7 @@ export class Game {
   status: GameStatus;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.game)
-  public userGameRecords!: UserGameRecords[];
+  userGameRecords!: UserGameRecords[];
 
   @ManyToOne(() => User, (user) => user.victories)
   winner: User;

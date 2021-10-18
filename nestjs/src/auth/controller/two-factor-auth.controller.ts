@@ -31,6 +31,10 @@ export class TwoFactorAuthController {
     private readonly authService: AuthService,
   ) {}
 
+  /*
+   * register sets secret in user database, and
+   * generates a qrcode in order to active Google two factor auth
+   */
   @Post('generate')
   async register(@Res() response: Response, @CurrentUser() user: User) {
     const { otpauthUrl } =
@@ -40,6 +44,10 @@ export class TwoFactorAuthController {
     return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
   }
 
+  /*
+   * turnOnTwoFactorAuthentication verifies 2fa code and secret,
+   * returns two factor enable true after valided
+   */
   @Post('turn-on')
   @HttpCode(200)
   async turnOnTwoFactorAuthentication(
@@ -67,6 +75,10 @@ export class TwoFactorAuthController {
     };
   }
 
+  /*
+   * authenticate verifies 2fa code and secret,
+   * sets jwt-two-factor cookie, and returns userPayload
+   */
   @Post('authenticate')
   @HttpCode(200)
   async authenticate(
