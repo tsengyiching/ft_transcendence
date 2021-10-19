@@ -27,16 +27,16 @@ function Home() {
     return (
                 <Row>
                     <Col xs={7} md={7} lg={7} className="LeftColHome">
-                        <Game />
+				    	<Game />
                     </Col>
                     <Col lg={5} md={4} sm={3} className="RightColHome">
-                        <Row lg={3} className="ColMembers">
-                            <Members/>
+		                <Row lg={3} className="ColMembers">
+						    <Members/>
                         </Row>
                         <Row>
-                            <Chat socket={socket}/>
+    						<Chat socket={socket}/>
                         </Row>
-                    </Col>
+					</Col>
                 </Row>
     )
 }
