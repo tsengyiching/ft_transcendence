@@ -14,8 +14,13 @@ export class AuthService {
     private userService: UserService,
   ) {}
 
-  login(user: User) {
-    const payload: JwtPayload = { username: user.nickname, id: user.id };
+  login(user: User, isSecondFactorAuthenticated = false) {
+    const payload: JwtPayload = {
+      username: user.nickname,
+      id: user.id,
+      email: user.email,
+      twoFA: isSecondFactorAuthenticated,
+    };
     return {
       accessToken: this.jwtService.sign(payload),
     };

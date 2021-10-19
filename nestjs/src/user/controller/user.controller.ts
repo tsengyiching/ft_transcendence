@@ -14,8 +14,11 @@ import { User } from '../model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { ChangeUserNameDto } from '../model/change-username.dto';
+import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
+import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
 
 @UseGuards(JwtAuthGuard)
+@UseGuards(JwtTwoFactorGuard)
 @Controller('profile')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -62,5 +65,16 @@ export class UserController {
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
     return this.userService.changeUserName(user.id, changeUserNameDto);
+  }
+
+  /*
+   ** changeUserAvatar modifies the user's avatar
+   */
+  @Patch('avatar')
+  changeUserAvatar(
+    @CurrentUser() user: User,
+    @Body() changeUserAvatarDto: ChangeUserAvatarDto,
+  ): Promise<User> {
+    return this.userService.changeUserAvatar(user.id, changeUserAvatarDto);
   }
 }

@@ -4,15 +4,24 @@ In this file, you'll find the list of api created in the back-end.
 ## /auth/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
-|GET| login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000(frond-end)*|
+|GET|login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000*<br />*If user has turned on two factor auth, redirect to localhost:3000/2fa*|
+
+## /2fa/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|Post|generate|-|generate a qrcode<br />*If user has already turned on two factor auth, throw HttpStatus:Bad_Request*|
+|Post|turn-on|Body<br />{"twoFactorAuthenticationCode": "xxxxxx"}|an object<br />{"userId": 60191,"twoFactorEnabled": true}<br />*If user didn't scan qrcode first, or user has already turned on two factor auth, throw HttpStatus:Bad_Request*<br />*If user enters wrong code, throw UnauthorizedException*|
+|Post|authenticate|Body<br />{"twoFactorAuthenticationCode": "xxxxxx"}|an object<br />{"id": 1,"username": "yi","email": "yi@student.42lyon.fr","twoFA":true}<br />*If user doesn't active two factor auth, throw HttpStatus:Bad_Request*<br />*If user enters wrong code, throw UnauthorizedException*
+
 ## /profile/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
-|GET|me|-|an object<br />`{"id":1,"nickname":"Foo","createDate":"xxx"}`|
-|GET|all|-|an array contains objects<br />`[{"id":1,"nickname":"Foo","createDate":"xxx"}, {...}, {...}...]`|
-|GET|:id|user id|an object<br />`{"id":1,"nickname":"Foo","createDate":"xxx"}`|
+|GET|me|-|an object<br />`{"id":1,"nickname":"Jo","createDate":"xxx","email":"xxx","isTwoFactorAuthenticationEnabled":true}`|
+|GET|all|-|an array contains objects<br />`[{"id":1,"nickname":"Li","createDate":"xxx","email":"xxx","isTwoFactorAuthenticationEnabled":false}, {...}, {...}...]`|
+|GET|:id|user id|an object<br />`{"id":1,"nickname":"Jo","createDate":"xxx","email":"xxx","isTwoFactorAuthenticationEnabled":true}`|
 |POST||Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object<br />`{"id":2,"nickname":"Bar","createDate":"xxx"}`<br /> *For testing only, delete later*|
-|PATCH|name|Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object with user's new nickname<br />`{"id":2,"nickname":"lolo","createDate":"xxx"}`|
+|PATCH|name|Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object with user's new nickname<br />`{"id": 6,"nickname": "yi","createDate": "xxx","avatar": "url","userStatus": "Available","email": "xxx","isTwoFactorAuthenticationEnabled": false}`<br />*If name format is uncorrect return HttpStatus:Bad_Request*`|
+|PATCH|avatar|Body <br />`{"avatar":"url"}`|an object with user's new avatar<br />`{"id": 6,"nickname": "yi","createDate": "xxx","avatar": "url","userStatus": "Available","email": "xxx","isTwoFactorAuthenticationEnabled": false}`<br />*If avatar's url is uncorrect, return HttpStatus:Bad_Request*|
 ## /game/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
@@ -30,10 +39,8 @@ In this file, you'll find the list of api created in the back-end.
 |:----:|:-----:|-------|:-----------|
 |GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
 |GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
-|GET|me/friendlist|-|an array contains friends id`[1, 2...]`|
-|GET|:id/friendlist|user id|an array contains friends id`[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
-|GET|me/blocklist|-|an array contains blocking users id `[1, 2...]`|
-|GET|:id/blocklist|user id|an array contains blocking users id `[1, 2...]`<br />*If user id doesn't exist, throw HttpStatus:Not_Found*|
+|GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[    {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available"}]`|
+|GET|:id/list|Query<br />?status=friend/notconfirmed/block|an array`[    {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available"}]`|
 |POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend/block, throw HttpStatus:Bad_Request*|
 |POST|add/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
 |Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|

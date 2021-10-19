@@ -4,7 +4,12 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 
-export type JwtPayload = { id: number; username: string };
+export type JwtPayload = {
+  id: number;
+  username: string;
+  email: string;
+  twoFA: boolean;
+};
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
@@ -24,15 +29,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  extractJwtFromCookie(req: Request) {
-    let token = null;
-    if (req && req.cookies) {
-      token = req.cookies['jwt'];
-    }
-    return token;
-  }
-
-  async validate(payload: JwtPayload) {
-    return { id: payload.id, username: payload.username };
+  async validate(payload: JwtPayload): Promise<JwtPayload> {
+    return {
+      id: payload.id,
+      username: payload.username,
+      email: payload.email,
+      twoFA: payload.twoFA,
+    };
   }
 }

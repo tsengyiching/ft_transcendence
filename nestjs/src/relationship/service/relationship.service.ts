@@ -39,29 +39,29 @@ export class RelationshipService {
     return relation[0];
   }
 
-  async getFriendList(id: number): Promise<number[]> {
-    await this.userService.getUserProfileById(id);
-    const data = await this.getFullData(id, RelationshipStatus.FRIEND);
-    const friendList = data.map((obj) => {
-      const relation = obj.relationship.userRelationship.filter(
-        (obj) => obj.userId !== id,
+  async getRelationList(
+    id: number,
+    reqStatus: string,
+  ): Promise<UserRelationship> {
+    let status: RelationshipStatus;
+    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
+    else if (reqStatus === 'notconfirmed')
+      status = RelationshipStatus.NOTCONFIRMED;
+    else if (reqStatus === 'block') status = RelationshipStatus.BLOCK;
+    else {
+      throw new HttpException(
+        'Relationship status does not exist.',
+        HttpStatus.BAD_REQUEST,
       );
-      return relation[0].userId;
-    });
-    return friendList;
-  }
-
-  async getBlockList(id: number): Promise<number[]> {
-    await this.userService.getUserProfileById(id);
-    const data = await this.getFullData(id, RelationshipStatus.BLOCK);
-    const blocked = data.map((obj) => {
-      const relation = obj.relationship.userRelationship;
-      return relation[1];
-    });
-    const blockList = blocked
-      .filter((obj) => obj.userId !== id)
-      .map((obj) => obj.userId);
-    return blockList;
+    }
+    return this.userRelationship
+      .createQueryBuilder('userRelationship')
+      .leftJoinAndSelect('userRelationship.relationship', 'relationship')
+      .leftJoinAndSelect('userRelationship.user', 'user')
+      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
+      .where('userRelationship.userId != :Id', { Id: id })
+      .andWhere('status = :status', { status: status })
+      .execute();
   }
 
   async addFriend(
@@ -258,7 +258,7 @@ export class RelationshipService {
    ** throws exception if it's true
    */
   async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
-    const friendlist = await this.getFriendList(userOne);
+    const friendlist = await this.getFriendsId(userOne);
     if (friendlist.includes(userTwo)) {
       throw new HttpException(
         'Users are friends already.',
@@ -281,6 +281,18 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
+  }
+
+  async getFriendsId(id: number): Promise<number[]> {
+    await this.userService.getUserProfileById(id);
+    const data = await this.getFullData(id, RelationshipStatus.FRIEND);
+    const friendList = data.map((obj) => {
+      const relation = obj.relationship.userRelationship.filter(
+        (obj) => obj.userId !== id,
+      );
+      return relation[0].userId;
+    });
+    return friendList;
   }
 
   async checkUserRelationBlock(
