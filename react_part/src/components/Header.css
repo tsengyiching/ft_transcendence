@@ -1,0 +1,11 @@
+.ProfilePicture {
+	max-width: 200px;
+	max-height: 200px;
+}
+
+.Header {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+	max-height: 15%;
+}

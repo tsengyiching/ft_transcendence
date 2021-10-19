@@ -1,30 +1,14 @@
 import { Form, Button } from 'react-bootstrap'
 import { useEffect, useState } from 'react'
 import axios from 'axios'
-
-import Talk from './Talk';
 import { Row, Col } from 'react-bootstrap'
 import {SocketContext} from "../context/socket"
 import { useContext } from 'react'
 import Chat from './chat/Chat'
-
-
-function Game() {
-	return (
-    <div className="col" style={{border:'1px solid black'}}>
-        <div className="row align-self-center">
-            <div className="col"></div>
-             <div className="col">
-                <Button>Créer / Rejoindre une partie</Button>
-            </div>
-            <div className="col">
-                <Button>Créer / Rejoindre une partie bonus</Button>
-            </div>
-            <div className="col"></div>
-		</div>
-	</div>
-	)
-}
+import Members from './members/members';
+import Game from './Game'
+import "./Home.css"
+import "./members/members.css"
 
 function Friend(props: {name: string, link_profile: string, link_picture: string, link_status: string, status_alt: string}) {
 	return (
@@ -66,7 +50,7 @@ function AddFriend() {
 	);
 }
 
-function Accueil() {
+function Home() {
 
     let socket = useContext(SocketContext);
     const [id, setId] = useState(0);
@@ -82,16 +66,20 @@ function Accueil() {
         })
     })
     return (
-        <div>
                 <Row>
-					<Game />
-                    <Col lg={5} style={{border:'1px solid black'}}>
-						<Friends />
-						<Chat socket={socket}/>
+                    <Col xs={7} md={7} lg={7} style={{border:'1px solid black'}}>
+				    	<Game />
+                    </Col>
+                    <Col lg={5} md={4} sm={3} className="RightColHome">
+		                <Row lg={3} className="ColMembers">
+						    <Members/>
+                        </Row>
+                        <Row>
+    						<Chat socket={socket}/>
+                        </Row>
 					</Col>
                 </Row>
-        </div>
     )
 }
 
-export default Accueil;
+export default Home;

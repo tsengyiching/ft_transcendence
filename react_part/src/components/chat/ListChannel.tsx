@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from "react"
 import { Placeholder, Row, Button, Image } from "react-bootstrap"
 import {SocketContext} from "../../context/socket"
-import './Chat.css'
+import './ListChannel.css'
 import PadlockImage from "../pictures/Padlock-symbol.png"
 import GlobeImage from "../pictures/earth-globe-world-globe-drawing-sticker.jpeg"
 import CrownImage from "../pictures/Crown.jpg"
@@ -11,6 +11,7 @@ import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 import JoinChannelModal from "./JoinChannelModal"
+import "./ListChannel.css"
 
 interface IMyChannel {
         channel_id: number,
@@ -103,7 +104,7 @@ function ListChannel(props: IUseStateChannel) {
         }, [MyChannels, OthersChannels, socket]);
 
 	return(
-                <Row className="ScrollingList">
+                <Row className="ScrollingListChannel">
                         <div className="ChannelsJoined">
                                 Channels Joined:
                                 { MyChannels.length !== 0 
