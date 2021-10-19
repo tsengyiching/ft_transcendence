@@ -44,28 +44,24 @@ function Chat(props: {socket: Socket}) {
                 <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             </Row>
         </Col>
-        <Col className="ColumnChat" lg={8} >
-                <Row className="TitleChannel">
-                        <Col>
-                            {channelSelected !== undefined
-                            ? <div> {channelSelected.channel_name} </div>
-                            : <div> No Channel selected </div>}
-                        </Col>
-                        <Col>
-                            <DropdownListUser/>
-                        </Col>
-                </Row>
-                {<Talk />}
-                <div className="d-flex justify-content-center">
-                    <Form className="w-75 p-3">
-                        <Form.Control type="name" placeholder="Message" />
-                        <Button type="submit">envoyer</Button>
-                    </Form>
-                </div>
-                <Row className="align-bottom">
-                    <Button > Modo Rights </Button>
-                    <Button > Owner Rights </Button>
-                </Row>
+        <Col className="ColumnChat" lg={{span: 7, offset: 2}} >
+            <Row className="TitleChannel">
+                <Col>
+                    {channelSelected !== undefined
+                    ? <div> {channelSelected.channel_name} </div>
+                    : <div> No Channel selected </div>}
+                </Col>
+                <Col>
+                    <DropdownListUser/>
+                </Col>
+            </Row>
+            {<Talk />}
+            <Form className="w-75 p-3 d-flex justify-content-center">
+                <Form.Control type="name" placeholder="Message" />
+                <Button type="submit">envoyer</Button>
+            </Form>
+            <Button > Modo Rights </Button>
+            <Button > Owner Rights </Button>
         </Col>
         </Row>
 	);

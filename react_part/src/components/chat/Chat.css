@@ -13,17 +13,21 @@
 	background-color: #A0B4D1;
 	text-align: center;
 	max-height: 40px;
-	max-width: 785px;
+	max-width: 100%;
+	margin: 0;
 	border: 1px solid black
 }
 
 .ButtonCreate {
-	border-radius: none;
+	border-radius: 5px;
+	border-color: none;
 	font-size: 1.5em;
 	height: 80px;
+	margin: 1px;
 }
 
 .ColumChat {
 	height: 40%;
 	width: 40%;
+	padding: 50px;
 }

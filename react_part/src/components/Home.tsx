@@ -72,7 +72,7 @@ function Accueil() {
     })
     return (
                 <Row>
-                    <Col xs={7} md={7} lg={7} style={{border:'1px solid black'}}>
+                    <Col xs={7} md={7} lg={7} className="LeftColHome">
 				    	<Game />
                     </Col>
                     <Col lg={5} md={4} sm={3} className="RightColHome">
