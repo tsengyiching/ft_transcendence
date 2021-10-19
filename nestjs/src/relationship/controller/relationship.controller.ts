@@ -7,6 +7,7 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   UseGuards,
 } from '@nestjs/common';
 import { Relationship } from '../model/relationship.entity';
@@ -16,8 +17,11 @@ import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { User } from 'src/user/model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { SendRelationshipDto } from '../model/send-relationship.dto';
+import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
+import UserRelationship from '../model/userRelationship.entity';
 
 @UseGuards(JwtAuthGuard)
+@UseGuards(JwtTwoFactorGuard)
 @Controller('relationship')
 export class RelationshipController {
   constructor(private relationshipService: RelationshipService) {}
@@ -42,38 +46,27 @@ export class RelationshipController {
   }
 
   /*
-   ** getMyFriends returns an array with user friends' id
-   ** parameter user's id
+   ** getList takes query relation_status to request corresponding list,
+   ** returns an array with user friends' id, nickname, avatar and status
    */
-  @Get('me/friendlist')
-  getMyFriendList(@CurrentUser() user: User): Promise<number[]> {
-    return this.relationshipService.getFriendList(user.id);
+  @Get('me/list')
+  getMyRelationList(
+    @CurrentUser() user: User,
+    @Query('status') status: string,
+  ): Promise<UserRelationship> {
+    return this.relationshipService.getRelationList(user.id, status);
   }
 
   /*
-   ** getFriends returns an array with user friends' id
-   ** parameter user's id
+   ** getList takes query relation_status to request corresponding list,
+   ** returns an array with user friends' id, nickname, avatar and status
    */
-  @Get(':id/friendlist')
-  getFriendList(@Param('id', ParseIntPipe) id: number): Promise<number[]> {
-    return this.relationshipService.getFriendList(id);
-  }
-
-  /*
-   ** getMyBlockList returns an array with user friends' id
-   */
-  @Get('me/blocklist')
-  getMyBlockList(@CurrentUser() user: User): Promise<number[]> {
-    return this.relationshipService.getBlockList(user.id);
-  }
-
-  /*
-   ** getBlocklist returns an array with user's blocklist
-   ** parameter user's id
-   */
-  @Get(':id/blocklist')
-  getBlockList(@Param('id', ParseIntPipe) id: number): Promise<number[]> {
-    return this.relationshipService.getBlockList(id);
+  @Get(':id/list')
+  getRelationList(
+    @CurrentUser() user: User,
+    @Query('relation_status') status: string,
+  ): Promise<UserRelationship> {
+    return this.relationshipService.getRelationList(user.id, status);
   }
 
   /*

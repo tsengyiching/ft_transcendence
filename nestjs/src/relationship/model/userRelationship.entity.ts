@@ -5,16 +5,16 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 @Entity('userRelationship')
 class UserRelationship {
   @PrimaryGeneratedColumn()
-  public id!: number;
+  id!: number;
 
   @Column()
-  public userId!: number;
+  userId!: number;
 
   @Column()
-  public relationshipId!: number;
+  relationshipId!: number;
 
   @ManyToOne(() => User, (user) => user.userRelationship)
-  public user!: User;
+  user!: User;
 
   @ManyToOne(
     () => Relationship,
@@ -23,7 +23,7 @@ class UserRelationship {
       onDelete: 'CASCADE',
     },
   )
-  public relationship!: Relationship;
+  relationship!: Relationship;
 }
 
 export default UserRelationship;

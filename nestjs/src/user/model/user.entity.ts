@@ -11,6 +11,12 @@ import {
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
 
+export enum onlineStatus {
+  AVAILABLE = 'Available',
+  PALYING = 'Playing',
+  OFFLINE = 'Offline',
+}
+
 @Entity()
 export class User {
   @PrimaryColumn()
@@ -25,8 +31,23 @@ export class User {
   @CreateDateColumn()
   createDate: Date;
 
+  @Column({
+    type: 'enum',
+    enum: onlineStatus,
+  })
+  userStatus: onlineStatus;
+
+  @Column({ nullable: true })
+  email?: string;
+
+  @Column({ default: false })
+  isTwoFactorAuthenticationEnabled: boolean;
+
+  @Column({ nullable: true, select: false })
+  twoFactorAuthenticationSecret?: string;
+
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
-  public userGameRecords!: UserGameRecords[];
+  userGameRecords!: UserGameRecords[];
 
   @OneToMany(() => Game, (game) => game.winner)
   victories: Game[];
@@ -35,7 +56,7 @@ export class User {
     () => UserRelationship,
     (userRelationship) => userRelationship.user,
   )
-  public userRelationship!: UserRelationship[];
+  userRelationship!: UserRelationship[];
 
   @OneToMany(
     () => ChannelParticipant,

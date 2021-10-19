@@ -19,8 +19,10 @@ import { SendGameDto } from '../model/send-game.dto';
 import { SendOngoingGameDto } from '../model/send-ongoging-game.dto';
 import { SendUserGameRecordsDto } from '../model/send-user-game-records.dto';
 import UserGameRecords from '../model/userGameRecords.entity';
+import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 
 @UseGuards(JwtAuthGuard)
+@UseGuards(JwtTwoFactorGuard)
 @Controller('game')
 export class GameController {
   constructor(private gameService: GameService) {}

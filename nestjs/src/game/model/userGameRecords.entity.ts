@@ -5,22 +5,22 @@ import { User } from 'src/user/model/user.entity';
 @Entity('userGameRecords')
 class UserGameRecords {
   @PrimaryGeneratedColumn()
-  public id!: number;
+  id!: number;
 
   @Column()
-  public userId!: number;
+  userId!: number;
 
   @Column()
-  public gameId!: number;
+  gameId!: number;
 
   @Column()
-  public score?: number;
+  score?: number;
 
   @ManyToOne(() => User, (user) => user.userGameRecords)
-  public user!: User;
+  user!: User;
 
   @ManyToOne(() => Game, (game) => game.userGameRecords)
-  public game!: Game;
+  game!: Game;
 }
 
 export default UserGameRecords;

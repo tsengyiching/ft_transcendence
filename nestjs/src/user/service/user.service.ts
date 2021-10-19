@@ -1,9 +1,10 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../model/user.entity';
+import { onlineStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
+import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
 
 @Injectable()
 export class UserService {
@@ -38,12 +39,11 @@ export class UserService {
 
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
-
-    console.log(profile);
     newUser.id = profile.id;
     newUser.nickname = profile.login;
+    newUser.email = profile.email;
     newUser.avatar = profile.image_url;
-
+    newUser.userStatus = onlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 
@@ -52,6 +52,7 @@ export class UserService {
    */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
+    newUser.userStatus = onlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 
@@ -75,6 +76,38 @@ export class UserService {
     }
     user.nickname = changeUserNameDto.nickname;
     return this.userRepository.save(user);
+  }
+
+  async changeUserAvatar(
+    id: number,
+    changeUserAvatarDto: ChangeUserAvatarDto,
+  ): Promise<User> {
+    const user = await this.getOneById(id);
+    user.avatar = changeUserAvatarDto.avatar;
+    return this.userRepository.save(user);
+  }
+
+  async setTwoFactorAuthenticationSecret(
+    secret: string,
+    userId: number,
+  ): Promise<UpdateResult> {
+    return this.userRepository.update(userId, {
+      twoFactorAuthenticationSecret: secret,
+    });
+  }
+
+  async turnOnTwoFactorAuthentication(userId: number): Promise<UpdateResult> {
+    return this.userRepository.update(userId, {
+      isTwoFactorAuthenticationEnabled: true,
+    });
+  }
+
+  async isUserTwoFactorAuthEnabled(userId: number): Promise<boolean> {
+    const userData = await this.getOneById(userId);
+    if (userData.isTwoFactorAuthenticationEnabled === true) {
+      return true;
+    }
+    return false;
   }
 
   /****************************************************************************/

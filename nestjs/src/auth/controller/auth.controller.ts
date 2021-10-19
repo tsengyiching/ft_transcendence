@@ -51,10 +51,9 @@ export class AuthController {
   }
 
   /**
-   * 42 OAuth Callback get responce code and creating jwt token.
+   * 42 OAuth Callback gets response code and creates jwt token.
    * @param req Request object corresponding to the client request.
-   * @param res Responce object corresponding to the server responce.
-   * @returns Promise<User> return user.
+   * @param res Response object corresponding to the server response.
    */
   @Get('42/callback')
   @UseGuards(FortyTwoGuard)
@@ -62,8 +61,12 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const { accessToken } = this.authService.login(req.user); // get jwt token
-    res.cookie('jwt', accessToken); // Creating cookies (jwt token)
-    res.redirect('http://localhost:3000/'); // redirect to front
+    const { accessToken } = this.authService.login(req.user);
+    res.cookie('jwt', accessToken);
+    if (req.user.isTwoFactorAuthenticationEnabled) {
+      res.redirect('http://localhost:3000/2fa');
+    } else {
+      res.redirect('http://localhost:3000/');
+    }
   }
 }
