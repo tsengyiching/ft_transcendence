@@ -31,9 +31,6 @@ export class User {
   @CreateDateColumn()
   createDate: Date;
 
-  @Column({ nullable: true })
-  avatar?: string;
-
   @Column({
     type: 'enum',
     enum: onlineStatus,
