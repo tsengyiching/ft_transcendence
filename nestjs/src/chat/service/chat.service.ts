@@ -98,13 +98,35 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  getChannelUserNotParticipate(userId: number): Promise<any> {
-    return this.channelParticipantRepository
+  async getChannelUserNotParticipate(userId: number): Promise<any> {
+    const registredChannel = await this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
-      .select(['channel.id', 'channel.type', 'channel.name'])
-      .where('channelParticipant.userId != :Id', { Id: userId })
+      .select(['channel.id'])
+      .where('channelParticipant.userId = :Id', { Id: userId })
+      //   .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
+
+    const channelList = await this.channelParticipantRepository
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.channel', 'channel')
+      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
+      .execute();
+
+    let channelListLenght = channelList.length;
+    for (let i = 0; i < channelListLenght; i++) {
+      for (let j = 0; j < registredChannel.length; j++) {
+        if (channelList[i].channel_id == registredChannel[j].channel_id) {
+          channelList.splice(i, 1);
+          channelListLenght = channelList.length;
+          i = -1;
+          j = 0;
+          break;
+        }
+      }
+    }
+
+    return channelList;
   }
 
   /**
