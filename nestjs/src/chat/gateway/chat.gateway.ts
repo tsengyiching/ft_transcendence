@@ -57,7 +57,7 @@ export class ChatGateway
     const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
-    console.log(await this.messageService.getDirectMessages(user.id, 1));
+    //console.log(await this.messageService.getDirectMessages(user.id, 1));
   }
 
   /**
@@ -76,10 +76,9 @@ export class ChatGateway
    */
   @SubscribeMessage('channel_create')
   async createChannel(client: Socket, data: CreateChannelDto) {
-    console.log('Channel Create');
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.createChannel(user.id, data);
-
+    console.log('Channel created successfully !');
     this.server.emit('channel-need-reload');
   }
 
@@ -115,7 +114,8 @@ export class ChatGateway
     channelParticipant: CreateChannelParticipantDto,
   ) {
     const user = await this.authService.getUserFromSocket(client);
-    this.chatService.addChannelParticipant(user.id, channelParticipant);
+    this.chatService.joinChannel(user.id, channelParticipant);
+    console.log('User joined channel successfully !');
 
     const channels_in = this.chatService.getChannelUserParticipate(user.id);
     const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
