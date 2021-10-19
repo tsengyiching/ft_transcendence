@@ -11,40 +11,40 @@ import './Chat.css'
 
 function Chat(props: {socket: Socket}) {
 
-    const [radioValue, setRadioValue] = useState('1');
+    const [channelradioValue, setchannelRadioValue] = useState('1');
     const [channelSelected, setChannelSelected] = useState<{channel_id: number, channel_name: string} | undefined>();
 
-    const radios = [
+    const channelradios = [
         {name: 'Channels', value: '1'},
         {name: 'private message', value: '2'},
     ]
 
 	return (
-	<Row>
-        <Col className="ColumnSelectChannel" lg={3}>
+        <Row>
+        <Col className="ColumnChat" lg={3}>
             <Row>
                 <ButtonGroup className="mb-2">
-                    {radios.map((radio, idx) => (
+                    {channelradios.map((radio, idx) => (
                         <ToggleButton
-                        id={`radio-${idx}`}
+                        id={`channelradio-${idx}`}
                         name="radio"
-                        key={idx}
+                        key={idx % 2 ? 'channels' : 'private message'}
                         type='radio'
                         variant={idx % 2 ? 'outline-success' : 'outline-danger'}
                         value={radio.value}
-                        checked={radioValue === radio.value}
-                        onChange={(e) => setRadioValue(e.currentTarget.value)}
+                        checked={channelradioValue === radio.value}
+                        onChange={(e) => setchannelRadioValue(e.currentTarget.value)}
                         >
                             {radio.name}
                         </ToggleButton>
                     ))}
                 </ButtonGroup>
-                {radioValue==='1' ? <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> : <ListMP/>}
+                {channelradioValue==='1' ? <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> : <ListMP/>}
                 <CreateChannelButton socketid={props.socket}/>
                 <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             </Row>
         </Col>
-        <Col className="ColumnChat">
+        <Col className="ColumnChat" lg={8} >
                 <Row className="TitleChannel">
                         <Col>
                             {channelSelected !== undefined
@@ -55,20 +55,19 @@ function Chat(props: {socket: Socket}) {
                             <DropdownListUser/>
                         </Col>
                 </Row>
-                <Talk />
+                {<Talk />}
                 <div className="d-flex justify-content-center">
                     <Form className="w-75 p-3">
                         <Form.Control type="name" placeholder="Message" />
                         <Button type="submit">envoyer</Button>
                     </Form>
                 </div>
-                <Row>
+                <Row className="align-bottom">
                     <Button > Modo Rights </Button>
                     <Button > Owner Rights </Button>
                 </Row>
         </Col>
-
-	</Row>
+        </Row>
 	);
 }
 

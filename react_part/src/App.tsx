@@ -9,7 +9,7 @@ function App() {
     <SocketContext.Provider value={socket}>
       <Container fluid className="App">
         <Header/>
-        <Router></Router>
+        <Router/>
       </Container>
     </SocketContext.Provider>
   );

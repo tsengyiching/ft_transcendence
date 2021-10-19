@@ -2,7 +2,7 @@
 
 .ChatTitle {
 	border: 1px solid black;
-	height: 50px;
+	max-height: 50px;
 	text-align: center;
 	font-size: 2em;
 	padding-top: 2px;
@@ -12,73 +12,18 @@
 	font-size: large;
 	background-color: #A0B4D1;
 	text-align: center;
-	height: 40px;
-	width: 785px;
+	max-height: 40px;
+	max-width: 785px;
 	border: 1px solid black
 }
 
 .ButtonCreate {
 	border-radius: none;
-	font-size: 25px;
+	font-size: 1.5em;
 	height: 80px;
 }
 
-.ScrollingList {
-	margin: 2px;
-	margin-bottom: 20px;
-	display: list-item;
-	height: 600px;
-	width: 500px;
-	overflow: auto;
-	font-size: large;
-}
-
-.ButtonChannel {
-	margin-top: 1px;
-	margin-bottom: 1px;
-	width: 220px;
-	height: 55px;
-	font-size: medium;
-	border: none;
-}
-
-/*Channels joined */
-
-.ChannelsJoined {
-	margin-bottom: 50px;
-}
-
-.ButtonMyChannel {
-	text-align: left;
-	background-color: #DC7633;
-}
-
-.ButtonMyChannel:hover {
-	background-color: #D35400;
-	border: none;
-}
-
-.ButtonMyChannel:focus {
-	background-color: #D35400;
-}
-
-.LogoChannel {
-	width: 20px;
-	height: 20px;
-	margin: 5px;
-}
-
-/*Channels not joined */
-.ButtonOtherChannel {
-	text-align: center;
-	background-color: #2E2792;
-}
-
-.ButtonOtherChannel:hover {
-	background-color: #2E2792;
-	border: none;
-}
-
-.ButtonOtherChannel:focus {
-	background-color: #2E2792;
+.ColumChat {
+	height: 40%;
+	width: 40%;
 }

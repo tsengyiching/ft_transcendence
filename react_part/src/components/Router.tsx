@@ -1,6 +1,6 @@
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import PageConnexion from './PageConnexion';
-import Accueil from './Home';
+import Home from './Home';
 import Profile from './Profile';
 import Parametres from './Parameters';
 import Connexion from './Connexion';
@@ -28,7 +28,7 @@ function Router() {
     return (
       <BrowserRouter>
         <Switch>
-          <Route exact path="/accueil" component={Accueil} />
+          <Route exact path="/accueil" component={Home} />
           <Route exact path="/me" component={Profile} />
           <Route exact path="/parametres" component={Parametres} />
           <Redirect to="/accueil"/>
