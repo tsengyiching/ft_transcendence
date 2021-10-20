@@ -1,5 +1,5 @@
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
-import {useState} from 'react'
+import {useState, useContext} from 'react'
 import Talk from './Talk';
 import { Socket } from "socket.io-client";
 import CreateChannelButton from './create_channel';
@@ -7,12 +7,13 @@ import ListChannel from "./ListChannel";
 import ListMP from "./ListMP"
 import DropdownListUser from './DropdownListUser';
 import './Chat.css'
+import {SocketContext} from '../../context/socket'
 
-
-function Chat(props: {socket: Socket}) {
+function Chat() {
 
     const [channelradioValue, setchannelRadioValue] = useState('1');
     const [channelSelected, setChannelSelected] = useState<{channel_id: number, channel_name: string} | undefined>();
+    const socket = useContext(SocketContext);
 
     const channelradios = [
         {name: 'Channels', value: '1'},
@@ -21,7 +22,7 @@ function Chat(props: {socket: Socket}) {
 
 	return (
         <Row>
-        <Col className="ColumnChat" lg={3}>
+        <Col className="ColumnChat" lg={{span: 3, offset: 0}}>
             <Row>
                 <ButtonGroup className="mb-2">
                     {channelradios.map((radio, idx) => (
@@ -40,11 +41,11 @@ function Chat(props: {socket: Socket}) {
                     ))}
                 </ButtonGroup>
                 {channelradioValue==='1' ? <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> : <ListMP/>}
-                <CreateChannelButton socketid={props.socket}/>
+                <CreateChannelButton socketid={socket}/>
                 <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             </Row>
         </Col>
-        <Col className="ColumnChat" lg={{span: 7, offset: 2}} >
+        <Col className="ColumnChat" lg={{span: 9, offset: 0}} >
             <Row className="TitleChannel">
                 <Col>
                     {channelSelected !== undefined

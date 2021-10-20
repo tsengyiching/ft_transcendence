@@ -1,0 +1,14 @@
+
+
+.ScrollingListFriends {
+	display: list-item;
+	padding: 0.5em;
+	height: 200px;
+	overflow: auto;
+	font-size: medium;
+}
+
+.Friend {
+	background-color: #4169E1 ;
+	color: #F0FFFF;
+}
