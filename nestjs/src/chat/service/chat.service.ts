@@ -78,8 +78,10 @@ export class ChatService {
           createChannelParticipantDto.password,
           channel.password,
         ))
-      )
+      ) {
+        console.log('Invalid channel password !');
         throw new WsException('Invalid channel password !');
+      }
     }
     return this.addChannelParticipant(
       createChannelParticipantDto.channelId,
@@ -89,20 +91,14 @@ export class ChatService {
   }
 
   /**
-   * getAllChannel return all channel list.
-   * @returns Promise<Channel[]> return all channel list.
-   */
-  getAllChannel(): Promise<Channel[]> {
-    return this.channelRepository.find({ order: { createDate: 'ASC' } });
-  }
-
-  /**
-   * getChannelUserParticipate returns the list of channels user dosen't participates.
+   * getUserNotParticipateChannels returns the list of channels user dosen't participates.
    * @param userId the id of user
    * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  async getChannelUserNotParticipate(userId: number): Promise<any> {
-    const registredChannel = await this.channelParticipantRepository
+  async getUserNotParticipateChannels(userId: number): Promise<any> {
+    /* Get channels' ids in which user participate*/
+    /* if user status is ban, HAVE TO CHECK WHAT WE WANT TO DO LATER*/
+    const userChannelsIds = await this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['channel.id'])
@@ -118,8 +114,8 @@ export class ChatService {
 
     let channelListLenght = channelList.length;
     for (let i = 0; i < channelListLenght; i++) {
-      for (let j = 0; j < registredChannel.length; j++) {
-        if (channelList[i].channel_id == registredChannel[j].channel_id) {
+      for (let j = 0; j < userChannelsIds.length; j++) {
+        if (channelList[i].channel_id == userChannelsIds[j].channel_id) {
           channelList.splice(i, 1);
           channelListLenght = channelList.length;
           i = -1;
@@ -133,11 +129,11 @@ export class ChatService {
   }
 
   /**
-   * getChannelUserParticipate returns the list of channels in which a user participates.
+   * getUserChannels returns all the channels in which user participates.
    * @param userId the id of user
-   * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
+   * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  getChannelUserParticipate(userId: number): Promise<any> {
+  getUserChannels(userId: number): Promise<ChannelParticipant> {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
@@ -148,11 +144,11 @@ export class ChatService {
   }
 
   /**
-   * getUserParticipateChannel get user participating to a specifique channel
+   * getChannelUsers get the channel's users
    * @param channelId channel id
-   * @returns Promise<any> return
+   * @returns Promise<ChannelParticipant> return
    */
-  getUserParticipateChannel(channelId: number): Promise<any> {
+  getChannelUsers(channelId: number): Promise<ChannelParticipant> {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.user', 'user')
@@ -163,7 +159,16 @@ export class ChatService {
   }
 
   /**
-   * getOneChannelParticipant return data of channel participant
+   * getAllChannel returns the list of channels that have been created.
+   * @returns Promise<Channel[]> returns channel list.
+   */
+  getAllChannel(): Promise<Channel[]> {
+    return this.channelRepository.find({ order: { createDate: 'ASC' } });
+  }
+
+  /**
+   * getOneChannelParticipant returns the participant in the matched channel,
+   * if this user is not in the channel, return null
    * @param userId
    * @param channelId
    * @returns

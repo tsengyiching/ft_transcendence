@@ -19,6 +19,7 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { SendRelationshipDto } from '../model/send-relationship.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import UserRelationship from '../model/userRelationship.entity';
+import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
@@ -76,7 +77,7 @@ export class RelationshipController {
   addFriend(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
+  ): Promise<SendAddFriendRelationshipDto> {
     return this.relationshipService.addFriend(user.id, relationshipDto);
   }
 
@@ -87,7 +88,7 @@ export class RelationshipController {
   addFriendTest(
     @Param('id', ParseIntPipe) id: number,
     @Body() relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
+  ): Promise<SendAddFriendRelationshipDto> {
     return this.relationshipService.addFriend(id, relationshipDto);
   }
 

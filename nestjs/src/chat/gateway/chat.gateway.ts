@@ -53,8 +53,10 @@ export class ChatGateway
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
     this.server.emit('user-join', user.id);
-    const channels_in = this.chatService.getChannelUserParticipate(user.id);
-    const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
+    const channels_in = this.chatService.getUserChannels(user.id);
+    const channels_out = this.chatService.getUserNotParticipateChannels(
+      user.id,
+    );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
     //console.log(await this.messageService.getDirectMessages(user.id, 1));
@@ -88,8 +90,10 @@ export class ChatGateway
   @SubscribeMessage('ask-reload-channel')
   async ReloadChannel(client: Socket) {
     const user: User = await this.authService.getUserFromSocket(client);
-    const channels_in = this.chatService.getChannelUserParticipate(user.id);
-    const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
+    const channels_in = this.chatService.getUserChannels(user.id);
+    const channels_out = this.chatService.getUserNotParticipateChannels(
+      user.id,
+    );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
   }
@@ -114,11 +118,13 @@ export class ChatGateway
     channelParticipant: CreateChannelParticipantDto,
   ) {
     const user = await this.authService.getUserFromSocket(client);
-    this.chatService.joinChannel(user.id, channelParticipant);
+    await this.chatService.joinChannel(user.id, channelParticipant);
     console.log('User joined channel successfully !');
 
-    const channels_in = this.chatService.getChannelUserParticipate(user.id);
-    const channels_out = this.chatService.getChannelUserNotParticipate(user.id);
+    const channels_in = this.chatService.getUserChannels(user.id);
+    const channels_out = this.chatService.getUserNotParticipateChannels(
+      user.id,
+    );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
   }
