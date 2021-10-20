@@ -11,6 +11,8 @@ import {
 } from '../model/channelParticipant.entity';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { WsException } from '@nestjs/websockets';
+import { EEXIST } from 'constants';
+import e from 'cors';
 
 @Injectable()
 export class ChatService {
@@ -95,37 +97,33 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  async getUserNotParticipateChannels(userId: number): Promise<any> {
-    /* Get channels' ids in which user participate*/
+  async getUserNotParticipateChannels(
+    userId: number,
+  ): Promise<ChannelParticipant> {
+    /* Get channels' ids in which the user participate*/
     /* if user status is ban, HAVE TO CHECK WHAT WE WANT TO DO LATER*/
-    const userChannelsIds = await this.channelParticipantRepository
-      .createQueryBuilder('channelParticipant')
-      .leftJoinAndSelect('channelParticipant.channel', 'channel')
-      .select(['channel.id'])
-      .where('channelParticipant.userId = :Id', { Id: userId })
-      //   .andWhere('status != :status', { status: StatusInChannel.BAN })
-      .execute();
+    const userChannels = await this.channelParticipantRepository.find({
+      where: { userId: userId },
+    });
+    const channelIds = userChannels.map((data) => data.channelId);
 
-    const channelList = await this.channelParticipantRepository
+    const allUserChannels = await this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .execute();
 
-    let channelListLenght = channelList.length;
-    for (let i = 0; i < channelListLenght; i++) {
-      for (let j = 0; j < userChannelsIds.length; j++) {
-        if (channelList[i].channel_id == userChannelsIds[j].channel_id) {
-          channelList.splice(i, 1);
-          channelListLenght = channelList.length;
-          i = -1;
-          j = 0;
-          break;
+    const seen = [];
+    const userNotJoinChannels = allUserChannels
+      .filter((data) => (channelIds.includes(data.channel_id) ? false : true))
+      .filter((data) => {
+        if (seen.includes(data.channel_id)) return false;
+        else {
+          seen.push(data.channel_id);
+          return true;
         }
-      }
-    }
-
-    return channelList;
+      });
+    return userNotJoinChannels;
   }
 
   /**
