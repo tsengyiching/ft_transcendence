@@ -95,7 +95,7 @@ export class ChatService {
   /**
    * getUserNotParticipateChannels returns the list of channels user dosen't participates.
    * @param userId the id of user
-   * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
+   * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
    */
   async getUserNotParticipateChannels(
     userId: number,
