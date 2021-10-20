@@ -52,6 +52,7 @@ export class UserService {
    */
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
+    newUser.isTwoFactorAuthenticationEnabled = false;
     newUser.userStatus = onlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }

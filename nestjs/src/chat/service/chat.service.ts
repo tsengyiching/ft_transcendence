@@ -21,57 +21,58 @@ export class ChatService {
   ) {}
 
   /**
-   * createChannel creating new channel with channel owner.
+   * createChannel creates new channel with a channel owner.
    * (Channel Create)
-   * @param channelCreatorId id of user creating channel
-   * @param createChannelDto data requirer to create channel (name)
+   * @param channelCreatorId id of user who creates channel
+   * @param createChannelDto data required for creating channel (name and passward)
    * @returns Promise<Channel>
    */
   async createChannel(
     channelCreatorId: number,
     createChannelDto: CreateChannelDto,
   ): Promise<Channel> {
-    // Creating Channel
+    await this.checkChannelNameAndPassword(createChannelDto);
+    /* Create new channel*/
     const newChannel = this.channelRepository.create({ ...createChannelDto });
-    if (newChannel.password && newChannel.password.length != 0) {
+    if (newChannel.password) {
       newChannel.type = ChannelType.PRIVATE;
       newChannel.password = await bcrypt.hash(newChannel.password, 10);
     }
     await this.channelRepository.save(newChannel);
-    //  Creating Channel Owner
-    const channelOwner = this.channelParticipantRepository.create();
-    channelOwner.channelId = newChannel.id;
-    channelOwner.userId = channelCreatorId;
-    channelOwner.role = ChannelRole.OWNER;
-    await this.channelParticipantRepository.save(channelOwner);
+
+    /* Add channel owner*/
+    await this.addChannelParticipant(
+      newChannel.id,
+      channelCreatorId,
+      ChannelRole.OWNER,
+    );
     return newChannel;
   }
 
   /**
-   * addChannelParticipant add a channel participant.
+   * joinChannel checks and adds a new channel participant.
    * (Channel Join)
    * @param createChannelParticipantDto
    * @returns ChannelParticipant
    */
-  async addChannelParticipant(
+  async joinChannel(
     userId: number,
     createChannelParticipantDto: CreateChannelParticipantDto,
   ): Promise<ChannelParticipant> {
-    const newChannelParticipant = this.channelParticipantRepository.create({
-      ...createChannelParticipantDto,
-    });
     const channel = await this.getChannelById(
       createChannelParticipantDto.channelId,
     );
     if (!channel)
-      throw new WsException('The channel you wish to join does not exist.');
+      throw new WsException(
+        'The channel that you wish to join does not exist.',
+      );
     const participant = await this.getOneChannelParticipant(
       userId,
       createChannelParticipantDto.channelId,
     );
     if (participant)
-      throw new WsException('You already participate in this channel.');
-    if (channel.type == ChannelType.PRIVATE)
+      throw new WsException('You are already a member of this channel.');
+    if (channel.type == ChannelType.PRIVATE) {
       if (
         !(await bcrypt.compare(
           createChannelParticipantDto.password,
@@ -79,10 +80,12 @@ export class ChatService {
         ))
       )
         throw new WsException('Invalid channel password !');
-    newChannelParticipant.userId = userId;
-    newChannelParticipant.role = ChannelRole.USER;
-    newChannelParticipant.status = StatusInChannel.NORMAL;
-    return this.channelParticipantRepository.save(newChannelParticipant);
+    }
+    return this.addChannelParticipant(
+      createChannelParticipantDto.channelId,
+      userId,
+      ChannelRole.USER,
+    );
   }
 
   /**
@@ -98,13 +101,35 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<any> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  getChannelUserNotParticipate(userId: number): Promise<any> {
-    return this.channelParticipantRepository
+  async getChannelUserNotParticipate(userId: number): Promise<any> {
+    const registredChannel = await this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
-      .select(['channel.id', 'channel.type', 'channel.name'])
-      .where('channelParticipant.userId != :Id', { Id: userId })
+      .select(['channel.id'])
+      .where('channelParticipant.userId = :Id', { Id: userId })
+      //   .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
+
+    const channelList = await this.channelParticipantRepository
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.channel', 'channel')
+      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
+      .execute();
+
+    let channelListLenght = channelList.length;
+    for (let i = 0; i < channelListLenght; i++) {
+      for (let j = 0; j < registredChannel.length; j++) {
+        if (channelList[i].channel_id == registredChannel[j].channel_id) {
+          channelList.splice(i, 1);
+          channelListLenght = channelList.length;
+          i = -1;
+          j = 0;
+          break;
+        }
+      }
+    }
+
+    return channelList;
   }
 
   /**
@@ -158,9 +183,52 @@ export class ChatService {
   /**
    * getChannelById Return channel data
    * @param channelId
-   * @returns
    */
   getChannelById(channelId: number): Promise<Channel> {
     return this.channelRepository.findOne(channelId);
+  }
+
+  /**
+   * addChannelParticipant adds a new channel participant.
+   * @param channel id, user id, user role
+   * @returns ChannelParticipant
+   */
+  async addChannelParticipant(
+    channelId: number,
+    userId: number,
+    role: ChannelRole,
+  ): Promise<ChannelParticipant> {
+    const channelParticipant = this.channelParticipantRepository.create();
+    channelParticipant.channelId = channelId;
+    channelParticipant.userId = userId;
+    channelParticipant.role = role;
+    return this.channelParticipantRepository.save(channelParticipant);
+  }
+
+  /****************************************************************************/
+  /*                                 checkers                                 */
+  /****************************************************************************/
+
+  async checkChannelNameAndPassword(
+    createChannelDto: CreateChannelDto,
+  ): Promise<void> {
+    const channelNames = await (
+      await this.getAllChannel()
+    ).map((data) => data.name);
+    if (channelNames.includes(createChannelDto.name)) {
+      console.log('Channel name has been taken.');
+      throw new WsException('Channel name has been taken, choose a new one.');
+    }
+    if (createChannelDto.password) {
+      if (
+        createChannelDto.password.length < 4 ||
+        createChannelDto.password.length > 16
+      ) {
+        console.log('Wrong password');
+        throw new WsException(
+          'Channel password should consist 4 to 16 letters including alphabets numbers and specials ',
+        );
+      }
+    }
   }
 }

@@ -1,7 +1,13 @@
 /*
  ** Test only, delete later
  */
-import { IsAlphanumeric, IsInt, IsNotEmpty, MaxLength } from 'class-validator';
+import {
+  IsAlphanumeric,
+  IsInt,
+  IsNotEmpty,
+  IsUrl,
+  MaxLength,
+} from 'class-validator';
 
 export class CreateUserDto {
   @IsInt()
@@ -11,4 +17,7 @@ export class CreateUserDto {
   @MaxLength(10)
   @IsNotEmpty()
   nickname: string;
+
+  @IsUrl()
+  avatar: string;
 }

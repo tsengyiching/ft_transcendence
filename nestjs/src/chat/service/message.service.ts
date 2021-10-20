@@ -44,27 +44,27 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  getDirectMessages(senderId: number, receiverId: number) {
-    return this.messageRepository.find({
-      where: [
-        { receiverId: receiverId, senderId: receiverId },
-        { receiverId: senderId, senderId: senderId },
-      ],
-      order: { createDate: 'ASC' },
-    });
-    //   .createQueryBuilder('directMessage')
-    //   .select([
-    //     'message.id',
-    //     'message.channelId',
-    //     'message.authorId',
-    //     'author.nickname',
-    //     'author.avatar',
-    //     'message.createDate',
-    //   ])
-    //   .addSelect('message.message', 'message_content')
-    //   .where('message.channelId = :Id', { Id: channelId })
-    //   .execute();
-  }
+  // getDirectMessages(senderId: number, receiverId: number) {
+  //   return this.messageRepository.find({
+  //     where: [
+  //       { receiverId: receiverId, senderId: receiverId },
+  //       { receiverId: senderId, senderId: senderId },
+  //     ],
+  //     order: { createDate: 'ASC' },
+  //   });
+  //   .createQueryBuilder('directMessage')
+  //   .select([
+  //     'message.id',
+  //     'message.channelId',
+  //     'message.authorId',
+  //     'author.nickname',
+  //     'author.avatar',
+  //     'message.createDate',
+  //   ])
+  //   .addSelect('message.message', 'message_content')
+  //   .where('message.channelId = :Id', { Id: channelId })
+  //   .execute();
+  //}
 
   async createDirectMessage(
     authorId: number,
