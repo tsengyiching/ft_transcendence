@@ -4,6 +4,7 @@ import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { RelationshipDto } from '../model/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
+import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
 import { SendRelationshipDto } from '../model/send-relationship.dto';
 import UserRelationship from '../model/userRelationship.entity';
 
@@ -67,14 +68,18 @@ export class RelationshipService {
   async addFriend(
     id: number,
     relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
+  ): Promise<SendAddFriendRelationshipDto> {
     await this.checkIsSameUser(id, relationshipDto.addresseeUserId);
     await this.checkUsersRelation(id, relationshipDto.addresseeUserId);
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
     await this.relationshipRepository.save(newRelationship);
     await this.setNewRelation(id, relationshipDto, newRelationship.id);
-    return newRelationship;
+    const relationship = await this.relationshipRepository.findOne({
+      where: { id: newRelationship.id },
+      relations: ['userRelationship'],
+    });
+    return this.reformAddFriendSendingData(relationship);
   }
 
   async acceptFriend(id: number): Promise<SendRelationshipDto> {
@@ -369,6 +374,22 @@ export class RelationshipService {
         relationship.userRelationship[0].userId,
         relationship.userRelationship[1].userId,
       ],
+    };
+    return obj;
+  }
+
+  /*
+   ** reformAddFriendSendingData returns
+   */
+  async reformAddFriendSendingData(
+    relationship: Relationship,
+  ): Promise<SendAddFriendRelationshipDto> {
+    const obj: SendAddFriendRelationshipDto = {
+      relationshipId: relationship.id,
+      createDate: relationship.createDate,
+      status: relationship.status,
+      demanderId: relationship.userRelationship[0].userId,
+      addresseeId: relationship.userRelationship[1].userId,
     };
     return obj;
   }
