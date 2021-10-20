@@ -2,7 +2,7 @@
 import { Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import {useState} from 'react'
 import './members.css'
-import Friends from './Friends'
+import ListFriends from './ListFriends'
 
 export default function Members()
 {
@@ -32,7 +32,7 @@ export default function Members()
 			    </ToggleButton>
 			))}
 		    </ButtonGroup>
-		    { radioMembersValue === '1' ? <Col> Friends</Col> 
+		    { radioMembersValue === '1' ? <ListFriends/>
 		    : radioMembersValue === '2' ? <Col> Users </Col>
 		    : radioMembersValue === '3' ? <Col> Blocked </Col>
 		    : 				  <Col> Friend Requests </Col>}

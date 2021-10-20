@@ -39,7 +39,6 @@ function ListChannel(props: IUseStateChannel) {
         const [ShowJoinModal, setShowJoinModal] = useState(0);
 
         useEffect( () => { 
-                console.log("into reload channel");
                 socket.emit("ask-reload-channel");
                 }, [])
 
@@ -53,6 +52,8 @@ function ListChannel(props: IUseStateChannel) {
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
                         
+                        {Channel.channel_name}
+                        
                         {Channel.role === 'Owner' ? 
                         <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
                         : Channel.role === "Admin" ?
@@ -65,7 +66,6 @@ function ListChannel(props: IUseStateChannel) {
                         <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
                         : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
                         
-                        {Channel.channel_name}
                 </Button>
                 )
         }
@@ -96,11 +96,6 @@ function ListChannel(props: IUseStateChannel) {
         useEffect(() => {
                 socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
-
-                console.log("My Channels:")
-                console.log(MyChannels);
-                console.log("Others Channels:")
-                console.log(OthersChannels);
         }, [MyChannels, OthersChannels, socket]);
 
 	return(
