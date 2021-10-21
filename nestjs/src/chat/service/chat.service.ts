@@ -11,8 +11,7 @@ import {
 } from '../model/channelParticipant.entity';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { WsException } from '@nestjs/websockets';
-import { EEXIST } from 'constants';
-import e from 'cors';
+import { LeaveChannelDto } from '../dto/leave-channel.dto';
 
 @Injectable()
 export class ChatService {
@@ -24,7 +23,7 @@ export class ChatService {
 
   /**
    * createChannel creates new channel with a channel owner.
-   * (Channel Create)
+   * (channel_create)
    * @param channelCreatorId id of user who creates channel
    * @param createChannelDto data required for creating channel (name and passward)
    * @returns Promise<Channel>
@@ -53,8 +52,8 @@ export class ChatService {
 
   /**
    * joinChannel checks and adds a new channel participant.
-   * (Channel Join)
-   * @param createChannelParticipantDto
+   * (channel-join)
+   * @param createChannelParticipantDto: channel id and password
    * @returns ChannelParticipant
    */
   async joinChannel(
@@ -64,10 +63,6 @@ export class ChatService {
     const channel = await this.getChannelById(
       createChannelParticipantDto.channelId,
     );
-    if (!channel)
-      throw new WsException(
-        'The channel that you wish to join does not exist.',
-      );
     const participant = await this.getOneChannelParticipant(
       userId,
       createChannelParticipantDto.channelId,
@@ -90,6 +85,101 @@ export class ChatService {
       userId,
       ChannelRole.USER,
     );
+  }
+
+  /**
+   * addChannelParticipant adds a new channel participant.
+   * @param channel id, user id, user role
+   * @returns ChannelParticipant
+   */
+  async addChannelParticipant(
+    channelId: number,
+    userId: number,
+    role: ChannelRole,
+  ): Promise<ChannelParticipant> {
+    const channelParticipant = this.channelParticipantRepository.create();
+    channelParticipant.channelId = channelId;
+    channelParticipant.userId = userId;
+    channelParticipant.role = role;
+    return this.channelParticipantRepository.save(channelParticipant);
+  }
+
+  /**
+   * leaveChannel checks and removes a channel current participant.
+   * (channel-leave)
+   * @param LeaveChannelDto: channel id
+   * @returns deleted ChannelParticipant
+   */
+  async leaveChannel(
+    userId: number,
+    leaveChannelDto: LeaveChannelDto,
+  ): Promise<ChannelParticipant> {
+    await this.getChannelById(leaveChannelDto.channelId);
+    const participant = await this.getOneChannelParticipant(
+      userId,
+      leaveChannelDto.channelId,
+    );
+    if (!participant)
+      throw new WsException('You are not a member of this channel.');
+    // participant.status == StatusInChannel.BAN -> cannot leave
+    // participant.status == StatusInChannel.OWNER -> admin becomes owner/ no admin -> random -> notify
+    return this.channelParticipantRepository.remove(participant);
+  }
+
+  /****************************************************************************/
+  /*                          Channel Getters                                 */
+  /****************************************************************************/
+
+  /**
+   * getAllChannels returns the list of channels that have been created.
+   * @returns Promise<Channel[]> returns channel list.
+   */
+  getAllChannels(): Promise<Channel[]> {
+    return this.channelRepository.find({ order: { createDate: 'ASC' } });
+  }
+
+  /**
+   * getChannelById Return channel data
+   * @param channelId
+   */
+  async getChannelById(channelId: number): Promise<Channel> {
+    const channel = await this.channelRepository.findOne(channelId);
+    if (!channel) throw new WsException('The channel does not exist.');
+    return channel;
+  }
+
+  /**
+   * getChannelUsers get the channel's users
+   * @param channelId channel id
+   * @returns Promise<ChannelParticipant> return
+   */
+  getChannelUsers(channelId: number): Promise<ChannelParticipant> {
+    return this.channelParticipantRepository
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.user', 'user')
+      .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
+      .where('channelParticipant.channelId = :Id', { Id: channelId })
+      .andWhere('status != :status', { status: StatusInChannel.BAN })
+      .execute();
+  }
+
+  /****************************************************************************/
+  /*                             User Getters                                 */
+  /****************************************************************************/
+
+  /**
+   * getUserChannels returns all the channels in which user participates.
+   * @param userId the id of user
+   * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
+   */
+  getUserChannels(userId: number): Promise<ChannelParticipant> {
+    return this.channelParticipantRepository
+      .createQueryBuilder('channelParticipant')
+      .leftJoinAndSelect('channelParticipant.channel', 'channel')
+      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
+      .where('channelParticipant.userId = :Id', { Id: userId })
+      .andWhere('status != :status', { status: StatusInChannel.BAN })
+      .execute();
   }
 
   /**
@@ -127,44 +217,6 @@ export class ChatService {
   }
 
   /**
-   * getUserChannels returns all the channels in which user participates.
-   * @param userId the id of user
-   * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
-   */
-  getUserChannels(userId: number): Promise<ChannelParticipant> {
-    return this.channelParticipantRepository
-      .createQueryBuilder('channelParticipant')
-      .leftJoinAndSelect('channelParticipant.channel', 'channel')
-      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
-      .where('channelParticipant.userId = :Id', { Id: userId })
-      .andWhere('status != :status', { status: StatusInChannel.BAN })
-      .execute();
-  }
-
-  /**
-   * getChannelUsers get the channel's users
-   * @param channelId channel id
-   * @returns Promise<ChannelParticipant> return
-   */
-  getChannelUsers(channelId: number): Promise<ChannelParticipant> {
-    return this.channelParticipantRepository
-      .createQueryBuilder('channelParticipant')
-      .leftJoinAndSelect('channelParticipant.user', 'user')
-      .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
-      .where('channelParticipant.channelId = :Id', { Id: channelId })
-      .andWhere('status != :status', { status: StatusInChannel.BAN })
-      .execute();
-  }
-
-  /**
-   * getAllChannel returns the list of channels that have been created.
-   * @returns Promise<Channel[]> returns channel list.
-   */
-  getAllChannel(): Promise<Channel[]> {
-    return this.channelRepository.find({ order: { createDate: 'ASC' } });
-  }
-
-  /**
    * getOneChannelParticipant returns the participant in the matched channel,
    * if this user is not in the channel, return null
    * @param userId
@@ -183,40 +235,15 @@ export class ChatService {
     });
   }
 
-  /**
-   * getChannelById Return channel data
-   * @param channelId
-   */
-  getChannelById(channelId: number): Promise<Channel> {
-    return this.channelRepository.findOne(channelId);
-  }
-
-  /**
-   * addChannelParticipant adds a new channel participant.
-   * @param channel id, user id, user role
-   * @returns ChannelParticipant
-   */
-  async addChannelParticipant(
-    channelId: number,
-    userId: number,
-    role: ChannelRole,
-  ): Promise<ChannelParticipant> {
-    const channelParticipant = this.channelParticipantRepository.create();
-    channelParticipant.channelId = channelId;
-    channelParticipant.userId = userId;
-    channelParticipant.role = role;
-    return this.channelParticipantRepository.save(channelParticipant);
-  }
-
   /****************************************************************************/
-  /*                                 checkers                                 */
+  /*                                 Checkers                                 */
   /****************************************************************************/
 
   async checkChannelNameAndPassword(
     createChannelDto: CreateChannelDto,
   ): Promise<void> {
     const channelNames = await (
-      await this.getAllChannel()
+      await this.getAllChannels()
     ).map((data) => data.name);
     if (channelNames.includes(createChannelDto.name)) {
       console.log('Channel name has been taken.');

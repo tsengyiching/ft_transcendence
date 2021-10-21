@@ -13,6 +13,8 @@ import { User } from 'src/user/model/user.entity';
 import { CreateChannelDto } from '../dto/channel.dto';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
+import { LeaveChannelDto } from '../dto/leave-channel.dto';
+import { ChannelParticipant } from '../model/channelParticipant.entity';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
 
@@ -74,7 +76,7 @@ export class ChatGateway
 
   /**
    * Create channel
-   * @param data
+   * @param CreateChannelDto : channel name and password
    */
   @SubscribeMessage('channel_create')
   async createChannel(client: Socket, data: CreateChannelDto) {
@@ -88,7 +90,7 @@ export class ChatGateway
    * Ask to Reload the Channels list
    */
   @SubscribeMessage('ask-reload-channel')
-  async ReloadChannel(client: Socket) {
+  async reloadChannel(client: Socket) {
     const user: User = await this.authService.getUserFromSocket(client);
     const channels_in = this.chatService.getUserChannels(user.id);
     const channels_out = this.chatService.getUserNotParticipateChannels(
@@ -110,17 +112,35 @@ export class ChatGateway
 
   /**
    * join channel
-   * @param data
+   * @param CreateChannelParticipantDto : channelId and password
    */
   @SubscribeMessage('channel-join')
-  async JoinChannel(
+  async joinChannel(
     client: Socket,
     channelParticipant: CreateChannelParticipantDto,
   ) {
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.joinChannel(user.id, channelParticipant);
     console.log('User joined channel successfully !');
+    /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
+    const channels_in = this.chatService.getUserChannels(user.id);
+    const channels_out = this.chatService.getUserNotParticipateChannels(
+      user.id,
+    );
+    client.emit('channels-user-in', await channels_in);
+    client.emit('channels-user-out', await channels_out);
+  }
 
+  /**
+   * leave channel
+   * @param LeaveChannelDto : channel id
+   */
+  @SubscribeMessage('channel-leave')
+  async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
+    const user = await this.authService.getUserFromSocket(client);
+    await this.chatService.leaveChannel(user.id, leaveChannelDto);
+    console.log('User joined channel successfully !');
+    /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
     const channels_in = this.chatService.getUserChannels(user.id);
     const channels_out = this.chatService.getUserNotParticipateChannels(
       user.id,
