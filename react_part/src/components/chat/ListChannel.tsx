@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { Placeholder, Row, Button, Image } from "react-bootstrap"
+import { Placeholder, Col, Row, Button, Image } from "react-bootstrap"
 import {SocketContext} from "../../context/socket"
 import './ListChannel.css'
 import PadlockImage from "../pictures/Padlock-symbol.png"
@@ -47,7 +47,8 @@ function ListChannel(props: IUseStateChannel) {
                 let channel_name = Channel.channel_name;
                 
                 return (
-                <Button key={channel_id} className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
+                <div key={channel_id}>
+                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
@@ -64,9 +65,9 @@ function ListChannel(props: IUseStateChannel) {
                         <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
                         : Channel.status !== "Mute" ?
                         <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
-                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
-                        
+                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}       
                 </Button>
+                </div>
                 )
         }
 
@@ -100,23 +101,27 @@ function ListChannel(props: IUseStateChannel) {
 
 	return(
                 <Row className="ScrollingListChannel">
-                        <div className="ChannelsJoined">
+                        <Col className="ChannelsJoined" lg={6} >
                                 Channels Joined:
                                 { MyChannels.length !== 0 
-                                        ? MyChannels.map(ButtonMyChannel)
+                                        ? <div style={{overflow: 'auto', height: '7.9em'}} > 
+                                                {MyChannels.map(ButtonMyChannel) }
+                                        </div>
                                         : <div/>
                                 }
-                        </div>
-                        <div className="ChannelNotJoinded">
+                        </Col>
+                        <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} lg={6}>
+
                                 Channels not Joined:
                                 { OthersChannels.length !== 0 
-                                        ? OthersChannels.map(ButtonOtherChannel)
+                                        ? <div style={{overflow: 'auto', height: '7.9em'}}>
+                                                {OthersChannels.map(ButtonOtherChannel)}
+                                        </div>
                                         : <div/>                
                                 }
-                        </div>
+                        </Col>
                 </Row>
 	)
-
 }
 
 export default ListChannel

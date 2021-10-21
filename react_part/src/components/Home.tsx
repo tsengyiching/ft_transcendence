@@ -30,8 +30,8 @@ function Home() {
 				    	<Game />
                     </Col>
                     <Col lg={5} md={4} sm={3} className="RightColHome">
-		                <Row lg={5} md={5} className="ColMembers" as={Members} />
-                        <Row lg={2} md={2} as={Chat}/>
+		                {/*<Row lg={5} md={5} className="ColMembers" as={Members} />*/}
+                        <Chat/>
 					</Col>
                 </Row>
     )

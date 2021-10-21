@@ -17,7 +17,7 @@ export default function Members()
 		<div>
 		    <ButtonGroup className="mb-2">
 			{membersradios.map((radio, idx) => (
-			    <ToggleButton
+			    /*<ToggleButton
 			    size="lg"
 			    id={`membersRadio-${idx}`}
 			    name="membersRadio"
@@ -29,7 +29,14 @@ export default function Members()
 			    onChange={(e) => setMembersRadioValue(e.currentTarget.value)}
 			    >
 				{radio.name}
-			    </ToggleButton>
+			    </ToggleButton>*/
+			    <button 
+				id={`membersRadio-${idx}`}
+			    	key={radio.name}
+				style={{width: '300px'}}
+				>
+				    {radio.name}
+			    </button>
 			))}
 		    </ButtonGroup>
 		    { radioMembersValue === '1' ? <ListFriends/>

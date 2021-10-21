@@ -3,18 +3,15 @@
 .ScrollingListChannel {
 	margin: 2px;
 	margin-bottom: 20px;
-	display: list-item;
-	height: 700px;
-	width: 500px;
-	overflow: auto;
-	font-size: large;
+	height: 10em;
+	font-size: medium;
 }
 
 .ButtonChannel {
 	margin-top: 1px;
 	margin-bottom: 1px;
-	width: 220px;
-	height: 55px;
+	width: 17em;
+	height: 2.5em;
 	font-size: medium;
 	border: none;
 }
@@ -23,11 +20,17 @@
 /*Channels joined */
 
 .ChannelsJoined {
-	margin-bottom: 50px;
+	margin-bottom: 20px;
+	display: list-item;
+}
+
+.ChannelsNotJoined {
+	margin-bottom: 20px;
+	display: list-item;
 }
 
 .ButtonMyChannel {
-	text-align: left;
+	text-align: center;
 	background-color: #DC7633;
 }
 
@@ -41,9 +44,12 @@
 }
 
 .LogoChannel {
-	width: 20px;
-	height: 20px;
-	margin: 5px;
+	width: 1.5em;
+	height: 1.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	margin-left: 0.6em;
+	margin-right: 0.6em;
 }
 
 /*Channels not joined */
