@@ -14,7 +14,6 @@ import { CreateChannelDto } from '../dto/channel.dto';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
-import { ChannelParticipant } from '../model/channelParticipant.entity';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
 
@@ -78,7 +77,7 @@ export class ChatGateway
    * Create channel
    * @param CreateChannelDto : channel name and password
    */
-  @SubscribeMessage('channel_create')
+  @SubscribeMessage('channel-create')
   async createChannel(client: Socket, data: CreateChannelDto) {
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.createChannel(user.id, data);
@@ -104,7 +103,7 @@ export class ChatGateway
    * delete channel
    * @param data
    */
-  @SubscribeMessage('channel_delete')
+  @SubscribeMessage('channel-delete')
   deleteChannel(@MessageBody() data) {
     console.log('Channel Delete');
     console.log(data);
@@ -154,9 +153,9 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('channel-load')
-  async loadChannel(client: Socket, @MessageBody() channelID: number) {
+  async loadChannel(client: Socket, @MessageBody() channelId: number) {
     const user = await this.authService.getUserFromSocket(client);
-    client.join('channel-' + channelID);
+    client.join('channel-' + channelId);
   }
 
   /**
@@ -164,8 +163,8 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('channel-unload')
-  async unloadChannel(client: Socket, @MessageBody() channelID: number) {
-    client.leave('channel-' + channelID);
+  async unloadChannel(client: Socket, @MessageBody() channelId: number) {
+    client.leave('channel-' + channelId);
   }
 
   /**

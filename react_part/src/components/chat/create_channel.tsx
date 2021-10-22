@@ -18,7 +18,7 @@ function CreateChannelModal(props: Props) {
     function SubmitForm(event: any) {
       event.preventDefault();
       let data = {name: name, password: password};
-      props.socket.emit('channel_create', data);
+      props.socket.emit('channel-create', data);
       onHide();
     }
 

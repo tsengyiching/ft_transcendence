@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { onlineStatus, User } from '../model/user.entity';
+import { OnlineStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
@@ -43,7 +43,7 @@ export class UserService {
     newUser.nickname = profile.login;
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
-    newUser.userStatus = onlineStatus.AVAILABLE;
+    newUser.userStatus = OnlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 
@@ -53,7 +53,7 @@ export class UserService {
   createUserWithDto(createUserDto: CreateUserDto): Promise<User> {
     const newUser = this.userRepository.create({ ...createUserDto });
     newUser.isTwoFactorAuthenticationEnabled = false;
-    newUser.userStatus = onlineStatus.AVAILABLE;
+    newUser.userStatus = OnlineStatus.AVAILABLE;
     return this.userRepository.save(newUser);
   }
 

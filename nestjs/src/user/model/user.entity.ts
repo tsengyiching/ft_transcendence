@@ -11,7 +11,7 @@ import {
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
 
-export enum onlineStatus {
+export enum OnlineStatus {
   AVAILABLE = 'Available',
   PALYING = 'Playing',
   OFFLINE = 'Offline',
@@ -33,9 +33,9 @@ export class User {
 
   @Column({
     type: 'enum',
-    enum: onlineStatus,
+    enum: OnlineStatus,
   })
-  userStatus: onlineStatus;
+  userStatus: OnlineStatus;
 
   @Column({ nullable: true })
   email?: string;

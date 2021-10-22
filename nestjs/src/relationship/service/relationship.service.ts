@@ -1,10 +1,12 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import e from 'cors';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { RelationshipDto } from '../model/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
 import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
+import { SendlistDto } from '../model/send-list.dto';
 import { SendRelationshipDto } from '../model/send-relationship.dto';
 import UserRelationship from '../model/userRelationship.entity';
 
@@ -40,10 +42,7 @@ export class RelationshipService {
     return relation[0];
   }
 
-  async getRelationList(
-    id: number,
-    reqStatus: string,
-  ): Promise<UserRelationship> {
+  async getRelationList(id: number, reqStatus: string): Promise<SendlistDto[]> {
     let status: RelationshipStatus;
     if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
     else if (reqStatus === 'notconfirmed')
@@ -55,14 +54,34 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    return this.userRelationship
-      .createQueryBuilder('userRelationship')
-      .leftJoinAndSelect('userRelationship.relationship', 'relationship')
-      .leftJoinAndSelect('userRelationship.user', 'user')
-      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
-      .where('userRelationship.userId != :Id', { Id: id })
-      .andWhere('status = :status', { status: status })
-      .execute();
+    const allList = await this.relationshipRepository.find({
+      relations: ['userRelationship', 'userRelationship.user'],
+      where: { status: status },
+    });
+    const userList = allList
+      .filter((data) => {
+        if (
+          data.userRelationship[0].userId === id ||
+          data.userRelationship[1].userId === id
+        )
+          return true;
+        else return false;
+      })
+      .map((data) => {
+        const res = data.userRelationship.filter((obj) => obj.userId !== id);
+        return res[0];
+      })
+      .map((data) => data.user);
+    const ret: SendlistDto[] = userList.map((data) => {
+      const obj: SendlistDto = {
+        userId: data.id,
+        nickname: data.nickname,
+        avatar: data.avatar,
+        status: data.userStatus,
+      };
+      return obj;
+    });
+    return ret;
   }
 
   async addFriend(

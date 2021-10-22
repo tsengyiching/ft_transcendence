@@ -23,7 +23,7 @@ export class ChatService {
 
   /**
    * createChannel creates new channel with a channel owner.
-   * (channel_create)
+   * (channel-create)
    * @param channelCreatorId id of user who creates channel
    * @param createChannelDto data required for creating channel (name and passward)
    * @returns Promise<Channel>
@@ -121,8 +121,11 @@ export class ChatService {
     );
     if (!participant)
       throw new WsException('You are not a member of this channel.');
-    // participant.status == StatusInChannel.BAN -> cannot leave
-    // participant.status == StatusInChannel.OWNER -> admin becomes owner/ no admin -> random -> notify
+    if (participant.status == StatusInChannel.BAN)
+      throw new WsException('User is banned in this channel.');
+    //if ()
+    //if (participant.status == StatusInChannel.OWNER)
+    //{ -> admin becomes owner/ no admin -> random}
     return this.channelParticipantRepository.remove(participant);
   }
 
@@ -161,6 +164,15 @@ export class ChatService {
       .where('channelParticipant.channelId = :Id', { Id: channelId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
+  }
+
+  async getChannelUsersAmount(channelId: number): Promise<number[]> {
+    const channelUsers = await this.channelRepository.find({
+      where: { id: channelId },
+      relations: ['participant'],
+    });
+    const amount = channelUsers.map((data) => data.participant.length);
+    return amount;
   }
 
   /****************************************************************************/
