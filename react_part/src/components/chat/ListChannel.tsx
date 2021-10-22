@@ -42,6 +42,17 @@ function ListChannel(props: IUseStateChannel) {
                 socket.emit("ask-reload-channel");
                 }, [])
 
+        useEffect(() => {
+                socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
+                socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
+
+                return (() => {
+                        socket.off("channels-user-in");
+                        socket.off("channels-user-out");
+                })
+        }, [MyChannels, OthersChannels, socket]);
+
+
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
@@ -93,12 +104,6 @@ function ListChannel(props: IUseStateChannel) {
                 )
         }
 
-
-        useEffect(() => {
-                socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
-                socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
-        }, [MyChannels, OthersChannels, socket]);
-
 	return(
                 <Row className="ScrollingListChannel">
                         <Col className="ChannelsJoined" lg={6} >
@@ -117,7 +122,7 @@ function ListChannel(props: IUseStateChannel) {
                                         ? <div style={{overflow: 'auto', height: '7.9em'}}>
                                                 {OthersChannels.map(ButtonOtherChannel)}
                                         </div>
-                                        : <div/>                
+                                        : <div/>
                                 }
                         </Col>
                 </Row>

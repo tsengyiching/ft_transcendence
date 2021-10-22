@@ -2,3 +2,14 @@
 .ColMembers {
 	height: 300rem;
 }
+
+.PictureUser {
+	height: 4em;
+	width: 4em;
+	margin-right: 2em;
+}
+
+.UserButton {
+	height: 4em;
+	font-size: large;
+}

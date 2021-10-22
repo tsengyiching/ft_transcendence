@@ -9,7 +9,7 @@ export default function InterfaceMembers()
     const [radioMembersValue, setMembersRadioValue] = useState('1');
     const membersradios = [
         {name: 'Friends', value: '1', variant: 'outline-primary'},
-        {name: 'Users', value: '2', variant: 'outline-secondary'},
+        {name: 'Other Users', value: '2', variant: 'outline-secondary'},
 	{name: 'Blocked', value: '3', variant: 'outline-danger'},
 	{name: 'Friend Requests', value: '4', variant: 'outline-warning'}
     ]
@@ -31,8 +31,8 @@ export default function InterfaceMembers()
 			    </ToggleButton>
 			))}
 		    </ButtonGroup>
-		    { radioMembersValue === '1' ? <ListFriends/>
-		    : radioMembersValue === '2' ? <Col> Users </Col>
+		    { radioMembersValue === '1' ? <ListFriends />
+		    : radioMembersValue === '2' ? <Col> Other Users </Col>
 		    : radioMembersValue === '3' ? <Col> Blocked </Col>
 		    : 				  <Col> Friend Requests </Col>}
 		</div>
