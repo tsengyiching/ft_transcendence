@@ -3,8 +3,7 @@ import axios from 'axios'
 import { Row, Col } from 'react-bootstrap'
 import {SocketContext} from "../context/socket"
 import { useContext } from 'react'
-import Chat from './chat/Chat'
-import Members from './members/members';
+import InterfaceUser from './chat/InterfaceUser'
 import Game from './Game'
 import "./Home.css"
 import "./members/members.css"
@@ -31,7 +30,7 @@ function Home() {
                     </Col>
                     <Col lg={5} md={4} sm={3} className="RightColHome">
 		                {/*<Row lg={5} md={5} className="ColMembers" as={Members} />*/}
-                        <Chat/>
+                        <InterfaceUser/>
 					</Col>
                 </Row>
     )

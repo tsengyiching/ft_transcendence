@@ -4,7 +4,7 @@ import {useState} from 'react'
 import './members.css'
 import ListFriends from './ListFriends'
 
-export default function Members()
+export default function InterfaceMembers()
 {
     const [radioMembersValue, setMembersRadioValue] = useState('1');
     const membersradios = [
@@ -17,8 +17,7 @@ export default function Members()
 		<div>
 		    <ButtonGroup className="mb-2">
 			{membersradios.map((radio, idx) => (
-			    /*<ToggleButton
-			    size="lg"
+			    <ToggleButton
 			    id={`membersRadio-${idx}`}
 			    name="membersRadio"
 			    key={radio.name}
@@ -29,14 +28,7 @@ export default function Members()
 			    onChange={(e) => setMembersRadioValue(e.currentTarget.value)}
 			    >
 				{radio.name}
-			    </ToggleButton>*/
-			    <button 
-				id={`membersRadio-${idx}`}
-			    	key={radio.name}
-				style={{width: '300px'}}
-				>
-				    {radio.name}
-			    </button>
+			    </ToggleButton>
 			))}
 		    </ButtonGroup>
 		    { radioMembersValue === '1' ? <ListFriends/>
