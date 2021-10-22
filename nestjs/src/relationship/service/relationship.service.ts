@@ -74,10 +74,10 @@ export class RelationshipService {
       .map((data) => data.user);
     const ret: SendlistDto[] = userList.map((data) => {
       const obj: SendlistDto = {
-        userId: data.id,
-        nickname: data.nickname,
-        avatar: data.avatar,
-        status: data.userStatus,
+        user_id: data.id,
+        user_nickname: data.nickname,
+        user_avatar: data.avatar,
+        user_userStatus: data.userStatus,
       };
       return obj;
     });

@@ -1,8 +1,8 @@
 import { OnlineStatus } from 'src/user/model/user.entity';
 
 export class SendlistDto {
-  userId: number;
-  nickname: string;
-  avatar: string;
-  status: OnlineStatus;
+  user_id: number;
+  user_nickname: string;
+  user_avatar: string;
+  user_userStatus: OnlineStatus;
 }

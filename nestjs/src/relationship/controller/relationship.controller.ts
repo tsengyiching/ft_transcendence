@@ -51,9 +51,21 @@ export class RelationshipController {
    ** returns an array with user friends' id, nickname, avatar and status
    */
   @Get('me/list')
-  getRelationList(
+  getMyRelationList(
     @CurrentUser() user: User,
     @Query('status') status: string,
+  ): Promise<SendlistDto[]> {
+    return this.relationshipService.getRelationList(user.id, status);
+  }
+
+  /*
+   ** getList takes query relation_status to request corresponding list,
+   ** returns an array with user friends' id, nickname, avatar and status
+   */
+  @Get(':id/list')
+  getRelationList(
+    @CurrentUser() user: User,
+    @Query('relation_status') status: string,
   ): Promise<SendlistDto[]> {
     return this.relationshipService.getRelationList(user.id, status);
   }
@@ -67,6 +79,17 @@ export class RelationshipController {
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
     return this.relationshipService.addFriend(user.id, relationshipDto);
+  }
+
+  /*
+   ** TESTER DELETE LATER
+   */
+  @Post('add/:id')
+  addFriendTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<SendAddFriendRelationshipDto> {
+    return this.relationshipService.addFriend(id, relationshipDto);
   }
 
   /*
@@ -101,6 +124,17 @@ export class RelationshipController {
   }
 
   /*
+   ** TESTER DELETE LATER
+   */
+  @Delete('unfriend/:id')
+  unfriendTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<SendRelationshipDto> {
+    return this.relationshipService.deleteFriend(id, relationshipDto);
+  }
+
+  /*
    ** blockUser returns the block relationship
    ** if the users are friends, they'll be unfriend first
    ** than create the block relationship
@@ -122,5 +156,16 @@ export class RelationshipController {
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
     return this.relationshipService.deleteBlockUser(user.id, relationshipDto);
+  }
+
+  /*
+   ** TESTER DELETE LATER
+   */
+  @Delete('unblock/:id')
+  unblockTest(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() relationshipDto: RelationshipDto,
+  ): Promise<SendRelationshipDto> {
+    return this.relationshipService.deleteBlockUser(id, relationshipDto);
   }
 }
