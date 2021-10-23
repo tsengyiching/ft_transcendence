@@ -3,6 +3,9 @@ import { Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import {useState} from 'react'
 import './members.css'
 import ListFriends from './ListFriends'
+import ListOtherUsers from './ListOtherUsers'
+import ListBlockedUsers from './ListBlockedUsers'
+import ListFriendRequests from './ListFriendRequests'
 
 export default function InterfaceMembers()
 {
@@ -32,9 +35,9 @@ export default function InterfaceMembers()
 			))}
 		    </ButtonGroup>
 		    { radioMembersValue === '1' ? <ListFriends />
-		    : radioMembersValue === '2' ? <Col> Other Users </Col>
-		    : radioMembersValue === '3' ? <Col> Blocked </Col>
-		    : 				  <Col> Friend Requests </Col>}
+		    : radioMembersValue === '2' ? <ListOtherUsers/>
+		    : radioMembersValue === '3' ? <ListBlockedUsers/>
+		    : 							  <ListFriendRequests/> }
 		</div>
 	)
 }
