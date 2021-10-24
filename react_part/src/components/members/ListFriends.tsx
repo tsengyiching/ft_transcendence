@@ -75,7 +75,8 @@ export default function ListFriends()
 	const [ReloadFriendlist, SetReloadFriendlist] = useState<boolean>(true);
 
 	useEffect(() => {
-		socket.on('reload-friendlist', () => {SetReloadFriendlist(!ReloadFriendlist)});
+		socket.on('reload-status', () => {SetReloadFriendlist(!ReloadFriendlist)});
+		return (() => {socket.off('reload-status');});
 	}, [])
 
 	useEffect(() => {
