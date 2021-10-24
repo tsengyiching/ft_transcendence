@@ -1,0 +1,12 @@
+.ScrollingListFriendRequests {
+	display: list-item;
+	padding: 0.5em;
+	height: 200px;
+	overflow: auto;
+	font-size: medium;
+}
+
+.FriendRequest {
+	background-color:#ff6900;
+	color: #F0FFFF;
+}

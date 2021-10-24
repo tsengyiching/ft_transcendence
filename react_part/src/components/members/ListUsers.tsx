@@ -69,7 +69,7 @@ export default function ListUsers()
 	}, [])
 
 	useEffect(() => {
-		axios.get("http://localhost:8080/relationship/me/list?status=User", {withCredentials: true,})
+		axios.get("http://localhost:8080/relationship/me/list", {withCredentials: true,})
 		.then(res => {
 			SetUsers(res.data);
 		})
