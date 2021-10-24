@@ -23,9 +23,9 @@ function Header () {
                 <div className="d-flex flex-row-reverse">
 					<ProfilImage />
                     <div className="col-">
-                        <div className="row"><h4><a href="/me">Profil</a></h4></div>
-                        <div className="row"><h4><a href="/parametres">Paramètres</a></h4></div>
-                        <div className="row"><h4><a href="/deconnexion">Deconnexion</a></h4></div>
+                        <div className="row"><h4><a href="/me">Profile</a></h4></div>
+                        <div className="row"><h4><a href="/parametres">Parameters</a></h4></div>
+                        <div className="row"><h4><a href="/deconnexion">Disconnection</a></h4></div>
                     </div>
                 </div>
             </nav>

@@ -5,10 +5,10 @@ function Game() {
         <div className="row align-self-center">
             <div className="col"></div>
              <div className="col">
-                <Button>Créer / Rejoindre une partie</Button>
+                <Button>Create / Join Game</Button>
             </div>
             <div className="col">
-                <Button>Créer / Rejoindre une partie bonus</Button>
+                <Button>Create / Join Bonus Game</Button>
             </div>
             <div className="col"></div>
 		</div>
