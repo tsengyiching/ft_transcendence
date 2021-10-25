@@ -1,14 +1,6 @@
 
-.ScrollingListBlockedUsers {
-	display: list-item;
-	padding: 0.5em;
-	height: 200px;
-	overflow: auto;
-	font-size: medium;
-}
-
 .BlockedUser {
-	background-color: #644343
-;
+	background-color: #644343;
+	margin-top: 0.5em;
 	color: #F0FFFF;
 }

@@ -4,14 +4,23 @@
 }
 
 .PictureUser {
-	height: 4em;
-	width: 4em;
+	height: 3.5em;
+	width: 3.5em;
+	margin: 0.2em;
 	margin-right: 2em;
 }
 
 .UserButton {
 	height: 4em;
 	font-size: large;
+}
+
+.ScrollingListMembers {
+	display: list-item;
+	padding: 0.5em;
+	height: 40em;
+	overflow: auto;
+	font-size: medium;
 }
 
 /* Context menu css */

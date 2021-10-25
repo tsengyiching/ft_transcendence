@@ -4,9 +4,9 @@ import {Image, Button} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriendRequests.css"
 import './members.css'
-import status from './Status'
-import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame} from './ContextMenuFunctions'
+import ApprovedButton from '../pictures/approved_button.png'
+import DeclineButton from '../pictures/decline_button.png'
+import {ValidationFriend} from "./ContextMenuFunctions"
 
 interface IFriendRequest {
 	user_id: number;
@@ -20,8 +20,8 @@ function FriendRequest(FriendRequest: IFriendRequest)
 			<div key={`FriendRequest_${FriendRequest.user_id}`} className="FriendRequest UserButton">
 				<Image src={FriendRequest.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
 				{FriendRequest.user_nickname}
-				<Button> Accept </Button>
-				<Button> Decline </Button>
+				<Image className="ValidationButton" src={ApprovedButton} rounded onClick={() => ValidationFriend(FriendRequest.user_id, true)}/>
+				<Image className="ValidationButton" src={DeclineButton} rounded onClick={() => ValidationFriend(FriendRequest.user_id, false)}/>
 			</div>
 		)
 		//console.log(`FriendRequest : ${FriendRequest}`)
@@ -45,13 +45,11 @@ export default function ListFriendRequests()
 		.catch(res => {
 			console.log("error");
 		})
-		SetFriendRequests([{user_id: 1, user_avatar: "https://ichef.bbci.co.uk/news/999/cpsprodpb/15951/production/_117310488_16.jpg"
-						, user_nickname: "Theo", user_userStatus: "Playing"}])
 		//console.log(FriendRequests);
 	}, [ReloadFriendRequestlist]);
 
 	return (
-		<div className="ScrollingListFriendRequests">
+		<div className="ScrollingListMembers">
 			{FriendRequests.map(FriendRequest)}
 			{/*<Button onClick={() => SetReloadFriendRequestlist(!ReloadFriendRequestlist)}> Reload FriendRequests
 			</Button>*/}

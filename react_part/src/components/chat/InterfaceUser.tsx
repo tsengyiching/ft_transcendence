@@ -8,6 +8,7 @@ import DropdownListUser from './DropdownListUser';
 import './InterfaceUser.css'
 import {SocketContext} from '../../context/socket'
 import InterfaceMembers from '../members/members';
+import { Server } from 'http';
 
 interface IStatus {
     id: number,
@@ -57,7 +58,11 @@ function InterfaceUser() {
         </Col>
         <Col>
             {channelradioValue==='1' ? 
-                  <CreateChannelButton socketid={socket}/>
+                <div>
+                    <CreateChannelButton socketid={socket}/>
+                    { channelSelected !== undefined &&
+                    <Button onClick={() => {socket.emit("user-leave", {channelId: channelSelected.channel_id}) }}> Leave Channel </Button>}
+                </div>
                 : <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             }
         </Col>

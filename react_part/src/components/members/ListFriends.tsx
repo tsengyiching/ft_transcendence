@@ -87,13 +87,11 @@ export default function ListFriends()
 		.catch(res => {
 			console.log("error");
 		})
-		SetFriends([{user_id: 1, user_avatar: "https://ichef.bbci.co.uk/news/999/cpsprodpb/15951/production/_117310488_16.jpg"
-						, user_nickname: "Theo", user_userStatus: "Available"}])
 		//console.log(Friends);
 	}, [ReloadFriendlist]);
 
 	return (
-		<div className="ScrollingListFriends">
+		<div className="ScrollingListMemebers">
 			{Friends.map(Friend)}
 			{/*<Button onClick={() => SetReloadFriendlist(!ReloadFriendlist)}> Reload Friends
 			</Button>*/}

@@ -64,13 +64,11 @@ export default function ListBlockedUsers()
 		.catch(res => {
 			console.log("error");
 		})
-		SetBlockedUsers([{user_id: 1, user_avatar: "https://ichef.bbci.co.uk/news/999/cpsprodpb/15951/production/_117310488_16.jpg"
-						, user_nickname: "Theo", user_userStatus: "Playing"}])
 		//console.log(BlockedUsers);
 	}, [ReloadBlockedUserlist]);
 
 	return (
-		<div className="ScrollingListBlockedUsers">
+		<div className="ScrollingListMembers">
 			{BlockedUsers.map(BlockedUser)}
 			{/*<Button onClick={() => SetReloadBlockedUserlist(!ReloadBlockedUserlist)}> Reload BlockedUsers
 			</Button>*/}

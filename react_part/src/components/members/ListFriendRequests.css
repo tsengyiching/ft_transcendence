@@ -1,12 +1,13 @@
-.ScrollingListFriendRequests {
-	display: list-item;
-	padding: 0.5em;
-	height: 200px;
-	overflow: auto;
-	font-size: medium;
-}
 
 .FriendRequest {
 	background-color:#ff6900;
 	color: #F0FFFF;
+	margin-top: 0.5em;
+}
+
+.ValidationButton {
+	width: 1.5em;
+	height: 1.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
 }
