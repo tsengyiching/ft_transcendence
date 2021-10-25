@@ -5,6 +5,7 @@ In this file, you'll find the list of api created in the back-end.
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
 |GET|login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000*<br />*If user has turned on two factor auth, redirect to localhost:3000/2fa*|
+|GET|disconnect| - |Disconnecting user by deleting cookies (jwt's).|
 
 ## /2fa/
 | Method | Root | Parameters | Return    |
