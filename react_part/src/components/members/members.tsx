@@ -1,5 +1,5 @@
 
-import { Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
+import { ButtonGroup, ToggleButton } from 'react-bootstrap'
 import {useState} from 'react'
 import './members.css'
 import ListFriends from './ListFriends'

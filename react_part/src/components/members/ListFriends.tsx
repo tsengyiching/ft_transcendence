@@ -54,7 +54,7 @@ function ConTextMenuFriend(props: {Friend: IFriend})
 function Friend(Friend: IFriend)
 	{
 		return (
-			<div>
+			<div id={`Friend_${Friend.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
 			<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
 				<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>

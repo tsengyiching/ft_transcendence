@@ -1,4 +1,4 @@
-import {Col, Button} from 'react-bootstrap'
+import {Button} from 'react-bootstrap'
 
 function Game() {
 	return (

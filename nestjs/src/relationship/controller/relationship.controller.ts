@@ -5,7 +5,6 @@ import {
   Get,
   Param,
   ParseIntPipe,
-  Patch,
   Post,
   Query,
   UseGuards,
@@ -95,7 +94,7 @@ export class RelationshipController {
   /*
    ** acceptFriend returns the new relationship
    */
-  @Patch('accept/:id')
+  @Get('accept/:id')
   acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {

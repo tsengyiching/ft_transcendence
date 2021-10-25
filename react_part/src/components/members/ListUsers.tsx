@@ -1,12 +1,11 @@
-import { useState, useEffect, MouseEventHandler,  } from "react"
+import { useState, useEffect, } from "react"
 import { socket } from "../../context/socket";
-import {Image, Button} from 'react-bootstrap'
+import {Image} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListUsers.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame} from './ContextMenuFunctions'
 
 interface IUser {
 	user_id: number;

@@ -10,7 +10,6 @@ import "./members/members.css"
 
 function Home() {
 
-    let socket = useContext(SocketContext);
     const [id, setId] = useState(0);
     const [name, setName] = useState("");
 

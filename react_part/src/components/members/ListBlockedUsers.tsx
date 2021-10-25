@@ -31,9 +31,9 @@ function ConTextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
 function BlockedUser(BlockedUser: IBlockedUser)
 	{
 		return (
-			<div>
+			<div id={`BlockedUser_${BlockedUser.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
-			<div key={`BlockedUser_${BlockedUser.user_id}`} className="BlockedUser UserButton">
+			<div className="BlockedUser UserButton">
 				<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
 				{BlockedUser.user_nickname}
 				{status(BlockedUser.user_userStatus)}

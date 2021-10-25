@@ -1,6 +1,3 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
-import { socket } from "../../context/socket";
 import { Image } from 'react-bootstrap'
 import './Status.css'
 
