@@ -67,6 +67,15 @@ export class RelationshipService {
           return true;
         else return false;
       })
+      .filter((data) => {
+        if (status === RelationshipStatus.NOTCONFIRMED) {
+          if (data.userRelationship[0].userId === id) return false;
+        }
+        if (status === RelationshipStatus.BLOCK) {
+          if (data.userRelationship[1].userId === id) return false;
+        }
+        return true;
+      })
       .map((data) => {
         const res = data.userRelationship.filter((obj) => obj.userId !== id);
         return res[0];
