@@ -39,7 +39,7 @@ In this file, you'll find the list of api created in the back-end.
 |:----:|:-----:|-------|:-----------|
 |GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
 |GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
-|GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available"}, {}...]`|
+|GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available", "relation_id": 1}, {}...]`|
 |POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend/block, throw HttpStatus:Bad_Request*|
 |Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
 |DELETE|reject/:id|relationship id|an object that was deleted <br />`{"createDate": "xxx", "status": "Not confirmed", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|

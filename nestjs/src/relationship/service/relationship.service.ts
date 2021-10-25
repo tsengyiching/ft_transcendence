@@ -70,14 +70,14 @@ export class RelationshipService {
       .map((data) => {
         const res = data.userRelationship.filter((obj) => obj.userId !== id);
         return res[0];
-      })
-      .map((data) => data.user);
+      });
     const ret: SendlistDto[] = userList.map((data) => {
       const obj: SendlistDto = {
-        user_id: data.id,
-        user_nickname: data.nickname,
-        user_avatar: data.avatar,
-        user_userStatus: data.userStatus,
+        user_id: data.user.id,
+        user_nickname: data.user.nickname,
+        user_avatar: data.user.avatar,
+        user_userStatus: data.user.userStatus,
+        relation_id: data.relationshipId,
       };
       return obj;
     });
