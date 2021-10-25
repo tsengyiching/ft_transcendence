@@ -11,25 +11,18 @@ export function InvitateToGame(id: number)
 	Approve or Decline a friend invitation
 	param: id: id of the user, isAccepted: does the user accept or decline the invitation
 */
-export function ValidationFriend(id: number, isAccepted: boolean)
+export async function ValidationFriend(id: number, isAccepted: boolean, CallBackfunction: () => void)
 {
 	if (isAccepted)
 	{
-		axios({
-			method: 'patch',
-			url: `http://localhost:8080/relationship/accept/${id}`,
-		      })
-		.then(res => socket.emit('reload-friend-requests'))
+		axios.patch(`http://localhost:8080/relationship/accept/${id}`, {withCredentials: true,})
+		.then(res => {CallBackfunction()})
 		.catch(res => console.log(`error in ValidationFriend: ${res}`));
 	}
 	else
 	{
-		axios({
-			method: 'patch',
-			url: `http://localhost:8080/relationship/decline/${id}`,
-		      })
-		.then(res => socket.emit('reload-friend-requests'))
+		axios.patch(`http://localhost:8080/relationship/reject/${id}`, {withCredentials: true,})
+		.then(res => CallBackfunction())
 		.catch(res => console.log(`error in ValidationFriend: ${res}`));
-
 	}
 }
