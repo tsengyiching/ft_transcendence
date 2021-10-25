@@ -13,7 +13,21 @@ export class MessageService {
     private messageRepository: Repository<Message>,
   ) {}
 
-  async getChannelMessages(authorId: number, channelId: number) {
+  async createChannelMessage(
+    authorId: number,
+    createMessageDto: CreateMessageDto,
+  ) {
+    // Check if channel exit
+    await this.channelService.getOneChannelParticipant(
+      authorId,
+      createMessageDto.channelId,
+    ); // check if user participate to the channel
+    const newMessage = this.messageRepository.create({ ...createMessageDto });
+    newMessage.authorId = authorId;
+    return this.messageRepository.save(newMessage);
+  }
+
+  async getChannelMessages(channelId: number) {
     return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')
@@ -30,41 +44,9 @@ export class MessageService {
       .execute();
   }
 
-  async createChannelMessage(
-    authorId: number,
-    createMessageDto: CreateMessageDto,
-  ) {
-    // Check if channel exit
-    await this.channelService.getOneChannelParticipant(
-      authorId,
-      createMessageDto.channelId,
-    ); // check if user participate to the channel
-    const newMessage = this.messageRepository.create({ ...createMessageDto });
-    newMessage.authorId = authorId;
-    return this.messageRepository.save(newMessage);
-  }
-
-  // getDirectMessages(senderId: number, receiverId: number) {
-  //   return this.messageRepository.find({
-  //     where: [
-  //       { receiverId: receiverId, senderId: receiverId },
-  //       { receiverId: senderId, senderId: senderId },
-  //     ],
-  //     order: { createDate: 'ASC' },
-  //   });
-  //   .createQueryBuilder('directMessage')
-  //   .select([
-  //     'message.id',
-  //     'message.channelId',
-  //     'message.authorId',
-  //     'author.nickname',
-  //     'author.avatar',
-  //     'message.createDate',
-  //   ])
-  //   .addSelect('message.message', 'message_content')
-  //   .where('message.channelId = :Id', { Id: channelId })
-  //   .execute();
-  //}
+  /****************************************************************************/
+  /*                               Direct Channel                             */
+  /****************************************************************************/
 
   async createDirectMessage(
     authorId: number,
@@ -78,5 +60,22 @@ export class MessageService {
     const newMessage = this.messageRepository.create({ ...createMessageDto });
     newMessage.authorId = authorId;
     return this.messageRepository.save(newMessage);
+  }
+
+  getDirectMessages(channelId: number) {
+    return this.messageRepository
+      .createQueryBuilder('directMessage')
+      .leftJoinAndSelect('message.author', 'author')
+      .select([
+        'message.id',
+        'message.channelId',
+        'message.authorId',
+        'author.nickname',
+        'author.avatar',
+        'message.createDate',
+      ])
+      .addSelect('message.message', 'message_content')
+      .where('message.channelId = :Id', { Id: channelId })
+      .execute();
   }
 }
