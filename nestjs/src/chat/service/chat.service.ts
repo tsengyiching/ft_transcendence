@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { CreateChannelDto } from '../dto/channel.dto';
+import { CreateChannelDto } from '../dto/create-channel.dto';
 import { Channel, ChannelType } from '../model/channel.entity';
 import * as bcrypt from 'bcrypt';
 import {
@@ -11,6 +11,7 @@ import {
 } from '../model/channelParticipant.entity';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { WsException } from '@nestjs/websockets';
+import { User } from 'src/user/model/user.entity';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
 
 @Injectable()
@@ -67,6 +68,12 @@ export class ChatService {
       userId,
       createChannelParticipantDto.channelId,
     );
+    if (!channel)
+      throw new WsException(
+        'The channel that you wish to join does not exist.',
+      );
+    if (channel.type == ChannelType.DIRECT)
+      throw new WsException('You cannot join a private chat channel.');
     if (participant)
       throw new WsException('You are already a member of this channel.');
     if (channel.type == ChannelType.PRIVATE) {
@@ -248,7 +255,52 @@ export class ChatService {
   }
 
   /****************************************************************************/
-  /*                                 Checkers                                 */
+  /*                               Direct Channel                             */
+  /****************************************************************************/
+
+  async createDirectChannel(user1: User, user2: User): Promise<Channel> {
+    // Check if the channel already exists.
+    let channel = await this.channelParticipantRepository
+      .createQueryBuilder()
+      .leftJoinAndSelect('ChannelParticipant.channel', 'channel')
+      .select(['channel.id'])
+      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhere('participant.userId = :Id', { Id: user1.id })
+      .andWhere('participant.userId = :Id', { Id: user2.id })
+      .execute();
+
+    if (!channel) throw new WsException('The convesation already exists');
+
+    const newChannel = this.channelRepository.create();
+    newChannel.name = user1.nickname + ', ' + user2.nickname;
+    newChannel.type = ChannelType.DIRECT;
+    channel = this.channelRepository.save(newChannel);
+
+    this.createDirectChannelParticipant(await channel, user1);
+    this.createDirectChannelParticipant(await channel, user2);
+    return channel;
+  }
+
+  async createDirectChannelParticipant(channel: Channel, user: User) {
+    const newUserparticipant = this.channelParticipantRepository.create();
+    newUserparticipant.channelId = channel.id;
+    newUserparticipant.role = ChannelRole.OWNER;
+    newUserparticipant.userId = user.id;
+    this.channelParticipantRepository.save(newUserparticipant);
+  }
+
+  async getDirectChannelList(userId: number): Promise<Channel[]> {
+    return this.channelRepository
+      .createQueryBuilder('channel')
+      .leftJoinAndSelect('channelParticipant', 'participant')
+      .select(['channel.id', 'channel.name'])
+      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhere('participant.userId = :Id', { Id: userId })
+      .execute();
+  }
+
+  /****************************************************************************/
+  /*                                 checkers                                 */
   /****************************************************************************/
 
   async checkChannelNameAndPassword(

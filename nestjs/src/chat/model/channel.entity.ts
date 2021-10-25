@@ -11,6 +11,7 @@ import { Message } from './messages.entity';
 export enum ChannelType {
   PUBLIC = 'Public',
   PRIVATE = 'Private',
+  DIRECT = 'Direct',
 }
 
 @Entity()
