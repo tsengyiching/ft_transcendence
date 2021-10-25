@@ -69,4 +69,14 @@ export class AuthController {
       res.redirect('http://localhost:3000/');
     }
   }
+
+  /**
+   * Disconnecting user by deleting cookies (jwt's).
+   * @param res Response object corresponding to the server response.
+   */
+  @Get('disconnect')
+  async disconnect(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('jwt');
+    res.clearCookie('jwt-two-factor');
+  }
 }
