@@ -46,27 +46,36 @@ export class RelationshipController {
   }
 
   /*
-   ** getList takes query relation_status to request corresponding list,
+   ** getMySpecificRelationList takes query relation_status to request corresponding list,
    ** returns an array with user friends' id, nickname, avatar and status
    */
   @Get('me/list')
-  getMyRelationList(
+  getMySpecificRelationList(
     @CurrentUser() user: User,
     @Query('status') status: string,
   ): Promise<SendlistDto[]> {
-    return this.relationshipService.getRelationList(user.id, status);
+    return this.relationshipService.getSpecificRelationList(user.id, status);
   }
 
   /*
-   ** getList takes query relation_status to request corresponding list,
+   ** getSpecificRelationList takes query relation_status to request corresponding list,
    ** returns an array with user friends' id, nickname, avatar and status
    */
   @Get(':id/list')
-  getRelationList(
+  getSpecificRelationList(
     @CurrentUser() user: User,
     @Query('relation_status') status: string,
   ): Promise<SendlistDto[]> {
-    return this.relationshipService.getRelationList(user.id, status);
+    return this.relationshipService.getSpecificRelationList(user.id, status);
+  }
+
+  /*
+   ** getMySpecificRelationList takes query relation_status to request corresponding list,
+   ** returns an array with user friends' id, nickname, avatar and status
+   */
+  @Get('me/allusers')
+  async getMyAllRelationList(@CurrentUser() user: User) {
+    return this.relationshipService.getAllRelationList(user.id);
   }
 
   /*

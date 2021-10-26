@@ -1,6 +1,5 @@
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import e from 'cors';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
 import { RelationshipDto } from '../model/relationship.dto';
@@ -42,7 +41,10 @@ export class RelationshipService {
     return relation[0];
   }
 
-  async getRelationList(id: number, reqStatus: string): Promise<SendlistDto[]> {
+  async getSpecificRelationList(
+    id: number,
+    reqStatus: string,
+  ): Promise<SendlistDto[]> {
     let status: RelationshipStatus;
     if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
     else if (reqStatus === 'notconfirmed')
@@ -91,6 +93,28 @@ export class RelationshipService {
       return obj;
     });
     return ret;
+  }
+
+  async getAllRelationList(id: number) {
+    const users = await this.userService.getAllWithConditions(id);
+    const friendIds = await this.getUserIdsWithRelatedStatus(id, 'friend');
+    const unconfirmIds = await this.getUserIdsWithRelatedStatus(
+      id,
+      'notconfirmed',
+    );
+    const blockIds = await this.getBlockIds(id);
+    const blockingIds = await this.getBlockingIds(id);
+    const addRelation = users
+      .map((data) => ({ ...data, relationship: null }))
+      .map((data) => {
+        if (friendIds.includes(data.id)) data.relationship = 'friend';
+        else if (unconfirmIds.includes(data.id))
+          data.relationship = 'Not confirmed';
+        else if (blockIds.includes(data.id)) data.relationship = 'block';
+        return data;
+      })
+      .filter((data) => (blockingIds.includes(data.id) ? false : true));
+    return addRelation;
   }
 
   async addFriend(
@@ -249,6 +273,41 @@ export class RelationshipService {
     await this.userRelationship.save(addressee);
   }
 
+  async getUserIdsWithRelatedStatus(
+    id: number,
+    reqStatus: string,
+  ): Promise<number[]> {
+    await this.userService.getUserProfileById(id);
+    let status: string;
+    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
+    if (reqStatus === 'notconfirmed') status = RelationshipStatus.NOTCONFIRMED;
+    const data = await this.getFullData(id, status);
+    const friendList = data.map((obj) => {
+      const relation = obj.relationship.userRelationship.filter(
+        (obj) => obj.userId !== id,
+      );
+      return relation[0].userId;
+    });
+    return friendList;
+  }
+
+  async getBlockIds(id: number) {
+    await this.userService.getUserProfileById(id);
+    const data = await this.getFullData(id, RelationshipStatus.BLOCK);
+    const blockList = data
+      .map((obj) => obj.relationship.userRelationship[1].userId)
+      .filter((data) => data !== id);
+    return blockList;
+  }
+
+  async getBlockingIds(id: number) {
+    await this.userService.getUserProfileById(id);
+    const data = await this.getFullData(id, RelationshipStatus.BLOCK);
+    const blockList = data
+      .map((obj) => obj.relationship.userRelationship[0].userId)
+      .filter((data) => data !== id);
+    return blockList;
+  }
   /****************************************************************************/
   /*                                 checkers                                 */
   /****************************************************************************/
@@ -291,7 +350,10 @@ export class RelationshipService {
    ** throws exception if it's true
    */
   async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
-    const friendlist = await this.getFriendsId(userOne);
+    const friendlist = await this.getUserIdsWithRelatedStatus(
+      userOne,
+      'friend',
+    );
     if (friendlist.includes(userTwo)) {
       throw new HttpException(
         'Users are friends already.',
@@ -314,18 +376,6 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
-  }
-
-  async getFriendsId(id: number): Promise<number[]> {
-    await this.userService.getUserProfileById(id);
-    const data = await this.getFullData(id, RelationshipStatus.FRIEND);
-    const friendList = data.map((obj) => {
-      const relation = obj.relationship.userRelationship.filter(
-        (obj) => obj.userId !== id,
-      );
-      return relation[0].userId;
-    });
-    return friendList;
   }
 
   async checkUserRelationBlock(

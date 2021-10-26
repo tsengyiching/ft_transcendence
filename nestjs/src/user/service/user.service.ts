@@ -16,6 +16,15 @@ export class UserService {
     return this.userRepository.find({ order: { createDate: 'ASC' } });
   }
 
+  async getAllWithConditions(id: number): Promise<User[]> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id != :Id', { Id: id })
+      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
+      .orderBy('id', 'ASC')
+      .getMany();
+  }
+
   /*
    ** getOneById returns the user
    */
