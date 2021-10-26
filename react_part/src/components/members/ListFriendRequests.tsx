@@ -1,6 +1,6 @@
 import { useState, useEffect, MouseEventHandler,  } from "react"
 import { socket } from "../../context/socket";
-import {Image, Button} from 'react-bootstrap'
+import {Image, Col, Row, Button} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriendRequests.css"
 import './members.css'
@@ -16,22 +16,12 @@ interface IFriendRequest {
 	relation_id: number;
 }
 
-
-
 export default function ListFriendRequests()
 {
 	const [FriendRequests, SetFriendRequests] = useState<IFriendRequest[]>([]);
 	const [ReloadFriendRequestlist, SetReloadFriendRequestlist] = useState<boolean>(true);
 
-	function ReloadComponent()
-	{
-		SetReloadFriendRequestlist(!ReloadFriendRequestlist);
-	}
-
-	useEffect(() => {
-		socket.on('reload-friend-requests', () => {SetReloadFriendRequestlist(!ReloadFriendRequestlist)});
-		//return (() => {socket.off('reload-friend-requests');});
-	}, [])
+	const ReloadComponent = () => SetReloadFriendRequestlist(!ReloadFriendRequestlist);
 
 	useEffect(() => {
 		axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
@@ -49,10 +39,18 @@ export default function ListFriendRequests()
 	{
 		return (
 			<div key={`FriendRequest_${FriendRequest.user_id}`} className="FriendRequest UserButton">
+				<Row>
+				<Col lg={3}>
 				<Image src={FriendRequest.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				{FriendRequest.user_nickname}
-				<Image className="ValidationButton" src={ApprovedButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, true, ReloadComponent) }/>
-				<Image className="ValidationButton" src={DeclineButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, false, ReloadComponent) }/>
+				</Col>
+				<Col lg={4}>
+				<div style={{margin:"1em"}}> {FriendRequest.user_nickname} </div>	
+				</Col>
+				<Col lg={5}>
+					<Image className="ValidationButton" src={ApprovedButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, true, ReloadComponent) }/>
+					<Image className="ValidationButton" src={DeclineButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, false, ReloadComponent) }/>
+				</Col>
+			</Row>
 			</div>
 		)
 		//console.log(`FriendRequest : ${FriendRequest}`)
@@ -61,8 +59,8 @@ export default function ListFriendRequests()
 	return (
 		<div className="ScrollingListMembers">
 			{FriendRequests.map(FriendRequest)}
-			{<Button onClick={() => SetReloadFriendRequestlist(!ReloadFriendRequestlist)}> Reload FriendRequests
-			</Button>}
+			{/*<Button onClick={() => SetReloadFriendRequestlist(!ReloadFriendRequestlist)}> Reload FriendRequests
+			</Button>*/}
 		</div>
 	)
 }

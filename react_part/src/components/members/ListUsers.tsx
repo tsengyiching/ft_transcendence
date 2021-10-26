@@ -1,6 +1,6 @@
 import { useState, useEffect, } from "react"
 import { socket } from "../../context/socket";
-import {Image} from 'react-bootstrap'
+import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListUsers.css"
 import './members.css'
@@ -8,17 +8,18 @@ import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 
 interface IUser {
-	user_id: number;
-	user_nickname: string;
-	user_avatar: string;
-	user_userStatus: 'Available' | 'Playing' | 'Offline'}
+	id: number;
+	nickname: string;
+	avatar: string;
+	userStatus: 'Available' | 'Playing' | 'Offline';
+	relationship: null | 'friend' | 'block' | 'Not confirmed'}
 
-function ConTextMenuUser(props: {User: IUser})
+function ContextMenuUser(props: {User: IUser})
 {
 	return (
-	<ContextMenu id={`ContextMenuUser_${props.User.user_id}`}>
+	<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
 
-		{ props.User.user_userStatus !== 'Offline' &&
+		{ props.User.userStatus !== 'Offline' &&
 		<div>
 		<MenuItem>
 			Send a message
@@ -43,14 +44,22 @@ function User(User: IUser)
 	{
 		return (
 			<div>
-			<ContextMenuTrigger id={`ContextMenuUser_${User.user_id}`}>
-			<div key={`User_${User.user_id}`} className="User UserButton">
-				<Image src={User.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				{User.user_nickname}
-				{status(User.user_userStatus)}
+			<ContextMenuTrigger id={`ContextMenuUser_${User.id}`}>
+			<div key={`User_${User.id}`} className="User UserButton">
+			<Row>
+				<Col lg={3}>
+					<Image src={User.avatar} className="PictureUser" alt="picture" rounded fluid/>
+				</Col>
+				<Col lg={5}>
+					<div style={{margin:"1em"}}> {User.nickname} </div>
+				</Col>
+				<Col>
+					{status(User.userStatus)}
+				</Col>
+			</Row>
 			</div>
 			</ContextMenuTrigger>
-			<ConTextMenuUser User={User}/>
+			<ContextMenuUser User={User}/>
 
 			</div>
 		)
@@ -68,7 +77,7 @@ export default function ListUsers()
 	}, [])
 
 	useEffect(() => {
-		axios.get("http://localhost:8080/relationship/me/list", {withCredentials: true,})
+		axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
 		.then(res => {
 			SetUsers(res.data);
 		})

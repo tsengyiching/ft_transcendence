@@ -1,12 +1,13 @@
-import { useState, useEffect, MouseEventHandler,  } from "react"
+import { useState, useEffect, useContext } from "react"
 import { socket } from "../../context/socket";
-import {Image, Button} from 'react-bootstrap'
+import {Image, Col, Row, Button, Alert} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {InvitateToGame} from './ContextMenuFunctions'
+import { DataContext } from "../../App";
 
 interface IFriend {
 	user_id: number;
@@ -14,7 +15,7 @@ interface IFriend {
 	user_avatar: string;
 	user_userStatus: 'Available' | 'Playing' | 'Offline'}
 
-function ConTextMenuFriend(props: {Friend: IFriend})
+function ContextMenuFriend(props: {Friend: IFriend})
 {
 	return (
 	<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
@@ -54,15 +55,23 @@ function ConTextMenuFriend(props: {Friend: IFriend})
 function Friend(Friend: IFriend)
 	{
 		return (
-			<div id={`Friend_${Friend.user_id}`}>
+			<div key={`Friend_${Friend.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
 			<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
-				<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				{Friend.user_nickname}
-				{status(Friend.user_userStatus)}
+			<Row>
+				<Col lg={3}>
+					<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+				</Col>
+				<Col lg={5}>
+					<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
+				</Col>
+				<Col>
+					{status(Friend.user_userStatus)}
+				</Col>
+			</Row>
 			</div>
 			</ContextMenuTrigger>
-			<ConTextMenuFriend Friend={Friend}/>
+			<ContextMenuFriend Friend={Friend}/>
 
 			</div>
 		)
@@ -72,13 +81,29 @@ function Friend(Friend: IFriend)
 export default function ListFriends()
 {
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	const [ReloadFriendlist, SetReloadFriendlist] = useState<boolean>(true);
+	const [var1, Setvar1] = useState<boolean>(false);
+	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: 'Available' | 'Offline' | 'Playing'}>({user_id: 0, status: 'Available'});
+	const userData = useContext(DataContext);
+	
+	//* TO DO socket for ReloadFriendlist
 
+	//actualize the friendlist
 	useEffect(() => {
-		socket.on('reload-status', () => {SetReloadFriendlist(!ReloadFriendlist)});
-		return (() => {socket.off('reload-status');});
-	}, [])
+		if (userData.id === ReloadFriendlist.user_id1 || userData.id === ReloadFriendlist.user_id2)
+		{
+		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
+		.then(res => {
+			SetFriends(res.data);
+		})
+		.catch(res => {
+			console.log("error");
+		})
+		console.log("reload friendlist");
+		}
+	}, [ReloadFriendlist])
 
+	//get list of friends at the mount of the component
 	useEffect(() => {
 		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
 		.then(res => {
@@ -87,14 +112,34 @@ export default function ListFriends()
 		.catch(res => {
 			console.log("error");
 		})
-		//console.log(Friends);
-	}, [ReloadFriendlist]);
+
+		socket.on("reload-friendlist", (data: {user_id1: number, user_id2: number}) => {
+			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
+		})
+	}, [])
+
+	//actualise the status
+	useEffect(() => {
+		if (ReloadStatus.user_id !== 0)
+		{
+		console.log("in reloadstatus effect");
+		const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)
+		if (friend !== undefined)
+		{
+			console.log("change status");
+			friend.user_userStatus = ReloadStatus.status;
+			Setvar1(!var1);
+		}
+		}
+	}, [ReloadStatus])
 
 	return (
 		<div className="ScrollingListMemebers">
 			{Friends.map(Friend)}
-			{/*<Button onClick={() => SetReloadFriendlist(!ReloadFriendlist)}> Reload Friends
-			</Button>*/}
+			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: "Playing"});} }> Playing
+			</Button>}
+			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: "Offline"});} }> Offline
+			</Button>}
 		</div>
 	)
 }

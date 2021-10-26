@@ -1,6 +1,6 @@
 import { useState, useEffect, MouseEventHandler,  } from "react"
 import { socket } from "../../context/socket";
-import {Image, Button} from 'react-bootstrap'
+import {Image, Button, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListBlockedUsers.css"
 import './members.css'
@@ -14,7 +14,7 @@ interface IBlockedUser {
 	user_avatar: string;
 	user_userStatus: 'Available' | 'Playing' | 'Offline'}
 
-function ConTextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
+function ContextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
 {
 	return (
 	<ContextMenu id={`ContextMenuBlockedUser_${props.BlockedUser.user_id}`}>
@@ -34,12 +34,20 @@ function BlockedUser(BlockedUser: IBlockedUser)
 			<div id={`BlockedUser_${BlockedUser.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
 			<div className="BlockedUser UserButton">
+			<Row>
+			<Col lg={3}>
 				<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				{BlockedUser.user_nickname}
+			</Col>
+			<Col lg={5}>
+				<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
+			</Col>
+			<Col>
 				{status(BlockedUser.user_userStatus)}
+			</Col>
+			</Row>
 			</div>
 			</ContextMenuTrigger>
-			<ConTextMenuBlockedUser BlockedUser={BlockedUser}/>
+			<ContextMenuBlockedUser BlockedUser={BlockedUser}/>
 
 			</div>
 		)

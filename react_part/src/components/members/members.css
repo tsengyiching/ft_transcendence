@@ -13,6 +13,7 @@
 .UserButton {
 	height: 4em;
 	font-size: large;
+  margin-top: 0.5em;
 }
 
 .ScrollingListMembers {

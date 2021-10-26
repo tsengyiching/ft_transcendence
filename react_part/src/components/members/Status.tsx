@@ -1,11 +1,14 @@
 import { Image } from 'react-bootstrap'
 import './Status.css'
+import GreenCercle from '../pictures/cercle-vert-fond-transparent.png'
+import OrangeCercle from '../pictures/cercle-orange-fond-transparent.png'
+import RedCercle from '../pictures/cercle-rouge-fond-transparent.png'
 
 function status(status: 'Available' | 'Playing' | 'Offline')
 {
-	const color = (status === 'Available') ? 'https://www.png-gratuit.com/img/cercle-vert-fond-transparent.png'
-		: (status === 'Playing') ? 'https://www.png-gratuit.com/img/cercle-orange-fond-transparent.png'
-		: 'https://www.png-gratuit.com/img/cercle-rouge-fond-transparent.png';
+	const color = (status === 'Available') ? GreenCercle
+		: (status === 'Playing') ? OrangeCercle
+		: RedCercle;
 
 	return (
 		<Image 	src={color} rounded className="StatusCircle"/>
