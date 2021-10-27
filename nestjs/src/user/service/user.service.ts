@@ -120,6 +120,29 @@ export class UserService {
     return false;
   }
 
+  /**
+   * Change all users status to offline.
+   */
+  async resetUserStatus() {
+    this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ userStatus: OnlineStatus.OFFLINE })
+      .where('userStatus != :status', { status: OnlineStatus.OFFLINE })
+      .execute();
+  }
+  /**
+   * Change user status to specifique value.
+   */
+  async setUserStatus(userId: number, status: OnlineStatus) {
+    this.userRepository
+      .createQueryBuilder()
+      .update(User)
+      .set({ userStatus: status })
+      .where('id = :id', { id: userId })
+      .execute();
+  }
+
   /****************************************************************************/
   /*                                 utils                                    */
   /****************************************************************************/

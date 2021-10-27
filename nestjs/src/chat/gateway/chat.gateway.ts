@@ -9,7 +9,7 @@ import {
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
-import { User } from 'src/user/model/user.entity';
+import { OnlineStatus, User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
@@ -46,6 +46,7 @@ export class ChatGateway
    */
   afterInit(server: any) {
     // console.log('Socket is live');
+    this.userService.resetUserStatus();
   }
 
   /**
@@ -56,7 +57,12 @@ export class ChatGateway
   async handleConnection(client: Socket, ...args: any[]) {
     console.log('New User Join');
     const user: User = await this.authService.getUserFromSocket(client);
-    this.server.emit('user-join', user.id);
+    this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+    this.server.emit('reload-status', {
+      user_id: user.id,
+      status: OnlineStatus.AVAILABLE,
+    });
+
     const channels_in = this.chatService.getUserChannels(user.id);
     const channels_out = this.chatService.getUserNotParticipateChannels(
       user.id,
@@ -73,7 +79,11 @@ export class ChatGateway
   async handleDisconnect(client: Socket) {
     console.log('Remove active user');
     const user: User = await this.authService.getUserFromSocket(client);
-    this.server.emit('user-leave', user.id);
+    this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+    this.server.emit('reload-status', {
+      user_id: user.id,
+      status: OnlineStatus.OFFLINE,
+    });
   }
 
   /**
@@ -205,16 +215,26 @@ export class ChatGateway
   }
 
   /**
+   * Ask to (Re)load the direct Channels list
+   */
+  @SubscribeMessage('private-ask-reload')
+  async loadPrivate(client: Socket) {
+    const user: User = await this.authService.getUserFromSocket(client);
+    const direct = this.chatService.getDirectChannelList(user.id);
+    client.emit('private-list', await direct);
+  }
+
+  /**
    * Load channel data (message) and register to the room event
    * @param data
    */
-  @SubscribeMessage('direct-load')
-  async loadDirect(client: Socket, channelID: number) {
+  @SubscribeMessage('private-load')
+  async loadDirect(client: Socket, channelId: number) {
     const user = await this.authService.getUserFromSocket(client);
     if (user) {
       const channelParticipant =
-        await this.chatService.getOneChannelParticipant(user.id, channelID);
-      if (channelParticipant) client.join('direct-' + channelID);
+        await this.chatService.getOneChannelParticipant(user.id, channelId);
+      if (channelParticipant) client.join('private-' + channelId);
     }
   }
 
@@ -222,9 +242,9 @@ export class ChatGateway
    * Unload Channel data
    * @param data
    */
-  @SubscribeMessage('direct-unload')
-  async unloadDirect(client: Socket, channelID: number) {
-    client.leave('direct-' + channelID);
+  @SubscribeMessage('private-unload')
+  async unloadDirect(client: Socket, channelId: number) {
+    client.leave('private-' + channelId);
   }
 
   /**
