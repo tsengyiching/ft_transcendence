@@ -11,15 +11,16 @@ import {
 } from '@nestjs/common';
 import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
-import { RelationshipDto } from '../model/relationship.dto';
+import { RelationshipDto } from '../dto/relationship.dto';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { User } from 'src/user/model/user.entity';
 import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
-import { SendRelationshipDto } from '../model/send-relationship.dto';
+import { SendRelationshipDto } from '../dto/send-relationship.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
-import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
-import { SendlistDto } from '../model/send-list.dto';
+import { SendAddFriendRelationshipDto } from '../dto/send-addFriend-relationship.dto';
+import { SendSpecificListRelationshipDto } from '../dto/send-specificList-relationship.dto';
 import { ChatGateway } from 'src/chat/gateway/chat.gateway';
+import { SendAllUsersRelationshipDto } from '../dto/send-allUsers-relationship.dto';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
@@ -57,7 +58,7 @@ export class RelationshipController {
   getMySpecificRelationList(
     @CurrentUser() user: User,
     @Query('status') status: string,
-  ): Promise<SendlistDto[]> {
+  ): Promise<SendSpecificListRelationshipDto[]> {
     return this.relationshipService.getSpecificRelationList(user.id, status);
   }
 
@@ -69,7 +70,7 @@ export class RelationshipController {
   getSpecificRelationList(
     @Param('id', ParseIntPipe) id: number,
     @Query('status') status: string,
-  ): Promise<SendlistDto[]> {
+  ): Promise<SendSpecificListRelationshipDto[]> {
     return this.relationshipService.getSpecificRelationList(id, status);
   }
 
@@ -78,7 +79,9 @@ export class RelationshipController {
    ** returns an array with user friends' id, nickname, avatar and status
    */
   @Get('me/allusers')
-  async getMyAllRelationList(@CurrentUser() user: User) {
+  async getMyAllRelationList(
+    @CurrentUser() user: User,
+  ): Promise<SendAllUsersRelationshipDto[]> {
     return this.relationshipService.getAllRelationList(user.id);
   }
 

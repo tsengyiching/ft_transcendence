@@ -1,6 +1,6 @@
 import { OnlineStatus } from 'src/user/model/user.entity';
 
-export class SendlistDto {
+export class SendSpecificListRelationshipDto {
   user_id: number;
   user_nickname: string;
   user_avatar: string;

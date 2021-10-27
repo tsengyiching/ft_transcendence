@@ -2,12 +2,13 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
-import { RelationshipDto } from '../model/relationship.dto';
+import { RelationshipDto } from '../dto/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
-import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
-import { SendlistDto } from '../model/send-list.dto';
-import { SendRelationshipDto } from '../model/send-relationship.dto';
+import { SendAddFriendRelationshipDto } from '../dto/send-addFriend-relationship.dto';
+import { SendSpecificListRelationshipDto } from '../dto/send-specificList-relationship.dto';
+import { SendRelationshipDto } from '../dto/send-relationship.dto';
 import UserRelationship from '../model/userRelationship.entity';
+import { SendAllUsersRelationshipDto } from '../dto/send-allUsers-relationship.dto';
 
 @Injectable()
 export class RelationshipService {
@@ -41,10 +42,11 @@ export class RelationshipService {
     return relation[0];
   }
 
+  /*  Query ?status="friend/notconfirmed/block"*/
   async getSpecificRelationList(
     id: number,
     reqStatus: string,
-  ): Promise<SendlistDto[]> {
+  ): Promise<SendSpecificListRelationshipDto[]> {
     const status: RelationshipStatus = this.checkReqStatus(reqStatus);
     const allList = await this.getAllRelationshipWithStatus(status);
     const userList = allList
@@ -72,16 +74,14 @@ export class RelationshipService {
     return this.reformListSendingData(userList);
   }
 
-  async getAllRelationList(id: number) {
+  /*get user's relationship with other users */
+  async getAllRelationList(id: number): Promise<SendAllUsersRelationshipDto[]> {
     const users = await this.userService.getAllWithConditions(id);
-    const friendIds = await this.getUserIdsWithRelatedStatus(id, 'friend');
-    const unconfirmIds = await this.getUserIdsWithRelatedStatus(
-      id,
-      'notconfirmed',
-    );
-    const blockIds = await this.getBlockIds(id);
+    const friendIds = await this.getUserIdsWithStatus(id, 'friend');
+    const unconfirmIds = await this.getUserIdsWithStatus(id, 'notconfirmed');
+    const blockIds = await this.getUserIdsWithStatus(id, 'block');
     const blockingIds = await this.getBlockingIds(id);
-    const addRelation = users
+    const relations = users
       .map((data) => ({ ...data, relationship: null }))
       .map((data) => {
         if (friendIds.includes(data.id)) data.relationship = 'friend';
@@ -91,19 +91,25 @@ export class RelationshipService {
         return data;
       })
       .filter((data) => (blockingIds.includes(data.id) ? false : true));
-    return addRelation;
+    return this.reformAllRelationListSendingData(relations);
   }
 
   async addFriend(
     id: number,
     relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
+    /* check */
     await this.checkIsSameUser(id, relationshipDto.addresseeUserId);
     await this.checkUsersRelation(id, relationshipDto.addresseeUserId);
+
+    /*create new relationship*/
     const newRelationship = await this.relationshipRepository.create();
     newRelationship.status = RelationshipStatus.NOTCONFIRMED;
     await this.relationshipRepository.save(newRelationship);
+
+    /* add two users in UserRelationship */
     await this.setNewRelation(id, relationshipDto, newRelationship.id);
+
     const relationship = await this.relationshipRepository.findOne({
       where: { id: newRelationship.id },
       relations: ['userRelationship'],
@@ -209,8 +215,10 @@ export class RelationshipService {
     });
   }
 
-  /*
-   ** getFullData returns user's friend full information
+  /**
+   * getFullData
+   * @arg : userId and the relationship's status
+   * @return : user's related other users
    */
   async getFullData(id: number, status: string): Promise<UserRelationship[]> {
     const data = await this.userRelationship.find({
@@ -223,8 +231,10 @@ export class RelationshipService {
     return data;
   }
 
-  /*
-   ** findUserRelationshipId returns user and his friend's relationshipId
+  /**
+   * findUserRelationshipId
+   * @arg : userId, friendId, the relationship's status
+   * @return : user and his friend's linked relationshipId
    */
   async findUserRelationshipId(
     userId: number,
@@ -247,8 +257,9 @@ export class RelationshipService {
     return relationshipId;
   }
 
-  /*
-   ** setNewRelation save data in userRelationship table
+  /**
+   * setNewRelation save two users in userRelationship table
+   * @arg : requester id; addresseeUserId; related relationshipId
    */
   async setNewRelation(
     id: number,
@@ -266,38 +277,61 @@ export class RelationshipService {
     await this.userRelationship.save(addressee);
   }
 
-  async getUserIdsWithRelatedStatus(
-    id: number,
-    reqStatus: string,
-  ): Promise<number[]> {
+  /**
+   * getUserIdsWithStatus
+   * @arg : userId and the status demanded
+   * @return array [user ids]
+   */
+  async getUserIdsWithStatus(id: number, reqStatus: string): Promise<number[]> {
+    /* check */
     await this.userService.getUserProfileById(id);
-    let status: string;
-    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
-    if (reqStatus === 'notconfirmed') status = RelationshipStatus.NOTCONFIRMED;
+    const status: RelationshipStatus = this.checkReqStatus(reqStatus);
+
+    /* get related data*/
     const data = await this.getFullData(id, status);
-    const friendList = data.map((obj) => {
-      const relation = obj.relationship.userRelationship.filter(
-        (obj) => obj.userId !== id,
-      );
-      return relation[0].userId;
-    });
-    return friendList;
+    if (
+      status == RelationshipStatus.FRIEND ||
+      status == RelationshipStatus.NOTCONFIRMED
+    ) {
+      const list = data.map((obj) => {
+        const relation = obj.relationship.userRelationship.filter(
+          (obj) => obj.userId !== id,
+        );
+        return relation[0].userId;
+      });
+      return list;
+    } else {
+      const blockList = data
+        .map((obj) => {
+          if (
+            obj.relationship.userRelationship[0].id <
+            obj.relationship.userRelationship[1].id
+          )
+            return obj.relationship.userRelationship[1].userId;
+          else return obj.relationship.userRelationship[0].userId;
+        })
+        .filter((data) => data !== id);
+      return blockList;
+    }
   }
 
-  async getBlockIds(id: number) {
+  /**
+   * getBlockingIds
+   * @arg : userId
+   * @return array [other user ids who block @arg id]
+   */
+  async getBlockingIds(id: number): Promise<number[]> {
     await this.userService.getUserProfileById(id);
     const data = await this.getFullData(id, RelationshipStatus.BLOCK);
     const blockList = data
-      .map((obj) => obj.relationship.userRelationship[1].userId)
-      .filter((data) => data !== id);
-    return blockList;
-  }
-
-  async getBlockingIds(id: number) {
-    await this.userService.getUserProfileById(id);
-    const data = await this.getFullData(id, RelationshipStatus.BLOCK);
-    const blockList = data
-      .map((obj) => obj.relationship.userRelationship[0].userId)
+      .map((obj) => {
+        if (
+          obj.relationship.userRelationship[0].id <
+          obj.relationship.userRelationship[1].id
+        )
+          return obj.relationship.userRelationship[0].userId;
+        else return obj.relationship.userRelationship[1].userId;
+      })
       .filter((data) => data !== id);
     return blockList;
   }
@@ -343,10 +377,7 @@ export class RelationshipService {
    ** throws exception if it's true
    */
   async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
-    const friendlist = await this.getUserIdsWithRelatedStatus(
-      userOne,
-      'friend',
-    );
+    const friendlist = await this.getUserIdsWithStatus(userOne, 'friend');
     if (friendlist.includes(userTwo)) {
       throw new HttpException(
         'Users are friends already.',
@@ -482,14 +513,30 @@ export class RelationshipService {
 
   async reformListSendingData(
     userList: UserRelationship[],
-  ): Promise<SendlistDto[]> {
-    const ret: SendlistDto[] = userList.map((data) => {
-      const obj: SendlistDto = {
+  ): Promise<SendSpecificListRelationshipDto[]> {
+    const ret: SendSpecificListRelationshipDto[] = userList.map((data) => {
+      const obj: SendSpecificListRelationshipDto = {
         user_id: data.user.id,
         user_nickname: data.user.nickname,
         user_avatar: data.user.avatar,
         user_userStatus: data.user.userStatus,
         relation_id: data.relationshipId,
+      };
+      return obj;
+    });
+    return ret;
+  }
+
+  async reformAllRelationListSendingData(
+    list: any,
+  ): Promise<SendAllUsersRelationshipDto[]> {
+    const ret: SendAllUsersRelationshipDto[] = list.map((data) => {
+      const obj: SendAllUsersRelationshipDto = {
+        id: data.id,
+        nickname: data.nickname,
+        avatar: data.avatar,
+        userStatus: data.userStatus,
+        relationshp: data.relationship,
       };
       return obj;
     });
