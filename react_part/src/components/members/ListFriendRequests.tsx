@@ -23,6 +23,7 @@ export default function ListFriendRequests()
 
 	const ReloadComponent = () => SetReloadFriendRequestlist(!ReloadFriendRequestlist);
 
+	//load list friend requests
 	useEffect(() => {
 		axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
 		.then(res => {

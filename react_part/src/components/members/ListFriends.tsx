@@ -13,7 +13,9 @@ interface IFriend {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: 'Available' | 'Playing' | 'Offline'}
+	user_userStatus: StatusType}
+
+type StatusType = 'Available' | 'Playing' | 'Offline';
 
 function ContextMenuFriend(props: {Friend: IFriend})
 {
@@ -81,12 +83,30 @@ function Friend(Friend: IFriend)
 export default function ListFriends()
 {
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	const [var1, Setvar1] = useState<boolean>(false);
 	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
-	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: 'Available' | 'Offline' | 'Playing'}>({user_id: 0, status: 'Available'});
+	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	
-	//* TO DO socket for ReloadFriendlist
+
+	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
+
+	//get list of friends at the mount of the component + start listening socket
+	useEffect(() => {
+		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
+		.then(res => {
+			SetFriends(res.data);
+		})
+		.catch(res => {
+			console.log("error");
+		})
+		
+		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		socket.on("reload-friendlist", (data: {user_id1: number, user_id2: number}) => {
+			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
+		})
+		return (() => {socket.off("reload-friendlist"); socket.off("reload-status");});
+	}, [])
 
 	//actualize the friendlist
 	useEffect(() => {
@@ -103,43 +123,27 @@ export default function ListFriends()
 		}
 	}, [ReloadFriendlist])
 
-	//get list of friends at the mount of the component
-	useEffect(() => {
-		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
-		.then(res => {
-			SetFriends(res.data);
-		})
-		.catch(res => {
-			console.log("error");
-		})
-
-		socket.on("reload-friendlist", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
-		})
-	}, [])
-
-	//actualise the status
+	//actualize the status
 	useEffect(() => {
 		if (ReloadStatus.user_id !== 0)
 		{
-		console.log("in reloadstatus effect");
-		const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)
-		if (friend !== undefined)
-		{
-			console.log("change status");
+			//console.log("in reloadstatus effect");
+			const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)
+			if (friend !== undefined)
+			{
+			//console.log("change status");
 			friend.user_userStatus = ReloadStatus.status;
-			Setvar1(!var1);
-		}
+			SetRefreshVar(!RefreshVar);
+			}
 		}
 	}, [ReloadStatus])
 
 	return (
 		<div className="ScrollingListMemebers">
 			{Friends.map(Friend)}
-			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: "Playing"});} }> Playing
-			</Button>}
-			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: "Offline"});} }> Offline
-			</Button>}
+			{<Button onClick={() => {socket.emit('test-reload-status')} }> Playing </Button>}
+			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: 'Offline'});} }> Offline </Button>}
+			{<Button onClick={() => {SetReloadFriendlist({user_id1: 60044, user_id2: 0});} }> Reload Friendlist </Button>}
 		</div>
 	)
 }
