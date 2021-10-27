@@ -19,12 +19,16 @@ import { SendRelationshipDto } from '../model/send-relationship.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { SendAddFriendRelationshipDto } from '../model/send-addFriend-relationship.dto';
 import { SendlistDto } from '../model/send-list.dto';
+import { ChatGateway } from 'src/chat/gateway/chat.gateway';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
 @Controller('relationship')
 export class RelationshipController {
-  constructor(private relationshipService: RelationshipService) {}
+  constructor(
+    private relationshipService: RelationshipService,
+    private chatGateway: ChatGateway,
+  ) {}
 
   /*
    ** getAll returns all relations with details
@@ -86,7 +90,12 @@ export class RelationshipController {
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
-    return this.relationshipService.addFriend(user.id, relationshipDto);
+    const test = this.relationshipService.addFriend(user.id, relationshipDto);
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    return test;
   }
 
   /*

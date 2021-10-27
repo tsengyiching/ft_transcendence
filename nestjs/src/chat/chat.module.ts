@@ -18,6 +18,6 @@ import { MessageService } from './service/message.service';
     AuthModule,
   ],
   providers: [ChatService, MessageService, ChatGateway],
-  exports: [ChatModule],
+  exports: [ChatModule, ChatGateway],
 })
 export class ChatModule {}
