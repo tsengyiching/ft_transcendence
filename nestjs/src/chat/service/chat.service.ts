@@ -142,8 +142,8 @@ export class ChatService {
       console.log(`Channel ${channel.name} has been deleted.`);
       await this.channelRepository.remove(channel);
     }
-    // if (participant.role === ChannelRole.OWNER) {
-    // }
+    if (participant.role === ChannelRole.OWNER) {
+    }
     //{ -> admin becomes owner/ no admin -> random}
     return this.channelParticipantRepository.remove(participant);
   }

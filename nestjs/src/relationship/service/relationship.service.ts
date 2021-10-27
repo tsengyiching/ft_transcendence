@@ -45,21 +45,8 @@ export class RelationshipService {
     id: number,
     reqStatus: string,
   ): Promise<SendlistDto[]> {
-    let status: RelationshipStatus;
-    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
-    else if (reqStatus === 'notconfirmed')
-      status = RelationshipStatus.NOTCONFIRMED;
-    else if (reqStatus === 'block') status = RelationshipStatus.BLOCK;
-    else {
-      throw new HttpException(
-        'Relationship status does not exist.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    const allList = await this.relationshipRepository.find({
-      relations: ['userRelationship', 'userRelationship.user'],
-      where: { status: status },
-    });
+    const status: RelationshipStatus = this.checkReqStatus(reqStatus);
+    const allList = await this.getAllRelationshipWithStatus(status);
     const userList = allList
       .filter((data) => {
         if (
@@ -82,17 +69,7 @@ export class RelationshipService {
         const res = data.userRelationship.filter((obj) => obj.userId !== id);
         return res[0];
       });
-    const ret: SendlistDto[] = userList.map((data) => {
-      const obj: SendlistDto = {
-        user_id: data.user.id,
-        user_nickname: data.user.nickname,
-        user_avatar: data.user.avatar,
-        user_userStatus: data.user.userStatus,
-        relation_id: data.relationshipId,
-      };
-      return obj;
-    });
-    return ret;
+    return this.reformListSendingData(userList);
   }
 
   async getAllRelationList(id: number) {
@@ -207,8 +184,24 @@ export class RelationshipService {
   /*                                 utils                                    */
   /****************************************************************************/
 
-  /*
-   ** getOneById returns the relationship detail
+  /**
+   * getAllRelationshipWithStatus
+   * @arg : status
+   * @return specific status' relationship with two related users
+   */
+  async getAllRelationshipWithStatus(
+    status: RelationshipStatus,
+  ): Promise<Relationship[]> {
+    return this.relationshipRepository.find({
+      relations: ['userRelationship', 'userRelationship.user'],
+      where: { status: status },
+    });
+  }
+
+  /**
+   * getOneById
+   * @arg : relationship id
+   * @return : that demanded relationship with two related users
    */
   getOneById(id: number): Promise<Relationship> {
     return this.relationshipRepository.findOne(id, {
@@ -413,6 +406,21 @@ export class RelationshipService {
     }
   }
 
+  checkReqStatus(reqStatus: string): RelationshipStatus {
+    let status: RelationshipStatus;
+    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
+    else if (reqStatus === 'notconfirmed')
+      status = RelationshipStatus.NOTCONFIRMED;
+    else if (reqStatus === 'block') status = RelationshipStatus.BLOCK;
+    else {
+      throw new HttpException(
+        'Relationship status does not exist.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return status;
+  }
+
   /****************************************************************************/
   /*                              Reform Objs                                 */
   /****************************************************************************/
@@ -470,5 +478,21 @@ export class RelationshipService {
       addresseeId: relationship.userRelationship[1].userId,
     };
     return obj;
+  }
+
+  async reformListSendingData(
+    userList: UserRelationship[],
+  ): Promise<SendlistDto[]> {
+    const ret: SendlistDto[] = userList.map((data) => {
+      const obj: SendlistDto = {
+        user_id: data.user.id,
+        user_nickname: data.user.nickname,
+        user_avatar: data.user.avatar,
+        user_userStatus: data.user.userStatus,
+        relation_id: data.relationshipId,
+      };
+      return obj;
+    });
+    return ret;
   }
 }

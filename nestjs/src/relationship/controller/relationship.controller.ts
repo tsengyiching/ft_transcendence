@@ -67,10 +67,10 @@ export class RelationshipController {
    */
   @Get(':id/list')
   getSpecificRelationList(
-    @CurrentUser() user: User,
+    @Param('id', ParseIntPipe) id: number,
     @Query('status') status: string,
   ): Promise<SendlistDto[]> {
-    return this.relationshipService.getSpecificRelationList(user.id, status);
+    return this.relationshipService.getSpecificRelationList(id, status);
   }
 
   /*
@@ -112,7 +112,7 @@ export class RelationshipController {
   async acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
-    const test  = await this.relationshipService.acceptFriend(id);
+    const test = await this.relationshipService.acceptFriend(id);
     this.chatGateway.server.emit('reload-friendlist', {
       user_id1: test.users[0],
       user_id2: test.users[1],
