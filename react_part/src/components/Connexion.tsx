@@ -1,11 +1,17 @@
+import React from "react";
 import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { Button } from "react-bootstrap"
 
 function Connexion () {
+
+    function onConnexion() {
+        window.location.href = 'http://localhost:8080/auth/login/'; 
+    }
+
     return (
-        <Route exact path='/connexion' component={() => { 
-            window.location.href = 'http://localhost:8080/auth/login/'; 
-            return null;
-        }}/>
+        <button onClick={onConnexion}>
+            Connexion
+        </button>
     )
 }
 
