@@ -1,33 +1,67 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
+import { getNameOfDeclaration } from "typescript";
+import {Image, Row, Col} from 'react-bootstrap'
+
+import {useParams} from "react-router-dom";
 
 export default function Profile() {
 
+    const [validate, setValidate] = useState(true);
     const [name, setName] = useState("");
-    const [image, setImage] = useState("");
+    const [idMain, setId] = useState(0);
+    const [avatar, setAvatar] = useState("")
+    const [friends, setFriends] = useState([]);
+    const [games, setGames] = useState([]);
+    const [profiles, setProfiles] = useState([]);
+
+    const { clientId }: { clientId: string } = useParams();
 
     useEffect(() => {
-        axios.get('http://localhost:8080/profile/me/',{
+        axios.get('http://localhost:8080/profile/' + clientId,{
             withCredentials:true,
         })
         .then(res => {
             setName(res.data.nickname)
+            setId(res.data.id)
+            setAvatar(res.data.avatar)
         })
         .catch(res => {
-            console.log("error connexion")
+            setValidate(false);
+        })
+
+        axios.get('http://localhost:8080/relationship/'+clientId+'/list?status=friend',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setFriends(res.data)
+        })
+        .catch(res => {
+            setValidate(false);
+        })
+
+        axios.get('http://localhost:8080/game/'+clientId+'/records',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setGames(res.data)
+        })
+        .catch(res => {
+            setValidate(false);
+        })
+
+        axios.get('http://localhost:8080/profile/all',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setProfiles(res.data)
+        })
+        .catch(res => {
+            setValidate(false);
         })
     }, []);
-    
-    /*printMatchsScore () {
-        return (
-            <div>
-                {data.scores.map((score) => {
-                    return (<h4> <img src={`${data.picture}`} className="img-fluid" width="100" alt="singe"/> {this.state.name} {score.score1} - {score.score2} {this.getName(score.idEnemy)} <img src={`${this.getPicture(score.idEnemy)}`} className="img-fluid" width="100" alt="singe"/></h4>)
-                })}
-            </div>
-        )
-    }
 
+    /*
     printStatus (id: number) {
         let tab = this.getStatus(id)
         for (let i = 0; i < tab.length; i++) {
@@ -38,66 +72,153 @@ export default function Profile() {
         console.log(tab)
         if (this.getStatus(id).indexOf(1) === 0)
             return (<img src="https://www.png-gratuit.com/img/cercle-rouge-fond-transparent.png" className="img-fluid" alt="orange circle" width="20"/>)
-        /*else if (this.getStatus(id) === 1)
+        else if (this.getStatus(id) === 1)
             return (<img src="https://www.png-gratuit.com/img/cercle-vert-fond-transparent.png" className="img-fluid" alt="orange circle" width="20"/>)
         else
             return (<img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Rond_orange.png" className="img-fluid" alt="orange circle" width="20"/>)    
     }
 
-    printFriendsList () {
+    */
+
+    function getPicture (iduser:number):string {
+        let url:string = "";
+        profiles.map(({id, nickname, avatar, date, status, email, twoFactor}) => {
+            if (iduser === id)
+                url = avatar;
+        })
+        return(url);
+    }
+
+    function getName (iduser:number):string {
+        let name:string = "";
+        profiles.map(({id, nickname, avatar, date, status, email, twoFactor}) => {
+            if (iduser === id)
+                name = nickname;
+        })
+        return(name);
+    }
+
+    function winningMatches ():number {
+        let total:number = 0;
+        games.map(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
+            if (userGameStatus === "Won")
+                total += 1;
+        })
+        return (total);
+    }
+
+    function lostMatches ():number {
+        let total:number = 0;
+        games.map(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
+            if (userGameStatus === "Lost")
+                total += 1;
+        })
+        return (total)
+    }
+
+    function printFriendsList () {
         return (
             <div>
-                {people.map((person) => {
+                {friends.map(({user_id, user_nickname, user_avatar, status}) => {
                     return (
-                        <h4>
-                            <img src={`${this.getPicture(person.id)}`} className="img-fluid" width="100" alt="singe"/> 
-                            {this.getName(person.id)}
-                            {this.printStatus(person.id)}
-                        </h4>
+                        <div key={user_id}>
+                            <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
+                            {user_nickname}
+                            {status}
+                        </div>
                     )
                 })
                 }
             </div>
         )
-    }*/
+    }
+
+    function printMatchsScore () {
+        return (
+            <div>
+                {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
+                    return ( 
+                        <div key={`${gameId}-matchsScore`}>
+                            <h4> 
+                                <Row>
+                                    <Col lg={4}>
+                                        <Image src={`${getPicture(idMain)}`} width="100" alt="pp" rounded/>
+                                    </Col>
+                                    <Col>
+                                        {` ${name} ` }
+                                        {` ${userScore} - ${opponentScore} `}
+                                        {` ${getName(opponentId)} `}
+                                    </Col>
+                                    <Col lg={4}>
+                                        <Image src={`${getPicture(opponentId)}`} width="100" alt="pp" rounded/>
+                                    </Col>
+                                </Row>
+                            </h4>
+                        </div>
+                    )
+                })}
+            </div>
+        )
+    }
+
+    function Validate() {
+        return (
+            <div className="row">
+                <div className="col">
+                    <h3>Profile :</h3>
+                    <h4>{name}</h4>
+                    <div className="row">
+                        <div className="col">
+                            <Image src={`${avatar}`} className="w-50" alt="singe" rounded/>
+                        </div>
+                    </div>
+                    <div className="row">
+                        <div className="col">
+                            Total matches win : {winningMatches()} <br></br>
+                            Total matches lost : {lostMatches()} <br></br><br></br><br></br>
+                            <Row>
+                                <Col lg={2}>
+                                </Col>
+                                <Col lg={8}>
+                                match history : {printMatchsScore()}
+                                </Col>
+                                <Col>
+                                </Col>
+                            </Row>
+                        </div>
+                    </div>
+                </div>
+                <div className="col">
+                    {}
+                    <h4>Friends :</h4>
+                    <Row>
+                        <Col lg={4}>
+                        </Col>
+                        <Col lg={4}>
+                            {printFriendsList()}
+                        </Col>
+                        <Col>
+                        </Col>
+                    </Row>
+                </div>
+            </div>
+        )
+    }
+
+    function Unvalidate() {
+        return (
+            <div> Error profile doesn't exist</div>
+        )
+    }
+
+    function PrintProfile() {
+        if (validate === false)
+            return Unvalidate();
+        else
+            return Validate();
+    }
 
     return (
-        <div className="row">
-            <div className="col">
-                <h3>Profil : </h3>
-                <h4>{name}</h4>
-                <div className="row">
-                    <div className="col">
-                        <img src={`${"https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKn2GIAH7auDdHRpZmNWQTzwAgZd-rWGynlg&usqp=CAU"}`} className="w-25" alt="singe"/>
-                    </div>
-                </div>
-                <div className="row">
-                    <div className="col">
-                        Total des matchs gagnés : {} <br></br>
-                        Total des matchs perdus : {} <br></br><br></br><br></br>
-                        Historique des matchs : {}
-                    </div>
-                </div>
-            </div>
-            <div className="col">
-                {}
-                <h4>Amis :</h4>
-                <div className="col">
-                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSKn2GIAH7auDdHRpZmNWQTzwAgZd-rWGynlg&usqp=CAU" className="img-fluid" width="100" alt="singe"/>
-                    Babar
-                    <img src="https://upload.wikimedia.org/wikipedia/commons/a/a0/Rond_orange.png" className="img-fluid" alt="orange circle" width="20"/>
-                </div>
-                <div className="col">
-                    <img src="https://cdn.futura-sciences.com/buildsv6/images/wide1920/4/a/0/4a02bf6947_50161932_gorille-coronavirus.jpg" className="img-fluid" width="100" alt="singe2"/>
-                    Bobek
-                    <img src="https://www.png-gratuit.com/img/cercle-vert-fond-transparent.png" className="img-fluid" alt="orange circle" width="20"/>
-                </div>
-                <div className="col">
-                    <img src="https://media.routard.com/image/24/9/pt72050.1281249.w430.jpg" className="img-fluid" width="100" alt="singe3"/>
-                    Martine
-                    <img src="https://www.png-gratuit.com/img/cercle-rouge-fond-transparent.png" className="img-fluid" alt="orange circle" width="20"/>
-                </div>
-            </div>
-        </div>
+        <PrintProfile/>
     )
 }

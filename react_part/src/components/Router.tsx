@@ -4,6 +4,7 @@ import Home from './Home';
 import Profile from './Profile';
 import Parametres from './Parameters';
 import Connexion from './Connexion';
+import Disconnect from './Disconnect';
 
 import axios from 'axios';
 import { useEffect, useState } from "react";
@@ -29,8 +30,9 @@ function Router() {
       <BrowserRouter>
         <Switch>
           <Route exact path="/accueil" component={Home} />
-          <Route exact path="/me" component={Profile} />
+          <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/parametres" component={Parametres} />
+          <Route exact path="/auth/disconnect" component={Disconnect} />
           <Redirect to="/accueil"/>
         </Switch>
       </BrowserRouter>

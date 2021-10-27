@@ -20,10 +20,6 @@ function PageConnexion() {
             history.push("/connexion");
         })
     })
-
-    return (
-        <div>Connexion</div>
-    )
 }
 
 export default PageConnexion;
