@@ -86,12 +86,19 @@ export class RelationshipController {
    ** addFriend returns the new relationship's id
    */
   @Post('add')
-  addFriend(
+  async addFriend(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
-    const test = this.relationshipService.addFriend(user.id, relationshipDto);
-    return test;
+    const relationship = await this.relationshipService.addFriend(
+      user.id,
+      relationshipDto,
+    );
+    this.chatGateway.server.emit('reload-request', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    return relationship;
   }
 
   /*
@@ -112,12 +119,16 @@ export class RelationshipController {
   async acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
-    const test = await this.relationshipService.acceptFriend(id);
-    this.chatGateway.server.emit('reload-friendlist', {
-      user_id1: test.users[0],
-      user_id2: test.users[1],
+    const relationship = await this.relationshipService.acceptFriend(id);
+    this.chatGateway.server.emit('reload-request', {
+      user_id1: relationship.users[0],
+      user_id2: relationship.users[1],
     });
-    return test;
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: relationship.users[0],
+      user_id2: relationship.users[1],
+    });
+    return relationship;
   }
 
   /*
@@ -134,11 +145,19 @@ export class RelationshipController {
    ** unfriend returns the deleted relationship
    */
   @Delete('unfriend')
-  unfriend(
+  async unfriend(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    return this.relationshipService.deleteFriend(user.id, relationshipDto);
+    const relationship = await this.relationshipService.deleteFriend(
+      user.id,
+      relationshipDto,
+    );
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: relationship.users[0],
+      user_id2: relationship.users[1],
+    });
+    return relationship;
   }
 
   /*
@@ -158,22 +177,43 @@ export class RelationshipController {
    ** than create the block relationship
    */
   @Post('block')
-  blockUser(
+  async blockUser(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
-    return this.relationshipService.blockUser(user.id, relationshipDto);
+    const relationship = await this.relationshipService.blockUser(
+      user.id,
+      relationshipDto,
+    );
+
+    this.chatGateway.server.emit('reload-blocked', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    this.chatGateway.server.emit('reload-users', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    return relationship;
   }
 
   /*
    ** unblock returns the deleted relationship
    */
   @Delete('unblock')
-  unblock(
+  async unblock(
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    return this.relationshipService.deleteBlockUser(user.id, relationshipDto);
+    const relationship = await this.relationshipService.deleteBlockUser(
+      user.id,
+      relationshipDto,
+    );
+    this.chatGateway.server.emit('reload-users', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    return relationship;
   }
 
   /*
