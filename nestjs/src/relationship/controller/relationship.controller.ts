@@ -91,10 +91,6 @@ export class RelationshipController {
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
     const test = this.relationshipService.addFriend(user.id, relationshipDto);
-    this.chatGateway.server.emit('reload-friendlist', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
     return test;
   }
 
@@ -113,10 +109,15 @@ export class RelationshipController {
    ** acceptFriend returns the new relationship
    */
   @Get('accept/:id')
-  acceptFriend(
+  async acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
-    return this.relationshipService.acceptFriend(id);
+    const test  = await this.relationshipService.acceptFriend(id);
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: test.users[0],
+      user_id2: test.users[1],
+    });
+    return test;
   }
 
   /*
