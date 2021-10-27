@@ -64,7 +64,7 @@ export class RelationshipController {
   @Get(':id/list')
   getSpecificRelationList(
     @CurrentUser() user: User,
-    @Query('relation_status') status: string,
+    @Query('status') status: string,
   ): Promise<SendlistDto[]> {
     return this.relationshipService.getSpecificRelationList(user.id, status);
   }

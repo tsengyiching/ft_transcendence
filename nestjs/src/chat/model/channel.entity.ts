@@ -38,7 +38,9 @@ export class Channel {
   @CreateDateColumn()
   createDate!: Date;
 
-  @OneToMany(() => ChannelParticipant, (participant) => participant.channel)
+  @OneToMany(() => ChannelParticipant, (participant) => participant.channel, {
+    onDelete: 'CASCADE',
+  })
   participant!: ChannelParticipant[];
 
   @OneToMany(() => Message, (messages) => messages.channel)

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { Channel, ChannelType } from '../model/channel.entity';
 import * as bcrypt from 'bcrypt';
@@ -117,21 +117,33 @@ export class ChatService {
    * @param LeaveChannelDto: channel id
    * @returns deleted ChannelParticipant
    */
-  async leaveChannel(
-    userId: number,
-    leaveChannelDto: LeaveChannelDto,
-  ): Promise<ChannelParticipant> {
-    await this.getChannelById(leaveChannelDto.channelId);
+  async leaveChannel(userId: number, leaveChannelDto: LeaveChannelDto) {
+    /* check channel */
+    const channel = await this.getChannelById(leaveChannelDto.channelId);
+    /* check participant */
     const participant = await this.getOneChannelParticipant(
       userId,
       leaveChannelDto.channelId,
     );
     if (!participant)
       throw new WsException('You are not a member of this channel.');
-    if (participant.status == StatusInChannel.BAN)
+    if (participant.status === StatusInChannel.BAN)
       throw new WsException('User is banned in this channel.');
-    //if ()
-    //if (participant.status == StatusInChannel.OWNER)
+    /* check channel other participants */
+    const channelUsers = await this.channelParticipantRepository.find({
+      where: {
+        channelId: leaveChannelDto.channelId,
+        userId: Not(userId),
+        status: StatusInChannel.NORMAL,
+      },
+    });
+    console.log(channelUsers);
+    if (channelUsers.length === 0) {
+      console.log(`Channel ${channel.name} has been deleted.`);
+      await this.channelRepository.remove(channel);
+    }
+    // if (participant.role === ChannelRole.OWNER) {
+    // }
     //{ -> admin becomes owner/ no admin -> random}
     return this.channelParticipantRepository.remove(participant);
   }
@@ -221,7 +233,6 @@ export class ChatService {
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .execute();
-
     const seen = [];
     const userNotJoinChannels = allUserChannels
       .filter((data) => (channelIds.includes(data.channel_id) ? false : true))

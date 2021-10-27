@@ -34,7 +34,9 @@ export class ChannelParticipant {
   @ManyToOne(() => User, (user) => user.channelParticipant)
   public user!: User;
 
-  @ManyToOne(() => Channel, (channel) => channel.participant)
+  @ManyToOne(() => Channel, (channel) => channel.participant, {
+    onDelete: 'CASCADE',
+  })
   public channel!: Channel;
 
   @Column({

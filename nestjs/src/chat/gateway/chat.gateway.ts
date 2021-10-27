@@ -140,8 +140,9 @@ export class ChatGateway
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
     const user = await this.authService.getUserFromSocket(client);
+    console.log('leave', user, 'dto', leaveChannelDto);
     await this.chatService.leaveChannel(user.id, leaveChannelDto);
-    console.log('User joined channel successfully !');
+    console.log('User left channel successfully !');
     /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
     const channels_in = this.chatService.getUserChannels(user.id);
     const channels_out = this.chatService.getUserNotParticipateChannels(
@@ -150,6 +151,10 @@ export class ChatGateway
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
   }
+
+  /**
+   *
+   */
 
   /**
    * Load channel data (message) and register to the room event

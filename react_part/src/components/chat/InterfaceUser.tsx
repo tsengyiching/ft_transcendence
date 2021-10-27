@@ -61,7 +61,7 @@ function InterfaceUser() {
                 <div>
                     <CreateChannelButton socketid={socket}/>
                     { channelSelected !== undefined &&
-                    <Button onClick={() => {socket.emit("user-leave", {channelId: channelSelected.channel_id}) }}> Leave Channel </Button>}
+                    <Button onClick={() => {socket.emit("channel-leave", {channelId: channelSelected.channel_id}) }}> Leave Channel </Button>}
                 </div>
                 : <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             }
