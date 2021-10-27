@@ -83,9 +83,9 @@ function Friend(Friend: IFriend)
 export default function ListFriends()
 {
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	const [var1, Setvar1] = useState<boolean>(false);
 	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	
 
@@ -133,7 +133,7 @@ export default function ListFriends()
 			{
 			//console.log("change status");
 			friend.user_userStatus = ReloadStatus.status;
-			Setvar1(!var1);
+			SetRefreshVar(!RefreshVar);
 			}
 		}
 	}, [ReloadStatus])

@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEventHandler,  } from "react"
+import { useState, useEffect, useContext,  } from "react"
 import { socket } from "../../context/socket";
 import {Image, Button, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -7,12 +7,15 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {InvitateToGame} from './ContextMenuFunctions'
+import {DataContext} from "../../App"
 
 interface IBlockedUser {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: 'Available' | 'Playing' | 'Offline'}
+	user_userStatus: StatusType}
+
+type StatusType = 'Available' | 'Playing' | 'Offline';
 
 function ContextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
 {
@@ -31,7 +34,7 @@ function ContextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
 function BlockedUser(BlockedUser: IBlockedUser)
 	{
 		return (
-			<div id={`BlockedUser_${BlockedUser.user_id}`}>
+			<div key={`BlockedUser_${BlockedUser.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
 			<div className="BlockedUser UserButton">
 			<Row>
@@ -56,14 +59,13 @@ function BlockedUser(BlockedUser: IBlockedUser)
 
 export default function ListBlockedUsers()
 {
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
-	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<boolean>(true);
+	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
+	const userData = useContext(DataContext);
 
-	useEffect(() => {
-		socket.on('reload-status', () => {SetReloadBlockedUserlist(!ReloadBlockedUserlist)});
-		return (() => {socket.off('reload-status');});
-	}, [])
-
+	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
 		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
 		.then(res => {
@@ -72,8 +74,43 @@ export default function ListBlockedUsers()
 		.catch(res => {
 			console.log("error");
 		})
+
+		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		socket.on("reload-blocked", (data: {user_id1: number, user_id2: number}) => {
+			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
+
+		return (() => {socket.off('reload-status'); socket.off('reload-blocked');});
 		//console.log(BlockedUsers);
-	}, [ReloadBlockedUserlist]);
+	}, []);
+
+	//actualize the blockedlist
+	useEffect(() => {
+		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id == ReloadBlockedUserlist.user_id2)
+		{
+			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+			.then(res => {
+				SetBlockedUsers(res.data);
+			})
+			.catch(res => {
+				console.log(res.data);
+			})
+		}
+	}, [ReloadBlockedUserlist])
+
+	//actualize the status
+	useEffect(() => {
+		if (ReloadStatus.user_id !== 0)
+		{
+			//console.log("in reloadstatus effect");
+			const blocked = BlockedUsers.find(element => element.user_id === ReloadStatus.user_id)
+			if (blocked !== undefined)
+			{
+				//console.log("change status");
+				blocked.user_userStatus = ReloadStatus.status;
+				SetRefreshVar(!RefreshVar);
+			}
+		}
+	}, [ReloadStatus])
 
 	return (
 		<div className="ScrollingListMembers">

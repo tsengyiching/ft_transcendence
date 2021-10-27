@@ -14,6 +14,8 @@ interface IUser {
 	userStatus: 'Available' | 'Playing' | 'Offline';
 	relationship: null | 'friend' | 'block' | 'Not confirmed'}
 
+type StatusType = 'Available' | 'Playing' | 'Offline';
+
 function ContextMenuUser(props: {User: IUser})
 {
 	return (
@@ -43,9 +45,9 @@ function ContextMenuUser(props: {User: IUser})
 function User(User: IUser)
 	{
 		return (
-			<div>
+			<div key={`User_${User.id}`}>
 			<ContextMenuTrigger id={`ContextMenuUser_${User.id}`}>
-			<div key={`User_${User.id}`} className="User UserButton">
+			<div className="User UserButton">
 			<Row>
 				<Col lg={3}>
 					<Image src={User.avatar} className="PictureUser" alt="picture" rounded fluid/>
@@ -70,11 +72,8 @@ export default function ListUsers()
 {
 	const [Users, SetUsers] = useState<IUser[]>([]);
 	const [ReloadUserlist, SetReloadUserlist] = useState<boolean>(true);
-
-	useEffect(() => {
-		socket.on('reload-status', () => {SetReloadUserlist(!ReloadUserlist)});
-		return (() => {socket.off('reload-status');});
-	}, [])
+	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 
 	useEffect(() => {
 		axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
@@ -84,8 +83,26 @@ export default function ListUsers()
 		.catch(res => {
 			console.log("error");
 		})
+		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		
+		return (() => {socket.off('reload-status');});
 		//console.log(Users);
-	}, [ReloadUserlist]);
+	}, []);
+
+	//actualize the status
+	useEffect(() => {
+		if (ReloadStatus.user_id !== 0)
+		{
+			//console.log("in reloadstatus effect");
+			const user = Users.find(element => element.id === ReloadStatus.user_id)
+			if (user !== undefined)
+			{
+			//console.log("change status");
+			user.userStatus = ReloadStatus.status;
+			SetRefreshVar(!RefreshVar);
+			}
+		}
+	}, [ReloadStatus])
 
 	return (
 		<div className="ScrollingListMembers">
