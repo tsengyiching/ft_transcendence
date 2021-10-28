@@ -50,7 +50,7 @@ function Header () {
                         {ProfilImage(user_avatar)}
                         <div className="col-">
                             <div className="row"><h4><a href={'/profile/'+id}>Profile</a></h4></div>
-                            <div className="row"><h4><a href="/parametres">Parameters</a></h4></div>
+                            <div className="row"><h4><a href="/settings">Settings</a></h4></div>
                             <div className="row"><h4><a href="/auth/disconnect">Disconnect</a></h4></div>
                         </div>
                     </div>

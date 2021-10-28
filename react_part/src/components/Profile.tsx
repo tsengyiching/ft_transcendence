@@ -18,48 +18,66 @@ export default function Profile() {
     const { clientId }: { clientId: string } = useParams();
 
     useEffect(() => {
+        let isMounted = true;
         axios.get('http://localhost:8080/profile/' + clientId,{
             withCredentials:true,
         })
         .then(res => {
-            setName(res.data.nickname)
-            setId(res.data.id)
-            setAvatar(res.data.avatar)
+            if (isMounted) {
+                setName(res.data.nickname)
+                setId(res.data.id)
+                setAvatar(res.data.avatar)
+            }
         })
         .catch(res => {
-            setValidate(false);
+            if (isMounted) {
+                setValidate(false);
+            }
         })
 
         axios.get('http://localhost:8080/relationship/'+clientId+'/list?status=friend',{
             withCredentials:true,
         })
         .then(res => {
-            setFriends(res.data)
+            if (isMounted) {
+                setFriends(res.data)
+            }
         })
         .catch(res => {
-            setValidate(false);
+            if (isMounted) {
+                setValidate(false);
+            }
         })
 
         axios.get('http://localhost:8080/game/'+clientId+'/records',{
             withCredentials:true,
         })
         .then(res => {
-            setGames(res.data)
+            if (isMounted) {
+                setGames(res.data)
+            }
         })
         .catch(res => {
-            setValidate(false);
+            if (isMounted) {
+                setValidate(false);
+            }
         })
 
         axios.get('http://localhost:8080/profile/all',{
             withCredentials:true,
         })
         .then(res => {
-            setProfiles(res.data)
+            if (isMounted) {
+                setProfiles(res.data)
+            }
         })
         .catch(res => {
-            setValidate(false);
+            if (isMounted) {
+                setValidate(false);
+            }
         })
-    }, []);
+        return () => { isMounted = false };
+    }, [axios]);
 
     /*
     printStatus (id: number) {
@@ -122,7 +140,9 @@ export default function Profile() {
                 {friends.map(({user_id, user_nickname, user_avatar, status}) => {
                     return (
                         <div key={user_id}>
-                            <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
+                            <a href={'/profile/'+user_id}>
+                                <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
+                            </a>
                             {user_nickname}
                             {status}
                         </div>
@@ -150,7 +170,9 @@ export default function Profile() {
                                         {` ${getName(opponentId)} `}
                                     </Col>
                                     <Col lg={4}>
-                                        <Image src={`${getPicture(opponentId)}`} width="100" alt="pp" rounded/>
+                                        <a href={'/profile/'+opponentId}>
+                                            <Image src={`${getPicture(opponentId)}`} width="100" alt="pp" rounded/>
+                                        </a>
                                     </Col>
                                 </Row>
                             </h4>
