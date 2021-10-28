@@ -87,9 +87,9 @@ export class RelationshipService {
         if (friendIds.includes(data.id)) data.relationship = 'friend';
         else if (unconfirmIds.includes(data.id))
           data.relationship = 'Not confirmed';
-        else if (blockIds.includes(data.id)) data.relationship = 'block';
         return data;
       })
+      .filter((data) => (blockIds.includes(data.id) ? false : true))
       .filter((data) => (blockingIds.includes(data.id) ? false : true));
     return this.reformAllRelationListSendingData(relations);
   }

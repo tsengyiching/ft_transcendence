@@ -1,6 +1,6 @@
 import { IsInt } from 'class-validator';
 
-export class CreateChannelParticipantDto {
+export class GeneralChannelDto {
   @IsInt()
   channelId: number;
 

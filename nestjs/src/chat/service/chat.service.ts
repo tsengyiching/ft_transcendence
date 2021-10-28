@@ -9,7 +9,7 @@ import {
   ChannelRole,
   StatusInChannel,
 } from '../model/channelParticipant.entity';
-import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
+import { GeneralChannelDto } from '../dto/general-channel.dto';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/model/user.entity';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
@@ -54,41 +54,32 @@ export class ChatService {
   /**
    * joinChannel checks and adds a new channel participant.
    * (channel-join)
-   * @param createChannelParticipantDto: channel id and password
+   * @param GeneralChannelDto: channel id and password
    * @returns ChannelParticipant
    */
   async joinChannel(
     userId: number,
-    createChannelParticipantDto: CreateChannelParticipantDto,
+    generalChannelDto: GeneralChannelDto,
   ): Promise<ChannelParticipant> {
-    const channel = await this.getChannelById(
-      createChannelParticipantDto.channelId,
-    );
+    const channel = await this.getChannelById(generalChannelDto.channelId);
     const participant = await this.getOneChannelParticipant(
       userId,
-      createChannelParticipantDto.channelId,
+      generalChannelDto.channelId,
     );
-    if (!channel)
-      throw new WsException(
-        'The channel that you wish to join does not exist.',
-      );
-    if (channel.type == ChannelType.DIRECT)
+    if (channel.type === ChannelType.DIRECT)
       throw new WsException('You cannot join a private chat channel.');
     if (participant)
       throw new WsException('You are already a member of this channel.');
-    if (channel.type == ChannelType.PRIVATE) {
+    if (channel.type === ChannelType.PRIVATE) {
       if (
-        !(await bcrypt.compare(
-          createChannelParticipantDto.password,
-          channel.password,
-        ))
+        !(await bcrypt.compare(generalChannelDto.password, channel.password))
       ) {
         console.log('Invalid channel password !');
         throw new WsException('Invalid channel password !');
       }
     }
     return this.addChannelParticipant(
-      createChannelParticipantDto.channelId,
+      generalChannelDto.channelId,
       userId,
       ChannelRole.USER,
     );
@@ -142,12 +133,43 @@ export class ChatService {
       console.log(`Channel ${channel.name} has been deleted.`);
       await this.channelRepository.remove(channel);
     }
-    if (participant.role === ChannelRole.OWNER) {
-    }
+    // if (participant.role === ChannelRole.OWNER) {
+    //   const admin = channelUsers.filter(
+    //     (data) => data.role === ChannelRole.ADMIN,
+    //   );
+
+    // }
     //{ -> admin becomes owner/ no admin -> random}
     return this.channelParticipantRepository.remove(participant);
   }
 
+  /**
+   * addChannelPassword
+   * (channel-add-password)
+   * @param channel id and password
+   */
+  async addChannelPassword(
+    userId: number,
+    generalChannelDto: GeneralChannelDto,
+  ) {
+    const channel = await this.getChannelById(generalChannelDto.channelId);
+    if (channel.type !== ChannelType.PUBLIC) {
+      console.log('This channel type is not public.');
+      throw new WsException('This channel type is not public.');
+    }
+    const participant = await this.getOneChannelParticipant(
+      userId,
+      generalChannelDto.channelId,
+    );
+    if (!participant) {
+      console.log('You are not a member of this channel.');
+      throw new WsException('You are not a member of this channel.');
+    }
+    if (participant.role !== ChannelRole.OWNER) {
+      console.log('Only channel owner can add password.');
+      throw new WsException('Only channel owner can add password.');
+    }
+  }
   /****************************************************************************/
   /*                          Channel Getters                                 */
   /****************************************************************************/
