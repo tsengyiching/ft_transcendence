@@ -5,5 +5,5 @@ export class SendAllUsersRelationshipDto {
   nickname: string;
   avatar: string;
   userStatus: OnlineStatus;
-  relationshp: string;
+  relationship: string;
 }

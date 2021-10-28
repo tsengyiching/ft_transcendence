@@ -6,8 +6,9 @@ import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame, SendMessage, SpectateGame, Unfriend} from './ContextMenuFunctions'
+import {Block, InvitateToGame, SendMessage, SpectateGame, Unfriend} from './ContextMenuFunctions'
 import { DataContext } from "../../App";
+import { useHistory } from "react-router";
 
 interface IFriend {
 	user_id: number;
@@ -17,74 +18,76 @@ interface IFriend {
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
-function ContextMenuFriend(props: {Friend: IFriend})
-{
-	return (
-	<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
 
-		{	props.Friend.user_userStatus === 'Available' &&
-		<MenuItem onClick={() => InvitateToGame(props.Friend.user_id)}>
-			Invitate to game
-		</MenuItem>}
-
-		{ props.Friend.user_userStatus === 'Playing' &&
-		<MenuItem onClick={() => SpectateGame(props.Friend.user_id)}>
-			Spectate Game
-		</MenuItem>}
-
-		<MenuItem onClick={() => SendMessage(props.Friend.user_id)}>
-			Send a message
-		</MenuItem>
-
-		<MenuItem>
-			View Profile
-		</MenuItem>
-
-		<MenuItem onClick={() => Unfriend(props.Friend.user_id)} >
-			Unfriend
-		</MenuItem>
-
-		<MenuItem>
-			Block
-		</MenuItem>
-	</ContextMenu>
-	)
-}
-
-function Friend(Friend: IFriend)
-	{
-		return (
-			<div key={`Friend_${Friend.user_id}`}>
-			<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
-			<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
-			<Row>
-				<Col lg={3}>
-					<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={5}>
-					<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
-				</Col>
-				<Col>
-					{status(Friend.user_userStatus)}
-				</Col>
-			</Row>
-			</div>
-			</ContextMenuTrigger>
-			<ContextMenuFriend Friend={Friend}/>
-
-			</div>
-		)
-		//console.log(`Friend : ${Friend}`)
-	}
 
 export default function ListFriends()
 {
+	function ContextMenuFriend(props: {Friend: IFriend})
+	{
+		return (
+		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
+	
+			{ props.Friend.user_userStatus === 'Available' &&
+			<MenuItem onClick={() => InvitateToGame(props.Friend.user_id)}>
+				Invitate to game
+			</MenuItem>}
+	
+			{ props.Friend.user_userStatus === 'Playing' &&
+			<MenuItem onClick={() => SpectateGame(props.Friend.user_id)}>
+				Spectate Game
+			</MenuItem>}
+	
+			<MenuItem onClick={() => SendMessage(props.Friend.user_id)}>
+				Send a message
+			</MenuItem>
+	
+			<MenuItem onClick={() => history.push(`/profile/${props.Friend.user_id}`)}>
+				View Profile
+			</MenuItem>
+	
+			<MenuItem onClick={() => Unfriend(props.Friend.user_id)} >
+				Unfriend
+			</MenuItem>
+	
+			<MenuItem onClick={() => Block(props.Friend.user_id)}>
+				Block
+			</MenuItem>
+		</ContextMenu>
+		)
+	}
+	
+	function Friend(Friend: IFriend)
+		{
+			return (
+				<div key={`Friend_${Friend.user_id}`}>
+				<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
+				<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
+				<Row>
+					<Col lg={3}>
+						<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+					</Col>
+					<Col lg={5}>
+						<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
+					</Col>
+					<Col>
+						{status(Friend.user_userStatus)}
+					</Col>
+				</Row>
+				</div>
+				</ContextMenuTrigger>
+				<ContextMenuFriend Friend={Friend}/>
+	
+				</div>
+			)
+			//console.log(`Friend : ${Friend}`)
+		}
+
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
 	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
-	
+	let history = useHistory();
 
 	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
 

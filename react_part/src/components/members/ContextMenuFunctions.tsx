@@ -1,6 +1,7 @@
 
 import axios from 'axios'
 import { socket } from '../../context/socket';
+import { useHistory } from "react-router-dom";
 
 export function InvitateToGame(id: number)
 {
@@ -21,6 +22,16 @@ export function Unfriend(id: number)
 export function Askfriend(id: number)
 {
 	axios.post('http://localhost:8080/relationship/add', {addresseeUserId: id}, {withCredentials: true})
+}
+
+export function Block(id: number)
+{
+	axios.post('http://localhost:8080/relationship/block', {addresseeUserId: id}, {withCredentials: true})
+}
+
+export function Unblock(id: number)
+{
+	axios.delete('http://localhost:8080/relationship/unblock', {withCredentials: true, data: {addresseeUserId: id}})
 }
 
 export function SendMessage(id: number)

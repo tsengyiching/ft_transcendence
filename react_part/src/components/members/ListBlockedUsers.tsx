@@ -6,8 +6,9 @@ import "./ListBlockedUsers.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame} from './ContextMenuFunctions'
+import {InvitateToGame, Unblock} from './ContextMenuFunctions'
 import {DataContext} from "../../App"
+import { useHistory } from "react-router";
 
 interface IBlockedUser {
 	user_id: number;
@@ -17,53 +18,54 @@ interface IBlockedUser {
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
-function ContextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
-{
-	return (
-	<ContextMenu id={`ContextMenuBlockedUser_${props.BlockedUser.user_id}`}>
-		<MenuItem>
-			View Profile
-		</MenuItem>
-		<MenuItem>
-			Unblock
-		</MenuItem>
-	</ContextMenu>
-	)
-}
-
-function BlockedUser(BlockedUser: IBlockedUser)
-{	
-		return (
-			<div key={`BlockedUser_${BlockedUser.user_id}`}>
-			<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
-			<div className="BlockedUser UserButton">
-			<Row>
-			<Col lg={3}>
-				<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-			</Col>
-			<Col lg={5}>
-				<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
-			</Col>
-			<Col>
-				{status(BlockedUser.user_userStatus)}
-			</Col>
-			</Row>
-			</div>
-			</ContextMenuTrigger>
-			<ContextMenuBlockedUser BlockedUser={BlockedUser}/>
-
-			</div>
-		)
-		//console.log(`BlockedUser : ${BlockedUser}`)
-}
-
 export default function ListBlockedUsers()
 {
+	function ContextMenuBlockedUser(props: {user_id: number})
+	{
+		return (
+		<ContextMenu id={`ContextMenuBlockedUser_${props.user_id}`}>
+			<MenuItem onClick={() => history.push(`/profile/${props.user_id}`)}>
+				View Profile
+			</MenuItem>
+			<MenuItem onClick={() => Unblock(props.user_id)} >
+				Unblock
+			</MenuItem>
+		</ContextMenu>
+		)
+	}
+	
+	function BlockedUser(BlockedUser: IBlockedUser)
+	{	
+			return (
+				<div key={`BlockedUser_${BlockedUser.user_id}`}>
+				<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
+				<div className="BlockedUser UserButton">
+				<Row>
+				<Col lg={3}>
+					<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+				</Col>
+				<Col lg={5}>
+					<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
+				</Col>
+				<Col>
+					{status(BlockedUser.user_userStatus)}
+				</Col>
+				</Row>
+				</div>
+				</ContextMenuTrigger>
+				<ContextMenuBlockedUser user_id={BlockedUser.user_id}/>
+	
+				</div>
+			)
+			//console.log(`BlockedUser : ${BlockedUser}`)
+	}
+
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
 	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const userData = useContext(DataContext);
+	let history = useHistory();
 
 	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
@@ -76,6 +78,7 @@ export default function ListBlockedUsers()
 			console.log("error");
 		})
 
+		console.log(BlockedUsers);
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on("reload-blocked", (data: {user_id1: number, user_id2: number}) => {
 			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});

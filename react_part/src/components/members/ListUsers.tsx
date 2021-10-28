@@ -7,7 +7,8 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {DataContext} from "../../App" 
-import { ValidationFriend, Unfriend, Askfriend } from "./ContextMenuFunctions";
+import {Unfriend, Askfriend, Block, Unblock, } from "./ContextMenuFunctions";
+import {useHistory} from "react-router-dom"
 
 interface IUser {
 	id: number;
@@ -18,36 +19,45 @@ interface IUser {
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
-function ContextMenuUser(props: {User: IUser})
+export default function ListUsers()
 {
-	return (
-	<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
+	function ContextMenuUser(props: {User: IUser})
+	{
+		//console.log(`${props.User.nickname} : ${props.User.relationship}`)
+	
+		return (
+		<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
+	
+			{ props.User.userStatus !== 'Offline' &&
+			<div>
+			<MenuItem>
+				Send a message
+			</MenuItem>
+			</div>
+			}
+			<MenuItem onClick={() => history.push(`/profile/${props.User.id}`)}>
+				View Profile
+			</MenuItem>
+			
+			{ props.User.relationship !== 'friend' &&
+			<MenuItem onClick={() => Askfriend(props.User.id)}>
+				Add Friend
+			</MenuItem>}
+	
+			{ props.User.relationship === 'friend' &&
+			<MenuItem onClick={() => Unfriend(props.User.id)}>
+				Unfriend
+			</MenuItem>}
+			
+			<MenuItem onClick={() => Block(props.User.id)}>
+				Block
+			</MenuItem> 
+	
+		</ContextMenu>
+		)
+	}
 
-		{ props.User.userStatus !== 'Offline' &&
-		<div>
-		<MenuItem>
-			Send a message
-		</MenuItem>
-		</div>
-		}
-		<MenuItem>
-			View Profile
-		</MenuItem>
-
-		<MenuItem onClick={() => Askfriend(props.User.id)}>
-			Add Friend
-		</MenuItem>
-		<MenuItem onClick={() => Unfriend(props.User.id)}>
-			Unfriend
-		</MenuItem>
-		<MenuItem>
-			Block / Unblock
-		</MenuItem>
-	</ContextMenu>
-	)
-}
-
-function User(User: IUser)
+	function User(User: IUser)
 	{
 		return (
 			<div key={`User_${User.id}`}>
@@ -67,19 +77,18 @@ function User(User: IUser)
 			</div>
 			</ContextMenuTrigger>
 			<ContextMenuUser User={User}/>
-
+	
 			</div>
 		)
 		//console.log(`User : ${User}`)
 	}
 
-export default function ListUsers()
-{
 	const [Users, SetUsers] = useState<IUser[]>([]);
 	const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
+	let history = useHistory();
 
 	useEffect(() => {
 		let isMounted = true;

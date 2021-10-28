@@ -101,6 +101,10 @@ export class RelationshipController {
     this.chatGateway.server.emit('reload-request', {
       user_id: relationshipDto.addresseeUserId,
     });
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: relationshipDto.addresseeUserId,
+      user_id2: user.id,
+    });
     return relationship;
   }
 
@@ -193,6 +197,10 @@ export class RelationshipController {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
     });
+    this.chatGateway.server.emit('reload-friendlist', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
@@ -213,6 +221,10 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.emit('reload-users', {
+      user_id1: user.id,
+      user_id2: relationshipDto.addresseeUserId,
+    });
+    this.chatGateway.server.emit('reload-blocked', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
     });
