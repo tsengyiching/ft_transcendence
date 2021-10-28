@@ -1,4 +1,4 @@
-import { useState, useEffect, MouseEventHandler,  } from "react"
+import { useState, useEffect, useContext,  } from "react"
 import { socket } from "../../context/socket";
 import {Image, Col, Row, Button} from 'react-bootstrap'
 import axios from 'axios'
@@ -7,6 +7,7 @@ import './members.css'
 import ApprovedButton from '../pictures/approved_button.png'
 import DeclineButton from '../pictures/decline_button.png'
 import {ValidationFriend} from "./ContextMenuFunctions"
+import {DataContext} from '../../App'
 
 interface IFriendRequest {
 	user_id: number;
@@ -19,22 +20,42 @@ interface IFriendRequest {
 export default function ListFriendRequests()
 {
 	const [FriendRequests, SetFriendRequests] = useState<IFriendRequest[]>([]);
-	const [ReloadFriendRequestlist, SetReloadFriendRequestlist] = useState<boolean>(true);
+	const [ReloadFriendRequestlist, SetReloadFriendRequestlist] = useState<{user_id: number}>({user_id: -1});
+	const DataUser = useContext(DataContext);
+	const ReloadComponent = () => SetReloadFriendRequestlist({user_id: DataUser.id});
 
-	const ReloadComponent = () => SetReloadFriendRequestlist(!ReloadFriendRequestlist);
 
 	//load list friend requests
 	useEffect(() => {
+		//console.log("Friend Request reloaded!")
+		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if (isMounted)
 			SetFriendRequests(res.data);
 		})
-		.catch(res => {
-			console.log("error");
+		.catch(res => { if (isMounted)
+			console.log(`error: ${res}`);
 		})
-		console.log("Friend Request reloaded!")
-		//console.log(FriendRequests);
-	}, [ReloadFriendRequestlist]);
+		socket.on('reload-request', (data: {user_id: number}) => {SetReloadFriendRequestlist(data)});
+		return (() => {isMounted = false; socket.off('reload-request')})
+	}, [axios]);
+
+	//reload list friend requests
+	useEffect(() => {
+		//console.log("Friend Request reloaded!")
+		let isMounted = true;
+		if (DataUser.id === ReloadFriendRequestlist.user_id)
+		{
+			axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
+			.then(res => { if (isMounted)
+				SetFriendRequests(res.data);
+			})
+			.catch(res => { if (isMounted)
+				console.log(`error: ${res}`);
+			})
+		}
+		return (() => {isMounted = false});
+	}, [axios, ReloadFriendRequestlist]);
 
 	function FriendRequest(FriendRequest: IFriendRequest)
 	{

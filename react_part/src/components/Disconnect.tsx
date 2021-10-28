@@ -8,16 +8,19 @@ function Disconnect () {
     let history = useHistory();
 
     useEffect(() => {
+        let isMounted = true;
+
         axios.get('http://localhost:8080/auth/disconnect',{
             withCredentials:true,
         })
-        .then(res => {
+        .then(res => { if (isMounted)
             history.push("/auth/disconnect")
         })
-        .catch(res => {
+        .catch(res => { if (isMounted)
             history.push("/connexion");
         })
-    }, []);
+        return (() => {isMounted = false})
+    }, [axios]);
 
     return (
         <div>Disconnected</div>

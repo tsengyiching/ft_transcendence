@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Patch,
   Param,
   ParseIntPipe,
   Post,
@@ -98,8 +99,7 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.emit('reload-request', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
+      user_id: relationshipDto.addresseeUserId,
     });
     return relationship;
   }
@@ -118,7 +118,7 @@ export class RelationshipController {
   /*
    ** acceptFriend returns the new relationship
    */
-  @Get('accept/:id')
+  @Patch('accept/:id')
   async acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
