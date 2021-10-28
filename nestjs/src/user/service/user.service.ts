@@ -123,7 +123,7 @@ export class UserService {
   /**
    * Change all users status to offline.
    */
-  async resetUserStatus() {
+  async resetUserStatus(): Promise<void> {
     this.userRepository
       .createQueryBuilder()
       .update(User)
@@ -131,10 +131,11 @@ export class UserService {
       .where('userStatus != :status', { status: OnlineStatus.OFFLINE })
       .execute();
   }
+
   /**
    * Change user status to specifique value.
    */
-  async setUserStatus(userId: number, status: OnlineStatus) {
+  async setUserStatus(userId: number, status: OnlineStatus): Promise<void> {
     this.userRepository
       .createQueryBuilder()
       .update(User)

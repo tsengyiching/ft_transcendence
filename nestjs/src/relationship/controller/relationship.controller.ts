@@ -124,9 +124,13 @@ export class RelationshipController {
    */
   @Patch('accept/:id')
   async acceptFriend(
+    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
-    const relationship = await this.relationshipService.acceptFriend(id);
+    const relationship = await this.relationshipService.acceptFriend(
+      id,
+      user.id,
+    );
     this.chatGateway.server.emit('reload-request', {
       user_id1: relationship.users[0],
       user_id2: relationship.users[1],
@@ -143,9 +147,10 @@ export class RelationshipController {
    */
   @Delete('reject/:id')
   rejectFriend(
+    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
-    return this.relationshipService.rejectFriend(id);
+    return this.relationshipService.rejectFriend(id, user.id);
   }
 
   /*

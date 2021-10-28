@@ -117,9 +117,13 @@ export class RelationshipService {
     return this.reformAddFriendSendingData(relationship);
   }
 
-  async acceptFriend(id: number): Promise<SendRelationshipDto> {
-    const relationship = await this.getOneById(id);
+  async acceptFriend(
+    relationshipId: number,
+    currentUserId: number,
+  ): Promise<SendRelationshipDto> {
+    const relationship = await this.getOneById(relationshipId);
     await this.checkFriendshipStatus(relationship);
+    await this.checkUserIsAddressee(relationship, currentUserId);
     relationship.status = RelationshipStatus.FRIEND;
     const updateRelationship = await this.relationshipRepository.save(
       relationship,
@@ -127,9 +131,13 @@ export class RelationshipService {
     return this.reformSendingData(updateRelationship);
   }
 
-  async rejectFriend(id: number): Promise<SendRelationshipDto> {
-    const relationship = await this.getOneById(id);
+  async rejectFriend(
+    relationshipId: number,
+    currentUserId: number,
+  ): Promise<SendRelationshipDto> {
+    const relationship = await this.getOneById(relationshipId);
     await this.checkFriendshipStatus(relationship);
+    await this.checkUserIsAddressee(relationship, currentUserId);
     const rm = await this.relationshipRepository.remove(relationship);
     return this.reformSendingData(rm);
   }
@@ -192,8 +200,8 @@ export class RelationshipService {
 
   /**
    * getAllRelationshipWithStatus
-   * @arg : status
-   * @return specific status' relationship with two related users
+   * @param : status
+   * @returns : specific status' relationship with two related users
    */
   async getAllRelationshipWithStatus(
     status: RelationshipStatus,
@@ -206,8 +214,8 @@ export class RelationshipService {
 
   /**
    * getOneById
-   * @arg : relationship id
-   * @return : that demanded relationship with two related users
+   * @param : relationship id
+   * @returns : that demanded relationship with two related users
    */
   getOneById(id: number): Promise<Relationship> {
     return this.relationshipRepository.findOne(id, {
@@ -217,8 +225,8 @@ export class RelationshipService {
 
   /**
    * getFullData
-   * @arg : userId and the relationship's status
-   * @return : user's related other users
+   * @param : userId and the relationship's status
+   * @returns : user's related other users
    */
   async getFullData(id: number, status: string): Promise<UserRelationship[]> {
     const data = await this.userRelationship.find({
@@ -233,8 +241,8 @@ export class RelationshipService {
 
   /**
    * findUserRelationshipId
-   * @arg : userId, friendId, the relationship's status
-   * @return : user and his friend's linked relationshipId
+   * @param : userId, friendId, the relationship's status
+   * @returns : user and his friend's linked relationshipId
    */
   async findUserRelationshipId(
     userId: number,
@@ -259,7 +267,8 @@ export class RelationshipService {
 
   /**
    * setNewRelation save two users in userRelationship table
-   * @arg : requester id; addresseeUserId; related relationshipId
+   * @param : requester id; addresseeUserId; related relationshipId
+   * @returns : the saving userRelationsip
    */
   async setNewRelation(
     id: number,
@@ -279,8 +288,8 @@ export class RelationshipService {
 
   /**
    * getUserIdsWithStatus
-   * @arg : userId and the status demanded
-   * @return array [user ids]
+   * @param : userId and the status demanded
+   * @returns : array [user ids]
    */
   async getUserIdsWithStatus(id: number, reqStatus: string): Promise<number[]> {
     /* check */
@@ -317,8 +326,8 @@ export class RelationshipService {
 
   /**
    * getBlockingIds
-   * @arg : userId
-   * @return array [other user ids who block @arg id]
+   * @param : userId
+   * @returns : array [other user ids who block @param id]
    */
   async getBlockingIds(id: number): Promise<number[]> {
     await this.userService.getUserProfileById(id);
@@ -339,9 +348,31 @@ export class RelationshipService {
   /*                                 checkers                                 */
   /****************************************************************************/
 
-  /*
-   ** checkFriendshipStatus throws exception if relationship does not exist,
-   ** or it has already the status Friend/Block
+  /**
+   * @param relationship and currentUserId
+   */
+  async checkUserIsAddressee(
+    relationship: Relationship,
+    userId: number,
+  ): Promise<void> {
+    if (
+      (relationship.userRelationship[0].id <
+        relationship.userRelationship[1].id &&
+        relationship.userRelationship[0].userId === userId) ||
+      (relationship.userRelationship[0].id >
+        relationship.userRelationship[1].id &&
+        relationship.userRelationship[1].userId === userId)
+    ) {
+      throw new HttpException(
+        'Current User is the one who made the friend request, he/she cannot accept this relationship.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+  }
+
+  /**
+   * checkFriendshipStatus throws exception if relationship does not exist,
+   * or it has already the status Friend/Block
    */
   async checkFriendshipStatus(relationship: Relationship): Promise<void> {
     if (!relationship) {
@@ -359,8 +390,8 @@ export class RelationshipService {
   }
 
   /*
-   ** checkIsSameUser throws exception if user does not exist,
-   ** or userOne and UserTwo have same id
+   * checkIsSameUser throws exception if user does not exist,
+   * or userOne and UserTwo have same id
    */
   async checkIsSameUser(userOne: number, userTwo: number): Promise<void> {
     if (userOne === userTwo) {
@@ -372,9 +403,9 @@ export class RelationshipService {
     await this.userService.getUserProfileById(userTwo);
   }
 
-  /*
-   ** checkUsersRelation see if there's an existing relationship between users,
-   ** throws exception if it's true
+  /**
+   * checkUsersRelation see if there's an existing relationship between users,
+   * throws exception if it's true
    */
   async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
     const friendlist = await this.getUserIdsWithStatus(userOne, 'friend');
@@ -456,8 +487,8 @@ export class RelationshipService {
   /*                              Reform Objs                                 */
   /****************************************************************************/
 
-  /*
-   ** reformSendingDataArray returns SendRelationshipDto[]
+  /**
+   * reformSendingDataArray returns SendRelationshipDto[]
    */
   async reformSendingDataArray(
     relationship: Relationship[],
@@ -477,8 +508,8 @@ export class RelationshipService {
     return ret;
   }
 
-  /*
-   ** reformSendingData returns SendRelationshipDto[]
+  /**
+   * reformSendingData returns SendRelationshipDto[]
    */
   async reformSendingData(
     relationship: Relationship,
@@ -495,8 +526,8 @@ export class RelationshipService {
     return obj;
   }
 
-  /*
-   ** reformAddFriendSendingData returns
+  /**
+   * reformAddFriendSendingData returns
    */
   async reformAddFriendSendingData(
     relationship: Relationship,
