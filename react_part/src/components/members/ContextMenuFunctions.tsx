@@ -31,7 +31,7 @@ export function ValidationFriend(relationship_id: number, isAccepted: boolean, C
 {
 	if (isAccepted)
 	{
-		axios.get(`http://localhost:8080/relationship/accept/${relationship_id}`, {withCredentials: true,})
+		axios.patch(`http://localhost:8080/relationship/accept/${relationship_id}`, {}, {withCredentials: true,})
 		.then(res => {CallBackfunction()})
 		.catch(res => console.log(`error in ValidationFriend: ${res}`));
 	}

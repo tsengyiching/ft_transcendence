@@ -32,7 +32,7 @@ function ContextMenuBlockedUser(props: {BlockedUser: IBlockedUser})
 }
 
 function BlockedUser(BlockedUser: IBlockedUser)
-	{
+{	
 		return (
 			<div key={`BlockedUser_${BlockedUser.user_id}`}>
 			<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
@@ -55,7 +55,7 @@ function BlockedUser(BlockedUser: IBlockedUser)
 			</div>
 		)
 		//console.log(`BlockedUser : ${BlockedUser}`)
-	}
+}
 
 export default function ListBlockedUsers()
 {

@@ -3,7 +3,7 @@ import {
   Controller,
   Delete,
   Get,
-  Put,
+  Patch,
   Param,
   ParseIntPipe,
   Post,
@@ -118,7 +118,7 @@ export class RelationshipController {
   /*
    ** acceptFriend returns the new relationship
    */
-  @Get('accept/:id')
+  @Patch('accept/:id')
   async acceptFriend(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<SendRelationshipDto> {
