@@ -2,7 +2,7 @@ import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import PageConnexion from './PageConnexion';
 import Home from './Home';
 import Profile from './Profile';
-import Parametres from './Parameters';
+import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 
@@ -31,7 +31,7 @@ function Router() {
         <Switch>
           <Route exact path="/accueil" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
-          <Route exact path="/parametres" component={Parametres} />
+          <Route exact path="/settings" component={Settings} />
           <Route exact path="/auth/disconnect" component={Disconnect} />
           <Redirect to="/accueil"/>
         </Switch>

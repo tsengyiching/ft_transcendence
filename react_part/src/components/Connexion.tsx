@@ -9,9 +9,9 @@ function Connexion () {
     }
 
     return (
-        <button onClick={onConnexion}>
+        <Button onClick={onConnexion}>
             Connexion
-        </button>
+        </Button>
     )
 }
 
