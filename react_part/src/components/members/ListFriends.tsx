@@ -6,7 +6,7 @@ import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame} from './ContextMenuFunctions'
+import {InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
 import { DataContext } from "../../App";
 
 interface IFriend {
@@ -23,30 +23,27 @@ function ContextMenuFriend(props: {Friend: IFriend})
 	<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
 
 		{	props.Friend.user_userStatus === 'Available' &&
-		<div>
-		<MenuItem>
-			<div onClick={() => InvitateToGame(props.Friend.user_id)}> Invitate to game </div>
-		</MenuItem>
-		<MenuItem>
-			Send a message
-		</MenuItem>
-		</div>
-		}
+		<MenuItem onClick={() => InvitateToGame(props.Friend.user_id)}>
+			Invitate to game
+		</MenuItem>}
+
 		{ props.Friend.user_userStatus === 'Playing' &&
-		<div>
-		<MenuItem> <div> Spectate Game </div></MenuItem>
+		<MenuItem onClick={() => SpectateGame(props.Friend.user_id)}>
+			Spectate Game
+		</MenuItem>}
+
 		<MenuItem>
 			Send a message
 		</MenuItem>
-		</div>
-		}
+
 		<MenuItem>
 			View Profile
 		</MenuItem>
 
-		<MenuItem>
+		<MenuItem onClick={() => Unfriend(props.Friend.user_id)} >
 			Unfriend
 		</MenuItem>
+
 		<MenuItem>
 			Block
 		</MenuItem>
@@ -93,6 +90,7 @@ export default function ListFriends()
 
 	//get list of friends at the mount of the component + start listening socket
 	useEffect(() => {
+		//console.log("in the first useEffect");
 		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
 		.then(res => {
 			SetFriends(res.data);
@@ -110,6 +108,7 @@ export default function ListFriends()
 
 	//actualize the friendlist
 	useEffect(() => {
+		//console.log("in reload friendlist");
 		if (userData.id === ReloadFriendlist.user_id1 || userData.id === ReloadFriendlist.user_id2)
 		{
 		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
@@ -119,12 +118,12 @@ export default function ListFriends()
 		.catch(res => {
 			console.log("error");
 		})
-		console.log("reload friendlist");
 		}
 	}, [ReloadFriendlist])
 
 	//actualize the status
 	useEffect(() => {
+		//console.log("in actualize status");
 		if (ReloadStatus.user_id !== 0)
 		{
 			//console.log("in reloadstatus effect");

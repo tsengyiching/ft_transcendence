@@ -19,8 +19,8 @@ function Home() {
         })
         .then(res => {
             setId(res.data.id)
-            setName(res.data.nickname)
-        })
+            setName(res.data.nickname)})
+        .catch(res => console.log(`error in Home : ${res.data}`));
     })
     return (
                 <Row>

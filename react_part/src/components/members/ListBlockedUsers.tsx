@@ -80,7 +80,6 @@ export default function ListBlockedUsers()
 			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
 
 		return (() => {socket.off('reload-status'); socket.off('reload-blocked');});
-		//console.log(BlockedUsers);
 	}, []);
 
 	//actualize the blockedlist
@@ -95,17 +94,15 @@ export default function ListBlockedUsers()
 				console.log(res.data);
 			})
 		}
-	}, [ReloadBlockedUserlist])
+	}, [ReloadBlockedUserlist, userData.id])
 
 	//actualize the status
 	useEffect(() => {
 		if (ReloadStatus.user_id !== 0)
 		{
-			//console.log("in reloadstatus effect");
 			const blocked = BlockedUsers.find(element => element.user_id === ReloadStatus.user_id)
 			if (blocked !== undefined)
 			{
-				//console.log("change status");
 				blocked.user_userStatus = ReloadStatus.status;
 				SetRefreshVar(!RefreshVar);
 			}

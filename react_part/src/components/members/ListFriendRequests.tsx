@@ -32,7 +32,7 @@ export default function ListFriendRequests()
 		.catch(res => {
 			console.log("error");
 		})
-		console.log("Friend Request reloaded!")
+		//console.log("Friend Request reloaded!")
 		//console.log(FriendRequests);
 	}, [ReloadFriendRequestlist]);
 

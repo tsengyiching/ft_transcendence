@@ -31,7 +31,6 @@ function App() {
   const [userData, SetuserData] = useState<Data>(emptyuser);
 
   useEffect(() => {
-
     axios.get("http://localhost:8080/profile/me", {withCredentials: true})
     .then((res) => SetuserData(res.data))
     .catch(res => console.log(`error in context user : ${res.data}`))
