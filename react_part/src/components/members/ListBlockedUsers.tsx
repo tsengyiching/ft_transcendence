@@ -67,11 +67,12 @@ export default function ListBlockedUsers()
 
 	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
+		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if(isMounted)
 			SetBlockedUsers(res.data);
 		})
-		.catch(res => {
+		.catch(res => { if (isMounted)
 			console.log("error");
 		})
 
@@ -79,22 +80,23 @@ export default function ListBlockedUsers()
 		socket.on("reload-blocked", (data: {user_id1: number, user_id2: number}) => {
 			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
 
-		return (() => {socket.off('reload-status'); socket.off('reload-blocked');});
-	}, []);
+		return (() => {socket.off('reload-status'); socket.off('reload-blocked'); isMounted = false;});
+	}, [axios]);
 
 	//actualize the blockedlist
 	useEffect(() => {
+		let isMounted = true
 		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id == ReloadBlockedUserlist.user_id2)
 		{
 			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
-			.then(res => {
+			.then(res => { if (isMounted)
 				SetBlockedUsers(res.data);
 			})
-			.catch(res => {
+			.catch(res => { if (isMounted)
 				console.log(res.data);
 			})
 		}
-	}, [ReloadBlockedUserlist, userData.id])
+	}, [ReloadBlockedUserlist, userData.id, axios])
 
 	//actualize the status
 	useEffect(() => {

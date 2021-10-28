@@ -31,9 +31,12 @@ function App() {
   const [userData, SetuserData] = useState<Data>(emptyuser);
 
   useEffect(() => {
+    let isMounted = true;
     axios.get("http://localhost:8080/profile/me", {withCredentials: true})
-    .then((res) => SetuserData(res.data))
-    .catch(res => console.log(`error in context user : ${res.data}`))
+    .then((res) => {if(isMounted) {SetuserData(res.data)} })
+    .catch(res => {if(isMounted) {console.log(`error in context user : ${res.data}`)}})
+
+    return (() => {isMounted = false});
   }, [])
   
   return (

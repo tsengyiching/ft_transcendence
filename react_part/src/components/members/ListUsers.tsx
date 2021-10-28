@@ -78,32 +78,35 @@ export default function ListUsers()
 	const userData = useContext(DataContext);
 
 	useEffect(() => {
+		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if (isMounted)
 			SetUsers(res.data);
 		})
-		.catch(res => {
+		.catch(res => { if (isMounted)
 			console.log("error");
 		})
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on('reload-users', (data: {user_id1: number, user_id2: number}) => {SetReloadUserlist(data)});
-		return (() => {socket.off('reload-status'); socket.off('reload-users')});
+		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
 		//console.log(Users);
-	}, []);
+	}, [axios]);
 
 	//actualize the list of users	
 	useEffect(() => {
+		let isMounted = true;
 		if (userData.id == ReloadUserlist.user_id1 || userData.id == ReloadUserlist.user_id2)
 		{
 			axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
-			.then(res => {
+			.then(res => { if (isMounted)
 				SetUsers(res.data);
 			})
-			.catch(res => {
+			.catch(res => { if (isMounted)
 				console.log("error");
 			})
 		}
-	}, [ReloadUserlist])
+		return (() => {isMounted = false})
+	}, [ReloadUserlist, axios])
 
 	//actualize the status
 	useEffect(() => {

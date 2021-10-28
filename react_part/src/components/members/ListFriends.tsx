@@ -6,7 +6,7 @@ import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
+import {InvitateToGame, SendMessage, SpectateGame, Unfriend} from './ContextMenuFunctions'
 import { DataContext } from "../../App";
 
 interface IFriend {
@@ -32,7 +32,7 @@ function ContextMenuFriend(props: {Friend: IFriend})
 			Spectate Game
 		</MenuItem>}
 
-		<MenuItem>
+		<MenuItem onClick={() => SendMessage(props.Friend.user_id)}>
 			Send a message
 		</MenuItem>
 
@@ -91,11 +91,12 @@ export default function ListFriends()
 	//get list of friends at the mount of the component + start listening socket
 	useEffect(() => {
 		//console.log("in the first useEffect");
+		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if (isMounted)
 			SetFriends(res.data);
 		})
-		.catch(res => {
+		.catch(res => { if (isMounted)
 			console.log("error");
 		})
 		
@@ -103,36 +104,36 @@ export default function ListFriends()
 		socket.on("reload-friendlist", (data: {user_id1: number, user_id2: number}) => {
 			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
 		})
-		return (() => {socket.off("reload-friendlist"); socket.off("reload-status");});
-	}, [])
+		return (() => {socket.off("reload-friendlist"); socket.off("reload-status"); isMounted = false;});
+	}, [axios])
 
 	//actualize the friendlist
 	useEffect(() => {
 		//console.log("in reload friendlist");
+		let isMounted = true;
 		if (userData.id === ReloadFriendlist.user_id1 || userData.id === ReloadFriendlist.user_id2)
 		{
 		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if (isMounted)
 			SetFriends(res.data);
 		})
-		.catch(res => {
+		.catch(res => { if (isMounted)
 			console.log("error");
 		})
 		}
-	}, [ReloadFriendlist])
+		return (() => {isMounted = false});
+	}, [ReloadFriendlist, axios])
 
 	//actualize the status
 	useEffect(() => {
 		//console.log("in actualize status");
 		if (ReloadStatus.user_id !== 0)
 		{
-			//console.log("in reloadstatus effect");
 			const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)
 			if (friend !== undefined)
 			{
-			//console.log("change status");
-			friend.user_userStatus = ReloadStatus.status;
-			SetRefreshVar(!RefreshVar);
+				friend.user_userStatus = ReloadStatus.status;
+				SetRefreshVar(!RefreshVar);
 			}
 		}
 	}, [ReloadStatus])
@@ -140,9 +141,6 @@ export default function ListFriends()
 	return (
 		<div className="ScrollingListMemebers">
 			{Friends.map(Friend)}
-			{<Button onClick={() => {socket.emit('test-reload-status')} }> Playing </Button>}
-			{<Button onClick={() => {SetReloadStatus({user_id: 115, status: 'Offline'});} }> Offline </Button>}
-			{<Button onClick={() => {SetReloadFriendlist({user_id1: 60044, user_id2: 0});} }> Reload Friendlist </Button>}
 		</div>
 	)
 }

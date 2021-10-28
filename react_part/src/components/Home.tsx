@@ -14,13 +14,16 @@ function Home() {
     const [name, setName] = useState("");
 
     useEffect(() => {
+        let isMounted = true;
         axios.get('http://localhost:8080/profile/me/',{
             withCredentials:true,
         })
-        .then(res => {
+        .then(res => { if (isMounted)
+            {
             setId(res.data.id)
-            setName(res.data.nickname)})
-        .catch(res => console.log(`error in Home : ${res.data}`));
+            setName(res.data.nickname)} })
+        .catch(res => {if (isMounted) console.log(`error in Home : ${res.data}`)} )
+        return (() => {isMounted = false})
     })
     return (
                 <Row>

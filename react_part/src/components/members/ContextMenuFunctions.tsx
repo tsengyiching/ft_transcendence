@@ -14,9 +14,14 @@ export function SpectateGame(id: number)
 
 export function Unfriend(id: number)
 {
-	axios.delete('http://localhost:8080/relationship/unfriend', {withCredentials: true, data: {addresseUserId: id}});
+	axios.delete('http://localhost:8080/relationship/unfriend', {withCredentials: true, data: {addresseUserId: id}})
+	.catch((res) => console.log(res));
 }
 
+export function SendMessage(id: number)
+{
+	console.log(`Send message to ${id}`);
+}
 
 /*
 	Approve or Decline a friend invitation

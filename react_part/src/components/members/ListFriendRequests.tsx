@@ -28,31 +28,34 @@ export default function ListFriendRequests()
 	//load list friend requests
 	useEffect(() => {
 		//console.log("Friend Request reloaded!")
+		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
-		.then(res => {
+		.then(res => { if (isMounted)
 			SetFriendRequests(res.data);
 		})
-		.catch(res => {
+		.catch(res => { if (isMounted)
 			console.log(`error: ${res}`);
 		})
 		socket.on('reload-request', (data: {user_id: number}) => {SetReloadFriendRequestlist(data)});
-		return (() => {socket.off('reload-request')});
-	}, []);
+		return (() => {isMounted = false; socket.off('reload-request')})
+	}, [axios]);
 
 	//reload list friend requests
 	useEffect(() => {
 		//console.log("Friend Request reloaded!")
+		let isMounted = true;
 		if (DataUser.id === ReloadFriendRequestlist.user_id)
 		{
 			axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
-			.then(res => {
+			.then(res => { if (isMounted)
 				SetFriendRequests(res.data);
 			})
-			.catch(res => {
+			.catch(res => { if (isMounted)
 				console.log(`error: ${res}`);
 			})
 		}
-	}, [ReloadFriendRequestlist]);
+		return (() => {isMounted = false});
+	}, [axios, ReloadFriendRequestlist]);
 
 	function FriendRequest(FriendRequest: IFriendRequest)
 	{
