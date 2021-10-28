@@ -7,6 +7,7 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {DataContext} from "../../App" 
+import { ValidationFriend, Unfriend, Askfriend } from "./ContextMenuFunctions";
 
 interface IUser {
 	id: number;
@@ -33,8 +34,11 @@ function ContextMenuUser(props: {User: IUser})
 			View Profile
 		</MenuItem>
 
-		<MenuItem>
-			Add Friend / Unfriend
+		<MenuItem onClick={() => Askfriend(props.User.id)}>
+			Add Friend
+		</MenuItem>
+		<MenuItem onClick={() => Unfriend(props.User.id)}>
+			Unfriend
 		</MenuItem>
 		<MenuItem>
 			Block / Unblock

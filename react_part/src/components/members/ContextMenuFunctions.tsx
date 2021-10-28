@@ -14,8 +14,13 @@ export function SpectateGame(id: number)
 
 export function Unfriend(id: number)
 {
-	axios.delete('http://localhost:8080/relationship/unfriend', {withCredentials: true, data: {addresseUserId: id}})
+	axios.delete('http://localhost:8080/relationship/unfriend', {withCredentials: true, data: {addresseeUserId: id}})
 	.catch((res) => console.log(res));
+}
+
+export function Askfriend(id: number)
+{
+	axios.post('http://localhost:8080/relationship/add', {addresseeUserId: id}, {withCredentials: true})
 }
 
 export function SendMessage(id: number)
