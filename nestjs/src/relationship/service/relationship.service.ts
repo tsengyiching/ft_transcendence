@@ -536,7 +536,7 @@ export class RelationshipService {
         nickname: data.nickname,
         avatar: data.avatar,
         userStatus: data.userStatus,
-        relationshp: data.relationship,
+        relationship: data.relationship,
       };
       return obj;
     });
