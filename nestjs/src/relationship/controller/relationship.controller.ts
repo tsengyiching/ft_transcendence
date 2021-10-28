@@ -99,8 +99,7 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.emit('reload-request', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
+      user_id: relationshipDto.addresseeUserId,
     });
     return relationship;
   }
