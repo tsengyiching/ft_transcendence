@@ -68,8 +68,6 @@ export class ChatGateway
     );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
-    const test = await this.chatService.getChannelUsers(5);
-    console.log('channel users', test);
     //console.log(await this.messageService.getDirectMessages(user.id, 1));
   }
 
@@ -104,9 +102,9 @@ export class ChatGateway
    * @param GeneralChannelDto : channelId and password
    */
   @SubscribeMessage('channel-join')
-  async joinChannel(client: Socket, channelParticipant: GeneralChannelDto) {
+  async joinChannel(client: Socket, channelDto: GeneralChannelDto) {
     const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.joinChannel(user.id, channelParticipant);
+    await this.chatService.joinChannel(user.id, channelDto);
     console.log('User joined channel successfully !');
     /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
     const channels_in = this.chatService.getUserChannels(user.id);
@@ -134,6 +132,7 @@ export class ChatGateway
     );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
+    // need to complete later; and leaveChannelDto -> channel Id
   }
 
   /**
@@ -143,14 +142,44 @@ export class ChatGateway
   @SubscribeMessage('channel-users')
   async getChannelUsers(channelId: number) {
     await this.getChannelUsers(channelId);
+    // check with Felix
   }
 
   /**
    * add Password
-   *
+   * @param GeneralChannelDto : channelId and password
    */
-  // @SubscribeMessage('channel-add-password')
-  // async addChannelPassword() {}
+  @SubscribeMessage('channel-add-password')
+  async addChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
+    const user = await this.authService.getUserFromSocket(client);
+    await this.chatService.addChannelPassword(user.id, channelDto);
+    console.log('Channel password has been added successfully !');
+    // check with Felix
+  }
+
+  /**
+   * change Password
+   * @param GeneralChannelDto : channelId and password
+   */
+  @SubscribeMessage('channel-change-password')
+  async changeChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
+    const user = await this.authService.getUserFromSocket(client);
+    await this.chatService.changeChannelPassword(user.id, channelDto);
+    console.log('Channel password has been changed successfully !');
+    // check with Felix
+  }
+
+  /**
+   * delete Password
+   * @param GeneralChannelDto : channelId and password
+   */
+  @SubscribeMessage('channel-delete-password')
+  async deleteChannelPassword(client: Socket, channelId: number) {
+    const user = await this.authService.getUserFromSocket(client);
+    await this.chatService.deleteChannelPassword(user.id, channelId);
+    console.log('Channel password has been deleted successfully !');
+    // check with Felix
+  }
 
   /**
    * Ask to Reload the Channels list
