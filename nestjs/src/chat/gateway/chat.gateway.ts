@@ -1,4 +1,5 @@
 import {
+  MessageBody,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -11,7 +12,7 @@ import { AuthService } from 'src/auth/service/auth.service';
 import { OnlineStatus, User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { CreateChannelDto } from '../dto/create-channel.dto';
-import { GeneralChannelDto } from '../dto/general-channel.dto';
+import { CreateChannelParticipantDto } from '../dto/create-channel-participant.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { ChatService } from '../service/chat.service';
@@ -68,8 +69,6 @@ export class ChatGateway
     );
     client.emit('channels-user-in', await channels_in);
     client.emit('channels-user-out', await channels_out);
-    const test = await this.chatService.getChannelUsers(5);
-    console.log('channel users', test);
     //console.log(await this.messageService.getDirectMessages(user.id, 1));
   }
 
@@ -100,11 +99,38 @@ export class ChatGateway
   }
 
   /**
+   * Ask to Reload the Channels list
+   */
+  @SubscribeMessage('ask-reload-channel')
+  async reloadChannel(client: Socket) {
+    const user: User = await this.authService.getUserFromSocket(client);
+    const channels_in = this.chatService.getUserChannels(user.id);
+    const channels_out = this.chatService.getUserNotParticipateChannels(
+      user.id,
+    );
+    client.emit('channels-user-in', await channels_in);
+    client.emit('channels-user-out', await channels_out);
+  }
+
+  /**
+   * delete channel
+   * @param data
+   */
+  @SubscribeMessage('channel-delete')
+  deleteChannel(data) {
+    console.log('Channel Delete');
+    console.log(data);
+  }
+
+  /**
    * join channel
-   * @param GeneralChannelDto : channelId and password
+   * @param CreateChannelParticipantDto : channelId and password
    */
   @SubscribeMessage('channel-join')
-  async joinChannel(client: Socket, channelParticipant: GeneralChannelDto) {
+  async joinChannel(
+    client: Socket,
+    channelParticipant: CreateChannelParticipantDto,
+  ) {
     const user = await this.authService.getUserFromSocket(client);
     await this.chatService.joinChannel(user.id, channelParticipant);
     console.log('User joined channel successfully !');
@@ -137,34 +163,8 @@ export class ChatGateway
   }
 
   /**
-   * get channel users
-   * @param channel id
-   */
-  @SubscribeMessage('channel-users')
-  async getChannelUsers(channelId: number) {
-    await this.getChannelUsers(channelId);
-  }
-
-  /**
-   * add Password
    *
    */
-  // @SubscribeMessage('channel-add-password')
-  // async addChannelPassword() {}
-
-  /**
-   * Ask to Reload the Channels list
-   */
-  @SubscribeMessage('ask-reload-channel')
-  async reloadChannel(client: Socket) {
-    const user: User = await this.authService.getUserFromSocket(client);
-    const channels_in = this.chatService.getUserChannels(user.id);
-    const channels_out = this.chatService.getUserNotParticipateChannels(
-      user.id,
-    );
-    client.emit('channels-user-in', await channels_in);
-    client.emit('channels-user-out', await channels_out);
-  }
 
   /**
    * Load channel data (message) and register to the room event
@@ -239,7 +239,11 @@ export class ChatGateway
     if (user) {
       const channelParticipant =
         await this.chatService.getOneChannelParticipant(user.id, channelId);
-      if (channelParticipant) client.join('private-' + channelId);
+      if (channelParticipant) {
+        client.join('private-' + channelId);
+        const messages = await this.messageService.getDirectMessages(channelId);
+        client.emit('private-message-list', messages);
+      }
     }
   }
 
