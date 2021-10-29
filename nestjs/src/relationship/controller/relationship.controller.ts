@@ -98,10 +98,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-    this.chatGateway.server.emit('reload-request', {
-      user_id: relationshipDto.addresseeUserId,
-    });
-    this.chatGateway.server.emit('reload-friendlist', {
+    this.chatGateway.server.emit('reload-users', {
       user_id1: relationshipDto.addresseeUserId,
       user_id2: user.id,
     });
@@ -131,11 +128,7 @@ export class RelationshipController {
       id,
       user.id,
     );
-    this.chatGateway.server.emit('reload-request', {
-      user_id1: relationship.users[0],
-      user_id2: relationship.users[1],
-    });
-    this.chatGateway.server.emit('reload-friendlist', {
+    this.chatGateway.server.emit('reload-users', {
       user_id1: relationship.users[0],
       user_id2: relationship.users[1],
     });
@@ -165,7 +158,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-    this.chatGateway.server.emit('reload-friendlist', {
+    this.chatGateway.server.emit('reload-users', {
       user_id1: relationship.users[0],
       user_id2: relationship.users[1],
     });
@@ -198,14 +191,6 @@ export class RelationshipController {
       relationshipDto,
     );
 
-    this.chatGateway.server.emit('reload-blocked', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
-    this.chatGateway.server.emit('reload-friendlist', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
@@ -226,10 +211,6 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.emit('reload-users', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
-    this.chatGateway.server.emit('reload-blocked', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
     });
