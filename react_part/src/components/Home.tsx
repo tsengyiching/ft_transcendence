@@ -7,6 +7,8 @@ import InterfaceUser from './chat/InterfaceUser'
 import Game from './Game'
 import "./Home.css"
 import "./members/members.css"
+import Notifications from './Notifications'
+
 
 function Home() {
 
@@ -26,7 +28,10 @@ function Home() {
         return (() => {isMounted = false})
     })
     return (
+        <div>
+                <Notifications/>
                 <Row>
+
                     <Col lg={7} md={6} xs={5} className="LeftColHome">
 				    	<Game />
                     </Col>
@@ -35,6 +40,7 @@ function Home() {
                         <InterfaceUser/>
 					</Col>
                 </Row>
+        </div>
     )
 }
 
