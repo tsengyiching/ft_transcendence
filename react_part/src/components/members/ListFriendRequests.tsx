@@ -38,7 +38,7 @@ export default function ListFriendRequests()
 		})
 		socket.on('reload-request', (data: {user_id: number}) => {SetReloadFriendRequestlist(data)});
 		return (() => {isMounted = false; socket.off('reload-request')})
-	}, [axios]);
+	}, []);
 
 	//reload list friend requests
 	useEffect(() => {
@@ -55,7 +55,7 @@ export default function ListFriendRequests()
 			})
 		}
 		return (() => {isMounted = false});
-	}, [axios, ReloadFriendRequestlist]);
+	}, [ReloadFriendRequestlist]);
 
 	function FriendRequest(FriendRequest: IFriendRequest)
 	{
