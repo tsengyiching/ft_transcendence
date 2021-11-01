@@ -23,41 +23,45 @@ import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
 export class UserController {
   constructor(private userService: UserService) {}
 
-  /*
-   ** getCurrentUser returns current User with id, nickname and createDate
+  /**
+   * getCurrentUser
+   * @returns : id, nickname, createDate, userStatus, email, 2fa enable
    */
   @Get('me')
   getCurrentUser(@CurrentUser() user: User): Promise<User> {
-    return this.userService.getUserProfileById(user.id);
+    return this.userService.getOneById(user.id);
   }
 
-  /*
-   ** getAll returns all users
+  /**
+   * getAll
+   * @returns : all users with id, nickname, createDate, userStatus, email
    */
   @Get('all')
   getUsers(): Promise<User[]> {
     return this.userService.getAll();
   }
 
-  /*
-   ** getUserProfileById returns the user with id, nickname and createDate
+  /**
+   * getUserProfileById
+   * @param : user id
+   * @returns : the user with id, nickname, createDate, userStatus, email
    */
   @Get(':id')
   getUserProfileById(@Param('id', ParseIntPipe) id: number): Promise<User> {
     return this.userService.getUserProfileById(id);
   }
 
-  /*
-   ** createUser locally, it returns the new user
-   ** have to delete later
+  /**
+   * createUser locally, it returns the new user
+   * have to delete later
    */
   @Post()
   createUser(@Body() createUserDto: CreateUserDto): Promise<User> {
     return this.userService.createUserWithDto(createUserDto);
   }
 
-  /*
-   ** changeUserName modifies the user's nickname which should be unique
+  /**
+   * changeUserName
    */
   @Patch('name')
   changeUserName(
@@ -67,8 +71,8 @@ export class UserController {
     return this.userService.changeUserName(user.id, changeUserNameDto);
   }
 
-  /*
-   ** changeUserAvatar modifies the user's avatar
+  /**
+   * changeUserAvatar
    */
   @Patch('avatar')
   changeUserAvatar(

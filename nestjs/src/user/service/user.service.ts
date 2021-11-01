@@ -12,31 +12,35 @@ export class UserService {
     @InjectRepository(User) private userRepository: Repository<User>,
   ) {}
 
+  /**
+   * getAll
+   * @returns : all users
+   */
   getAll(): Promise<User[]> {
-    return this.userRepository.find({ order: { createDate: 'ASC' } });
+    return this.userRepository.find({
+      select: ['id', 'nickname', 'avatar', 'createDate', 'userStatus', 'email'],
+      order: { createDate: 'ASC' },
+    });
   }
 
-  async getAllWithConditions(id: number): Promise<User[]> {
-    return this.userRepository
-      .createQueryBuilder('user')
-      .where('user.id != :Id', { Id: id })
-      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
-      .orderBy('id', 'ASC')
-      .getMany();
-  }
-
-  /*
-   ** getOneById returns the user
+  /**
+   * getOneById
+   * @param : user id
+   * @returns : user
    */
   getOneById(id: number): Promise<User> {
     return this.userRepository.findOne(id);
   }
 
-  /*
-   ** ! add avatar and status later
+  /**
+   * getUserProfileById
+   * @param : user id
+   * @returns : user or throw error
    */
-  async getUserProfileById(id: number) {
-    const user = await this.userRepository.findOne(id);
+  async getUserProfileById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne(id, {
+      select: ['id', 'nickname', 'avatar', 'createDate', 'userStatus', 'email'],
+    });
     if (user) {
       return user;
     }
@@ -46,6 +50,11 @@ export class UserService {
     );
   }
 
+  /**
+   * createUser
+   * @param : 42 profile payload
+   * @returns : user
+   */
   createUser(profile: any): Promise<User> {
     const newUser = this.userRepository.create();
     newUser.id = profile.id;
@@ -66,21 +75,32 @@ export class UserService {
     return this.userRepository.save(newUser);
   }
 
+  /**
+   * changeUserName
+   * @param : user id and new nickname
+   * @returns : user
+   */
   async changeUserName(
     id: number,
     changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
     const user = await this.getOneById(id);
+    if (!user) {
+      throw new HttpException(
+        `This User ${id} does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     if (user.nickname === changeUserNameDto.nickname) {
       throw new HttpException(
-        `Same user nickname is entered !`,
+        `${user.nickname} is your current nickname !`,
         HttpStatus.BAD_REQUEST,
       );
     }
     const allUsers = await this.getUserNameList();
     if (allUsers.includes(changeUserNameDto.nickname)) {
       throw new HttpException(
-        `This nickname has been taken, please choose a new one !`,
+        `${changeUserNameDto.nickname} has been taken, please choose a new one !`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -88,16 +108,38 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  /**
+   * changeUserAvatar
+   * @param : user id and new avatar url
+   * @returns : user
+   */
   async changeUserAvatar(
     id: number,
     changeUserAvatarDto: ChangeUserAvatarDto,
   ): Promise<User> {
     const user = await this.getOneById(id);
+    if (!user) {
+      throw new HttpException(
+        `This User ${id} does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.avatar === changeUserAvatarDto.avatar) {
+      throw new HttpException(
+        `${user.avatar} is your current avatar url!`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
     user.avatar = changeUserAvatarDto.avatar;
     return this.userRepository.save(user);
   }
 
-  async setTwoFactorAuthenticationSecret(
+  /**
+   * setTwoFactorAuthenticationSecret
+   * @param : user id and secret
+   * @returns : update info
+   */
+  setTwoFactorAuthenticationSecret(
     secret: string,
     userId: number,
   ): Promise<UpdateResult> {
@@ -106,15 +148,31 @@ export class UserService {
     });
   }
 
-  async turnOnTwoFactorAuthentication(userId: number): Promise<UpdateResult> {
+  /**
+   * turnOnTwoFactorAuthentication
+   * @param : user id
+   * @returns : update info
+   */
+  turnOnTwoFactorAuthentication(userId: number): Promise<UpdateResult> {
     return this.userRepository.update(userId, {
       isTwoFactorAuthenticationEnabled: true,
     });
   }
 
-  async isUserTwoFactorAuthEnabled(userId: number): Promise<boolean> {
-    const userData = await this.getOneById(userId);
-    if (userData.isTwoFactorAuthenticationEnabled === true) {
+  /**
+   * isUserTwoFactorAuthEnabled
+   * @param : user id
+   * @returns : boolean
+   */
+  async isUserTwoFactorAuthEnabled(id: number): Promise<boolean> {
+    const user = await this.getOneById(id);
+    if (!user) {
+      throw new HttpException(
+        `This User ${id} does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.isTwoFactorAuthenticationEnabled === true) {
       return true;
     }
     return false;
@@ -123,8 +181,8 @@ export class UserService {
   /**
    * Change all users status to offline.
    */
-  async resetUserStatus(): Promise<void> {
-    this.userRepository
+  resetUserStatus(): Promise<UpdateResult> {
+    return this.userRepository
       .createQueryBuilder()
       .update(User)
       .set({ userStatus: OnlineStatus.OFFLINE })
@@ -133,10 +191,10 @@ export class UserService {
   }
 
   /**
-   * Change user status to specifique value.
+   * Change user status to specific value.
    */
-  async setUserStatus(userId: number, status: OnlineStatus): Promise<void> {
-    this.userRepository
+  setUserStatus(userId: number, status: OnlineStatus): Promise<UpdateResult> {
+    return this.userRepository
       .createQueryBuilder()
       .update(User)
       .set({ userStatus: status })
@@ -148,24 +206,18 @@ export class UserService {
   /*                                 utils                                    */
   /****************************************************************************/
 
+  getAllWithConditions(id: number): Promise<User[]> {
+    return this.userRepository
+      .createQueryBuilder('user')
+      .where('user.id != :Id', { Id: id })
+      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
+      .orderBy('id', 'ASC')
+      .getMany();
+  }
+
   async getUserNameList(): Promise<string[]> {
     const users = await this.getAll();
     const names = users.map((obj) => obj.nickname);
     return names;
-  }
-
-  async getUserIdByName(name: string): Promise<number> {
-    const users = await this.getAll();
-    const id = users
-      .filter((obj) => obj.nickname === name)
-      .map((obj) => obj.id);
-
-    if (id.length === 0) {
-      throw new HttpException(
-        'User with this name does not exist.',
-        HttpStatus.NOT_FOUND,
-      );
-    }
-    return id[0];
   }
 }

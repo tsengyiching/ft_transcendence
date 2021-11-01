@@ -45,7 +45,11 @@ export class ChatGateway
    */
   afterInit(server: any) {
     // console.log('Socket is live');
-    this.userService.resetUserStatus();
+    try {
+      this.userService.resetUserStatus();
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -54,20 +58,26 @@ export class ChatGateway
    * @param args
    */
   async handleConnection(client: Socket, ...args: any[]) {
-    console.log('New User Join');
-    const user: User = await this.authService.getUserFromSocket(client);
-    this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
-    this.server.emit('reload-status', {
-      user_id: user.id,
-      status: OnlineStatus.AVAILABLE,
-    });
+    try {
+      console.log('New User Join');
 
-    const channels_in = this.chatService.getUserChannels(user.id);
-    const channels_out = this.chatService.getUserNotParticipateChannels(
-      user.id,
-    );
-    client.emit('channels-user-in', await channels_in);
-    client.emit('channels-user-out', await channels_out);
+      const user: User = await this.authService.getUserFromSocket(client);
+      this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+      this.server.emit('reload-status', {
+        user_id: user.id,
+        status: OnlineStatus.AVAILABLE,
+      });
+
+      const channels_in = this.chatService.getUserChannels(user.id);
+      const channels_out = this.chatService.getUserNotParticipateChannels(
+        user.id,
+      );
+      client.emit('channels-user-in', await channels_in);
+      client.emit('channels-user-out', await channels_out);
+    } catch (error) {
+      console.log(error);
+    }
+
     //console.log(await this.messageService.getDirectMessages(user.id, 1));
   }
 
@@ -76,13 +86,17 @@ export class ChatGateway
    * @param client
    */
   async handleDisconnect(client: Socket) {
-    console.log('Remove active user');
-    const user: User = await this.authService.getUserFromSocket(client);
-    this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
-    this.server.emit('reload-status', {
-      user_id: user.id,
-      status: OnlineStatus.OFFLINE,
-    });
+    try {
+      console.log('Remove active user');
+      const user: User = await this.authService.getUserFromSocket(client);
+      this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+      this.server.emit('reload-status', {
+        user_id: user.id,
+        status: OnlineStatus.OFFLINE,
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -91,10 +105,14 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-create')
   async createChannel(client: Socket, data: CreateChannelDto) {
-    const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.createChannel(user.id, data);
-    console.log('Channel created successfully !');
-    this.server.emit('channel-need-reload');
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.createChannel(user.id, data);
+      console.log('Channel created successfully !');
+      this.server.emit('channel-need-reload');
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -103,16 +121,20 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-join')
   async joinChannel(client: Socket, channelDto: GeneralChannelDto) {
-    const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.joinChannel(user.id, channelDto);
-    console.log('User joined channel successfully !');
-    /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
-    const channels_in = this.chatService.getUserChannels(user.id);
-    const channels_out = this.chatService.getUserNotParticipateChannels(
-      user.id,
-    );
-    client.emit('channels-user-in', await channels_in);
-    client.emit('channels-user-out', await channels_out);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.joinChannel(user.id, channelDto);
+      console.log('User joined channel successfully !');
+      /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
+      const channels_in = this.chatService.getUserChannels(user.id);
+      const channels_out = this.chatService.getUserNotParticipateChannels(
+        user.id,
+      );
+      client.emit('channels-user-in', await channels_in);
+      client.emit('channels-user-out', await channels_out);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -121,18 +143,22 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
-    const user = await this.authService.getUserFromSocket(client);
-    console.log('leave', user, 'dto', leaveChannelDto);
-    await this.chatService.leaveChannel(user.id, leaveChannelDto);
-    console.log('User left channel successfully !');
-    /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
-    const channels_in = this.chatService.getUserChannels(user.id);
-    const channels_out = this.chatService.getUserNotParticipateChannels(
-      user.id,
-    );
-    client.emit('channels-user-in', await channels_in);
-    client.emit('channels-user-out', await channels_out);
-    // need to complete later; and leaveChannelDto -> channel Id
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      console.log('leave', user, 'dto', leaveChannelDto);
+      await this.chatService.leaveChannel(user.id, leaveChannelDto);
+      console.log('User left channel successfully !');
+      /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
+      const channels_in = this.chatService.getUserChannels(user.id);
+      const channels_out = this.chatService.getUserNotParticipateChannels(
+        user.id,
+      );
+      client.emit('channels-user-in', await channels_in);
+      client.emit('channels-user-out', await channels_out);
+      // need to complete later; and leaveChannelDto -> channel Id
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -141,7 +167,11 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-users')
   async getChannelUsers(channelId: number) {
-    await this.getChannelUsers(channelId);
+    try {
+      await this.getChannelUsers(channelId);
+    } catch (error) {
+      console.log(error);
+    }
     // check with Felix
   }
 
@@ -151,9 +181,13 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-add-password')
   async addChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
-    const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.addChannelPassword(user.id, channelDto);
-    console.log('Channel password has been added successfully !');
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.addChannelPassword(user.id, channelDto);
+      console.log('Channel password has been added successfully !');
+    } catch (error) {
+      console.log(error);
+    }
     // check with Felix
   }
 
@@ -163,9 +197,13 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-change-password')
   async changeChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
-    const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.changeChannelPassword(user.id, channelDto);
-    console.log('Channel password has been changed successfully !');
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.changeChannelPassword(user.id, channelDto);
+      console.log('Channel password has been changed successfully !');
+    } catch (error) {
+      console.log(error);
+    }
     // check with Felix
   }
 
@@ -175,9 +213,13 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-delete-password')
   async deleteChannelPassword(client: Socket, channelId: number) {
-    const user = await this.authService.getUserFromSocket(client);
-    await this.chatService.deleteChannelPassword(user.id, channelId);
-    console.log('Channel password has been deleted successfully !');
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.deleteChannelPassword(user.id, channelId);
+      console.log('Channel password has been deleted successfully !');
+    } catch (error) {
+      console.log(error);
+    }
     // check with Felix
   }
 
@@ -186,13 +228,17 @@ export class ChatGateway
    */
   @SubscribeMessage('ask-reload-channel')
   async reloadChannel(client: Socket) {
-    const user: User = await this.authService.getUserFromSocket(client);
-    const channels_in = this.chatService.getUserChannels(user.id);
-    const channels_out = this.chatService.getUserNotParticipateChannels(
-      user.id,
-    );
-    client.emit('channels-user-in', await channels_in);
-    client.emit('channels-user-out', await channels_out);
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      const channels_in = this.chatService.getUserChannels(user.id);
+      const channels_out = this.chatService.getUserNotParticipateChannels(
+        user.id,
+      );
+      client.emit('channels-user-in', await channels_in);
+      client.emit('channels-user-out', await channels_out);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -201,11 +247,15 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-load')
   async loadChannel(client: Socket, channelId: number) {
-    const user = await this.authService.getUserFromSocket(client);
-    if (user) {
-      const channelParticipant =
-        await this.chatService.getOneChannelParticipant(user.id, channelId);
-      if (channelParticipant) client.join('channel-' + channelId);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      if (user) {
+        const channelParticipant =
+          await this.chatService.getOneChannelParticipant(user.id, channelId);
+        if (channelParticipant) client.join('channel-' + channelId);
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -224,11 +274,15 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-message')
   async newChannelMessage(client: Socket, message: CreateMessageDto) {
-    const user: User = await this.authService.getUserFromSocket(client);
-    // Save message in db
-    this.messageService.createChannelMessage(user.id, message);
-    // Send message to all people connected in channel
-    this.server.to('channel-' + message.channelId).emit('message', message);
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      // Save message in db
+      this.messageService.createChannelMessage(user.id, message);
+      // Send message to all people connected in channel
+      this.server.to('channel-' + message.channelId).emit('message', message);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /****************************************************************************/
@@ -241,11 +295,15 @@ export class ChatGateway
    */
   @SubscribeMessage('private-create')
   async createDirect(client: Socket, data: CreateDirectDto) {
-    const user1 = await this.authService.getUserFromSocket(client);
-    const user2 = await this.userService.getOneById(data.UserId);
-    await this.chatService.createDirectChannel(user1, user2);
-    console.log('Channel created successfully !');
-    this.server.emit('private-need-reload');
+    try {
+      const user1 = await this.authService.getUserFromSocket(client);
+      const user2 = await this.userService.getOneById(data.UserId);
+      await this.chatService.createDirectChannel(user1, user2);
+      console.log('Channel created successfully !');
+      this.server.emit('private-need-reload');
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -253,9 +311,13 @@ export class ChatGateway
    */
   @SubscribeMessage('private-ask-reload')
   async loadPrivate(client: Socket) {
-    const user: User = await this.authService.getUserFromSocket(client);
-    const direct = this.chatService.getDirectChannelList(user.id);
-    client.emit('private-list', await direct);
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      const direct = this.chatService.getDirectChannelList(user.id);
+      client.emit('private-list', await direct);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   /**
@@ -264,15 +326,21 @@ export class ChatGateway
    */
   @SubscribeMessage('private-load')
   async loadDirect(client: Socket, channelId: number) {
-    const user = await this.authService.getUserFromSocket(client);
-    if (user) {
-      const channelParticipant =
-        await this.chatService.getOneChannelParticipant(user.id, channelId);
-      if (channelParticipant) {
-        client.join('private-' + channelId);
-        const messages = await this.messageService.getDirectMessages(channelId);
-        client.emit('private-message-list', messages);
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      if (user) {
+        const channelParticipant =
+          await this.chatService.getOneChannelParticipant(user.id, channelId);
+        if (channelParticipant) {
+          client.join('private-' + channelId);
+          const messages = await this.messageService.getDirectMessages(
+            channelId,
+          );
+          client.emit('private-message-list', messages);
+        }
       }
+    } catch (error) {
+      console.log(error);
     }
   }
 
@@ -291,10 +359,14 @@ export class ChatGateway
    */
   @SubscribeMessage('direct-message')
   async newDirectMessage(client: Socket, message: CreateMessageDto) {
-    const user: User = await this.authService.getUserFromSocket(client);
-    // Save message in db
-    this.messageService.createChannelMessage(user.id, message);
-    // Send message to all people connected in channel
-    this.server.to('direct-' + message.channelId).emit('message', message);
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      // Save message in db
+      this.messageService.createChannelMessage(user.id, message);
+      // Send message to all people connected in channel
+      this.server.to('direct-' + message.channelId).emit('message', message);
+    } catch (error) {
+      console.log(error);
+    }
   }
 }
