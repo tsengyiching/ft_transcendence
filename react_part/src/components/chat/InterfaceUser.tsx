@@ -1,5 +1,5 @@
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
-import React, {useState, useContext, useEffect} from 'react'
+import {useState, useContext, useEffect} from 'react'
 import Talk from './Talk';
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
@@ -8,17 +8,18 @@ import DropdownListUser from './DropdownListUser';
 import './InterfaceUser.css'
 import {SocketContext} from '../../context/socket'
 import InterfaceMembers from '../members/members';
-import { Server } from 'http';
+import LeaveChannelButton from './LeaveChannelModal'
 
-interface IStatus {
-    id: number,
-    status: 'Available' | 'Playing' | 'Offline'
+interface IChannel {
+    channel_id: number,
+    channel_name: string
 }
+
 
 function InterfaceUser() {
 
     const [channelradioValue, setchannelRadioValue] = useState('1');
-    const [channelSelected, setChannelSelected] = useState<{channel_id: number, channel_name: string} | undefined>();
+    const [channelSelected, setChannelSelected] = useState<IChannel | undefined>();
     const socket = useContext(SocketContext);
 
     const channelradios = [
@@ -27,9 +28,10 @@ function InterfaceUser() {
     ]
 
     useEffect(() => {
-        socket.on('channel-need-reload', () => {socket.emit('ask-reload-channel');});
-        return (socket.off('channel-need-reload'))
+        socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
     }, [])
+
+    function ResetChannel() { setChannelSelected(undefined)}
 
     function InterfaceChannel() {
         return (
@@ -60,8 +62,9 @@ function InterfaceUser() {
             {channelradioValue==='1' ? 
                 <div>
                     <CreateChannelButton socketid={socket}/>
-                    { channelSelected !== undefined &&
-                    <Button onClick={() => {socket.emit("channel-leave", {channelId: channelSelected.channel_id}) }}> Leave Channel </Button>}
+                    { channelSelected !== undefined ?
+                        <LeaveChannelButton channel={channelSelected} CallBackFunction={ResetChannel} />
+                    :   <Button disabled className="ButtonCreate bg-secondary"> Leave Channel</Button>}
                 </div>
                 : <button className="ButtonCreate bg-success"> Create Private Conversation </button>
             }
