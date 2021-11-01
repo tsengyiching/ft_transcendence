@@ -28,8 +28,7 @@ function InterfaceUser() {
     ]
 
     useEffect(() => {
-        socket.on('channel-need-reload', () => {socket.emit('ask-reload-channel');});
-        return (socket.off('channel-need-reload'))
+        socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
     }, [])
 
     function ResetChannel() { setChannelSelected(undefined)}
