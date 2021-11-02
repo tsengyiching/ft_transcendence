@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react"
-import { Placeholder, Col, Row, Button, Image } from "react-bootstrap"
+import { Col, Row, Button, Image } from "react-bootstrap"
 import {SocketContext} from "../../context/socket"
 import './ListChannel.css'
 import PadlockImage from "../pictures/Padlock-symbol.png"
@@ -40,7 +40,7 @@ function ListChannel(props: IUseStateChannel) {
 
         useEffect( () => { 
                 socket.emit("ask-reload-channel");
-                }, [])
+                }, [socket])
 
         useEffect(() => {
                 socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));

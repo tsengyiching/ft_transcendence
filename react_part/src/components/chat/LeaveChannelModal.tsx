@@ -1,5 +1,5 @@
 import { useState, useContext } from 'react'
-import {Button, Modal, Form} from 'react-bootstrap'
+import {Button, Modal} from 'react-bootstrap'
 import {SocketContext} from '../../context/socket'
 
 interface IChannel {

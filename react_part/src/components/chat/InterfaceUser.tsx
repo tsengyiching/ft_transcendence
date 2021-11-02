@@ -29,7 +29,7 @@ function InterfaceUser() {
 
     useEffect(() => {
         socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
-    }, [])
+    }, [socket])
 
     function ResetChannel() { setChannelSelected(undefined)}
 
@@ -78,8 +78,8 @@ function InterfaceUser() {
             <Row className="TitleChannel">
                 <Col>
                     {channelSelected !== undefined
-                    ? <div> {channelSelected.channel_name} </div>
-                    : <div> No Channel selected </div>}
+                    ? <h2> {channelSelected.channel_name} </h2>
+                    : <div> </div>}
                 </Col>
                 <Col>
                     <DropdownListUser/>
@@ -90,8 +90,6 @@ function InterfaceUser() {
                 <Form.Control type="name" placeholder="Message" />
                 <Button type="submit">envoyer</Button>
             </Form>
-            <Button > Modo Rights </Button>
-            <Button > Owner Rights </Button>
             </div>
     )}
 

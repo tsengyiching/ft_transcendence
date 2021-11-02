@@ -1,7 +1,5 @@
 
 import axios from 'axios'
-import { socket } from '../../context/socket';
-import { useHistory } from "react-router-dom";
 
 export function InvitateToGame(id: number)
 {
