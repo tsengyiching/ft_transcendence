@@ -80,10 +80,10 @@ export default function ListBlockedUsers()
 
 		console.log(BlockedUsers);
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on("reload-blocked", (data: {user_id1: number, user_id2: number}) => {
+		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
 			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
 
-		return (() => {socket.off('reload-status'); socket.off('reload-blocked'); isMounted = false;});
+		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
 	}, [axios]);
 
 	//actualize the blockedlist
