@@ -22,6 +22,7 @@ import { SendAddFriendRelationshipDto } from '../dto/send-addFriend-relationship
 import { SendSpecificListRelationshipDto } from '../dto/send-specificList-relationship.dto';
 import { ChatGateway } from 'src/chat/gateway/chat.gateway';
 import { SendAllUsersRelationshipDto } from '../dto/send-allUsers-relationship.dto';
+import { UserService } from 'src/user/service/user.service';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
@@ -29,6 +30,7 @@ import { SendAllUsersRelationshipDto } from '../dto/send-allUsers-relationship.d
 export class RelationshipController {
   constructor(
     private relationshipService: RelationshipService,
+    private userService: UserService,
     private chatGateway: ChatGateway,
   ) {}
 
@@ -68,10 +70,11 @@ export class RelationshipController {
    ** returns an array with user friends' id, nickname, avatar and status
    */
   @Get(':id/list')
-  getSpecificRelationList(
+  async getSpecificRelationList(
     @Param('id', ParseIntPipe) id: number,
     @Query('status') status: string,
   ): Promise<SendSpecificListRelationshipDto[]> {
+    await this.userService.getUserProfileById(id);
     return this.relationshipService.getSpecificRelationList(id, status);
   }
 
@@ -94,6 +97,7 @@ export class RelationshipController {
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendAddFriendRelationshipDto> {
+    await this.userService.getUserProfileById(relationshipDto.addresseeUserId);
     const relationship = await this.relationshipService.addFriend(
       user.id,
       relationshipDto,
@@ -103,17 +107,6 @@ export class RelationshipController {
       user_id2: user.id,
     });
     return relationship;
-  }
-
-  /*
-   ** TESTER DELETE LATER
-   */
-  @Post('add/:id')
-  addFriendTest(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() relationshipDto: RelationshipDto,
-  ): Promise<SendAddFriendRelationshipDto> {
-    return this.relationshipService.addFriend(id, relationshipDto);
   }
 
   /*
@@ -154,6 +147,7 @@ export class RelationshipController {
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
+    await this.userService.getUserProfileById(relationshipDto.addresseeUserId);
     const relationship = await this.relationshipService.deleteFriend(
       user.id,
       relationshipDto,
@@ -166,17 +160,6 @@ export class RelationshipController {
   }
 
   /*
-   ** TESTER DELETE LATER
-   */
-  @Delete('unfriend/:id')
-  unfriendTest(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() relationshipDto: RelationshipDto,
-  ): Promise<SendRelationshipDto> {
-    return this.relationshipService.deleteFriend(id, relationshipDto);
-  }
-
-  /*
    ** blockUser returns the block relationship
    ** if the users are friends, they'll be unfriend first
    ** than create the block relationship
@@ -186,6 +169,7 @@ export class RelationshipController {
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<Relationship> {
+    await this.userService.getUserProfileById(relationshipDto.addresseeUserId);
     const relationship = await this.relationshipService.blockUser(
       user.id,
       relationshipDto,
@@ -206,6 +190,7 @@ export class RelationshipController {
     @CurrentUser() user: User,
     @Body() relationshipDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
+    await this.userService.getUserProfileById(relationshipDto.addresseeUserId);
     const relationship = await this.relationshipService.deleteBlockUser(
       user.id,
       relationshipDto,
@@ -215,16 +200,5 @@ export class RelationshipController {
       user_id2: relationshipDto.addresseeUserId,
     });
     return relationship;
-  }
-
-  /*
-   ** TESTER DELETE LATER
-   */
-  @Delete('unblock/:id')
-  unblockTest(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() relationshipDto: RelationshipDto,
-  ): Promise<SendRelationshipDto> {
-    return this.relationshipService.deleteBlockUser(id, relationshipDto);
   }
 }
