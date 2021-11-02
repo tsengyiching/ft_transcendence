@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react"
 import { socket } from "../../context/socket";
-import {Image, Col, Row, Button, Alert} from 'react-bootstrap'
+import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriends.css"
 import './members.css'
@@ -108,7 +108,7 @@ export default function ListFriends()
 			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
 		})
 		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
-	}, [axios])
+	}, [])
 
 	//actualize the friendlist
 	useEffect(() => {
@@ -125,7 +125,7 @@ export default function ListFriends()
 		})
 		}
 		return (() => {isMounted = false});
-	}, [ReloadFriendlist, axios])
+	}, [ReloadFriendlist, userData.id])
 
 	//actualize the status
 	useEffect(() => {
@@ -139,6 +139,7 @@ export default function ListFriends()
 				SetRefreshVar(!RefreshVar);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ReloadStatus])
 
 	return (

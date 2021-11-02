@@ -1,6 +1,6 @@
 import { useHistory } from "react-router-dom";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import axios from 'axios';
 
 function Disconnect () {
@@ -20,7 +20,7 @@ function Disconnect () {
             history.push("/connexion");
         })
         return (() => {isMounted = false})
-    }, [axios]);
+    }, [history]);
 
     return (
         <div>Disconnected</div>

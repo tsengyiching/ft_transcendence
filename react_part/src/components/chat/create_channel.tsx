@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Socket } from "socket.io-client";
-import { Button, Modal, ToggleButton, ToggleButtonGroup, Form, InputGroup} from "react-bootstrap";
+import { Button, Modal, ToggleButton, ToggleButtonGroup, Form,} from "react-bootstrap";
 
 interface Props {
   show: boolean,

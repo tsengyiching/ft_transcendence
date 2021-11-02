@@ -7,7 +7,7 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {DataContext} from "../../App" 
-import {Unfriend, Askfriend, Block, Unblock, } from "./ContextMenuFunctions";
+import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
 import {useHistory} from "react-router-dom"
 
 interface IUser {
@@ -103,12 +103,12 @@ export default function ListUsers()
 		socket.on('reload-users', (data: {user_id1: number, user_id2: number}) => {SetReloadUserlist(data)});
 		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
 		//console.log(Users);
-	}, [axios]);
+	}, []);
 
 	//actualize the list of users	
 	useEffect(() => {
 		let isMounted = true;
-		if (userData.id == ReloadUserlist.user_id1 || userData.id == ReloadUserlist.user_id2)
+		if (userData.id === ReloadUserlist.user_id1 || userData.id === ReloadUserlist.user_id2)
 		{
 			axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
 			.then(res => { if (isMounted)
@@ -119,7 +119,7 @@ export default function ListUsers()
 			})
 		}
 		return (() => {isMounted = false})
-	}, [ReloadUserlist, axios])
+	}, [ReloadUserlist, userData.id])
 
 	//actualize the status
 	useEffect(() => {
@@ -134,6 +134,7 @@ export default function ListUsers()
 			SetRefreshVar(!RefreshVar);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ReloadStatus])
 
 	return (

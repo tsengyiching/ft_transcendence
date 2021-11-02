@@ -1,5 +1,4 @@
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import PageConnexion from './PageConnexion';
 import Home from './Home';
 import Profile from './Profile';
 import Settings from './Settings';

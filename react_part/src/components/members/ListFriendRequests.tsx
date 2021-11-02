@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext,  } from "react"
 import { socket } from "../../context/socket";
-import {Image, Col, Row, Button} from 'react-bootstrap'
+import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriendRequests.css"
 import './members.css'
@@ -55,7 +55,7 @@ export default function ListFriendRequests()
 			})
 		}
 		return (() => {isMounted = false});
-	}, [ReloadFriendRequestlist]);
+	}, [ReloadFriendRequestlist, DataUser.id]);
 
 	function FriendRequest(FriendRequest: IFriendRequest)
 	{

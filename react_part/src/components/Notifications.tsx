@@ -1,4 +1,3 @@
-import Button from '@restart/ui/esm/Button';
 import { useEffect, useState } from 'react';
 import {Toast, ToastContainer, } from 'react-bootstrap'
 import { socket } from '../context/socket';
@@ -37,17 +36,14 @@ function Notifications() {
 		SetNotifications([...NotificationList]);
 	}
 
-	function createNotif(notif: INotification)
-	{
-		NotificationList.push(notif);
-		SetNotifications([...NotificationList])
-	}
-
 	useEffect(() =>
 	{
-		socket.on('alert', (data: {alert: INotification}) => {createNotif(data.alert)});
-		console.log(`NotificationList changed!`);
-		console.log(NotificationList);
+		socket.on('alert', (data: {alert: INotification}) => {
+			NotificationList.push(data.alert);
+			SetNotifications([...NotificationList]);
+		});
+		//console.log(`NotificationList changed!`);
+		//console.log(NotificationList);
 		return (() => {socket.off('alert')})
 	}, [NotificationList]);
 

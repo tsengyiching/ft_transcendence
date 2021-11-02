@@ -1,12 +1,12 @@
 import { useState, useEffect, useContext,  } from "react"
 import { socket } from "../../context/socket";
-import {Image, Button, Col, Row} from 'react-bootstrap'
+import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListBlockedUsers.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {InvitateToGame, Unblock} from './ContextMenuFunctions'
+import {Unblock} from './ContextMenuFunctions'
 import {DataContext} from "../../App"
 import { useHistory } from "react-router";
 
@@ -78,18 +78,17 @@ export default function ListBlockedUsers()
 			console.log("error");
 		})
 
-		console.log(BlockedUsers);
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
 			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
 
 		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
-	}, [axios]);
+	}, []);
 
 	//actualize the blockedlist
 	useEffect(() => {
 		let isMounted = true
-		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id == ReloadBlockedUserlist.user_id2)
+		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id === ReloadBlockedUserlist.user_id2)
 		{
 			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
 			.then(res => { if (isMounted)
@@ -99,7 +98,7 @@ export default function ListBlockedUsers()
 				console.log(res.data);
 			})
 		}
-	}, [ReloadBlockedUserlist, userData.id, axios])
+	}, [ReloadBlockedUserlist, userData.id])
 
 	//actualize the status
 	useEffect(() => {
@@ -112,6 +111,7 @@ export default function ListBlockedUsers()
 				SetRefreshVar(!RefreshVar);
 			}
 		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ReloadStatus])
 
 	return (
