@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Socket } from "socket.io-client";
-import { Button, Modal, ToggleButton, ToggleButtonGroup, Form, } from "react-bootstrap";
+import { Button, Modal, ToggleButton, ToggleButtonGroup, Form, InputGroup} from "react-bootstrap";
 
 interface Props {
   show: boolean,
@@ -11,26 +11,27 @@ interface Props {
 
 function CreateChannelModal(props: Props) {
 
-    const [passwordLock, setPasswordLock] = useState(true);
+    const [isPrivate, setIsPrivate] = useState(true);
     const [password, setPassword] = useState("");
     const [name, setName] = useState("");
 
+
     function SubmitForm(event: any) {
-      event.preventDefault();
-      let data = {name: name, password: password};
-      props.socket.emit('channel-create', data);
-      onHide();
+        event.preventDefault();
+        let data = {name: name, password: password};
+        props.socket.emit('channel-create', data);
+        onHide();
     }
 
     function onHide(){
       setPassword("");
-      setPasswordLock(true);
+      setIsPrivate(true);
       props.onHide();
     }
 
     function ChangeName(e: React.ChangeEvent<HTMLInputElement>) { setName(e.currentTarget.value);}
     function ChangePassword(e: React.ChangeEvent<HTMLInputElement>) {
-      if (passwordLock)
+      if (isPrivate)
         setPassword("");
       else
         setPassword(e.currentTarget.value);}
@@ -41,6 +42,7 @@ function CreateChannelModal(props: Props) {
       size="lg"
       aria-labelledby="contained-modal-title-vcenter"
       centered
+      style={{color:"black"}}
     >
       <Modal.Header closeButton>
         <Modal.Title id="contained-modal-title-vcenter">
@@ -50,20 +52,25 @@ function CreateChannelModal(props: Props) {
       <Modal.Body>
         <Form className="w-50 p-3 " onSubmit={SubmitForm} >
           <ToggleButtonGroup name='typeChannel' className="mb-3" defaultValue={"public"} type='radio'>
-            <ToggleButton value ={"public"} id="publicChannel" type='radio' variant="primary" onClick={() => {setPasswordLock(true); setPassword("")}}>
+            <ToggleButton value ={"public"} id="publicChannel" type='radio' variant="primary" onClick={() => {setIsPrivate(true); setPassword("")}}>
               Public Channel
             </ToggleButton>
-            <ToggleButton value={"private"} id="privateChannel" type='radio' variant="primary" onClick={() => {setPasswordLock(false)}}>
+            <ToggleButton value={"private"} id="privateChannel" type='radio' variant="primary" onClick={() => {setIsPrivate(false)}}>
               Private Channel
             </ToggleButton>
           </ToggleButtonGroup>
           <Form.Label> Channel Name </Form.Label>
-          <Form.Control type="text" name="name" placeholder="Channel Name" className="mb-4" onChange={ChangeName}/>
-
-          <Form.Label>
-            Password
-          </Form.Label>
-          <Form.Control type="password" className="mb-3" value={password} name="password" placeholder="Password (only for private)" onChange={ChangePassword} />
+          <Form.Control type="text" name="name" placeholder="Channel Name" className="mb-4" onChange={ChangeName} required/>
+          
+          { !isPrivate ? 
+          <div style={{height:"6em"}}>
+            <Form.Label>
+              Password
+            </Form.Label>
+            <Form.Control type="password" className="mb-3" value={password} name="password" placeholder="Password" onChange={ChangePassword} required/>
+          </div>
+          : <div style={{height:"6em"}}/>}
+          
           <Button variant="success" type="submit">
               Create Channel
           </Button>
