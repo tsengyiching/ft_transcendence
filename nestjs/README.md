@@ -5,6 +5,7 @@ In this file, you'll find the list of api created in the back-end.
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
 |GET|login| - |1st time: user logins 42 and gives auth (back-end creates user)<br />2nd time: login only<br />*redirect to localhost:3000*<br />*If user has turned on two factor auth, redirect to localhost:3000/2fa*|
+|GET|disconnect| - |Disconnecting user by deleting cookies (jwt's).|
 
 ## /2fa/
 | Method | Root | Parameters | Return    |
@@ -39,15 +40,12 @@ In this file, you'll find the list of api created in the back-end.
 |:----:|:-----:|-------|:-----------|
 |GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
 |GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
-|GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[    {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available"}]`|
-|GET|:id/list|Query<br />?status=friend/notconfirmed/block|an array`[    {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available"}]`|
+|GET|me/allusers|-|an array <br />`[{"id": 1,"nickname": "Tim","avatar": "xxx","userStatus": "Available","relationship": null/Friend/Block/Not confirmed},]`|
+|GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available", "relation_id": 1}, {}...]`|
+|GET|:id/list|user id<br />Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available", "relation_id": 1}, {}...]`|
 |POST|add|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Not confirmed", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend/block, throw HttpStatus:Bad_Request*|
-|POST|add/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
 |Patch|accept/:id|relationship id|an object<br />`{"id": 1, "createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
 |DELETE|reject/:id|relationship id|an object that was deleted <br />`{"createDate": "xxx", "status": "Not confirmed", "users": [1, 3]}`<br />*If relationship id doesn’t exist, throw HttpStatus:Not_Found; <br /> Relationship status should be NOT CONFIRMED, otherwise throw HttpStatus:Bad_Request*|
 |DELETE|unfriend|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />Users should be friends, other situation would throw HttpStatus:Bad_Request|
-|DELETE|unfriend/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
 |POST|block|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Block", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend, it will be remove and create the new relationship with status Block.<br />If users already in status Block, throw HttpStatus:Bad_Request.*|
-|POST|block/:id|user id<br />Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|
 |DELETE|unblock|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />User id should be on the blocklist, other situation would throw HttpStatus:Bad_Request|
-|DELETE|unblock/:id|Body<br />`{"addresseeUserId": number;}`|Same as above, for testing only, delete later.|

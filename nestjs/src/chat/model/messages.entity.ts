@@ -1,28 +1,32 @@
-import { User } from 'src/user/model/user.entity';
 import {
   Column,
   CreateDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from 'src/user/model/user.entity';
 import { Channel } from './channel.entity';
 
 @Entity()
 export class Message {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
+
+  @Column()
+  channelId: number;
 
   @ManyToOne(() => Channel, (channel) => channel.messages)
   channel: Channel;
 
+  @Column()
+  authorId: number;
+
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'author' })
   author: User;
 
   @Column()
-  messages: string;
+  message: string;
 
   @CreateDateColumn()
   createDate: Date;

@@ -30,7 +30,6 @@ export class AuthController {
    * @returns Promise<User>
    */
   @Get('login/:id')
-  @UseGuards(FortyTwoGuard)
   async loginDebug(
     @Res({ passthrough: true }) res: Response,
     @Param('id', ParseIntPipe) id: number,
@@ -69,5 +68,15 @@ export class AuthController {
     } else {
       res.redirect('http://localhost:3000/');
     }
+  }
+
+  /**
+   * Disconnecting user by deleting cookies (jwt's).
+   * @param res Response object corresponding to the server response.
+   */
+  @Get('disconnect')
+  async disconnect(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('jwt');
+    res.clearCookie('jwt-two-factor');
   }
 }

@@ -2,10 +2,13 @@ import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserService } from 'src/user/service/user.service';
 import { Repository } from 'typeorm';
-import { RelationshipDto } from '../model/relationship.dto';
+import { RelationshipDto } from '../dto/relationship.dto';
 import { Relationship, RelationshipStatus } from '../model/relationship.entity';
-import { SendRelationshipDto } from '../model/send-relationship.dto';
+import { SendAddFriendRelationshipDto } from '../dto/send-addFriend-relationship.dto';
+import { SendSpecificListRelationshipDto } from '../dto/send-specificList-relationship.dto';
+import { SendRelationshipDto } from '../dto/send-relationship.dto';
 import UserRelationship from '../model/userRelationship.entity';
+import { SendAllUsersRelationshipDto } from '../dto/send-allUsers-relationship.dto';
 
 @Injectable()
 export class RelationshipService {
@@ -35,123 +38,213 @@ export class RelationshipService {
         HttpStatus.NOT_FOUND,
       );
     }
-    const relation = await this.reformSendingDataArray(relationship);
+    const relation = this.reformSendingDataArray(relationship);
     return relation[0];
   }
 
-  async getRelationList(
+  /*  Query ?status="friend/notconfirmed/block"*/
+  async getSpecificRelationList(
     id: number,
     reqStatus: string,
-  ): Promise<UserRelationship> {
-    let status: RelationshipStatus;
-    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
-    else if (reqStatus === 'notconfirmed')
-      status = RelationshipStatus.NOTCONFIRMED;
-    else if (reqStatus === 'block') status = RelationshipStatus.BLOCK;
-    else {
-      throw new HttpException(
-        'Relationship status does not exist.',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    return this.userRelationship
-      .createQueryBuilder('userRelationship')
-      .leftJoinAndSelect('userRelationship.relationship', 'relationship')
-      .leftJoinAndSelect('userRelationship.user', 'user')
-      .select(['user.id', 'user.nickname', 'user.avatar', 'user.userStatus'])
-      .where('userRelationship.userId != :Id', { Id: id })
-      .andWhere('status = :status', { status: status })
-      .execute();
+  ): Promise<SendSpecificListRelationshipDto[]> {
+    const status: RelationshipStatus = this.checkReqStatus(reqStatus);
+    const allList = await this.getAllRelationshipWithStatus(status);
+    const userList = allList
+      .filter((data) => {
+        if (
+          data.userRelationship[0].userId === id ||
+          data.userRelationship[1].userId === id
+        )
+          return true;
+        else return false;
+      })
+      .filter((data) => {
+        if (status === RelationshipStatus.NOTCONFIRMED) {
+          if (data.userRelationship[0].id < data.userRelationship[1].id)
+            if (data.userRelationship[0].userId === id) return false;
+          if (data.userRelationship[0].id > data.userRelationship[1].id)
+            if (data.userRelationship[1].userId === id) return false;
+        }
+        if (status === RelationshipStatus.BLOCK) {
+          if (data.userRelationship[0].id < data.userRelationship[1].id)
+            if (data.userRelationship[1].userId === id) return false;
+          if (data.userRelationship[0].id > data.userRelationship[1].id)
+            if (data.userRelationship[0].userId === id) return false;
+        }
+        return true;
+      })
+      .map((data) => {
+        const res = data.userRelationship.filter((obj) => obj.userId !== id);
+        return res[0];
+      });
+    return this.reformListSendingData(userList);
+  }
+
+  /*get user's relationship with other users */
+  async getAllRelationList(id: number): Promise<SendAllUsersRelationshipDto[]> {
+    const res = await Promise.all([
+      this.userService.getAllWithConditions(id),
+      this.getUserIdsWithStatus(id, RelationshipStatus.FRIEND),
+      this.getUserIdsWithStatus(id, RelationshipStatus.NOTCONFIRMED),
+      this.getUserIdsWithStatus(id, RelationshipStatus.BLOCK),
+      this.getBlockingIds(id),
+    ]);
+    const relations = res[0]
+      .map((data) => ({ ...data, relationship: null }))
+      .map((data) => {
+        if (res[1].includes(data.id))
+          data.relationship = RelationshipStatus.FRIEND;
+        else if (res[2].includes(data.id))
+          data.relationship = RelationshipStatus.NOTCONFIRMED;
+        return data;
+      })
+      .filter((data) => (res[3].includes(data.id) ? false : true))
+      .filter((data) => (res[4].includes(data.id) ? false : true));
+    return this.reformAllRelationListSendingData(relations);
   }
 
   async addFriend(
     id: number,
     relationshipDto: RelationshipDto,
-  ): Promise<Relationship> {
-    await this.checkIsSameUser(id, relationshipDto.addresseeUserId);
-    await this.checkUsersRelation(id, relationshipDto.addresseeUserId);
-    const newRelationship = await this.relationshipRepository.create();
-    newRelationship.status = RelationshipStatus.NOTCONFIRMED;
-    await this.relationshipRepository.save(newRelationship);
-    await this.setNewRelation(id, relationshipDto, newRelationship.id);
-    return newRelationship;
+  ): Promise<SendAddFriendRelationshipDto> {
+    if (
+      this.checkIsNotSameUser(id, relationshipDto.addresseeUserId) &&
+      (await this.checkUsersRelation(id, relationshipDto.addresseeUserId))
+    ) {
+      /*create new relationship*/
+      const newRelationship = await this.setNewRelationship(
+        RelationshipStatus.NOTCONFIRMED,
+      );
+
+      /* add two users in UserRelationship */
+      await this.setNewUserRelationship(id, newRelationship.id);
+      await this.setNewUserRelationship(
+        relationshipDto.addresseeUserId,
+        newRelationship.id,
+      );
+
+      const relationship = await this.relationshipRepository.findOne({
+        where: { id: newRelationship.id },
+        relations: ['userRelationship'],
+      });
+      return this.reformAddFriendSendingData(relationship);
+    }
   }
 
-  async acceptFriend(id: number): Promise<SendRelationshipDto> {
-    const relationship = await this.getOneById(id);
-    await this.checkFriendshipStatus(relationship);
-    relationship.status = RelationshipStatus.FRIEND;
-    const updateRelationship = await this.relationshipRepository.save(
-      relationship,
-    );
-    return this.reformSendingData(updateRelationship);
+  async acceptFriend(
+    relationshipId: number,
+    currentUserId: number,
+  ): Promise<SendRelationshipDto> {
+    const relationship = await this.getOneById(relationshipId);
+    if (
+      this.checkFriendshipStatus(relationship) &&
+      this.checkUserIsAddressee(relationship, currentUserId)
+    ) {
+      relationship.status = RelationshipStatus.FRIEND;
+      await this.relationshipRepository.save(relationship);
+    }
+    return this.reformSendingData(relationship);
   }
 
-  async rejectFriend(id: number): Promise<SendRelationshipDto> {
-    const relationship = await this.getOneById(id);
-    await this.checkFriendshipStatus(relationship);
-    const rm = await this.relationshipRepository.remove(relationship);
-    return this.reformSendingData(rm);
+  async rejectFriend(
+    relationshipId: number,
+    currentUserId: number,
+  ): Promise<SendRelationshipDto> {
+    const relationship = await this.getOneById(relationshipId);
+    if (
+      this.checkFriendshipStatus(relationship) &&
+      this.checkUserIsAddressee(relationship, currentUserId)
+    ) {
+      await this.relationshipRepository.remove(relationship);
+    }
+    return this.reformSendingData(relationship);
   }
 
   async deleteFriend(
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.checkIsSameUser(id, delDto.addresseeUserId);
-    const relationId = await this.findUserRelationshipId(
-      id,
-      delDto.addresseeUserId,
-      RelationshipStatus.FRIEND,
-    );
-    if (!relationId) {
-      throw new HttpException(
-        'Users are not friends, cannot unfriend.',
-        HttpStatus.BAD_REQUEST,
+    if (this.checkIsNotSameUser(id, delDto.addresseeUserId)) {
+      const relationId = await this.findUserRelationshipId(
+        id,
+        delDto.addresseeUserId,
+        RelationshipStatus.FRIEND,
       );
+      if (!relationId) {
+        throw new HttpException(
+          'Users are not friends, cannot unfriend.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const delRelationship = await this.getOneById(relationId);
+      await this.relationshipRepository.remove(delRelationship);
+      return this.reformSendingData(delRelationship);
     }
-    const delRelationship = await this.getOneById(relationId);
-    const rm = await this.relationshipRepository.remove(delRelationship);
-    return this.reformSendingData(rm);
   }
 
   async blockUser(id: number, dto: RelationshipDto): Promise<Relationship> {
-    await this.checkIsSameUser(id, dto.addresseeUserId);
-    await this.checkUserRelationBlock(id, dto.addresseeUserId);
-    const blockRelationship = await this.relationshipRepository.create();
-    blockRelationship.status = RelationshipStatus.BLOCK;
-    await this.relationshipRepository.save(blockRelationship);
-    await this.setNewRelation(id, dto, blockRelationship.id);
-    return blockRelationship;
+    if (
+      this.checkIsNotSameUser(id, dto.addresseeUserId) &&
+      (await this.checkUsersAreNotBlock(id, dto.addresseeUserId))
+    ) {
+      await this.deleteCurrentRelationship(id, dto.addresseeUserId);
+      const blockRelationship = await this.setNewRelationship(
+        RelationshipStatus.BLOCK,
+      );
+      /* add two users in UserRelationship */
+      await this.setNewUserRelationship(id, blockRelationship.id);
+      await this.setNewUserRelationship(
+        dto.addresseeUserId,
+        blockRelationship.id,
+      );
+      return blockRelationship;
+    }
   }
 
   async deleteBlockUser(
     id: number,
     delDto: RelationshipDto,
   ): Promise<SendRelationshipDto> {
-    await this.checkIsSameUser(id, delDto.addresseeUserId);
-    const relationId = await this.findUserRelationshipId(
-      id,
-      delDto.addresseeUserId,
-      RelationshipStatus.BLOCK,
-    );
-    if (!relationId) {
-      throw new HttpException(
-        'User is not on blocklist, cannot unblock.',
-        HttpStatus.BAD_REQUEST,
+    if (this.checkIsNotSameUser(id, delDto.addresseeUserId)) {
+      const relationId = await this.findUserRelationshipId(
+        id,
+        delDto.addresseeUserId,
+        RelationshipStatus.BLOCK,
       );
+      if (!relationId) {
+        throw new HttpException(
+          'User is not on blocklist, cannot unblock.',
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      const delRelationship = await this.getOneById(relationId);
+      await this.relationshipRepository.remove(delRelationship);
+      return this.reformSendingData(delRelationship);
     }
-    const delRelationship = await this.getOneById(relationId);
-    const rm = await this.relationshipRepository.remove(delRelationship);
-    return this.reformSendingData(rm);
   }
 
   /****************************************************************************/
   /*                                 utils                                    */
   /****************************************************************************/
 
-  /*
-   ** getOneById returns the relationship detail
+  /**
+   * getAllRelationshipWithStatus
+   * @param : status
+   * @returns : specific status' relationship with two related users
+   */
+  getAllRelationshipWithStatus(
+    status: RelationshipStatus,
+  ): Promise<Relationship[]> {
+    return this.relationshipRepository.find({
+      relations: ['userRelationship', 'userRelationship.user'],
+      where: { status: status },
+    });
+  }
+
+  /**
+   * getOneById
+   * @param : relationship id
+   * @returns : that demanded relationship with two related users
    */
   getOneById(id: number): Promise<Relationship> {
     return this.relationshipRepository.findOne(id, {
@@ -159,33 +252,36 @@ export class RelationshipService {
     });
   }
 
-  /*
-   ** getFullData returns user's friend full information
+  /**
+   * getFullData
+   * @param : userId and the relationship's status
+   * @returns : user's related other users
    */
-  async getFullData(id: number, status: string): Promise<UserRelationship[]> {
-    const data = await this.userRelationship.find({
+  getFullData(id: number, status: string): Promise<UserRelationship[]> {
+    return this.userRelationship.find({
       where: {
         userId: id,
         relationship: { status: status },
       },
       relations: ['relationship', 'relationship.userRelationship'],
     });
-    return data;
   }
 
-  /*
-   ** findUserRelationshipId returns user and his friend's relationshipId
+  /**
+   * findUserRelationshipId
+   * @param : userId, friendId, the relationship's status
+   * @returns : user and his friend's linked relationshipId
    */
   async findUserRelationshipId(
-    userId: number,
-    friendId: number,
-    status: string,
+    userOne: number,
+    userTwo: number,
+    status: RelationshipStatus,
   ): Promise<number> {
-    const data = await this.getFullData(userId, status);
+    const data = await this.getFullData(userOne, status);
     const found = data
       .map((obj) => {
         const relation = obj.relationship.userRelationship
-          .filter((obj) => obj.userId === friendId)
+          .filter((obj) => obj.userId === userTwo)
           .map((obj) => obj.relationshipId);
         return relation;
       })
@@ -197,34 +293,117 @@ export class RelationshipService {
     return relationshipId;
   }
 
-  /*
-   ** setNewRelation save data in userRelationship table
+  /**
+   * setNewRelationship save new Relationship
+   * @param : relationship status
+   * @returns : Relationship
    */
-  async setNewRelation(
-    id: number,
-    relationshipDto: RelationshipDto,
-    newId: number,
-  ): Promise<void> {
-    const requester = await this.userRelationship.create();
-    requester.userId = id;
-    requester.relationshipId = newId;
-    await this.userRelationship.save(requester);
+  setNewRelationship(status: RelationshipStatus): Promise<Relationship> {
+    const newRelationship = this.relationshipRepository.create();
+    newRelationship.status = status;
+    return this.relationshipRepository.save(newRelationship);
+  }
 
-    const addressee = await this.userRelationship.create();
-    addressee.userId = relationshipDto.addresseeUserId;
-    addressee.relationshipId = newId;
-    await this.userRelationship.save(addressee);
+  /**
+   * setNewUserRelationship save user in userRelationship table
+   * @param : user id
+   * @returns : userRelationship
+   */
+  setNewUserRelationship(
+    id: number,
+    relationshipId: number,
+  ): Promise<UserRelationship> {
+    const userRelationship = this.userRelationship.create();
+    userRelationship.userId = id;
+    userRelationship.relationshipId = relationshipId;
+    return this.userRelationship.save(userRelationship);
+  }
+
+  /**
+   * getUserIdsWithStatus
+   * @param : userId and the status demanded
+   * @returns : array [user ids]
+   */
+  async getUserIdsWithStatus(
+    id: number,
+    reqStatus: RelationshipStatus,
+  ): Promise<number[]> {
+    const data = await this.getFullData(id, reqStatus);
+    if (
+      reqStatus == RelationshipStatus.FRIEND ||
+      reqStatus == RelationshipStatus.NOTCONFIRMED
+    ) {
+      const list = data.map((obj) => {
+        const relation = obj.relationship.userRelationship.filter(
+          (obj) => obj.userId !== id,
+        );
+        return relation[0].userId;
+      });
+      return list;
+    } else {
+      const blockList = data
+        .map((obj) => {
+          if (
+            obj.relationship.userRelationship[0].id <
+            obj.relationship.userRelationship[1].id
+          )
+            return obj.relationship.userRelationship[1].userId;
+          else return obj.relationship.userRelationship[0].userId;
+        })
+        .filter((data) => data !== id);
+      return blockList;
+    }
+  }
+
+  /**
+   * getBlockingIds
+   * @param : userId
+   * @returns : array [other user ids who block @param id]
+   */
+  async getBlockingIds(id: number): Promise<number[]> {
+    const data = await this.getFullData(id, RelationshipStatus.BLOCK);
+    const blockingList = data
+      .map((obj) => {
+        if (
+          obj.relationship.userRelationship[0].id <
+          obj.relationship.userRelationship[1].id
+        )
+          return obj.relationship.userRelationship[0].userId;
+        else return obj.relationship.userRelationship[1].userId;
+      })
+      .filter((data) => data !== id);
+    return blockingList;
   }
 
   /****************************************************************************/
   /*                                 checkers                                 */
   /****************************************************************************/
 
-  /*
-   ** checkFriendshipStatus throws exception if relationship does not exist,
-   ** or it has already the status Friend/Block
+  /**
+   * @param : relationship and currentUserId
    */
-  async checkFriendshipStatus(relationship: Relationship): Promise<void> {
+  checkUserIsAddressee(relationship: Relationship, userId: number): boolean {
+    if (
+      (relationship.userRelationship[0].id <
+        relationship.userRelationship[1].id &&
+        relationship.userRelationship[0].userId === userId) ||
+      (relationship.userRelationship[0].id >
+        relationship.userRelationship[1].id &&
+        relationship.userRelationship[1].userId === userId)
+    ) {
+      throw new HttpException(
+        'Current User is the one who made the friend request, he/she cannot accept this relationship.',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return true;
+  }
+
+  /**
+   * checkFriendshipStatus throws exception if relationship does not exist,
+   * or it has already the status Friend/Block
+   */
+  checkFriendshipStatus(relationship: Relationship): boolean {
     if (!relationship) {
       throw new HttpException(
         'Relationship with this id does not exist.',
@@ -237,29 +416,34 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    return true;
   }
 
   /*
-   ** checkIsSameUser throws exception if user does not exist,
-   ** or userOne and UserTwo have same id
+   * checkIsNotSameUser throws exception if user does not exist,
+   * or userOne and UserTwo have same id
    */
-  async checkIsSameUser(userOne: number, userTwo: number): Promise<void> {
+  checkIsNotSameUser(userOne: number, userTwo: number): boolean {
     if (userOne === userTwo) {
       throw new HttpException(
         'User cannot add, unfriend, block, unblock her / himself !',
         HttpStatus.BAD_REQUEST,
       );
     }
-    await this.userService.getUserProfileById(userTwo);
+    return true;
   }
 
-  /*
-   ** checkUsersRelation see if there's an existing relationship between users,
-   ** throws exception if it's true
+  /**
+   * checkUsersRelation see if there's an existing relationship between users,
+   * throws exception if it's true
    */
-  async checkUsersRelation(userOne: number, userTwo: number): Promise<void> {
-    const friendlist = await this.getFriendsId(userOne);
-    if (friendlist.includes(userTwo)) {
+  async checkUsersRelation(userOne: number, userTwo: number): Promise<boolean> {
+    const friend = await this.findUserRelationshipId(
+      userOne,
+      userTwo,
+      RelationshipStatus.FRIEND,
+    );
+    if (friend > 0) {
       throw new HttpException(
         'Users are friends already.',
         HttpStatus.BAD_REQUEST,
@@ -281,24 +465,13 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
+    return true;
   }
 
-  async getFriendsId(id: number): Promise<number[]> {
-    await this.userService.getUserProfileById(id);
-    const data = await this.getFullData(id, RelationshipStatus.FRIEND);
-    const friendList = data.map((obj) => {
-      const relation = obj.relationship.userRelationship.filter(
-        (obj) => obj.userId !== id,
-      );
-      return relation[0].userId;
-    });
-    return friendList;
-  }
-
-  async checkUserRelationBlock(
+  async checkUsersAreNotBlock(
     userOne: number,
     userTwo: number,
-  ): Promise<void> {
+  ): Promise<boolean> {
     const block = await this.findUserRelationshipId(
       userOne,
       userTwo,
@@ -310,57 +483,63 @@ export class RelationshipService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    const friend = await this.findUserRelationshipId(
-      userOne,
-      userTwo,
-      RelationshipStatus.FRIEND,
-    );
-    if (friend) {
-      const delRelationship = await this.getOneById(friend);
-      await this.relationshipRepository.remove(delRelationship);
+    return true;
+  }
+
+  async deleteCurrentRelationship(
+    userOne: number,
+    userTwo: number,
+  ): Promise<Relationship> {
+    const res = await Promise.all([
+      this.findUserRelationshipId(userOne, userTwo, RelationshipStatus.FRIEND),
+      this.findUserRelationshipId(
+        userOne,
+        userTwo,
+        RelationshipStatus.NOTCONFIRMED,
+      ),
+    ]);
+    if (res[0]) {
+      const delRelationship = await this.getOneById(res[0]);
+      return this.relationshipRepository.remove(delRelationship);
+    } else if (res[1]) {
+      const delRelationship = await this.getOneById(res[1]);
+      return this.relationshipRepository.remove(delRelationship);
     }
-    const unconfirm = await this.findUserRelationshipId(
-      userOne,
-      userTwo,
-      RelationshipStatus.NOTCONFIRMED,
-    );
-    if (unconfirm) {
-      const delRelationship = await this.getOneById(unconfirm);
-      await this.relationshipRepository.remove(delRelationship);
+  }
+
+  checkReqStatus(reqStatus: string): RelationshipStatus {
+    let status: RelationshipStatus;
+    if (reqStatus === 'friend') status = RelationshipStatus.FRIEND;
+    else if (reqStatus === 'notconfirmed')
+      status = RelationshipStatus.NOTCONFIRMED;
+    else if (reqStatus === 'block') status = RelationshipStatus.BLOCK;
+    else {
+      throw new HttpException(
+        'Relationship status does not exist.',
+        HttpStatus.BAD_REQUEST,
+      );
     }
+    return status;
   }
 
   /****************************************************************************/
   /*                              Reform Objs                                 */
   /****************************************************************************/
 
-  /*
-   ** reformSendingDataArray returns SendRelationshipDto[]
+  /**
+   * reformSendingDataArray returns SendRelationshipDto[]
    */
-  async reformSendingDataArray(
-    relationship: Relationship[],
-  ): Promise<SendRelationshipDto[]> {
-    const ret: SendRelationshipDto[] = relationship.map((data) => {
-      const obj: SendRelationshipDto = {
-        id: data.id,
-        createDate: data.createDate,
-        status: data.status,
-        users: [
-          data.userRelationship[0].userId,
-          data.userRelationship[1].userId,
-        ],
-      };
-      return obj;
-    });
+  reformSendingDataArray(relationship: Relationship[]): SendRelationshipDto[] {
+    const ret: SendRelationshipDto[] = relationship.map((data) =>
+      this.reformSendingData(data),
+    );
     return ret;
   }
 
-  /*
-   ** reformSendingData returns SendRelationshipDto[]
+  /**
+   * reformSendingData returns SendRelationshipDto[]
    */
-  async reformSendingData(
-    relationship: Relationship,
-  ): Promise<SendRelationshipDto> {
+  reformSendingData(relationship: Relationship): SendRelationshipDto {
     const obj: SendRelationshipDto = {
       id: relationship.id,
       createDate: relationship.createDate,
@@ -371,5 +550,51 @@ export class RelationshipService {
       ],
     };
     return obj;
+  }
+
+  /**
+   * reformAddFriendSendingData returns
+   */
+  reformAddFriendSendingData(
+    relationship: Relationship,
+  ): SendAddFriendRelationshipDto {
+    const obj: SendAddFriendRelationshipDto = {
+      relationshipId: relationship.id,
+      createDate: relationship.createDate,
+      status: relationship.status,
+      demanderId: relationship.userRelationship[0].userId,
+      addresseeId: relationship.userRelationship[1].userId,
+    };
+    return obj;
+  }
+
+  reformListSendingData(
+    userList: UserRelationship[],
+  ): SendSpecificListRelationshipDto[] {
+    const ret: SendSpecificListRelationshipDto[] = userList.map((data) => {
+      const obj: SendSpecificListRelationshipDto = {
+        user_id: data.user.id,
+        user_nickname: data.user.nickname,
+        user_avatar: data.user.avatar,
+        user_userStatus: data.user.userStatus,
+        relation_id: data.relationshipId,
+      };
+      return obj;
+    });
+    return ret;
+  }
+
+  reformAllRelationListSendingData(list: any): SendAllUsersRelationshipDto[] {
+    const ret: SendAllUsersRelationshipDto[] = list.map((data) => {
+      const obj: SendAllUsersRelationshipDto = {
+        id: data.id,
+        nickname: data.nickname,
+        avatar: data.avatar,
+        userStatus: data.userStatus,
+        relationship: data.relationship,
+      };
+      return obj;
+    });
+    return ret;
   }
 }

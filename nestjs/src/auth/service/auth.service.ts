@@ -26,7 +26,7 @@ export class AuthService {
     };
   }
 
-  public async getUserFromAuthenticationToken(token: string) {
+  getUserFromAuthenticationToken(token: string): Promise<User> {
     const payload: JwtPayload = this.jwtService.verify(token, {
       secret: process.env.JWT_SECRET,
     });
@@ -35,7 +35,7 @@ export class AuthService {
     }
   }
 
-  async getUserFromSocket(socket: Socket) {
+  async getUserFromSocket(socket: Socket): Promise<User> {
     const cookie = socket.handshake.headers.cookie;
 
     if (!cookie) throw new WsException('Unauthorized');

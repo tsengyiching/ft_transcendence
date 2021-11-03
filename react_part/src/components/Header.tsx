@@ -1,4 +1,9 @@
 import React from 'react'
+import "./Header.css"
+
+import axios from 'axios';
+import { useEffect, useState} from "react";
+import { Image } from "react-bootstrap";
 
 function PongButton (){
 	return(
@@ -8,27 +13,60 @@ function PongButton (){
 	);
 }
 
-function ProfilImage () {
+function ProfilImage (user_avatar:string) {
 	return (
-        <img src="https://cdn-images.zoobeauval.com/zEc_LhDPGUIUNXh2DPZwK1F3E9I=/730x730/https://s3.eu-west-3.amazonaws.com/images.zoobeauval.com/2020/06/sticker-2-5ee22a296cd7d.jpg" className="w-25" alt="singe"/>
-	);
+        <div>
+            <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
+        </div>
+    );
 }
 
 function Header () {
-    return (
-        <div>
-            <nav className="navbar navbar-expand-sm navbar-dark bg-info mb-3 py-0">
-			<PongButton/>
-                <u className="d-flex flex-row-reverse">
-					<ProfilImage />
-                    <div className="col-">
-                        <div className="row"><h4><a href="/me">Profil</a></h4></div>
-                        <div className="row"><h4><a href="/parametres">Paramètres</a></h4></div>
+    const [isConnected, setConnexion] = useState(true);
+    const [user_avatar, setAvatar] = useState("")
+    const [id, setId] = useState(0);
+
+    useEffect(() => {
+        axios.get('http://localhost:8080/profile/me/',{
+            withCredentials:true,
+        })
+        .then(res => {
+            setId(res.data.id);
+            setAvatar(res.data.avatar)
+            setConnexion(true);
+        })
+        .catch(res => {
+            setConnexion(false);
+        })
+    }, []);
+    
+    if (isConnected)
+    {
+        return (
+            <div>
+                <nav className="Header navbar navbar-expand-sm navbar-dark bg-info"> {/*"navbar navbar-expand-sm navbar-dark bg-info mb-3 py-0"*/}
+                <PongButton/>
+                    <div className="d-flex flex-row-reverse">
+                        {ProfilImage(user_avatar)}
+                        <div className="col-">
+                            <div className="row"><h4><a href={'/profile/'+id}>Profile</a></h4></div>
+                            <div className="row"><h4><a href="/settings">Settings</a></h4></div>
+                            <div className="row"><h4><a href="/auth/disconnect">Disconnect</a></h4></div>
+                        </div>
                     </div>
-                </u>
-            </nav>
-        </div>
-    )
+                </nav>
+            </div>
+        )
+    }
+    else {
+        return (
+            <div>
+                <nav className="Header navbar navbar-expand-sm navbar-dark bg-info"> {/*"navbar navbar-expand-sm navbar-dark bg-info mb-3 py-0"*/}
+                <PongButton/>
+                </nav>
+            </div>
+        )
+    }
 }
 
 export default Header;

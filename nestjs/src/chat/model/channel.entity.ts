@@ -9,37 +9,40 @@ import { ChannelParticipant } from './channelParticipant.entity';
 import { Message } from './messages.entity';
 
 export enum ChannelType {
-  PUBLIC = 1,
-  PRIVATE = 0,
+  PUBLIC = 'Public',
+  PRIVATE = 'Private',
+  DIRECT = 'Direct',
 }
 
 @Entity()
 export class Channel {
   @PrimaryGeneratedColumn()
-  public id: number;
+  id: number;
 
   @Column({ unique: true })
-  public name!: string;
+  name!: string;
 
   /**
-   * Contain Bcrypt hashed password of chanel if is private
+   * Contain Bcrypt hashed password of channel if is private
    */
   @Column()
-  public password?: string;
+  password?: string;
 
   @Column({
     type: 'enum',
     enum: ChannelType,
     default: ChannelType.PUBLIC,
   })
-  public type!: ChannelType;
+  type: ChannelType;
 
   @CreateDateColumn()
-  public createDate!: Date;
+  createDate!: Date;
 
-  @OneToMany(() => ChannelParticipant, (participant) => participant.channel)
-  public participant!: ChannelParticipant[];
+  @OneToMany(() => ChannelParticipant, (participant) => participant.channel, {
+    onDelete: 'CASCADE',
+  })
+  participant!: ChannelParticipant[];
 
   @OneToMany(() => Message, (messages) => messages.channel)
-  public messages!: Message[];
+  messages!: Message[];
 }

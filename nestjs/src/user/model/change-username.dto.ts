@@ -1,8 +1,14 @@
-import { IsAlphanumeric, IsNotEmpty, MaxLength } from 'class-validator';
+import {
+  IsAlphanumeric,
+  IsNotEmpty,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class ChangeUserNameDto {
   @IsAlphanumeric()
-  @MaxLength(10)
+  @MinLength(2)
+  @MaxLength(15)
   @IsNotEmpty()
   nickname: string;
 }

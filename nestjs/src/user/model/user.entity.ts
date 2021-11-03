@@ -1,4 +1,5 @@
 import { ChannelParticipant } from 'src/chat/model/channelParticipant.entity';
+import { Message } from 'src/chat/model/messages.entity';
 import { Game } from 'src/game/model/game.entity';
 import UserRelationship from 'src/relationship/model/userRelationship.entity';
 import {
@@ -10,7 +11,7 @@ import {
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
 
-export enum onlineStatus {
+export enum OnlineStatus {
   AVAILABLE = 'Available',
   PALYING = 'Playing',
   OFFLINE = 'Offline',
@@ -24,17 +25,17 @@ export class User {
   @Column()
   nickname: string;
 
+  @Column()
+  avatar: string;
+
   @CreateDateColumn()
   createDate: Date;
 
-  @Column({ nullable: true })
-  avatar?: string;
-
   @Column({
     type: 'enum',
-    enum: onlineStatus,
+    enum: OnlineStatus,
   })
-  userStatus: onlineStatus;
+  userStatus: OnlineStatus;
 
   @Column({ nullable: true })
   email?: string;
@@ -61,5 +62,8 @@ export class User {
     () => ChannelParticipant,
     (channelParticipant) => channelParticipant.user,
   )
-  channelParticipant!: ChannelParticipant[];
+  public channelParticipant!: ChannelParticipant[];
+
+  @OneToMany(() => Message, (message) => message.author)
+  public message!: Message[];
 }
