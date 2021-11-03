@@ -145,15 +145,19 @@ export class ChatGateway
     try {
       const user = await this.authService.getUserFromSocket(client);
       console.log('leave', user, 'dto', leaveChannelDto);
-      await this.chatService.leaveChannel(user.id, leaveChannelDto);
+      if (await this.chatService.leaveChannel(user.id, leaveChannelDto)) {
+        this.server.emit('channel-need-reload');
+      } else {
+        const channels_in = this.chatService.getUserChannels(user.id);
+        const channels_out = this.chatService.getUserNotParticipateChannels(
+          user.id,
+        );
+        /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
+
+        client.emit('channels-user-in', await channels_in);
+        client.emit('channels-user-out', await channels_out);
+      }
       console.log('User left channel successfully !');
-      /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
-      const channels_in = this.chatService.getUserChannels(user.id);
-      const channels_out = this.chatService.getUserNotParticipateChannels(
-        user.id,
-      );
-      client.emit('channels-user-in', await channels_in);
-      client.emit('channels-user-out', await channels_out);
       // need to complete later; and leaveChannelDto -> channel Id
     } catch (error) {
       console.log(error);

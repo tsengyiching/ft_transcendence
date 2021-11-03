@@ -102,7 +102,7 @@ export class ChatService {
    * leaveChannel checks and removes a channel current participant.
    * (channel-leave)
    * @param LeaveChannelDto: channel id
-   * @returns deleted ChannelParticipant
+   * @returns bool, true If channels as been deleted false if is not.
    */
   async leaveChannel(userId: number, leaveChannelDto: LeaveChannelDto) {
     /* check channel */
@@ -123,10 +123,11 @@ export class ChatService {
         status: StatusInChannel.NORMAL,
       },
     });
-    console.log(channelUsers);
     if (channelUsers.length === 0) {
       console.log(`Channel ${channel.name} has been deleted.`);
       await this.channelRepository.remove(channel);
+      this.channelParticipantRepository.remove(participant);
+      return true;
     }
     // if (participant.role === ChannelRole.OWNER) {
     //   const admin = channelUsers.filter(
@@ -135,7 +136,8 @@ export class ChatService {
 
     // }
     //{ -> admin becomes owner/ no admin -> random}
-    return this.channelParticipantRepository.remove(participant);
+    this.channelParticipantRepository.remove(participant);
+    return false;
   }
 
   /**
