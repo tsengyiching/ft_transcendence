@@ -80,16 +80,19 @@ function InterfaceUser() {
                     {channelSelected !== undefined
                     ? <h2> {channelSelected.channel_name} </h2>
                     : <div> </div>}
+                    <Talk/>
+                    <Form className="w-75 p-3 d-flex justify-content-center">
+                    <Form.Control type="name" placeholder="Message" />
+                    <Button type="submit">envoyer</Button>
+                    </Form>
                 </Col>
-                <Col>
-                    <DropdownListUser/>
+                <Col style={{height:"60em"}}>
+                        <Button> Settings </Button>
+                        <div style={{height:"600px"}}> list channel participants</div>
+                        <DropdownListUser/>
                 </Col>
             </Row>
-            {<Talk />}
-            <Form className="w-75 p-3 d-flex justify-content-center">
-                <Form.Control type="name" placeholder="Message" />
-                <Button type="submit">envoyer</Button>
-            </Form>
+
             </div>
     )}
 
