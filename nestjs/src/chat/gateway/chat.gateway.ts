@@ -74,11 +74,10 @@ export class ChatGateway
       );
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
+      console.log(await this.messageService.getDirectMessages(user.id, 1));
     } catch (error) {
       console.log(error);
     }
-
-    //console.log(await this.messageService.getDirectMessages(user.id, 1));
   }
 
   /**
@@ -334,6 +333,7 @@ export class ChatGateway
         if (channelParticipant) {
           client.join('private-' + channelId);
           const messages = await this.messageService.getDirectMessages(
+            user.id,
             channelId,
           );
           client.emit('private-message-list', messages);
