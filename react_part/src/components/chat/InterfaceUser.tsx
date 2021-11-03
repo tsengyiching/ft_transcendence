@@ -24,11 +24,18 @@ interface IMessage {
     author_avatar: string,
 }
 
+interface IUser {
+    user_id: number,
+    user_nickname: string,
+    channel_type: 'Public' | 'Private'
+}
+
 /* *CHAT */
 function Chat(channelSelected: IChannel)
 {
-    const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
     const socket = useContext(SocketContext);
+    const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
+    const [ListUsers, SetListUsers] = useState<IUser[]>([]);
 
     useEffect(() => {
         socket.emit('channel-load', {channelId: channelSelected.channel_id});
@@ -38,9 +45,18 @@ function Chat(channelSelected: IChannel)
                         message_authorId: 115,
                         message_content: "coucou!",
                         author_nickname: "theo",
-                        author_avatar: "https://ih1.redbubble.net/image.362317170.4069/st,small,507x507-pad,600x600,f8f8f8.jpg"}])
-        return (() => { socket.emit('channel-unload', {channelId: channelSelected.channel_id}) });
+                        author_avatar: "https://ih1.redbubble.net/image.362317170.4069/st,small,507x507-pad,600x600,f8f8f8.jpg"}]);
+
+        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data)});
+        //get list users
+        socket.on('channel')
+
+        return (() => { socket.emit('channel-unload', {channelId: channelSelected.channel_id}); socket.off('channel-users') });
     }, [])
+
+    useEffect(() => {
+
+    }, )
 
 	return (
 	<Row className="TitleChannel">
