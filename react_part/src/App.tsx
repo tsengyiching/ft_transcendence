@@ -1,30 +1,10 @@
-// import './App.css';
+import './App.css';
 // import Router from './components/Router';
 // import Header from './components/Header';
 // import { Container } from 'react-bootstrap';
 // import {SocketContext, socket} from './context/socket'
 // import axios from 'axios'
-// import React, { useState, useEffect } from 'react';
-
-// enum OnlineStatus {
-// 	AVAILABLE = 'Available',
-// 	PALYING = 'Playing',
-// 	OFFLINE = 'Offline',
-//       }
-
-// interface Data {
-//   id: number,
-//   nickname: string,
-//   avatar: string,
-//   createDate: Date,
-//   userStatus: OnlineStatus,
-//   email: string,
-//   isTwoFactorAuthenticationEnabled: boolean,
-// }
-
-// const emptyuser: Data = {id: 0, nickname: "", avatar: "", createDate: new Date(1980,1,2, 12,34,56),
-// userStatus: OnlineStatus.AVAILABLE, email: "", isTwoFactorAuthenticationEnabled: false};
-// export const DataContext = React.createContext(emptyuser);
+ import React, { useState, useEffect } from 'react';
 
 // function App() {
   
@@ -53,11 +33,30 @@
 
 // export default App;
 
-import React, { useLayoutEffect } from 'react';
 import './App.css';
 import Pong from './components/pong/components/Pong';
 import Fetch from './components/pong/components/Fetch';
 import {GameSocketContext, gameSocket} from './components/pong/context/gameSocket';
+
+enum OnlineStatus {
+	AVAILABLE = 'Available',
+	PALYING = 'Playing',
+	OFFLINE = 'Offline',
+      }
+
+interface Data {
+  id: number,
+  nickname: string,
+  avatar: string,
+  createDate: Date,
+  userStatus: OnlineStatus,
+  email: string,
+  isTwoFactorAuthenticationEnabled: boolean,
+}
+
+ const emptyuser: Data = {id: 0, nickname: "", avatar: "", createDate: new Date(1980,1,2, 12,34,56),
+ userStatus: OnlineStatus.AVAILABLE, email: "", isTwoFactorAuthenticationEnabled: false};
+ export const DataContext = React.createContext(emptyuser);
 
 function App() {
 	const coeff = 1;
