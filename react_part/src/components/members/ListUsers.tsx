@@ -15,7 +15,7 @@ interface IUser {
 	nickname: string;
 	avatar: string;
 	userStatus: 'Available' | 'Playing' | 'Offline';
-	relationship: null | 'friend' | 'block' | 'Not confirmed'}
+	relationship: null | 'Friend' | 'Block' | 'Not confirmed'}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
@@ -39,12 +39,12 @@ export default function ListUsers()
 				View Profile
 			</MenuItem>
 			
-			{ props.User.relationship !== 'friend' &&
+			{ props.User.relationship !== 'Friend' &&
 			<MenuItem onClick={() => Askfriend(props.User.id)}>
 				Add Friend
 			</MenuItem>}
 	
-			{ props.User.relationship === 'friend' &&
+			{ props.User.relationship === 'Friend' &&
 			<MenuItem onClick={() => Unfriend(props.User.id)}>
 				Unfriend
 			</MenuItem>}
