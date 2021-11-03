@@ -71,7 +71,6 @@ export class ChatService {
       throw new WsException('You are already a member of this channel.');
     if (channel.type === ChannelType.PRIVATE) {
       if (!(await bcrypt.compare(channelDto.password, channel.password))) {
-        console.log('Invalid channel password !');
         throw new WsException('Invalid channel password !');
       }
     }
