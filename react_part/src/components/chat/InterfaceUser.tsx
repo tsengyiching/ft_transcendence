@@ -1,6 +1,6 @@
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import {useState, useContext, useEffect} from 'react'
-import Talk from './Talk';
+import ChatChannel from './Talk';
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
 import ListMP from "./ListMP"
@@ -74,33 +74,30 @@ function InterfaceUser() {
 
     function InterfaceChat() {
         return (
-            <div>
             <Row className="TitleChannel">
-                <Col>
                     {channelSelected !== undefined
-                    ? <h2> {channelSelected.channel_name} </h2>
-                    : <div> </div>}
-                    <Talk/>
-                    <Form className="w-75 p-3 d-flex justify-content-center">
+                    ? <h2 style={{height:"1.2em"}}> {channelSelected.channel_name} </h2>
+                    : <h2 style={{height:"1.2em"}}></h2>}
+                <Col lg={8}>
+                    <ChatChannel/>
+                    <Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
                     <Form.Control type="name" placeholder="Message" />
-                    <Button type="submit">envoyer</Button>
+                    {channelSelected !== undefined ? <Button type="submit" > Send </Button>
+                    : <Button type="submit" disabled > Send </Button> }
                     </Form>
                 </Col>
                 <Col style={{height:"60em"}}>
-                        <Button> Settings </Button>
-                        <div style={{height:"600px"}}> list channel participants</div>
-                        <DropdownListUser/>
+                        <Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Settings </Button>
+                        <div style={{height:"40em"}}> list channel participants</div>
                 </Col>
             </Row>
-
-            </div>
     )}
 
 	return (
         <div>
         <Row as={InterfaceChannel}/>
         <Row>
-          <Col className="ColumnChat" lg={{span: 8, offset: 0}}>
+          <Col className="ColumnChat" lg={{span: 8, offset: 0}} style={{borderRight:"1px solid #aaa", height: "48em"}}>
               <InterfaceChat/>
           </Col>
           <Col className="ColumnChat" lg={{span: 4, offset: 0}} >

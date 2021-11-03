@@ -1,11 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-function Talk() {
+function ChatChannel() {
     return (
-        <div className="overflow-auto" style={{height: '675px', border:'1px solid black'}}>
-                Messagerie
+        <div className="overflow-auto" style={{height: '38em', border:'1px solid black'}}>
+                Chat Channel
         </div>
     )
 }
 
-export default Talk;
+export default ChatChannel;
