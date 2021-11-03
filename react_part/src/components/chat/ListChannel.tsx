@@ -11,7 +11,7 @@ import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 import JoinChannelModal from "./JoinChannelModal"
-import "./ListChannel.css"
+
 
 interface IMyChannel {
         channel_id: number,
