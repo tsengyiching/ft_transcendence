@@ -74,9 +74,8 @@ export class ChatGateway
       );
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
-      console.log(await this.messageService.getDirectMessages(user.id, 1));
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -94,7 +93,7 @@ export class ChatGateway
         status: OnlineStatus.OFFLINE,
       });
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -110,7 +109,7 @@ export class ChatGateway
       console.log('Channel created successfully !');
       this.server.emit('channel-need-reload');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -132,7 +131,7 @@ export class ChatGateway
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -160,7 +159,7 @@ export class ChatGateway
       console.log('User left channel successfully !');
       // need to complete later; and leaveChannelDto -> channel Id
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -189,7 +188,7 @@ export class ChatGateway
       await this.chatService.addChannelPassword(user.id, channelDto);
       console.log('Channel password has been added successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
@@ -205,7 +204,7 @@ export class ChatGateway
       await this.chatService.changeChannelPassword(user.id, channelDto);
       console.log('Channel password has been changed successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
@@ -221,7 +220,7 @@ export class ChatGateway
       await this.chatService.deleteChannelPassword(user.id, channelId);
       console.log('Channel password has been deleted successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
