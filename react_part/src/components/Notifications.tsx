@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import {Toast, ToastContainer, } from 'react-bootstrap'
+import {Toast, ToastContainer, Button } from 'react-bootstrap'
 import { socket } from '../context/socket';
 
-type NotificationType = 'success' | 'warning' | 'error'
+type NotificationType = 'success' | 'warning' | 'danger'
 
 interface INotification
 {
@@ -57,11 +57,11 @@ function Notifications() {
 		NotificationList.map((Notification, idx) => ToastComponent({Notification, idx}))
 	}
 	</ToastContainer>
- {/* 	<Button onClick={ () => {
+{/*  	<Button onClick={ () => {
 		console.log('click');
 		successnotif.message = `message : ${compt}`;
-		successnotif.type = 'warning';
-		setcompt(compt + 1);
+		successnotif.type = 'success';
+		setcompt(compt + 2);
 		NotificationList.push(successnotif);
 		let newlist: INotification[] = [...NotificationList]
 		SetNotifications(newlist);
