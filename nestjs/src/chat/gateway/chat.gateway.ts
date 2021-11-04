@@ -256,7 +256,7 @@ export class ChatGateway
           await this.chatService.getOneChannelParticipant(user.id, channelId);
         if (channelParticipant) client.join('channel-' + channelId);
         const messages = this.messageService.getChannelMessages(channelId);
-        client.emit('private-message-list', messages);
+        client.emit('channel-message-list', messages);
       }
     } catch (error) {
       console.log(error);
