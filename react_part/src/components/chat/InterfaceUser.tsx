@@ -1,7 +1,7 @@
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import {useState, useContext, useEffect} from 'react'
 import ChatChannel from './Talk';
-import CreateChannelButton from './Create_channel';
+import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
 import ListMP from "./ListMP"
 import {SocketContext} from '../../context/socket'
@@ -112,24 +112,21 @@ interface IUser {
 function Chat(channelSelected: IChannel)
 {
     const socket = useContext(SocketContext);
-    const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
     const [ListUsers, SetListUsers] = useState<IUser[]>([]);
+    const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
 
     useEffect(() => {
         socket.emit('channel-load', {channelId: channelSelected.channel_id});
-        //socket.on('channel-message-list', )
-        SetListMessage([{channel_id: channelSelected.channel_id, 
+        /*SetListMessage([{channel_id: channelSelected.channel_id, 
                         message_channelId: 1,
                         message_authorId: 115,
                         message_content: "coucou!",
                         author_nickname: "theo",
-                        author_avatar: "https://ih1.redbubble.net/image.362317170.4069/st,small,507x507-pad,600x600,f8f8f8.jpg"}]);
+                        author_avatar: "https://ih1.redbubble.net/image.362317170.4069/st,small,507x507-pad,600x600,f8f8f8.jpg"}]);*/
 
         socket.on('channel-users', (data: IUser[]) => {SetListUsers(data)});
-        //get list users
-        socket.on('channel')
-
-        return (() => { socket.emit('channel-unload', {channelId: channelSelected.channel_id}); socket.off('channel-users') });
+        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data)})
+        return (() => { socket.emit('channel-unload', {channelId: channelSelected.channel_id}); socket.off('channel-users'); socket.off('channel-message-list') });
     }, [])
 
 	return (
