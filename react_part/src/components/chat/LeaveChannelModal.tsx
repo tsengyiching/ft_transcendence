@@ -26,6 +26,7 @@ function LeaveChannelButton(props: {channel: IChannel, CallBackFunction: () => v
 		</Button>
 		<Modal
 		show={ShowModal}
+		onHide={() => SetShowModal(false)}
 		size="lg"
 		aria-labelledby="contained-modal-title-vcenter"
 		centered
