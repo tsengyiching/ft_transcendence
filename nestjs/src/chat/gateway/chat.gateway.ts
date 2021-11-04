@@ -74,9 +74,8 @@ export class ChatGateway
       );
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
-      console.log(await this.messageService.getDirectMessages(user.id, 1));
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -94,7 +93,7 @@ export class ChatGateway
         status: OnlineStatus.OFFLINE,
       });
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -110,7 +109,7 @@ export class ChatGateway
       console.log('Channel created successfully !');
       this.server.emit('channel-need-reload');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -132,7 +131,7 @@ export class ChatGateway
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -145,18 +144,22 @@ export class ChatGateway
     try {
       const user = await this.authService.getUserFromSocket(client);
       console.log('leave', user, 'dto', leaveChannelDto);
-      await this.chatService.leaveChannel(user.id, leaveChannelDto);
+      if (await this.chatService.leaveChannel(user.id, leaveChannelDto)) {
+        this.server.emit('channel-need-reload');
+      } else {
+        const channels_in = this.chatService.getUserChannels(user.id);
+        const channels_out = this.chatService.getUserNotParticipateChannels(
+          user.id,
+        );
+        /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
+
+        client.emit('channels-user-in', await channels_in);
+        client.emit('channels-user-out', await channels_out);
+      }
       console.log('User left channel successfully !');
-      /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
-      const channels_in = this.chatService.getUserChannels(user.id);
-      const channels_out = this.chatService.getUserNotParticipateChannels(
-        user.id,
-      );
-      client.emit('channels-user-in', await channels_in);
-      client.emit('channels-user-out', await channels_out);
       // need to complete later; and leaveChannelDto -> channel Id
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -185,7 +188,7 @@ export class ChatGateway
       await this.chatService.addChannelPassword(user.id, channelDto);
       console.log('Channel password has been added successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
@@ -201,7 +204,7 @@ export class ChatGateway
       await this.chatService.changeChannelPassword(user.id, channelDto);
       console.log('Channel password has been changed successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
@@ -217,7 +220,7 @@ export class ChatGateway
       await this.chatService.deleteChannelPassword(user.id, channelId);
       console.log('Channel password has been deleted successfully !');
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
     // check with Felix
   }
@@ -252,6 +255,8 @@ export class ChatGateway
         const channelParticipant =
           await this.chatService.getOneChannelParticipant(user.id, channelId);
         if (channelParticipant) client.join('channel-' + channelId);
+        const messages = this.messageService.getChannelMessages(channelId);
+        client.emit('private-message-list', messages);
       }
     } catch (error) {
       console.log(error);
