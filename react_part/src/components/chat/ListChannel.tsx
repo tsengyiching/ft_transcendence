@@ -46,6 +46,8 @@ function ListChannel(props: IUseStateChannel) {
                 socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
 
+                //console.log("my channels: "); console.log(MyChannels);
+                //console.log("Other channels: "); console.log(OthersChannels);
                 return (() => {
                         socket.off("channels-user-in");
                         socket.off("channels-user-out");

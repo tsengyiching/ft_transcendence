@@ -16,7 +16,7 @@ function Notifications() {
 	{
 		return (
 			<div key={`Toast_${props.idx}`}>
-			<Toast bg={props.Notification.type} onClose={() => closeNotif(props.idx)}>
+			<Toast bg={props.Notification.type} onClose={() => closeNotif(props.idx)} delay={10000} autohide>
 				<Toast.Header>
 					<strong style={{width: "21em"}}> Notification </strong>
 				</Toast.Header>
