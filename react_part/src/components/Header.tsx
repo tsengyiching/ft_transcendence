@@ -16,7 +16,7 @@ function PongButton (){
 function ProfilImage (user_avatar:string) {
 	return (
         <div>
-            <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
+            <Image src={`${user_avatar}`} style={{width:"150px", height:"100px", objectFit:'cover', objectPosition:'center'}} alt="pp" rounded fluid/>
         </div>
     );
 }
