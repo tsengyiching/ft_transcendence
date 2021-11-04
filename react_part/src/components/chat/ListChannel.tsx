@@ -98,7 +98,7 @@ function ListChannel(props: IUseStateChannel) {
                         </Button>
                         <JoinChannelModal
                         show={ShowJoinModal === channel_id}
-                        onHide={() => {setShowJoinModal(0); console.log(channel_name)}}
+                        onHide={() => {setShowJoinModal(0);}}
                         backdrop="static"
                         channel={Channel}
                         />

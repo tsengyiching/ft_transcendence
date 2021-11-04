@@ -67,7 +67,7 @@ function CreateChannelModal(props: Props) {
             <Form.Label>
               Password
             </Form.Label>
-            <Form.Control type="password" className="mb-3" value={password} name="password" placeholder="Password" onChange={ChangePassword} required/>
+            <Form.Control required type="password" className="mb-3" value={password} name="password" placeholder="Password" onChange={ChangePassword}/>
           </div>
           : <div style={{height:"6em"}}/>}
           
