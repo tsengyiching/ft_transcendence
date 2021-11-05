@@ -41,12 +41,12 @@ function App():React.ReactElement {
   
   return (
     <DataContext.Provider value={userData}>
-    <SocketContext.Provider value={socket}>
-      <Container fluid className="App">
-        <Header/>
-        <Router/>
-      </Container>
-    </SocketContext.Provider>
+    	<SocketContext.Provider value={socket}>
+    		<Container fluid className="App">
+    		    <Header/>
+    		    <Router/>
+    		</Container>
+    	</SocketContext.Provider>
     </DataContext.Provider>
   );
 }
