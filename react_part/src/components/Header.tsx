@@ -12,7 +12,6 @@ import {LinkContainer} from 'react-router-bootstrap'
 import { DataContext, Data } from '../App';
 
 
-
 function Header () {
     const [isConnected, setConnexion] = useState(true);
     const [user_avatar, setAvatar] = useState("")
