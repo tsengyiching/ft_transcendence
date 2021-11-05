@@ -11,12 +11,14 @@ import { AuthService } from 'src/auth/service/auth.service';
 import { OnlineStatus, User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { CreateChannelDto } from '../dto/create-channel.dto';
-import { GeneralChannelDto } from '../dto/general-channel.dto';
+import { JoinChannelDto } from '../dto/join-channel.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
 import { CreateDirectDto } from '../dto/create-direct.dto';
+import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
+import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -115,10 +117,10 @@ export class ChatGateway
 
   /**
    * join channel
-   * @param GeneralChannelDto : channelId and password
+   * @param JoinChannelDto : channelId and password
    */
   @SubscribeMessage('channel-join')
-  async joinChannel(client: Socket, channelDto: GeneralChannelDto) {
+  async joinChannel(client: Socket, channelDto: JoinChannelDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.joinChannel(user.id, channelDto);
@@ -143,7 +145,6 @@ export class ChatGateway
   async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      console.log('leave', user, 'dto', leaveChannelDto);
       if (await this.chatService.leaveChannel(user.id, leaveChannelDto)) {
         this.server.emit('channel-need-reload');
       } else {
@@ -151,13 +152,14 @@ export class ChatGateway
         const channels_out = this.chatService.getUserNotParticipateChannels(
           user.id,
         );
+
         /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
+        /* ? NOTIFY THE NEW OWNER ? */
 
         client.emit('channels-user-in', await channels_in);
         client.emit('channels-user-out', await channels_out);
       }
       console.log('User left channel successfully !');
-      // need to complete later; and leaveChannelDto -> channel Id
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -178,51 +180,38 @@ export class ChatGateway
   }
 
   /**
-   * add Password
-   * @param GeneralChannelDto : channelId and password
+   * set administrator
+   * @param SetChannelAdminDto (channel id and admin id)
    */
-  @SubscribeMessage('channel-add-password')
-  async addChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
+  @SubscribeMessage('channel-set-admin')
+  async setChannelAdmin(client: Socket, setAdminDto: SetChannelAdminDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.addChannelPassword(user.id, channelDto);
-      console.log('Channel password has been added successfully !');
+      await this.chatService.setChannelAdmin(user.id, setAdminDto);
+      console.log('Channel admin has been set successfully !');
+      this.server.emit('channel-need-reload');
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
-    // check with Felix
   }
 
   /**
    * change Password
-   * @param GeneralChannelDto : channelId and password
+   * @param SetChannelPasswordDto : (channel id, action, password)
    */
   @SubscribeMessage('channel-change-password')
-  async changeChannelPassword(client: Socket, channelDto: GeneralChannelDto) {
+  async changeChannelPassword(
+    client: Socket,
+    channelDto: SetChannelPasswordDto,
+  ) {
     try {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.changeChannelPassword(user.id, channelDto);
       console.log('Channel password has been changed successfully !');
+      this.server.emit('channel-need-reload');
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
-    // check with Felix
-  }
-
-  /**
-   * delete Password
-   * @param GeneralChannelDto : channelId and password
-   */
-  @SubscribeMessage('channel-delete-password')
-  async deleteChannelPassword(client: Socket, channelId: number) {
-    try {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.deleteChannelPassword(user.id, channelId);
-      console.log('Channel password has been deleted successfully !');
-    } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
-    }
-    // check with Felix
   }
 
   /**
