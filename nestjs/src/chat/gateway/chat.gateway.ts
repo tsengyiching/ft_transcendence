@@ -17,6 +17,7 @@ import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
 import { CreateDirectDto } from '../dto/create-direct.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -158,6 +159,20 @@ export class ChatGateway
       }
       console.log('User left channel successfully !');
       // need to complete later; and leaveChannelDto -> channel Id
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  /**
+   * change user status
+   * @param LeaveChannelDto : channel id
+   */
+  @SubscribeMessage('channel-status-change')
+  async changeChannelUserStatus(client: Socket, statusChange: ChangeStatusDto) {
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      this.chatService.changeChannelUserStatus(user, statusChange);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }

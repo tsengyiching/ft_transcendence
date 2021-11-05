@@ -13,6 +13,7 @@ import { GeneralChannelDto } from '../dto/general-channel.dto';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/model/user.entity';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @Injectable()
 export class ChatService {
@@ -139,8 +140,49 @@ export class ChatService {
 
     // }
     //{ -> admin becomes owner/ no admin -> random}
-    this.channelParticipantRepository.remove(res[1]);
+    await this.channelParticipantRepository.remove(res[1]);
     return false;
+  }
+
+  async changeChannelUserStatus(user: User, statusChange: ChangeStatusDto) {
+    const channelOperator = await this.getOneChannelParticipant(
+      user.id,
+      statusChange.channelId,
+    );
+
+    const channelUser = await this.getOneChannelParticipant(
+      statusChange.userId,
+      statusChange.channelId,
+    );
+
+    if (
+      channelOperator.role != ChannelRole.OWNER &&
+      channelOperator.role != ChannelRole.ADMIN
+    )
+      throw new WsException(
+        'You must be an administrator or owner to change the status of a user.',
+      );
+
+    if (
+      (channelOperator.role == ChannelRole.ADMIN &&
+        channelUser.role == ChannelRole.ADMIN) ||
+      channelUser.role == ChannelRole.OWNER
+    )
+      throw new WsException(
+        'you must have a higher role to change the status of a user.',
+      );
+
+    if (
+      statusChange.status != StatusInChannel.BAN &&
+      statusChange.status != StatusInChannel.MUTE &&
+      statusChange.status != StatusInChannel.NORMAL
+    )
+      throw new WsException('The status does not exist.');
+
+    channelUser.status = statusChange.status;
+    channelUser.statusExpiration = Date.now() + statusChange.statusExpiration;
+
+    this.channelParticipantRepository.save(channelUser);
   }
 
   /**
