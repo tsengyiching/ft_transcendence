@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {Button, Image} from 'react-bootstrap'
+import {Button, Image, Spinner} from 'react-bootstrap'
 import './Game.css'
 import Container from 'react-bootstrap/Container';
 
@@ -17,26 +17,26 @@ const Game:React.FC = () => {
                 <div className="col">
                     <Button>Join a bonus game</Button>
                 </div>
+				<Image src={process.env.PUBLIC_URL + '/pongbackground.jpg'} style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}}fluid />
         </div>
         );
     }
 
     function waitingForGame():JSX.Element {
         return (
-		<Container className='container-content' fluid >
-			<Image src='https://media4.giphy.com/media/gx54W1mSpeYMg/giphy.gif' fluid/>
+		<Container className='no-padding' fluid >
+			<Image style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}} src='https://media4.giphy.com/media/gx54W1mSpeYMg/giphy.gif'/>
             <Button className='button' onClick={handleClick}>Exit the Matchmaking</Button>
 			
-            <p className='over'>waiting for a game ...</p>
+            <p className='over'>waiting for a game </p> <Spinner className='overspinner' animation="border" variant="light" />
 		</Container>
 		);
     }
    //         {/*<div className='waiting-text'>looking for a partner...</div>*/}
 
 	return (
-        <Container className='container-back' fluid>
+        <Container className='no-padding' fluid>
             {toggleGame ? waitingForGame() : showButtons()}
-            {toggleGame ? '' : <Image src='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT4zqAcI7RlbhpEpf_gqQpC3krnJeYXifFIwg&usqp=CAU' fluid />}
 		</Container>
 	);
 }
