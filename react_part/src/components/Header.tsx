@@ -3,20 +3,12 @@ import "./Header.css"
 
 import axios from 'axios';
 import { useEffect, useState} from "react";
-import { Image , Row, Col} from "react-bootstrap";
+import { Image } from "react-bootstrap";
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 
-
-function PongButton (){
-	return(
-            <div className="container">
-                <a href="/accueil" className="navbar-brand"><h1>Pong</h1></a>
-            </div>
-	);
-}
 
 function Header () {
     const [isConnected, setConnexion] = useState(true);
