@@ -12,10 +12,10 @@ const Game:React.FC = () => {
         return (
         <div className="row align-self-center">
             <div className="col">
-                    <Button onClick={handleClick}>Join a normal game</Button>
+                    <Button variant="outline-warning" onClick={handleClick}>Join a normal game</Button>
                 </div>
                 <div className="col">
-                    <Button>Join a bonus game</Button>
+                    <Button variant="outline-warning">Join a bonus game</Button>
                 </div>
 				<Image src={process.env.PUBLIC_URL + '/pongbackground.jpg'} style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}}fluid />
         </div>
@@ -26,7 +26,7 @@ const Game:React.FC = () => {
         return (
 		<Container className='no-padding' fluid >
 			<Image style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}} src='https://media4.giphy.com/media/gx54W1mSpeYMg/giphy.gif'/>
-            <Button className='button' onClick={handleClick}>Exit the Matchmaking</Button>
+            <Button variant="outline-warning" className='button' onClick={handleClick}>Exit the Matchmaking</Button>
 			
             <p className='over'>waiting for a game </p> <Spinner className='overspinner' animation="border" variant="light" />
 		</Container>
