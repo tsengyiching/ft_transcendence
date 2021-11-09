@@ -116,7 +116,7 @@ function Chat(channelSelected: IChannel)
     const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
 
     useEffect(() => {
-        socket.emit('channel-load', {channelId: channelSelected.channel_id});
+        socket.emit('channel-load', channelSelected.channel_id);
         /*SetListMessage([{channel_id: channelSelected.channel_id, 
                         message_channelId: 1,
                         message_authorId: 115,
