@@ -5,6 +5,7 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { SSL_OP_EPHEMERAL_RSA } from 'constants';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { OnlineStatus, User } from 'src/user/model/user.entity';
@@ -12,6 +13,10 @@ import { UserService } from 'src/user/service/user.service';
 import { PongService } from './pong.game.service';
 import { PongUsersService } from './pong.users.service';
 // https://www.generacodice.com/en/articolo/713202/how-can-i-find-the-response-time-latency-of-a-client-in-nodejs-with-sockets-socket-
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 @WebSocketGateway({
   namespace: 'pong',
@@ -35,8 +40,8 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
       client.join(user.id.toString());
       this.pongUsersService.userConnect(user.id);
-      if (this.pongUsersService.isInMatchmaking(user.id))
-        client.emit('inMatchMaking');
+      const resp = this.pongUsersService.isInMatchmaking(user.id);
+      client.emit('inMatchMaking', resp);
     } catch (error) {
       console.log(error);
     }
@@ -46,6 +51,7 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       client.leave(user.id.toString());
+      await sleep(2000);
       const left = this.pongUsersService.userDisconnect(user.id);
       if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
         this.pongUsersService.removePlayer(user.id);
@@ -59,21 +65,50 @@ export class PongGateway {
    * @param client Socket de la fenetre qui se connecte au jeu (peut etre plusieur par joueur)
    * si le joueur n'est pas dans la file d'attente, l'ajoute et envoie l'info aux autres fenetre de ce joueur
    */
-  @SubscribeMessage('matchmaking')
+  @SubscribeMessage('matchmakingON')
   async enterMatchMakingRoom(client: Socket) {
     try {
-      console.log('New Player Joins');
-
       const user: User = await this.authService.getUserFromSocket(client);
-      const already = this.pongUsersService.addNewPlayer(user.id);
-      if (!already && this.pongUsersService.nbWindowForUser(user.id) !== 1)
-        client.to(user.id.toString()).emit('inMatchMaking');
-////////////////////////////////////////////////// TODO
+
+      console.log('New Player Joins', user.id.toString());
+      client.emit('inMatchMaking', true);
+      client.to(user.id.toString()).emit('inMatchMaking', true);
+      this.pongUsersService.addNewPlayer(user.id);
+      ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
     }
   }
 
+  @SubscribeMessage('matchmakingOFF')
+  async leaveMatchMakingRoom(client: Socket) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+
+      console.log('New Player LEAVE', user.id.toString());
+      client.emit('inMatchMaking', false);
+      client.to(user.id.toString()).emit('inMatchMaking', false);
+      this.pongUsersService.removePlayer(user.id);
+      ////////////////////////////////////////////////// TODO
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @SubscribeMessage('isInMatchmaking?')
+  async isInMatchmaking(client: Socket) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      const resp = this.pongUsersService.isInMatchmaking(user.id);
+      console.log('%cHELLO', 'color: #FF0000');
+      console.log(resp);
+      client.emit('inMatchMaking', resp);
+
+      ////////////////////////////////////////////////// TODO
+    } catch (error) {
+      console.log(error);
+    }
+  }
   // @SubscribeMessage('down')
   // onDown(client: any, payload: any) {
   //   users.map((e) => {

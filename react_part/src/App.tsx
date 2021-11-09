@@ -3,6 +3,8 @@ import Router from './components/Router';
 import Header from './components/Header';
 import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
+import {GameSocketContext, gameSocket} from './context/gameSocket';
+
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
 
@@ -42,10 +44,14 @@ function App():React.ReactElement {
   return (
     <DataContext.Provider value={userData}>
     	<SocketContext.Provider value={socket}>
+      <GameSocketContext.Provider value={gameSocket}>
+
     		<Container fluid className="App">
     		    <Header/>
     		    <Router/>
     		</Container>
+        </GameSocketContext.Provider>
+
     	</SocketContext.Provider>
     </DataContext.Provider>
   );
