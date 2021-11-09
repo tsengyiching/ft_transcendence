@@ -41,6 +41,7 @@ export class TwoFactorAuthController {
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         user,
       );
+    response.setHeader('content-type', 'image/png');
     return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
   }
 

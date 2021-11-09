@@ -33,7 +33,11 @@ export class TwoFactorAuthService {
   }
 
   async pipeQrCodeStream(stream: Response, otpauthUrl: string) {
-    return toFileStream(stream, otpauthUrl);
+    return toFileStream(stream, otpauthUrl, {
+      type: 'png',
+      width: 200,
+      errorCorrectionLevel: 'H',
+    });
   }
 
   async isTwoFactorAuthenticationCodeValid(

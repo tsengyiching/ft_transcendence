@@ -28,7 +28,7 @@ export class MessageService {
   async createChannelMessage(
     authorId: number,
     createMessageDto: CreateMessageDto,
-  ) {
+  ): Promise<Message> {
     // Check if channel exit
     const participant = await this.channelService.getOneChannelParticipant(
       authorId,
@@ -58,7 +58,7 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  getChannelMessages(channelId: number) {
+  getChannelMessages(channelId: number): Promise<Message> {
     return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')
@@ -82,7 +82,7 @@ export class MessageService {
   async createDirectMessage(
     authorId: number,
     createMessageDto: CreateMessageDto,
-  ) {
+  ): Promise<Message> {
     // Check if channel exit
     await this.channelService.getOneChannelParticipant(
       authorId,

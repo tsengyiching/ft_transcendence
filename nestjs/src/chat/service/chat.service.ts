@@ -156,7 +156,10 @@ export class ChatService {
     return false;
   }
 
-  async changeChannelUserStatus(user: User, statusChange: ChangeStatusDto) {
+  async changeChannelUserStatus(
+    user: User,
+    statusChange: ChangeStatusDto,
+  ): Promise<ChannelParticipant> {
     const channelOperator = await this.getOneChannelParticipant(
       user.id,
       statusChange.channelId,
@@ -194,7 +197,7 @@ export class ChatService {
     channelUser.status = statusChange.status;
     channelUser.statusExpiration = Date.now() + statusChange.statusExpiration;
 
-    this.channelParticipantRepository.save(channelUser);
+    return this.channelParticipantRepository.save(channelUser);
   }
 
   /**
