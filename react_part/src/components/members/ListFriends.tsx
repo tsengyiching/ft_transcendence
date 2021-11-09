@@ -63,14 +63,12 @@ export default function ListFriends()
 				<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
 				<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
 				<Row>
-					<Col lg={3}>
+					<Col lg={3} className="position-relative">
 						<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(Friend.user_userStatus)}
 					</Col>
 					<Col lg={5}>
 						<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
-					</Col>
-					<Col>
-						{status(Friend.user_userStatus)}
 					</Col>
 				</Row>
 				</div>

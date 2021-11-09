@@ -63,17 +63,15 @@ export default function ListUsers()
 			<div key={`User_${User.id}`}>
 			<ContextMenuTrigger id={`ContextMenuUser_${User.id}`}>
 			<div className="User UserButton">
-			<Row>
-				<Col lg={3}>
-					<Image src={User.avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={5}>
-					<div style={{margin:"1em"}}> {User.nickname} </div>
-				</Col>
-				<Col>
-					{status(User.userStatus)}
-				</Col>
-			</Row>
+				<Row>
+					<Col lg={3} className="position-relative">
+						<Image src={User.avatar} className="PictureUser" alt="picture" fluid/>
+						{status(User.userStatus)}
+					</Col>
+					<Col lg={5}>
+						<div style={{margin:"1em"}}> {User.nickname} </div>
+					</Col>
+				</Row>
 			</div>
 			</ContextMenuTrigger>
 			<ContextMenuUser User={User}/>

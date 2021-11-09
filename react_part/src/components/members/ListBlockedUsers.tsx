@@ -41,15 +41,13 @@ export default function ListBlockedUsers()
 				<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
 				<div className="BlockedUser UserButton">
 				<Row>
-				<Col lg={3}>
-					<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={5}>
-					<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
-				</Col>
-				<Col>
-					{status(BlockedUser.user_userStatus)}
-				</Col>
+					<Col lg={3} className="position-relative">
+						<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(BlockedUser.user_userStatus)}
+					</Col>
+					<Col lg={5}>
+						<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
+					</Col>
 				</Row>
 				</div>
 				</ContextMenuTrigger>

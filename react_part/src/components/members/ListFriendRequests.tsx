@@ -8,6 +8,7 @@ import ApprovedButton from '../pictures/approved_button.png'
 import DeclineButton from '../pictures/decline_button.png'
 import {ValidationFriend} from "./ContextMenuFunctions"
 import {DataContext} from '../../App'
+import status from "./Status";
 
 interface IFriendRequest {
 	user_id: number;
@@ -62,17 +63,18 @@ export default function ListFriendRequests()
 		return (
 			<div key={`FriendRequest_${FriendRequest.user_id}`} className="FriendRequest UserButton">
 				<Row>
-				<Col lg={3}>
-				<Image src={FriendRequest.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={4}>
-				<div style={{margin:"1em"}}> {FriendRequest.user_nickname} </div>	
-				</Col>
-				<Col lg={5}>
-					<Image className="ValidationButton" src={ApprovedButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, true, ReloadComponent) }/>
-					<Image className="ValidationButton" src={DeclineButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, false, ReloadComponent) }/>
-				</Col>
-			</Row>
+					<Col lg={3} className="position-relative">
+						<Image src={FriendRequest.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(FriendRequest.user_userStatus)}
+					</Col>
+					<Col lg={4}>
+						<div style={{margin:"1em"}}> {FriendRequest.user_nickname} </div>
+					</Col>
+					<Col lg={5}>
+						<Image className="ValidationButton" src={ApprovedButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, true, ReloadComponent) }/>
+						<Image className="ValidationButton" src={DeclineButton} rounded onClick={() => ValidationFriend(FriendRequest.relation_id, false, ReloadComponent) }/>
+					</Col>
+				</Row>
 			</div>
 		)
 		//console.log(`FriendRequest : ${FriendRequest}`)
