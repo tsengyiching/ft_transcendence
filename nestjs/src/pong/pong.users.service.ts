@@ -25,6 +25,7 @@ export class PongUsersService {
   }
 
   userConnect(id: number) {
+    if (!this.isConnected[id]) this.isConnected[id] = 0;
     this.isConnected[id] += 1;
   }
 
