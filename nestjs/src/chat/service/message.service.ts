@@ -35,21 +35,22 @@ export class MessageService {
       createMessageDto.channelId,
     ); // check if user participate to the channel
 
-    if (participant.status == StatusInChannel.BAN)
-      throw new WsException('Cannot post message in channel if you are ban !');
-
     if (
-      participant.statusExpiration &&
-      participant.status == StatusInChannel.MUTE
+      participant.status == StatusInChannel.MUTE ||
+      participant.status == StatusInChannel.BAN
     ) {
       // if mute expire
+      if (participant.statusExpiration == 0)
+        throw new WsException(
+          'Cannot post message in channel if you are ban or mute !',
+        );
       if (participant.statusExpiration < Date.now()) {
         participant.status = StatusInChannel.NORMAL;
         participant.statusExpiration = 0;
         this.channelRepository.save(participant);
       } else
         throw new WsException(
-          'cannot post message in channel if you are mute !',
+          'Cannot post message in channel if you are ban or mute !',
         );
     }
     const newMessage = this.messageRepository.create({ ...createMessageDto });
@@ -57,7 +58,7 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  async getChannelMessages(channelId: number) {
+  getChannelMessages(channelId: number) {
     return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')

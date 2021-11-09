@@ -115,7 +115,7 @@ export class ChatService {
     userId: number,
     leaveChannelDto: LeaveChannelDto,
   ): Promise<boolean> {
-    const [channel, user, otherUsers] = await Promise.all([
+    const [channel, participant, otherUsers] = await Promise.all([
       this.getChannelById(leaveChannelDto.channelId),
       this.getOneChannelParticipant(userId, leaveChannelDto.channelId),
       this.channelParticipantRepository.find({
@@ -126,16 +126,21 @@ export class ChatService {
         },
       }),
     ]);
-    if (this.isChannelParticipant(user)) {
-      if (user.status === StatusInChannel.BAN)
-        throw new WsException('User is banned in this channel.');
+    if (this.isChannelParticipant(participant)) {
+      if (
+        participant.status === StatusInChannel.BAN ||
+        participant.status === StatusInChannel.MUTE
+      )
+        throw new WsException(
+          'You could not leave a channel from which you were banned or mute.',
+        );
     }
     if (otherUsers.length === 0) {
       console.log(`Channel ${channel.name} has been deleted.`);
       await this.channelRepository.remove(channel);
       return true;
     }
-    if (user.role === ChannelRole.OWNER) {
+    if (participant.role === ChannelRole.OWNER) {
       const admin = otherUsers.filter(
         (data) => data.role === ChannelRole.ADMIN,
       );
@@ -147,7 +152,7 @@ export class ChatService {
         await this.channelParticipantRepository.save(otherUsers[0]);
       }
     }
-    await this.channelParticipantRepository.remove(user);
+    await this.channelParticipantRepository.remove(participant);
     return false;
   }
 
