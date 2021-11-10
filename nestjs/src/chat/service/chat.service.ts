@@ -296,9 +296,9 @@ export class ChatService {
   /**
    * getChannelUsers get the channel's users
    * @param channelId channel id
-   * @returns Promise<ChannelParticipant> return
+   * @returns Promise<any> return
    */
-  getChannelUsers(channelId: number): Promise<ChannelParticipant> {
+  getChannelUsers(channelId: number): Promise<any> {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.user', 'user')
@@ -326,7 +326,7 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  getUserChannels(userId: number): Promise<ChannelParticipant> {
+  getUserChannels(userId: number): Promise<any> {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')

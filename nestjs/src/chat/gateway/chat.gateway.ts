@@ -262,7 +262,9 @@ export class ChatGateway
         const messages = await this.messageService.getChannelMessages(
           channelId,
         );
+        const users = await this.chatService.getChannelUsers(channelId);
         client.emit('channel-message-list', messages);
+        client.emit('channel-users', users);
       }
     } catch (error) {
       console.log(error);
@@ -283,15 +285,31 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('channel-message')
-  async newChannelMessage(client: Socket, message: CreateMessageDto) {
+  async newChannelMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       // Save message in db
-      this.messageService.createChannelMessage(user.id, message);
+      const message = await this.messageService.createChannelMessage(
+        user.id,
+        messageDto,
+      );
+
+      const sendMessage = {
+        message_id: message.id,
+        message_channelId: message.channelId,
+        message_authorId: user.id,
+        message_createDate: message.createDate,
+        author_nickname: user.nickname,
+        author_avatar: user.avatar,
+        message_content: message.message,
+      };
+
       // Send message to all people connected in channel
-      this.server.to('channel-' + message.channelId).emit('channel-new-message', message);
+      this.server
+        .to('channel-' + message.channelId)
+        .emit('channel-new-message', sendMessage);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 

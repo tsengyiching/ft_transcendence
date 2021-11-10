@@ -4,8 +4,8 @@ import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListFriendRequests.css"
 import './members.css'
-import ApprovedButton from '../pictures/approved_button.png'
-import DeclineButton from '../pictures/decline_button.png'
+import ApprovedButton from '../pictures/check.svg'
+import DeclineButton from '../pictures/cross.svg'
 import {ValidationFriend} from "./ContextMenuFunctions"
 import {DataContext} from '../../App'
 import status from "./Status";
