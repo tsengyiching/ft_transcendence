@@ -1,0 +1,30 @@
+/* * Interface .ChatTitle */
+
+
+.TitleChannel {
+	font-size: large;
+	background-color: #A0B4D1;
+	text-align: center;
+	max-height: 40px;
+	max-width: 100%;
+	margin: 0;
+	border: 1px solid black
+}
+
+.FormSendMessage {
+	width: 100%;
+	padding: 1em;
+	display: flex;
+}
+
+.MsgBubble {
+	width: 70%;
+	height: 5em;
+	margin: 2em;
+	border-radius: 2em;
+}
+
+.pictureChat {
+	height: 2.5em;
+	width: 2.5em;
+}

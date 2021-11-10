@@ -1,9 +1,9 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, Image } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {useState, useContext, useEffect} from 'react'
+import {useState, useContext, useEffect, useRef} from 'react'
 import {SocketContext} from '../../context/socket'
-import './InterfaceUser.css'
+import './ChatInterface.css'
 import {IChannel} from './InterfaceUser'
 import {DataContext} from '../../App'
 
@@ -49,19 +49,30 @@ function ChatDisabled()
 function Message(message: IMessage)
 {
 	const userData = useContext(DataContext);
-	const color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
+	let color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
+	let side;
+	if (message.message_authorId === userData.id)
+	{
+		color = '#34b7f1';
+		side = 'left';
+	}
+	else
+	{
+		color = '#25d366';
+		side = 'right';
+	}
 
 	return (
-	<div key={`message_${message.message_channelId}_${message.message_id}`} style={{backgroundColor: color}}>
+	<div key={`message_${message.message_channelId}_${message.message_id}`} className={`MsgBubble`} style={{backgroundColor: color}}>
 		<Row>
 			<Col>
-				<Image src={message.author_avatar} roundedCircle fluid style={{height:"2em"}}/>
+				<Image src={message.author_avatar} roundedCircle fluid className="pictureChat" />
 			</Col>
 			<Col>
 				{message.author_nickname}
 			</Col>
 			<Col>
-				{/* {message.message_createDate} */}
+				{ message.message_createDate}
 			</Col>
 		</Row>
 		<Row>
@@ -74,14 +85,24 @@ function Message(message: IMessage)
 
 function ChatMessages(props: {ListMessage: IMessage[]}) {
 
+	const messagesEndRef = useRef<null | HTMLDivElement>(null)
+	
 	useEffect(() => {
 		console.log("list message in ChatMessages: ");
 		console.log(props.ListMessage);
+		scrollToBottom();
 	}, [props.ListMessage])
+	
+	const scrollToBottom = () => {
+		if (messagesEndRef.current !== null && messagesEndRef.current.id == 'bottomchatmessage')
+	  		messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: 'end', inline: 'nearest' })
+	}
 
     return (
-        <div className="overflow-auto" style={{height: '38em', border:'1px solid black'}}>
-                {props.ListMessage.map(Message)}
+
+        <div className="overflow-auto" style={{height: '38em', border:'1px solid black',}}>
+		{props.ListMessage.map(Message)}
+		<div id="bottomchatmessage" ref={messagesEndRef} />
         </div>
     )
 }
