@@ -37,4 +37,21 @@ export class PongUsersService {
   nbWindowForUser(id: number): number {
     return this.isConnected[id];
   }
+
+  makeMatchMaking():any {
+	  const len = this.inMatchMaking.length;
+	  if (len === 2)
+	  {
+		  // enlever les users du tableau et renvoyer une copie du tableau
+		return this.inMatchMaking;
+	  }
+	  else if (len > 2) {
+		  // enlever les 2 users du tableau
+		///// make matchmaking avec random / selon ex parties / lvl
+		// return le tableau de 2 id
+	  }
+	  else
+	  	return NaN;
+
+  }
 }

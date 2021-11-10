@@ -71,9 +71,11 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
 
       console.log('New Player Joins', user.id.toString());
-      client.emit('inMatchMaking', true);
-      client.to(user.id.toString()).emit('inMatchMaking', true);
+      //client.emit('inMatchMaking', true);
+      this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayer(user.id);
+	  await sleep(10000);// attendre 10 sec pour lancer le matchmaking // return un tableau d'id des 2 users qui entrent dans la game et envoie un socket a ces 2 id 
+	  console.log('HOHOHO');
       ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
@@ -86,10 +88,9 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
 
       console.log('New Player LEAVE', user.id.toString());
-      client.emit('inMatchMaking', false);
-      client.to(user.id.toString()).emit('inMatchMaking', false);
+      //client.emit('inMatchMaking', false);
+      this.server.to(user.id.toString()).emit('inMatchMaking', false);
       this.pongUsersService.removePlayer(user.id);
-      ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
     }
@@ -100,11 +101,8 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       const resp = this.pongUsersService.isInMatchmaking(user.id);
-      console.log('%cHELLO', 'color: #FF0000');
       console.log(resp);
       client.emit('inMatchMaking', resp);
-
-      ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
     }
