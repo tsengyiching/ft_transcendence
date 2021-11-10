@@ -9,11 +9,7 @@
 	font-size: 30px;
 	color: white;
 }
-.overspinner {
-	position:absolute;
-	top: 25%;
-	left: 33%;
-}
+
 .container-back {
 	background-color: blue;
 	width: 100%;

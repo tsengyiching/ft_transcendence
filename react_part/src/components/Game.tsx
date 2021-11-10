@@ -40,7 +40,7 @@ const Game:React.FC = () => {
 		<Container className='no-padding' fluid >
 			<Image style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}} src='https://media4.giphy.com/media/gx54W1mSpeYMg/giphy.gif'/>
             <Button variant="outline-warning" className='button' onClick={handleClickOFF}>Exit the Matchmaking</Button>
-			<p className='over'>waiting for a game </p> <Spinner className='overspinner' animation="border" variant="light" />
+			<div className='over'>waiting for a game <Spinner animation="border" variant="light" /></div> 
 		</Container>
 		);
     }

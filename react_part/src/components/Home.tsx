@@ -10,8 +10,7 @@ function Home() {
 
     return (
         <Container className='no-padding' fluid>
-                <Notifications/>
-				
+                <Notifications/>	
                 <Row>
                     <Col lg={7} md={6} xs={5} className="LeftColHome">
 				    	<Game />
