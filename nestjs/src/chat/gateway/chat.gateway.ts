@@ -289,7 +289,7 @@ export class ChatGateway
       // Save message in db
       this.messageService.createChannelMessage(user.id, message);
       // Send message to all people connected in channel
-      this.server.to('channel-' + message.channelId).emit('message', message);
+      this.server.to('channel-' + message.channelId).emit('channel-new-message', message);
     } catch (error) {
       console.log(error);
     }
