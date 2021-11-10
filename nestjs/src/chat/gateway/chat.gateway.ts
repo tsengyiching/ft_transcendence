@@ -262,7 +262,9 @@ export class ChatGateway
         const messages = await this.messageService.getChannelMessages(
           channelId,
         );
+        const users = await this.chatService.getChannelUsers(channelId);
         client.emit('channel-message-list', messages);
+        client.emit('channel-users', users);
       }
     } catch (error) {
       console.log(error);
