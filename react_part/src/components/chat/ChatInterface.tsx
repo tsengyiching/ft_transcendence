@@ -33,7 +33,7 @@ function ChatDisabled()
 	<Row className="TitleChannel">
 		<h2 style={{height:"1.2em"}}></h2>
 		<Col lg={8}>
-			<ChatMessages ListMessage={[]}/>
+			<ListChatMessage ListMessage={[]}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 				<Form.Control type="name" placeholder="Message" />
 				<Button type="submit" disabled > Send </Button> 
@@ -46,7 +46,7 @@ function ChatDisabled()
 	</Row>);
 }
 
-function Message(message: IMessage)
+function ChannelMessage(message: IMessage)
 {
 	const userData = useContext(DataContext);
 	let color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
@@ -83,7 +83,7 @@ function Message(message: IMessage)
 	</div>)
 }
 
-function ChatMessages(props: {ListMessage: IMessage[]}) {
+function ListChatMessage(props: {ListMessage: IMessage[]}) {
 
 	const messagesEndRef = useRef<null | HTMLDivElement>(null)
 	
@@ -101,13 +101,29 @@ function ChatMessages(props: {ListMessage: IMessage[]}) {
     return (
 
         <div className="overflow-auto" style={{height: '38em', border:'1px solid black',}}>
-		{props.ListMessage.map(Message)}
+		{props.ListMessage.map(ChannelMessage)}
 		<div id="bottomchatmessage" ref={messagesEndRef} />
         </div>
     )
 }
 
+function ChannelUser(user: IUser)
+{
+	return(
+		<div>
+			{user.user_nickname}
+		</div>
+	)
+}
 
+function ListChannelUser(props: {ListUsers: IUser[]})
+{
+	return (
+		<div style={{height:"40em"}}> 
+			{props.ListUsers.map(ChannelUser)}
+		</div>
+	)
+}
 
 function ChatChannel(channelSelected: IChannel)
 {
@@ -161,7 +177,7 @@ function ChatChannel(channelSelected: IChannel)
 		? <h2 style={{height:"1.2em"}}> {channelSelected.channel_name} </h2>
 		: <h2 style={{height:"1.2em"}}></h2>}
 		<Col lg={8}>
-			<ChatMessages ListMessage={ListMessage}/>
+			<ListChatMessage ListMessage={ListMessage}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 				<Form.Control type="text" value={message} placeholder="Message" onChange={ChangeMsg}/>
 				<Button type="submit" onClick={handleSubmit}> Send </Button>
@@ -169,7 +185,7 @@ function ChatChannel(channelSelected: IChannel)
 		</Col>
 		<Col style={{height:"60em"}}>
 			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Channel Settings </Button>
-			<div style={{height:"40em"}}> list channel participants</div>
+			<ListChannelUser ListUsers={ListUsers}/>
 		</Col>
 	</Row>)
 }
