@@ -1,11 +1,11 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
+import { Form, Button, Row, Col, Image } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {useState, useContext, useEffect} from 'react'
 import {SocketContext} from '../../context/socket'
 import './InterfaceUser.css'
 import {IChannel} from './InterfaceUser'
-
+import {DataContext} from '../../App'
 
 /* 
 ****CHAT****
@@ -48,17 +48,20 @@ function ChatDisabled()
 
 function Message(message: IMessage)
 {
+	const userData = useContext(DataContext);
+	const color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
+
 	return (
-	<div key={`message_${message.message_channelId}_${message.message_id}`}>
+	<div key={`message_${message.message_channelId}_${message.message_id}`} style={{backgroundColor: color}}>
 		<Row>
 			<Col>
-				{message.author_avatar}
+				<Image src={message.author_avatar} roundedCircle fluid style={{height:"2em"}}/>
 			</Col>
 			<Col>
 				{message.author_nickname}
 			</Col>
 			<Col>
-				{message.message_createDate}
+				{/* {message.message_createDate} */}
 			</Col>
 		</Row>
 		<Row>
@@ -93,10 +96,11 @@ function ChatChannel(channelSelected: IChannel)
     const [message, SetMessage] = useState<string>("");
 
     useEffect(() => {
-        socket.emit('channel-load', channelSelected.channel_id);
 
+	socket.emit('channel-load', channelSelected.channel_id);
         socket.on('channel-users', (data: IUser[]) => {SetListUsers(data); console.log("list users: "); console.log(data)});
-        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data.reverse()); console.log("list messages: "); console.log(data)});
+        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);
+								console.log("list messages: "); console.log(data)});
 
 	return (() => {
 		socket.emit('channel-unload', {channelId: channelSelected.channel_id});
@@ -106,10 +110,15 @@ function ChatChannel(channelSelected: IChannel)
     }, [channelSelected])
 
     useEffect(() => {
-	    socket.on('channel-new-message', (new_message: IMessage) => {const buffer = ListMessage; buffer.push(new_message); SetListMessage(buffer)});
+	socket.on('channel-new-message', (new_message: IMessage) => {
+		const buffer = [...ListMessage];
+		buffer.push(new_message);
+		SetListMessage(buffer)
+		});
 
-	    return (() => {socket.off('channel-new-message');});
-    }, [channelSelected])
+		return (() => {socket.off('channel-new-message');});
+    }, [ListMessage])
+
     //Form management
     const handleSubmit = (event: any) => {
 		event.preventDefault();
