@@ -7,6 +7,7 @@ import './ChatInterface.css'
 import {IChannel, Role} from './InterfaceUser'
 import {DataContext} from '../../App'
 import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
+import { useHistory } from 'react-router'
 
 /* 
 ****CHAT****
@@ -50,10 +51,35 @@ function ChatDisabled()
 
 function ChannelMessage(message: IMessage)
 {
+	function timeSince(date: any) {
+
+		var options = {year: 'numeric', month: 'long', day: 'numeric',};
+
+		var seconds = Math.floor((new Date().getTime() - date) / 1000);
+		var interval = seconds / 2592000;
+
+		if (interval > 1) {
+		  return date.toLocaleDateString("en-EN", options);
+		}
+		interval = seconds / 86400;
+		if (interval > 1) {
+		  return Math.floor(interval) + " days ago";
+		}
+		interval = seconds / 3600;
+		if (interval > 1) {
+		  return Math.floor(interval) + " hours ago";
+		}
+		interval = seconds / 60;
+		if (interval > 1) {
+		  return Math.floor(interval) + " minutes ago";
+		}
+		return "Now";
+	}
+
 	const userData = useContext(DataContext);
 	let color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
 	let side;
-	if (message.message_authorId === userData.id)
+	if (message.message_authorId !== userData.id)
 	{
 		color = '#34b7f1';
 		side = 'left';
@@ -74,7 +100,7 @@ function ChannelMessage(message: IMessage)
 				{message.author_nickname}
 			</Col>
 			<Col>
-				{ message.message_createDate}
+				{ timeSince(new Date(message.message_createDate))}
 			</Col>
 		</Row>
 		<Row>
@@ -109,31 +135,50 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
-function ContextMenuChannelUser(props: {user: IUser, myrole: Role})
-{
-	return (
-		<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
-			<MenuItem>
-				Mute
-			</MenuItem>
-		</ContextMenu>
-		)
-}
-
-function ChannelUser(props: {user: IUser, myrole: Role})
-{
-	return(
-		<Button key={`channel_user_${props.user.user_id}`} disabled style={{width: "80%", margin: "0.5%"}}>
-			<ContextMenuTrigger id={`ContextMenuChannelUser_${props.user.user_id}`}>
-				{props.user.user_nickname}
-			</ContextMenuTrigger>
-			<ContextMenuChannelUser {...props}/>
-		</Button>
-	)
-}
-
 function ListChannelUser(props: {ListUsers: IUser[], myrole: Role})
 {
+	let history = useHistory();
+	const userData = useContext(DataContext);
+
+
+	function ContextMenuChannelUser(props: {user: IUser, myrole: Role})
+	{
+		return (	
+				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
+				<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
+					View Profile
+				</MenuItem>
+				<MenuItem>
+					Send a message
+				</MenuItem>
+				<MenuItem>
+					Mute
+				</MenuItem>
+				<MenuItem>
+					Ban
+				</MenuItem>
+				<MenuItem>
+					Promote Admin
+				</MenuItem>
+				</ContextMenu>
+
+			)
+	}
+	
+	function ChannelUser(props: {user: IUser, myrole: Role })
+	{
+		return(
+			<div key={`channel_user_${props.user.user_id}`}>
+				<ContextMenuTrigger id={`ContextMenuChannelUser_${props.user.user_id}`}>
+				<Button disabled style={{width: "80%", margin: "0.5%"}}>
+				{props.user.user_nickname}
+				</Button>
+				</ContextMenuTrigger>
+				<ContextMenuChannelUser {...props}/>
+			</div>
+		)
+	}
+
 	return (
 		<div className="overflow-auto" style={{marginTop: "15%"}}>
 			{props.ListUsers.map((User: IUser) => <ChannelUser user={User} myrole={props.myrole}/> )}
