@@ -2,7 +2,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, Image } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import {useState, useContext, useEffect, useRef} from 'react'
-import {SocketContext} from '../../context/socket'
+import {socket, SocketContext} from '../../context/socket'
 import './ChatInterface.css'
 import {IChannel, Role} from './InterfaceUser'
 import {DataContext} from '../../App'
@@ -74,7 +74,7 @@ function ChannelMessage(message: IMessage)
 		  return Math.floor(interval) + " minutes ago";
 		}
 		return "Now";
-	}
+}
 
 	const userData = useContext(DataContext);
 	let color = (message.message_authorId === userData.id) ? '#34b7f1' : '#25d366'
@@ -135,37 +135,56 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
-function ListChannelUser(props: {ListUsers: IUser[], myrole: Role})
+function ListChannelUser(props: {ListUsers: IUser[], myrole: Role, channelId: number})
 {
 	let history = useHistory();
 	const userData = useContext(DataContext);
+	const socket = useContext(SocketContext);
 
-
-	function ContextMenuChannelUser(props: {user: IUser, myrole: Role})
+	function ContextMenuChannelUser(props: {user: IUser, myrole: Role, channelId: number})
 	{
-		return (	
-				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
-				<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
-					View Profile
-				</MenuItem>
-				<MenuItem>
-					Send a message
-				</MenuItem>
-				<MenuItem>
-					Mute
-				</MenuItem>
-				<MenuItem>
-					Ban
-				</MenuItem>
-				<MenuItem>
-					Promote Admin
-				</MenuItem>
-				</ContextMenu>
+		const Mygrade = props.myrole === 'Owner' ? 1 : props.myrole === 'Admin' ? 2 : 3;
+		const Usergrade = props.user.role === 'Owner' ? 1 : props.user.role === 'Admin' ? 2 : 3;
 
+		return (<div>
+			{props.user.user_id === userData.id ?
+				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
+					<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
+						View Profile
+					</MenuItem>
+				</ContextMenu>
+			:
+				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
+					<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
+						View Profile
+					</MenuItem>
+					<MenuItem>
+						Send a message
+					</MenuItem>
+					{
+					<MenuItem>
+						Mute
+					</MenuItem>}
+					<MenuItem>
+						Ban
+					</MenuItem>
+					{ Mygrade === 1 && Usergrade === 3 &&
+					<MenuItem onClick={() => {socket.emit("channel-set-admin", {channelId: props.channelId, participantId: props.user.user_id})}}>
+						Promote Admin
+					</MenuItem>
+					}
+					{ Mygrade === 1 && Usergrade === 2 &&
+					<MenuItem>
+						Demote to User
+					</MenuItem>
+					}
+				</ContextMenu>
+			}
+			</div>
 			)
 	}
 	
-	function ChannelUser(props: {user: IUser, myrole: Role })
+	function ChannelUser(props: {user: IUser, myrole: Role, channelId: number})
 	{
 		return(
 			<div key={`channel_user_${props.user.user_id}`}>
@@ -181,7 +200,7 @@ function ListChannelUser(props: {ListUsers: IUser[], myrole: Role})
 
 	return (
 		<div className="overflow-auto" style={{marginTop: "15%"}}>
-			{props.ListUsers.map((User: IUser) => <ChannelUser user={User} myrole={props.myrole}/> )}
+			{props.ListUsers.map((User: IUser) => <ChannelUser user={User} myrole={props.myrole} channelId={props.channelId}/> )}
 		</div>
 	)
 }
@@ -245,7 +264,7 @@ function ChatChannel(channelSelected: IChannel)
 		</Col>
 		<Col>
 			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Channel Settings </Button>
-			<ListChannelUser ListUsers={ListUsers} myrole={channelSelected.role}/>
+			<ListChannelUser ListUsers={ListUsers} myrole={channelSelected.role} channelId={channelSelected.channel_id}/>
 		</Col>
 	</Row>)
 }
