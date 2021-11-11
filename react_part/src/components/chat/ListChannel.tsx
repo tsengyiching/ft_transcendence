@@ -11,14 +11,14 @@ import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 import JoinChannelModal from "./JoinChannelModal"
-import {IChannel} from './InterfaceUser'
+import {IChannel, Role} from './InterfaceUser'
 
 
 interface IMyChannel {
         channel_id: number,
         channel_name: string,
         channel_type: 'Private' | 'Public'
-        role: 'Owner' | 'Admin' | 'User';
+        role: Role;
         status: 'Normal' | 'Mute' | 'Ban';
 }
 

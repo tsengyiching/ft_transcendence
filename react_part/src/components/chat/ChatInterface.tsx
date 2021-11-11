@@ -4,9 +4,9 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import {useState, useContext, useEffect, useRef} from 'react'
 import {SocketContext} from '../../context/socket'
 import './ChatInterface.css'
-import {IChannel} from './InterfaceUser'
+import {IChannel, Role} from './InterfaceUser'
 import {DataContext} from '../../App'
-import { ContextMenuTrigger } from 'react-contextmenu'
+import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
 
 /* 
 ****CHAT****
@@ -26,7 +26,7 @@ interface IUser {
     user_id: number,
     user_nickname: string,
     user_avatar: string,
-    role: 'Owner' | 'Admin' | 'User'
+    role: Role
 }
 
 function ChatDisabled()
@@ -109,28 +109,34 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
-function ContextMenuUser()
+function ContextMenuChannelUser(props: {user: IUser, myrole: Role})
 {
-
+	return (
+		<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
+			<MenuItem>
+				Mute
+			</MenuItem>
+		</ContextMenu>
+		)
 }
 
-function ChannelUser(user: IUser)
+function ChannelUser(props: {user: IUser, myrole: Role})
 {
 	return(
-		<Button key={`channel_user_${user.user_id}`} disabled style={{width: "80%", margin: "0.5%"}}>
-			<ContextMenuTrigger id={`ContextMenuChannelUser_${user.user_id}`}>
-				{user.user_nickname}
+		<Button key={`channel_user_${props.user.user_id}`} disabled style={{width: "80%", margin: "0.5%"}}>
+			<ContextMenuTrigger id={`ContextMenuChannelUser_${props.user.user_id}`}>
+				{props.user.user_nickname}
 			</ContextMenuTrigger>
-			{/* <ContextMenuChannelUser /> */}
+			<ContextMenuChannelUser {...props}/>
 		</Button>
 	)
 }
 
-function ListChannelUser(props: {ListUsers: IUser[]})
+function ListChannelUser(props: {ListUsers: IUser[], myrole: Role})
 {
 	return (
 		<div className="overflow-auto" style={{marginTop: "15%"}}>
-			{props.ListUsers.map(ChannelUser)}
+			{props.ListUsers.map((User: IUser) => <ChannelUser user={User} myrole={props.myrole}/> )}
 		</div>
 	)
 }
@@ -194,7 +200,7 @@ function ChatChannel(channelSelected: IChannel)
 		</Col>
 		<Col>
 			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Channel Settings </Button>
-			<ListChannelUser ListUsers={ListUsers}/>
+			<ListChannelUser ListUsers={ListUsers} myrole={channelSelected.role}/>
 		</Col>
 	</Row>)
 }

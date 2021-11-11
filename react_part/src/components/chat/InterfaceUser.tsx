@@ -10,10 +10,12 @@ import LeaveChannelButton from './LeaveChannelModal'
 import './InterfaceUser.css'
 import InterfaceChat from './ChatInterface';
 
+export type Role = 'Owner' | 'Admin' | 'User';
+
 export interface IChannel {
     channel_id: number,
     channel_name: string,
-    role: 'Owner' | 'Admin' | 'User',
+    role: Role,
 }
 
 /* * ALL THE USER INTERFACE */
