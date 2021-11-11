@@ -16,6 +16,7 @@ import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import { Option, SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
+import { number } from '@hapi/joi';
 
 @Injectable()
 export class ChatService {
@@ -298,7 +299,8 @@ export class ChatService {
    * @param channelId channel id
    * @returns Promise<any> return
    */
-  getChannelUsers(channelId: number): Promise<any> {
+  async getChannelUsers(channelId: number): Promise<any> {
+    await this.getChannelById(channelId);
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.user', 'user')
@@ -398,7 +400,7 @@ export class ChatService {
 
   async createDirectChannel(user1: User, user2: User): Promise<Channel> {
     // Check if the channel already exists.
-    let channel = await this.channelParticipantRepository
+    const channel = await this.channelParticipantRepository
       .createQueryBuilder()
       .leftJoinAndSelect('ChannelParticipant.channel', 'channel')
       .select(['channel.id'])
@@ -406,25 +408,19 @@ export class ChatService {
       .andWhere('participant.userId = :Id', { Id: user1.id })
       .andWhere('participant.userId = :Id', { Id: user2.id })
       .execute();
-
+    // if not true ???
     if (!channel) throw new WsException('The convesation already exists');
 
     const newChannel = this.channelRepository.create();
-    newChannel.name = user1.nickname + ', ' + user2.nickname;
+    newChannel.name = `${user1.nickname} , ${user2.nickname}`;
     newChannel.type = ChannelType.DIRECT;
-    channel = this.channelRepository.save(newChannel);
+    await this.channelRepository.save(newChannel);
 
-    this.createDirectChannelParticipant(await channel, user1);
-    this.createDirectChannelParticipant(await channel, user2);
-    return channel;
-  }
-
-  async createDirectChannelParticipant(channel: Channel, user: User) {
-    const newUserparticipant = this.channelParticipantRepository.create();
-    newUserparticipant.channelId = channel.id;
-    newUserparticipant.role = ChannelRole.OWNER;
-    newUserparticipant.userId = user.id;
-    this.channelParticipantRepository.save(newUserparticipant);
+    await Promise.all([
+      this.addChannelParticipant(newChannel.id, user1.id, ChannelRole.OWNER),
+      this.addChannelParticipant(newChannel.id, user2.id, ChannelRole.OWNER),
+    ]);
+    return newChannel;
   }
 
   async getDirectChannelList(userId: number): Promise<Channel[]> {

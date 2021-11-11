@@ -180,7 +180,7 @@ export class ChatGateway
 
   /**
    * change user status
-   * @param LeaveChannelDto : channel id
+   * @param ChangeStatusDto : channel id
    */
   @SubscribeMessage('channel-status-change')
   async changeChannelUserStatus(
@@ -189,7 +189,7 @@ export class ChatGateway
   ) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      this.chatService.changeChannelUserStatus(user, statusChangeDto);
+      await this.chatService.changeChannelUserStatus(user, statusChangeDto);
       const channels_in = this.chatService.getUserChannels(user.id);
       client.emit('channels-user-in', await channels_in);
       const users = await this.chatService.getChannelUsers(
@@ -421,7 +421,7 @@ export class ChatGateway
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       // Save message in db
-      this.messageService.createChannelMessage(user.id, message);
+      await this.messageService.createChannelMessage(user.id, message);
       // Send message to all people connected in channel
       this.server.to('direct-' + message.channelId).emit('message', message);
     } catch (error) {

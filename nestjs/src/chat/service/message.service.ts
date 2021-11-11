@@ -47,7 +47,7 @@ export class MessageService {
       if (participant.statusExpiration < Date.now()) {
         participant.status = StatusInChannel.NORMAL;
         participant.statusExpiration = 0;
-        this.channelRepository.save(participant);
+        await this.channelRepository.save(participant);
       } else
         throw new WsException(
           'Cannot post message in channel if you are ban or mute !',
