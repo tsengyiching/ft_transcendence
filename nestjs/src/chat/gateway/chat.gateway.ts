@@ -183,10 +183,21 @@ export class ChatGateway
    * @param LeaveChannelDto : channel id
    */
   @SubscribeMessage('channel-status-change')
-  async changeChannelUserStatus(client: Socket, statusChange: ChangeStatusDto) {
+  async changeChannelUserStatus(
+    client: Socket,
+    statusChangeDto: ChangeStatusDto,
+  ) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      this.chatService.changeChannelUserStatus(user, statusChange);
+      this.chatService.changeChannelUserStatus(user, statusChangeDto);
+      const channels_in = this.chatService.getUserChannels(user.id);
+      client.emit('channels-user-in', await channels_in);
+      const users = await this.chatService.getChannelUsers(
+        statusChangeDto.channelId,
+      );
+      this.server
+        .to('channel-' + statusChangeDto.channelId)
+        .emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }

@@ -302,9 +302,8 @@ export class ChatService {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.user', 'user')
-      .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
+      .select(['role', 'status', 'user.id', 'user.nickname', 'user.avatar'])
       .where('channelParticipant.channelId = :Id', { Id: channelId })
-      .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }
 
@@ -332,7 +331,6 @@ export class ChatService {
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .where('channelParticipant.userId = :Id', { Id: userId })
-      .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }
 
