@@ -13,6 +13,7 @@ import InterfaceChat from './ChatInterface';
 export interface IChannel {
     channel_id: number,
     channel_name: string,
+    role: 'Owner' | 'Admin' | 'User',
 }
 
 /* * ALL THE USER INTERFACE */

@@ -11,6 +11,7 @@ import NormalImage from "../pictures/volume-on.png"
 import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 import JoinChannelModal from "./JoinChannelModal"
+import {IChannel} from './InterfaceUser'
 
 
 interface IMyChannel {
@@ -28,8 +29,8 @@ export interface IOtherChannel {
 }
 
 interface IUseStateChannel {
-        channelSelected: {channel_id: number, channel_name: string} | undefined;
-        setChannelSelected: React.Dispatch<React.SetStateAction<{channel_id: number; channel_name: string;} | undefined>>
+        channelSelected: IChannel | undefined;
+        setChannelSelected: React.Dispatch<React.SetStateAction< IChannel | undefined>>
 }
 
 function ListChannel(props: IUseStateChannel) {
@@ -58,10 +59,11 @@ function ListChannel(props: IUseStateChannel) {
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
-                
+                let role = Channel.role;
+
                 return (
                 <div key={channel_id}>
-                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name}))}>
+                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name, role}))}>
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}

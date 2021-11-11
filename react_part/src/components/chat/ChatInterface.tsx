@@ -6,6 +6,7 @@ import {SocketContext} from '../../context/socket'
 import './ChatInterface.css'
 import {IChannel} from './InterfaceUser'
 import {DataContext} from '../../App'
+import { ContextMenuTrigger } from 'react-contextmenu'
 
 /* 
 ****CHAT****
@@ -24,7 +25,8 @@ interface IMessage {
 interface IUser {
     user_id: number,
     user_nickname: string,
-    channel_type: 'Public' | 'Private'
+    user_avatar: string,
+    role: 'Owner' | 'Admin' | 'User'
 }
 
 function ChatDisabled()
@@ -107,11 +109,19 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
+function ContextMenuUser()
+{
+
+}
+
 function ChannelUser(user: IUser)
 {
 	return(
-		<Button disabled style={{width: "80%", margin: "0.5%"}}>
-			{user.user_nickname}
+		<Button key={`channel_user_${user.user_id}`} disabled style={{width: "80%", margin: "0.5%"}}>
+			<ContextMenuTrigger id={`ContextMenuChannelUser_${user.user_id}`}>
+				{user.user_nickname}
+			</ContextMenuTrigger>
+			{/* <ContextMenuChannelUser /> */}
 		</Button>
 	)
 }
@@ -119,7 +129,7 @@ function ChannelUser(user: IUser)
 function ListChannelUser(props: {ListUsers: IUser[]})
 {
 	return (
-		<div className="overflow-auto" style={{marginTop: "15%"}}> 
+		<div className="overflow-auto" style={{marginTop: "15%"}}>
 			{props.ListUsers.map(ChannelUser)}
 		</div>
 	)
@@ -135,7 +145,7 @@ function ChatChannel(channelSelected: IChannel)
     useEffect(() => {
 
 	socket.emit('channel-load', channelSelected.channel_id);
-        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data);});
+        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data); console.log(data)});
         socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 	return (() => {
@@ -193,7 +203,10 @@ export default function InterfaceChat(props: {channelSelected: IChannel | undefi
     return (
     <div>
             {props.channelSelected !== undefined ?
-            <ChatChannel channel_id={props.channelSelected.channel_id} channel_name={props.channelSelected.channel_name} />
+            <ChatChannel 
+	    	channel_id={props.channelSelected.channel_id}
+		channel_name={props.channelSelected.channel_name}
+		role={props.channelSelected.role}/>
             : <ChatDisabled/> }
     </div>
 )}
