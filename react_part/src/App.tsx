@@ -12,7 +12,7 @@ enum OnlineStatus {
 	OFFLINE = 'Offline',
       }
 
-interface Data {
+export interface Data {
   id: number,
   nickname: string,
   avatar: string,
