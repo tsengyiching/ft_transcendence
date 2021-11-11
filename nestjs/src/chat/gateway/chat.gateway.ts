@@ -131,6 +131,12 @@ export class ChatGateway
       const channels_out = this.chatService.getUserNotParticipateChannels(
         user.id,
       );
+      const users = await this.chatService.getChannelUsers(
+        channelDto.channelId,
+      );
+      this.server
+        .to('channel-' + channelDto.channelId)
+        .emit('channel-users', users);
       client.emit('channels-user-in', await channels_in);
       client.emit('channels-user-out', await channels_out);
     } catch (error) {
@@ -157,6 +163,12 @@ export class ChatGateway
         /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
         /* ? NOTIFY THE NEW OWNER ? */
 
+        const users = await this.chatService.getChannelUsers(
+          leaveChannelDto.channelId,
+        );
+        this.server
+          .to('channel-' + leaveChannelDto.channelId)
+          .emit('channel-users', users);
         client.emit('channels-user-in', await channels_in);
         client.emit('channels-user-out', await channels_out);
       }
@@ -204,7 +216,14 @@ export class ChatGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.setChannelAdmin(user.id, setAdminDto);
       console.log('Channel admin has been set successfully !');
-      this.server.emit('channel-need-reload');
+      const channels_in = this.chatService.getUserChannels(user.id);
+      client.emit('channels-user-in', await channels_in);
+      const users = await this.chatService.getChannelUsers(
+        setAdminDto.channelId,
+      );
+      this.server
+        .to('channel-' + setAdminDto.channelId)
+        .emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
