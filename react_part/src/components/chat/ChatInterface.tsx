@@ -88,8 +88,8 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
 	const messagesEndRef = useRef<null | HTMLDivElement>(null)
 	
 	useEffect(() => {
-		console.log("list message in ChatMessages: ");
-		console.log(props.ListMessage);
+		//console.log("list message in ChatMessages: ");
+		//console.log(props.ListMessage);
 		scrollToBottom();
 	}, [props.ListMessage])
 	
@@ -110,16 +110,16 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
 function ChannelUser(user: IUser)
 {
 	return(
-		<div>
+		<Button disabled style={{width: "80%", margin: "0.5%"}}>
 			{user.user_nickname}
-		</div>
+		</Button>
 	)
 }
 
 function ListChannelUser(props: {ListUsers: IUser[]})
 {
 	return (
-		<div style={{height:"40em"}}> 
+		<div className="overflow-auto" style={{marginTop: "15%"}}> 
 			{props.ListUsers.map(ChannelUser)}
 		</div>
 	)
@@ -135,9 +135,8 @@ function ChatChannel(channelSelected: IChannel)
     useEffect(() => {
 
 	socket.emit('channel-load', channelSelected.channel_id);
-        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data); console.log("list users: "); console.log(data)});
-        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);
-								console.log("list messages: "); console.log(data)});
+        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data);});
+        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 	return (() => {
 		socket.emit('channel-unload', {channelId: channelSelected.channel_id});
@@ -165,7 +164,7 @@ function ChatChannel(channelSelected: IChannel)
 			return ;
 		}
 		socket.emit('channel-message', {channelId: channelSelected.channel_id, message: message});
-		console.log(`channel ${channelSelected.channel_name} send : ${message}`);
+		//console.log(`channel ${channelSelected.channel_name} send : ${message}`);
 		SetMessage("");
 	}
 
@@ -183,7 +182,7 @@ function ChatChannel(channelSelected: IChannel)
 				<Button type="submit" onClick={handleSubmit}> Send </Button>
 			</Form>
 		</Col>
-		<Col style={{height:"60em"}}>
+		<Col>
 			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Channel Settings </Button>
 			<ListChannelUser ListUsers={ListUsers}/>
 		</Col>
