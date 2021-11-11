@@ -72,6 +72,7 @@ export class MessageService {
       ])
       .addSelect('message.message', 'message_content')
       .where('message.channelId = :Id', { Id: channelId })
+      .orderBy('message.createDate', 'ASC')
       .execute();
   }
 
@@ -110,6 +111,7 @@ export class MessageService {
       ])
       .addSelect('message.message', 'message_content')
       .where('message.channelId = :Id', { Id: channelId })
+      .orderBy('message.createDate', 'ASC')
       .execute();
 
     const userNotJoinChannels = allChannelMessages.filter(
