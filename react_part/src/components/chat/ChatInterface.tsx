@@ -1,14 +1,12 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Form, Button, Row, Col, Image } from 'react-bootstrap'
+import { Form, Button, Row, Col, Image, Modal } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
-import {useState, useContext, useEffect, useRef} from 'react'
+import React, {useState, useContext, useEffect, useRef} from 'react'
 import {socket, SocketContext} from '../../context/socket'
 import './ChatInterface.css'
 import {IChannel, Role} from './InterfaceUser'
 import {DataContext, Data} from '../../App'
-import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
-import { useHistory } from 'react-router'
-
+import ListChannelUser from './ListUserChannel'
 /* 
 ****CHAT****
 */
@@ -25,7 +23,7 @@ interface IMessage {
 
 type Status = 'Mute' | 'Ban' | 'Normal'
 
-interface IUser {
+export interface IUser {
     user_id: number,
     user_nickname: string,
     user_avatar: string,
@@ -122,76 +120,6 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
-function ListChannelUser(props: {ListUsers: IUser[], myrole: Role, channelId: number})
-{
-	let history = useHistory();
-	const userData = useContext(DataContext);
-	const socket = useContext(SocketContext);
-
-	function ContextMenuChannelUser(props: {user: IUser, myrole: Role, channelId: number})
-	{
-		const Mygrade = props.myrole === 'Owner' ? 1 : props.myrole === 'Admin' ? 2 : 3;
-		const Usergrade = props.user.role === 'Owner' ? 1 : props.user.role === 'Admin' ? 2 : 3;
-
-		return (<div>
-			{props.user.user_id === userData.id ?
-				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
-					<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
-						View Profile
-					</MenuItem>
-				</ContextMenu>
-			:
-				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
-					<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
-						View Profile
-					</MenuItem>
-					<MenuItem>
-						Send a message
-					</MenuItem>
-					{
-					<MenuItem>
-						Mute
-					</MenuItem>}
-					<MenuItem>
-						Ban
-					</MenuItem>
-					{ Mygrade === 1 && Usergrade === 3 &&
-					<MenuItem onClick={() => {socket.emit("channel-set-admin", {channelId: props.channelId, participantId: props.user.user_id})}}>
-						Promote Admin
-					</MenuItem>
-					}
-					{ Mygrade === 1 && Usergrade === 2 &&
-					<MenuItem>
-						Demote to User
-					</MenuItem>
-					}
-				</ContextMenu>
-			}
-			</div>
-			)
-	}
-	
-	function ChannelUser(props: {user: IUser, myrole: Role, channelId: number})
-	{
-		return(
-			<div>
-				<ContextMenuTrigger id={`ContextMenuChannelUser_${props.user.user_id}`}>
-					<Button disabled style={{width: "80%", margin: "0.5%"}}>
-						{props.user.user_nickname}
-					</Button>
-				</ContextMenuTrigger>
-				<ContextMenuChannelUser {...props}/>
-			</div>
-		)
-	}
-
-	return (
-		<div className="overflow-auto" style={{marginTop: "15%"}}>
-			{props.ListUsers.map((User: IUser) => <ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/> )}
-		</div>
-	)
-}
-
 function ChatChannel(channelSelected: IChannel)
 {
     const socket = useContext(SocketContext);
@@ -201,7 +129,7 @@ function ChatChannel(channelSelected: IChannel)
 
 	useEffect(() => {
 		socket.emit('channel-load', channelSelected.channel_id);
-	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data); console.log(data)});
+	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data)});
 	        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 		return (() => {
