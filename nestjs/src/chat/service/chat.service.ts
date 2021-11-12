@@ -13,10 +13,13 @@ import { JoinChannelDto } from '../dto/join-channel.dto';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/model/user.entity';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
-import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
-import { Option, SetChannelPasswordDto } from '../dto/set-channel-password.dto';
+import { OptionAdmin, SetChannelAdminDto } from '../dto/set-channel-admin.dto';
+import {
+  OptionPassword,
+  SetChannelPasswordDto,
+} from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
-import { number } from '@hapi/joi';
+import e from 'cors';
 
 @Injectable()
 export class ChatService {
@@ -127,7 +130,7 @@ export class ChatService {
         },
       }),
     ]);
-    if (this.isChannelParticipant(participant)) {
+    if (this.isChannelParticipant(participant, channel)) {
       if (
         participant.status === StatusInChannel.BAN ||
         participant.status === StatusInChannel.MUTE
@@ -204,31 +207,44 @@ export class ChatService {
   /**
    * setChannelAdmin
    * (channel-set-admin)
-   * @param : SetChannelAdminDto (channel id and admin id)
+   * @param : SetChannelAdminDto (channel id, admin id, action)
    */
   async setChannelAdmin(
     userId: number,
     setAdminDto: SetChannelAdminDto,
   ): Promise<ChannelParticipant> {
-    const [channel, operator, participant] = await Promise.all([
-      this.getChannelById(setAdminDto.channelId),
-      this.getOneChannelParticipant(userId, setAdminDto.channelId),
-      this.getOneChannelParticipant(
-        setAdminDto.participantId,
-        setAdminDto.channelId,
-      ),
-    ]);
-    if (channel.type === ChannelType.DIRECT)
-      throw new WsException(`${channel.name} is a direct chat`);
     if (
-      this.isChannelParticipant(operator) &&
-      this.isChannelParticipant(participant) &&
-      this.isChannelParticipantOwner(operator) &&
-      this.isChannelParticipantNormalUser(participant)
+      setAdminDto.action === OptionAdmin.SET ||
+      setAdminDto.action === OptionAdmin.UNSET
     ) {
-      participant.role = ChannelRole.ADMIN;
-      return this.channelParticipantRepository.save(participant);
-    }
+      const [channel, operator, participant] = await Promise.all([
+        this.getChannelById(setAdminDto.channelId),
+        this.getOneChannelParticipant(userId, setAdminDto.channelId),
+        this.getOneChannelParticipant(
+          setAdminDto.participantId,
+          setAdminDto.channelId,
+        ),
+      ]);
+      if (channel.type === ChannelType.DIRECT)
+        throw new WsException(`${channel.name} is a direct channel.`);
+      if (
+        this.isChannelParticipant(operator, channel) &&
+        this.isChannelParticipant(participant, channel) &&
+        this.isChannelOwner(operator, channel)
+      ) {
+        if (setAdminDto.action === OptionAdmin.SET) {
+          if (this.isChannelParticipantNormalUser(participant, channel)) {
+            participant.role = ChannelRole.ADMIN;
+            return this.channelParticipantRepository.save(participant);
+          }
+        } else {
+          if (this.isChannelAdmin(participant, channel)) {
+            participant.role = ChannelRole.USER;
+            return this.channelParticipantRepository.save(participant);
+          }
+        }
+      }
+    } else throw new WsException('Wrong admin setting action.');
   }
 
   /**
@@ -245,13 +261,13 @@ export class ChatService {
       this.getOneChannelParticipant(userId, channelDto.channelId),
     ]);
     if (
-      this.isChannelParticipant(user) &&
-      this.isChannelParticipantOwner(user)
+      this.isChannelParticipant(user, channel) &&
+      this.isChannelOwner(user, channel)
     ) {
       if (
-        (channelDto.action === Option.ADD &&
+        (channelDto.action === OptionPassword.ADD &&
           this.checkChannelType(channel, ChannelType.PUBLIC)) ||
-        (channelDto.action === Option.CHANGE &&
+        (channelDto.action === OptionPassword.CHANGE &&
           this.checkChannelType(channel, ChannelType.PRIVATE))
       ) {
         if (this.checkChannelPassword(channelDto.password)) {
@@ -260,7 +276,7 @@ export class ChatService {
           return this.channelRepository.save(channel);
         }
       } else if (
-        channelDto.action === Option.REMOVE &&
+        channelDto.action === OptionPassword.REMOVE &&
         this.checkChannelType(channel, ChannelType.PRIVATE)
       ) {
         channel.type = ChannelType.PUBLIC;
@@ -456,36 +472,56 @@ export class ChatService {
 
   checkChannelType(channel: Channel, type: ChannelType): boolean {
     if (channel.type !== type) {
-      throw new WsException('The channel type is not correct.');
-    }
-    return true;
-  }
-
-  isChannelParticipant(participant: ChannelParticipant): boolean {
-    if (!participant) {
-      throw new WsException('You are not a member of this channel.');
-    }
-    return true;
-  }
-
-  isChannelParticipantOwner(participant: ChannelParticipant): boolean {
-    if (participant.role !== ChannelRole.OWNER) {
       throw new WsException(
-        'Only channel owner have the right to add/change/delete password and set an administrator.',
+        `The channel [${channel.name}] type is not correct.`,
       );
     }
     return true;
   }
 
-  isChannelParticipantNormalUser(participant: ChannelParticipant): boolean {
+  isChannelParticipant(
+    participant: ChannelParticipant,
+    channel: Channel,
+  ): boolean {
+    if (!participant) {
+      throw new WsException(
+        `User is not a member of channel [${channel.name}].`,
+      );
+    }
+    return true;
+  }
+
+  isChannelOwner(participant: ChannelParticipant, channel: Channel): boolean {
+    if (participant.role !== ChannelRole.OWNER) {
+      throw new WsException(
+        `${participant.user.nickname} is not the owner of channel [${channel.name}].
+        Only the owner can add/change/delete password and set/unset administrators.`,
+      );
+    }
+    return true;
+  }
+
+  isChannelAdmin(participant: ChannelParticipant, channel: Channel): boolean {
+    if (participant.role !== ChannelRole.ADMIN) {
+      throw new WsException(
+        `${participant.user.nickname} is not the administrator of channel [${channel.name}].`,
+      );
+    }
+    return true;
+  }
+
+  isChannelParticipantNormalUser(
+    participant: ChannelParticipant,
+    channel: Channel,
+  ): boolean {
     if (participant.role !== ChannelRole.USER) {
       throw new WsException(
-        `This participant is already a channel owner or admin`,
+        `${participant.user.nickname} is already the owner/administrator of channel [${channel.name}].`,
       );
     }
     if (participant.status !== StatusInChannel.NORMAL) {
       throw new WsException(
-        `This participant's status in this channel is mute or ban.`,
+        `${participant.user.nickname} is muted/banned in channel [${channel.name}].`,
       );
     }
     return true;

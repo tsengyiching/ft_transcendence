@@ -1,6 +1,6 @@
 import { IsEnum, IsInt } from 'class-validator';
 
-export enum Option {
+export enum OptionPassword {
   ADD = 'Add',
   CHANGE = 'Change',
   REMOVE = 'Remove',
@@ -10,8 +10,8 @@ export class SetChannelPasswordDto {
   @IsInt()
   channelId: number;
 
-  @IsEnum(Option)
-  action: Option;
+  @IsEnum(OptionPassword)
+  action: OptionPassword;
 
   password: string;
 }

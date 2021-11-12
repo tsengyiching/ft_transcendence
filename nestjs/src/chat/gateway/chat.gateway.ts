@@ -221,12 +221,12 @@ export class ChatGateway
    * set administrator
    * @param SetChannelAdminDto (channel id and admin id)
    */
-  @SubscribeMessage('channel-set-admin')
+  @SubscribeMessage('channel-admin')
   async setChannelAdmin(client: Socket, setAdminDto: SetChannelAdminDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.setChannelAdmin(user.id, setAdminDto);
-      console.log('Channel admin has been set successfully !');
+      console.log('Channel admin has been set/unset successfully !');
       const channels_in = this.chatService.getUserChannels(user.id);
       client.emit('channels-user-in', await channels_in);
       const users = await this.chatService.getChannelUsers(
