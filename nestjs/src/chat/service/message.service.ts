@@ -46,7 +46,7 @@ export class MessageService {
         );
       if (participant.statusExpiration < Date.now()) {
         participant.status = StatusInChannel.NORMAL;
-        participant.statusExpiration = 0;
+        participant.statusExpiration = null;
         await this.channelRepository.save(participant);
       } else
         throw new WsException(

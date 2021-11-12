@@ -10,6 +10,7 @@ import { Message } from './model/messages.entity';
 import { ChannelParticipant } from './model/channelParticipant.entity';
 import { MessageService } from './service/message.service';
 import { RelationshipModule } from 'src/relationship/relationship.module';
+import { ChatTasksService } from './chat.cron';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { RelationshipModule } from 'src/relationship/relationship.module';
     AuthModule,
     forwardRef(() => RelationshipModule),
   ],
-  providers: [ChatService, MessageService, ChatGateway],
+  providers: [ChatService, MessageService, ChatGateway, ChatTasksService],
   exports: [ChatModule, ChatGateway],
 })
 export class ChatModule {}
