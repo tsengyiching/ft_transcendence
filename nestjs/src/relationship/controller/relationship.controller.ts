@@ -9,8 +9,10 @@ import {
   Post,
   Query,
   UseGuards,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
-import { Relationship } from '../model/relationship.entity';
+import { Relationship, RelationshipStatus } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
 import { RelationshipDto } from '../dto/relationship.dto';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
@@ -71,10 +73,16 @@ export class RelationshipController {
    */
   @Get(':id/list')
   async getSpecificRelationList(
+    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Query('status') status: string,
   ): Promise<SendSpecificListRelationshipDto[]> {
     await this.userService.getUserProfileById(id);
+    if (status !== RelationshipStatus.FRIEND && id !== user.id)
+      throw new HttpException(
+        `User has no right to get other lists.`,
+        HttpStatus.BAD_REQUEST,
+      );
     return this.relationshipService.getSpecificRelationList(id, status);
   }
 

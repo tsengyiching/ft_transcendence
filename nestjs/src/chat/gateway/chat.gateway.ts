@@ -70,13 +70,12 @@ export class ChatGateway
         user_id: user.id,
         status: OnlineStatus.AVAILABLE,
       });
-
-      const channels_in = this.chatService.getUserChannels(user.id);
-      const channels_out = this.chatService.getUserNotParticipateChannels(
-        user.id,
-      );
-      client.emit('channels-user-in', await channels_in);
-      client.emit('channels-user-out', await channels_out);
+      const [channels_in, channels_out] = await Promise.all([
+        this.chatService.getUserChannels(user.id),
+        this.chatService.getUserNotParticipateChannels(user.id),
+      ]);
+      client.emit('channels-user-in', channels_in);
+      client.emit('channels-user-out', channels_out);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -90,7 +89,7 @@ export class ChatGateway
     try {
       console.log('Remove active user');
       const user: User = await this.authService.getUserFromSocket(client);
-      this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+      await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
       this.server.emit('reload-status', {
         user_id: user.id,
         status: OnlineStatus.OFFLINE,
@@ -127,18 +126,18 @@ export class ChatGateway
       await this.chatService.joinChannel(user.id, channelDto);
       console.log('User joined channel successfully !');
       /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
-      const channels_in = this.chatService.getUserChannels(user.id);
-      const channels_out = this.chatService.getUserNotParticipateChannels(
-        user.id,
-      );
-      const users = await this.chatService.getChannelUsers(
-        channelDto.channelId,
-      );
+
+      const [channels_in, channels_out, users] = await Promise.all([
+        this.chatService.getUserChannels(user.id),
+        this.chatService.getUserNotParticipateChannels(user.id),
+        this.chatService.getChannelUsers(channelDto.channelId),
+      ]);
+
       this.server
         .to('channel-' + channelDto.channelId)
         .emit('channel-users', users);
-      client.emit('channels-user-in', await channels_in);
-      client.emit('channels-user-out', await channels_out);
+      client.emit('channels-user-in', channels_in);
+      client.emit('channels-user-out', channels_out);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -155,22 +154,19 @@ export class ChatGateway
       if (await this.chatService.leaveChannel(user.id, leaveChannelDto)) {
         this.server.emit('channel-need-reload');
       } else {
-        const channels_in = this.chatService.getUserChannels(user.id);
-        const channels_out = this.chatService.getUserNotParticipateChannels(
-          user.id,
-        );
-
         /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
         /* ? NOTIFY THE NEW OWNER ? */
 
-        const users = await this.chatService.getChannelUsers(
-          leaveChannelDto.channelId,
-        );
+        const [channels_in, channels_out, users] = await Promise.all([
+          this.chatService.getUserChannels(user.id),
+          this.chatService.getUserNotParticipateChannels(user.id),
+          this.chatService.getChannelUsers(leaveChannelDto.channelId),
+        ]);
         this.server
           .to('channel-' + leaveChannelDto.channelId)
           .emit('channel-users', users);
-        client.emit('channels-user-in', await channels_in);
-        client.emit('channels-user-out', await channels_out);
+        client.emit('channels-user-in', channels_in);
+        client.emit('channels-user-out', channels_out);
       }
       console.log('User left channel successfully !');
     } catch (error) {
@@ -253,12 +249,12 @@ export class ChatGateway
   async reloadChannel(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      const channels_in = this.chatService.getUserChannels(user.id);
-      const channels_out = this.chatService.getUserNotParticipateChannels(
-        user.id,
-      );
-      client.emit('channels-user-in', await channels_in);
-      client.emit('channels-user-out', await channels_out);
+      const [channels_in, channels_out] = await Promise.all([
+        this.chatService.getUserChannels(user.id),
+        this.chatService.getUserNotParticipateChannels(user.id),
+      ]);
+      client.emit('channels-user-in', channels_in);
+      client.emit('channels-user-out', channels_out);
     } catch (error) {
       console.log(error);
     }
@@ -341,8 +337,10 @@ export class ChatGateway
   @SubscribeMessage('private-create')
   async createDirect(client: Socket, data: CreateDirectDto) {
     try {
-      const user1 = await this.authService.getUserFromSocket(client);
-      const user2 = await this.userService.getOneById(data.UserId);
+      const [user1, user2] = await Promise.all([
+        this.authService.getUserFromSocket(client),
+        this.userService.getOneById(data.UserId),
+      ]);
       await this.chatService.createDirectChannel(user1, user2);
       console.log('Channel created successfully !');
       this.server.emit('private-need-reload');
