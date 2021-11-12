@@ -349,6 +349,7 @@ export class ChatService {
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .where('channelParticipant.userId = :Id', { Id: userId })
+      .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }
 
