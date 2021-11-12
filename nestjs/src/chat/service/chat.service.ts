@@ -199,7 +199,9 @@ export class ChatService {
       throw new WsException('The status does not exist.');
 
     channelUser.status = statusChange.status;
-    channelUser.statusExpiration = Date.now() + statusChange.statusExpiration;
+    if (channelUser.statusExpiration == 0) channelUser.statusExpiration = null;
+    else
+      channelUser.statusExpiration = Date.now() + statusChange.statusExpiration;
 
     return this.channelParticipantRepository.save(channelUser);
   }

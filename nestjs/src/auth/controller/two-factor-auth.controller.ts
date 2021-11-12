@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   HttpException,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { User } from 'src/user/model/user.entity';
 import { CurrentUser } from '../decorator/currrent.user.decorator';
@@ -35,7 +36,7 @@ export class TwoFactorAuthController {
    * register sets secret in user database, and
    * generates a qrcode in order to active Google two factor auth
    */
-  @Post('generate')
+  @Get('generate')
   async register(@Res() response: Response, @CurrentUser() user: User) {
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(

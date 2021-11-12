@@ -204,20 +204,6 @@ export class ChatGateway
   }
 
   /**
-   * get channel users
-   * @param channel id
-   */
-  @SubscribeMessage('channel-users')
-  async getChannelUsers(channelId: number) {
-    try {
-      await this.getChannelUsers(channelId);
-    } catch (error) {
-      console.log(error);
-    }
-    // check with Felix
-  }
-
-  /**
    * set administrator
    * @param SetChannelAdminDto (channel id and admin id)
    */
@@ -227,8 +213,9 @@ export class ChatGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.setChannelAdmin(user.id, setAdminDto);
       console.log('Channel admin has been set/unset successfully !');
-      const channels_in = this.chatService.getUserChannels(user.id);
-      client.emit('channels-user-in', await channels_in);
+      this.server
+        .to('channel-' + setAdminDto.channelId)
+        .emit('channel-need-reload');
       const users = await this.chatService.getChannelUsers(
         setAdminDto.channelId,
       );
