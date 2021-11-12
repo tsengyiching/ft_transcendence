@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import { getNameOfDeclaration } from "typescript";
 import {Image, Row, Col} from 'react-bootstrap'
 
 import {useParams} from "react-router-dom";
@@ -77,7 +76,7 @@ export default function Profile() {
             }
         })
         return () => { isMounted = false };
-    }, [axios]);
+    }, [clientId]);
 
     /*
     printStatus (id: number) {
@@ -100,7 +99,7 @@ export default function Profile() {
 
     function getPicture (iduser:number):string {
         let url:string = "";
-        profiles.map(({id, nickname, avatar, date, status, email, twoFactor}) => {
+        profiles.forEach(({id, nickname, avatar, date, status, email, twoFactor}) => {
             if (iduser === id)
                 url = avatar;
         })
@@ -109,7 +108,7 @@ export default function Profile() {
 
     function getName (iduser:number):string {
         let name:string = "";
-        profiles.map(({id, nickname, avatar, date, status, email, twoFactor}) => {
+        profiles.forEach(({id, nickname, avatar, date, status, email, twoFactor}) => {
             if (iduser === id)
                 name = nickname;
         })
@@ -118,7 +117,7 @@ export default function Profile() {
 
     function winningMatches ():number {
         let total:number = 0;
-        games.map(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
+        games.forEach(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
             if (userGameStatus === "Won")
                 total += 1;
         })
@@ -127,7 +126,7 @@ export default function Profile() {
 
     function lostMatches ():number {
         let total:number = 0;
-        games.map(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
+        games.forEach(({id, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
             if (userGameStatus === "Lost")
                 total += 1;
         })
