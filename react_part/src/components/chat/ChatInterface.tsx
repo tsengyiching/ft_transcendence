@@ -123,6 +123,7 @@ function ListChatMessage(props: {ListMessage: IMessage[]}) {
 function ChatChannel(channelSelected: IChannel)
 {
     const socket = useContext(SocketContext);
+    const userData = useContext(DataContext);
     const [ListUsers, SetListUsers] = useState<IUser[]>([]);
     const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
     const [message, SetMessage] = useState<string>("");
@@ -173,7 +174,10 @@ function ChatChannel(channelSelected: IChannel)
 			<ListChatMessage ListMessage={ListMessage}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 				<Form.Control type="text" value={message} placeholder="Message" onChange={ChangeMsg}/>
-				<Button type="submit" onClick={handleSubmit}> Send </Button>
+				{ ListUsers.find((element) => element.user_id === userData.id)?.status === 'Mute' ?
+					<Button type="submit" variant="danger" onClick={handleSubmit} disabled> Send </Button>
+				:	<Button type="submit" onClick={handleSubmit}> Send </Button>
+				}
 			</Form>
 		</Col>
 		<Col>
