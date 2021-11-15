@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { Ball, Paddle, Player, ObjectToCollide, Party } from './pong.interface';
+import { UserService } from 'src/user/service/user.service';
+import { OnlineStatus, User } from 'src/user/model/user.entity';
+
 import {
   XR,
   XL,
@@ -18,11 +21,12 @@ export class PongService {
   private parties: Party[] = [];
 
   getPartById(id: number) {
-    return this.parties[id];
+    return this.parties.find((e) => {e.id === id});
   }
 
-  private setNewParty(p1: Player, p2: Player): Party {
+  private setNewParty(id:number, p1: Player, p2: Player): Party {
     const newParty: Party = {
+	  id: id,
       ball: {
         pos: { x: W * 0.5, y: H * 0.5 },
         radius: 15,
@@ -58,14 +62,34 @@ export class PongService {
     };
     return newParty;
   }
+
+  private async createPlayerById(id:number, userService:UserService, paddle:number):Promise<Player> {
+	try {
+		const user: User = await userService.getOneById(id);
+		let newPlayer:Player = {
+			name: user.nickname,
+			id: id,
+  			avatar: user.avatar,
+  			paddle: paddle,
+  			score: 0,
+  			up: false,
+  			down: false
+		}
+		return newPlayer;
+	}
+	catch (error) {
+		console.log(error);
+	}
+  } 
   /**
    *
    * @param pOne player one, gets left paddle
    * @param pTwo player two, gets right paddle
    * @returns id of the party ??(voir avec Felix) // TODO
    */
-  createNewParty(pOne: Player, pTwo: Player) {
-    this.parties.push(this.setNewParty(pOne, pTwo));
-    return this.parties.length - 1; // return l'id de la partie TODO
+  async createNewParty(id: number, usersIdArr:number[], userService:UserService) {
+	const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
+	const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
+    this.parties.push(this.setNewParty(id, pOne, pTwo));
   }
 }

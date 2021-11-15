@@ -37,6 +37,7 @@ export type Player = {
 };
 
 export type Party = {
+  id: number;
   ball: Ball;
   paddleL: Paddle;
   paddleR: Paddle;
