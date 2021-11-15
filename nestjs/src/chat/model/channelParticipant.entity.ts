@@ -57,7 +57,7 @@ export class ChannelParticipant {
     type: 'timestamp',
     default: null,
   })
-  statusExpiration: number;
+  statusExpiration: Date;
 
   @CreateDateColumn()
   public createDate: Date;
