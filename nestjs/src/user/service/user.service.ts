@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OnlineStatus, User } from '../model/user.entity';
+import { OnlineStatus, SiteStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
@@ -62,6 +62,8 @@ export class UserService {
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
     newUser.userStatus = OnlineStatus.AVAILABLE;
+    if (profile.id === 60191) newUser.siteStatus = SiteStatus.OWNER;
+    else newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
 
@@ -72,6 +74,7 @@ export class UserService {
     const newUser = this.userRepository.create({ ...createUserDto });
     newUser.isTwoFactorAuthenticationEnabled = false;
     newUser.userStatus = OnlineStatus.AVAILABLE;
+    newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
 
@@ -201,6 +204,12 @@ export class UserService {
       .where('id = :id', { id: userId })
       .execute();
   }
+
+  /****************************************************************************/
+  /*                            Admin Page                                    */
+  /****************************************************************************/
+
+  // getUserWithSiteStatus(){}
 
   /****************************************************************************/
   /*                                 utils                                    */

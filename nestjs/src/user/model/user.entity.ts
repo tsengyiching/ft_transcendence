@@ -11,6 +11,13 @@ import {
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
 
+export enum SiteStatus {
+  OWNER = 'Owner',
+  MODERATOR = 'Moderator',
+  USER = 'User',
+  BANNED = 'Banned',
+}
+
 export enum OnlineStatus {
   AVAILABLE = 'Available',
   PALYING = 'Playing',
@@ -36,6 +43,12 @@ export class User {
     enum: OnlineStatus,
   })
   userStatus: OnlineStatus;
+
+  @Column({
+    type: 'enum',
+    enum: SiteStatus,
+  })
+  siteStatus: SiteStatus;
 
   @Column({ nullable: true })
   email?: string;
