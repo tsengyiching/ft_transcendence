@@ -184,9 +184,8 @@ export default function InterfaceChat(props: {channelSelected: IChannel | undefi
     <div>
             {props.channelSelected !== undefined ?
             <ChatChannel 
-	    	channel_id={props.channelSelected.channel_id}
-		channel_name={props.channelSelected.channel_name}
-		role={props.channelSelected.role}/>
+		{...props.channelSelected}
+		/>
             : <ChatDisabled/> }
     </div>
 )}

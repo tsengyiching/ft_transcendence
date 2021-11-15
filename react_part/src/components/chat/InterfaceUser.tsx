@@ -15,6 +15,7 @@ export type Role = 'Owner' | 'Admin' | 'User';
 export interface IChannel {
     channel_id: number,
     channel_name: string,
+    channel_type: 'Public' | 'Private',
     role: Role,
 }
 

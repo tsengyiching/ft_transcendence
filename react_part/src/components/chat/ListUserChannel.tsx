@@ -122,7 +122,6 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 		<div className="overflow-auto" style={{marginTop: "15%"}}>
 			{props.ListUsers.map((User: IUser) =>
 			<ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/>)}
-			<div> {props.myrole} </div>
 		</div>
 	)
 }

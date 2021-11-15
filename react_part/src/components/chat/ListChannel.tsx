@@ -48,7 +48,7 @@ function ListChannel(props: IUseStateChannel) {
                         SetMyChannels(data);
                         let NewSelectedChannel = MyChannels.find((elem) => elem.channel_id === props.channelSelected?.channel_id);
                         if (NewSelectedChannel !== undefined && props.channelSelected !== undefined
-                                && (NewSelectedChannel.role !== props.channelSelected.role || NewSelectedChannel.channel_name !== props.channelSelected.channel_name))
+                                && (NewSelectedChannel.role !== props.channelSelected.role || NewSelectedChannel.channel_type))
                                 props.setChannelSelected({...NewSelectedChannel});
                 });
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
@@ -66,10 +66,11 @@ function ListChannel(props: IUseStateChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
                 let role = Channel.role;
+                let channel_type = Channel.channel_type;
 
                 return (
                 <div key={channel_id}>
-                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name, role}))}>
+                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name, channel_type, role,}))}>
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
