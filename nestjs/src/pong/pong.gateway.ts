@@ -74,13 +74,16 @@ export class PongGateway {
       //client.emit('inMatchMaking', true);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayer(user.id);
-	  await sleep(10000);// attendre 10 sec pour lancer le matchmaking // return un tableau d'id des 2 users qui entrent dans la game et envoie un socket a ces 2 id 
+	  await sleep(5000);
 	  const userArray = this.pongUsersService.makeMatchMaking();
 	  if (userArray) {
-		  userArray.map((e) => {
-			  this.server.to(e.toString()).emit('inMatchMaking', false);
-		  })
 		  console.log(userArray);
+		  const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ?? 
+		  userArray.forEach((e) => {
+			  this.server.to(e.toString()).emit('inMatchMaking', false);
+			  this.server.to(e.toString()).emit('inGame', GameId);
+			  // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
+		  })
 	  }
       ////////////////////////////////////////////////// TODO
     } catch (error) {
@@ -158,15 +161,14 @@ export class PongGateway {
   //   }
   //   console.log(playing);
   // }
-  // @SubscribeMessage('gameon')
-  // gameOn(client: any, payload: any) {
-  //   if (playing) {
-  //     console.log('JEU');
-  //     party = setNewParty();
-  //     this.server.emit('gameOk', true);
-  //   } else if (!playing) this.server.emit('gameOk', false);
-  //   else;
-  // }
+  @SubscribeMessage('newGame')
+  async gameOn(client: any) {
+    try {
+		const user: User = await this.authService.getUserFromSocket(client);
+	  } catch (error) {
+		console.log(error);
+	  }
+  }
 
   // @SubscribeMessage('start')
   // startGame(client: Socket, Payload: any) {

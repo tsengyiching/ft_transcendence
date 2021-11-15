@@ -6,7 +6,9 @@ import {GameSocketContext, gameSocket} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
 
 const Game:React.FC = () => {
-    const [toggleGame, setToggleGame] = useState<boolean>();
+    const [toggleMatchMaking, setToggleMatchMaking] = useState<boolean>();
+	const [gameId, setGameId] = useState<null | number>(null);
+	const [inGame, setInGame] = useState<boolean>(false)
     const socket:Socket = useContext(GameSocketContext);
 
     socket.emit('isInMatchmaking?');
@@ -14,8 +16,12 @@ const Game:React.FC = () => {
     useEffect(() => {
         socket.on('inMatchMaking', (e) => {
             console.log(e);
-            setToggleGame(e);
+            setToggleMatchMaking(e);
         });
+		socket.on('inGame', (e) => { // METTRE LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
+			setGameId(e);
+			socket.emit('NewGame', e);
+		})
     })
     
     const handleClickON = () => socket.emit('matchmakingON');
@@ -44,9 +50,11 @@ const Game:React.FC = () => {
 		</Container>
 		);
     }
+
 	return (
         <Container className='no-padding' fluid>
-            {toggleGame ? waitingForGame() : showButtons()}
+			{gameId != null ? 'yes' : 'nope'}
+            {toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);
 }
@@ -56,3 +64,4 @@ const Game:React.FC = () => {
 // https://images.takeshape.io/fd194db7-7b25-4b5a-8cc7-da7f31fab475/dev/c235b62a-9442-4325-b9c9-ec1b7bfcb8f2/xdVFewf.gif?w=1200&q=80 popup defi
 export default Game;
 
+// TODO POSTICO
