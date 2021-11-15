@@ -29,6 +29,12 @@
 	width: 2.5em;
 }
 
+.iconParameters {
+  width: 80%;
+  height: 55%;
+  margin-top: 20%;
+}
+
 /* Context menu css */
 
 nav.react-contextmenu {
