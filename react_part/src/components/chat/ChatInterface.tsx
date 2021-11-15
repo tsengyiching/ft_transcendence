@@ -61,19 +61,7 @@ function timeSince(date: any) {
 
 function ChannelMessage(props: {message: IMessage, userData: Data})
 {
-	let color = (props.message.message_authorId === props.userData.id) ? '#34b7f1' : '#25d366'
-	let side;
-
-	if (props.message.message_authorId !== props.userData.id)
-	{
-		color = '#34b7f1';
-		side = 'left';
-	}
-	else
-	{
-		color = '#25d366';
-		side = 'right';
-	}
+	let color = (props.message.message_authorId !== props.userData.id) ? '#34b7f1' : '#25d366'
 
 	return (
 	<div className={`MsgBubble`} style={{backgroundColor: color}}>
@@ -134,7 +122,7 @@ function ChatChannel(channelSelected: IChannel)
 	useEffect(() => {
 		//console.log(`channel-load : ${channelSelected.channel_id}`);
 		socket.emit('channel-load', channelSelected.channel_id);
-	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data);});
+	        socket.on('channel-users', (data: IUser[]) => { SetListUsers(data); });
 	        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 		return (() => {
@@ -179,9 +167,9 @@ function ChatChannel(channelSelected: IChannel)
 			<ListChatMessage ListMessage={ListMessage}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 				<Form.Control type="text" value={message} placeholder="Message" onChange={ChangeMsg}/>
-				{ ListUsers.find((element) => element.user_id === userData.id)?.status === 'Mute' ?
-					<Button type="submit" variant="danger" onClick={handleSubmit} disabled> Send </Button>
-				:	<Button type="submit" onClick={handleSubmit}> Send </Button>
+				{ListUsers.find((element) => element.user_id === userData.id) !== undefined && ListUsers.find((element) => element.user_id === userData.id)?.status !== 'Mute' ?
+					<Button type="submit" onClick={handleSubmit}> Send </Button>
+				:	<Button type="submit" variant="danger" disabled> Send </Button>
 				}
 			</Form>
 		</Col>
@@ -196,9 +184,8 @@ export default function InterfaceChat(props: {channelSelected: IChannel | undefi
     <div>
             {props.channelSelected !== undefined ?
             <ChatChannel 
-	    	channel_id={props.channelSelected.channel_id}
-		channel_name={props.channelSelected.channel_name}
-		role={props.channelSelected.role}/>
+		{...props.channelSelected}
+		/>
             : <ChatDisabled/> }
     </div>
 )}
@@ -222,7 +209,7 @@ function ChatDisabled()
 			<ListChatMessage ListMessage={[]}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 				<Form.Control type="name" placeholder="Message" />
-				<Button type="submit" disabled > Send </Button> 
+				<Button type="submit" variant="danger" disabled> Send </Button>
 			</Form>
 		</Col>
 		<Col style={{height:"60em"}}>

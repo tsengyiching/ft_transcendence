@@ -9,7 +9,7 @@ export class ChangeStatusDto {
   userId: number;
 
   @IsInt()
-  statusExpiration: number;
+  sanctionDuration: number;
 
   @IsEnum(StatusInChannel)
   status: StatusInChannel;
