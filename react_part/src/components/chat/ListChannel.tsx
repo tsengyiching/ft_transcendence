@@ -44,7 +44,13 @@ function ListChannel(props: IUseStateChannel) {
                 }, [socket])
 
         useEffect(() => {
-                socket.on("channels-user-in", (data: IMyChannel[]) => SetMyChannels(data));
+                socket.on("channels-user-in", (data: IMyChannel[]) => {
+                        SetMyChannels(data);
+                        let NewSelectedChannel = MyChannels.find((elem) => elem.channel_id === props.channelSelected?.channel_id);
+                        if (NewSelectedChannel !== undefined && props.channelSelected !== undefined
+                                && (NewSelectedChannel.role !== props.channelSelected.role || NewSelectedChannel.channel_name !== props.channelSelected.channel_name))
+                                props.setChannelSelected({...NewSelectedChannel});
+                });
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
 
                 //console.log("my channels: "); console.log(MyChannels);

@@ -2,7 +2,7 @@
 import {Button} from 'react-bootstrap'
 import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
 import { useHistory } from 'react-router'
-import {useState, useContext} from 'react'
+import {useState, useContext, useEffect} from 'react'
 import {socket, SocketContext} from '../../context/socket'
 import {DataContext, Data} from '../../App'
 import {Modal, Form} from 'react-bootstrap'
@@ -120,7 +120,9 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 
 	return (
 		<div className="overflow-auto" style={{marginTop: "15%"}}>
-			{props.ListUsers.map((User: IUser) => <ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/> )}
+			{props.ListUsers.map((User: IUser) =>
+			<ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/>)}
+			<div> {props.myrole} </div>
 		</div>
 	)
 }
