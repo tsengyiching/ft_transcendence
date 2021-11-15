@@ -5,7 +5,7 @@ import { useHistory } from 'react-router'
 import {useState, useContext} from 'react'
 import {socket, SocketContext} from '../../context/socket'
 import {DataContext, Data} from '../../App'
-import {Modal} from 'react-bootstrap'
+import {Modal, Form} from 'react-bootstrap'
 import {IUser} from './ChatInterface'
 import {Role} from './InterfaceUser'
 
@@ -15,6 +15,7 @@ interface IPropsModal {
 	backdrop: string,
 	sanctionstatus: 'mute' | 'ban',
 	user: IUser | undefined,
+	channelid: number,
       }
 
 export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role, channelId: number,})
@@ -33,7 +34,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 
 		const Mygrade = props.myrole === 'Owner' ? 3 : props.myrole === 'Admin' ? 2 : 1;
 		const Usergrade = props.user.role === 'Owner' ? 3 : props.user.role === 'Admin' ? 2 : 1;
-
+		
 		return (<div>
 			{props.user.user_id === userData.id ?
 				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
@@ -74,7 +75,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 			</div>
 			)
 	}
-	
+
 	function ChannelUser(props: {user: IUser, myrole: Role, channelId: number})
 	{
 		const [ViewModal, SetViewModal] = useState(false);		
@@ -108,11 +109,11 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 					backdrop="static"
 					sanctionstatus={SanctionStatus}
 					user={UserModal}
+					channelid={props.channelId}
 				/>
 			</div>
 		)
 	}
-
 	let history = useHistory();
 	const userData = useContext(DataContext);
 	const socket = useContext(SocketContext);
@@ -124,11 +125,50 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 	)
 }
 
+
+function convertTime(s_time: string)
+{
+	if (s_time === "5min")
+		return (5);
+	else if (s_time === "15min")
+		return (15);
+	else if (s_time === "1hour")
+		return (60);
+	else if (s_time === "8hours")
+		return (60 * 8);
+	else if (s_time === "1day")
+		return (60 * 24);
+	else if (s_time === "15days")
+		return (60 * 24 * 15);
+	return (0);
+}
+
 function SanctionModal(props: IPropsModal)
 {
+	const [time, setTime] = useState<string>("");
+
+	function onHide()
+	{
+		setTime("");
+		props.onHide();
+	}
+
 	function SubmitForm(event: any)
 	{
 		event.preventDefault();
+		console.log({
+			channelId: props.channelid,
+			userId: props.user?.user_id,
+			statusExpiration: convertTime(time),
+			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),	
+		})
+		socket.emit('channel-status-change', {
+			channelId: props.channelid,
+			userId: props.user?.user_id,
+			statusExpiration: convertTime(time),
+			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),
+		})
+		onHide()
 	}
 
 	if (props.user === undefined)
@@ -145,8 +185,43 @@ function SanctionModal(props: IPropsModal)
 				</Modal.Title>
 			</Modal.Header>
 			<Modal.Body>
-
+				<Form>
+					{props.sanctionstatus === "mute" ?
+					<Form.Select aria-label="Default select example"
+						value={time} 
+						onChange={(e: any) => {setTime(e.target.value);}}
+					>
+						<option>Time {props.sanctionstatus}</option>
+						<option value="5min">5 minutes</option>
+						<option value="15min">15 minutes</option>
+						<option value="1hour">1 hour</option>
+						<option value="8hours">8 hours</option>
+						<option value="1day">1 day</option>
+					</Form.Select>
+					:
+					<Form.Select aria-label="Default select example"
+						value={time} 
+						onChange={(e: any) => {setTime(e.target.value); console.log(`time: ${time}`)}}
+					>
+						<option value="5min">5 minutes</option>
+						<option value="15min">15 minutes</option>
+						<option value="1hour">1 hour</option>
+						<option value="8hours">8 hours</option>
+						<option value="1day">1 day</option>
+						<option value="15days">15 days</option>
+						<option value="permanent">permanent </option>
+					</Form.Select>
+					}
+				</Form>
 			</Modal.Body>
+			<Modal.Footer>
+				<Button variant="primary" onClick={SubmitForm} >
+					Submit
+				</Button>
+				<Button variant="secondary" onClick={onHide}>
+					Cancel
+				</Button>
+			</Modal.Footer>
 		</Modal>
 	)
 }

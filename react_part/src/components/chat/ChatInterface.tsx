@@ -129,7 +129,7 @@ function ChatChannel(channelSelected: IChannel)
 
 	useEffect(() => {
 		socket.emit('channel-load', channelSelected.channel_id);
-	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data)});
+	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data);});
 	        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 		return (() => {
