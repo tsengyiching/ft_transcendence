@@ -75,7 +75,13 @@ export class PongGateway {
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayer(user.id);
 	  await sleep(10000);// attendre 10 sec pour lancer le matchmaking // return un tableau d'id des 2 users qui entrent dans la game et envoie un socket a ces 2 id 
-	  console.log('HOHOHO');
+	  const userArray = this.pongUsersService.makeMatchMaking();
+	  if (userArray) {
+		  userArray.map((e) => {
+			  this.server.to(e.toString()).emit('inMatchMaking', false);
+		  })
+		  console.log(userArray);
+	  }
       ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);

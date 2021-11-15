@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 export class PongUsersService {
   private inMatchMaking: number[] = [];
   private isConnected: number[] = [];
+  private check:boolean = false;
 
   isInMatchmaking(id: number): boolean {
     const found = this.inMatchMaking.find((e) => e === id);
@@ -40,13 +41,23 @@ export class PongUsersService {
 
   makeMatchMaking():any {
 	  const len = this.inMatchMaking.length;
-	  if (len === 2)
+	  let ret:number[] =[];
+ 	  if (len === 2)
 	  {
 		  // enlever les users du tableau et renvoyer une copie du tableau
-		return this.inMatchMaking;
+		ret = this.inMatchMaking;
+		this.inMatchMaking = [];
+		return ret;
 	  }
 	  else if (len > 2) {
 		  // enlever les 2 users du tableau
+		  for (let i:number=0; i < 2; i++){
+		    let index = Math.round(Math.random() * this.inMatchMaking.length);
+			console.log(this.inMatchMaking);
+		    ret.push(this.inMatchMaking[index]);
+		    this.inMatchMaking.splice(index, 1);
+		  }
+		  return ret;
 		///// make matchmaking avec random / selon ex parties / lvl
 		// return le tableau de 2 id
 	  }
