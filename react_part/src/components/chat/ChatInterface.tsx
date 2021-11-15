@@ -7,6 +7,9 @@ import './ChatInterface.css'
 import {IChannel, Role} from './InterfaceUser'
 import {DataContext, Data} from '../../App'
 import ListChannelUser from './ListUserChannel'
+import ParametersChannel from './ParametersChannel'
+import ParametersIcon from '../pictures/parameters-icon.png'
+
 /* 
 ****CHAT****
 */
@@ -129,12 +132,14 @@ function ChatChannel(channelSelected: IChannel)
     const [message, SetMessage] = useState<string>("");
 
 	useEffect(() => {
+		//console.log(`channel-load : ${channelSelected.channel_id}`);
 		socket.emit('channel-load', channelSelected.channel_id);
 	        socket.on('channel-users', (data: IUser[]) => {SetListUsers(data);});
 	        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
 
 		return (() => {
-			socket.emit('channel-unload', {channelId: channelSelected.channel_id});
+			//console.log(`channel-unload: ${channelSelected.channel_id}`);
+			socket.emit('channel-unload', channelSelected.channel_id);
 			socket.off('channel-users');
 			socket.off('channel-message-list');
 			SetMessage("");});
@@ -166,9 +171,9 @@ function ChatChannel(channelSelected: IChannel)
 	const ChangeMsg = (e: React.ChangeEvent<HTMLInputElement>) => { SetMessage(e.currentTarget.value);}
 
 	return (
-	<Row className="TitleChannel">
-		{channelSelected !== undefined
-		? <h2 style={{height:"1.2em"}}> {channelSelected.channel_name} </h2>
+		<Row className="TitleChannel">
+		{channelSelected !== undefined ?
+			<ParametersChannel {...channelSelected} />
 		: <h2 style={{height:"1.2em"}}></h2>}
 		<Col lg={8}>
 			<ListChatMessage ListMessage={ListMessage}/>
@@ -181,7 +186,6 @@ function ChatChannel(channelSelected: IChannel)
 			</Form>
 		</Col>
 		<Col>
-			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"}> Channel Settings </Button>
 			<ListChannelUser ListUsers={ListUsers} myrole={channelSelected.role} channelId={channelSelected.channel_id}/>
 		</Col>
 	</Row>)
@@ -205,7 +209,15 @@ function ChatDisabled()
 
 	return (
 	<Row className="TitleChannel">
-		<h2 style={{height:"1.2em"}}></h2>
+		<Row>
+			<Col lg={11}>
+				<h2 style={{height:"1.2em"}}>
+				</h2>
+			</Col>
+			<Col>
+				<Image className="iconParameters" roundedCircle src={ParametersIcon} />
+			</Col>
+		</Row>
 		<Col lg={8}>
 			<ListChatMessage ListMessage={[]}/>
 			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
@@ -214,7 +226,6 @@ function ChatDisabled()
 			</Form>
 		</Col>
 		<Col style={{height:"60em"}}>
-			<Button style={{width:"12.5em", borderRadius:"3em"}} variant={"secondary"} disabled> Channel Settings </Button>
 			<div style={{height:"40em"}}> list channel participants</div>
 		</Col>
 	</Row>);

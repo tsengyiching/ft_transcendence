@@ -20,6 +20,7 @@ import { CreateDirectDto } from '../dto/create-direct.dto';
 import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
+import { channel } from 'diagnostics_channel';
 
 @WebSocketGateway({
   namespace: 'chat',
@@ -290,6 +291,7 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-unload')
   async unloadChannel(client: Socket, channelId: number) {
+    console.log(channelId);
     client.leave('channel-' + channelId);
   }
 
