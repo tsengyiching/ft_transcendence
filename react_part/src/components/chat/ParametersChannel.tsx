@@ -23,7 +23,9 @@ export default function ParametersChannel(channelselected: IChannel)
 		</h2>
 	</Col>
 	<Col>
-		<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}}/>
+		{channelselected.role === "Owner" ?
+		<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}} />
+		: <Image className="iconParameters" roundedCircle src={ParametersIcon}/>}
 		<ModalParameters 
 		show={modalShow}
 		onHide={() => setModalShow(false)}
@@ -65,7 +67,10 @@ function ModalParameters(props: Props)
 		else
 			action = "Remove";
 		console.log({channelId: props.channel.channel_id, action: action, password: password});
-		socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: password});
+		if (action !== "Remove")
+			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: password});
+		else
+			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: null});
 		onHide();
 	      }
 
