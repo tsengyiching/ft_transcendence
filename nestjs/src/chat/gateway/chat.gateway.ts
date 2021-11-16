@@ -60,12 +60,13 @@ export class ChatGateway
    * @param client
    * @param args
    */
-  async handleConnection(client: Socket, ...args: any[]) {
+  async handleConnection(client: Socket) {
     try {
       console.log('New User Join');
 
       const user: User = await this.authService.getUserFromSocket(client);
       this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+      client.join('user-' + user.id);
       this.server.emit('reload-status', {
         user_id: user.id,
         status: OnlineStatus.AVAILABLE,
@@ -90,6 +91,7 @@ export class ChatGateway
       console.log('Remove active user');
       const user: User = await this.authService.getUserFromSocket(client);
       await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+      client.leave('user-' + user.id);
       this.server.emit('reload-status', {
         user_id: user.id,
         status: OnlineStatus.OFFLINE,
@@ -136,8 +138,8 @@ export class ChatGateway
       this.server
         .to('channel-' + channelDto.channelId)
         .emit('channel-users', users);
-      client.emit('channels-user-in', channels_in);
-      client.emit('channels-user-out', channels_out);
+      this.server.to('user-' + user.id).emit('channels-user-in', channels_in);
+      this.server.to('user-' + user.id).emit('channels-user-out', channels_out);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -165,8 +167,10 @@ export class ChatGateway
         this.server
           .to('channel-' + leaveChannelDto.channelId)
           .emit('channel-users', users);
-        client.emit('channels-user-in', channels_in);
-        client.emit('channels-user-out', channels_out);
+        this.server.to('user-' + user.id).emit('channels-user-in', channels_in);
+        this.server
+          .to('user-' + user.id)
+          .emit('channels-user-out', channels_out);
       }
       console.log('User left channel successfully !');
     } catch (error) {
@@ -187,7 +191,9 @@ export class ChatGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.changeChannelUserStatus(user, statusChangeDto);
       const channels_in = this.chatService.getUserChannels(user.id);
-      client.emit('channels-user-in', await channels_in);
+      this.server
+        .to('user-' + user.id)
+        .emit('channels-user-in', await channels_in);
       const users = await this.chatService.getChannelUsers(
         statusChangeDto.channelId,
       );
@@ -209,9 +215,10 @@ export class ChatGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.setChannelAdmin(user.id, setAdminDto);
       console.log('Channel admin has been set/unset successfully !');
+      const channels_in = await this.chatService.getUserChannels(user.id);
       this.server
-        .to('channel-' + setAdminDto.channelId)
-        .emit('channel-need-reload');
+        .to('user-' + setAdminDto.participantId)
+        .emit('channels-user-in', channels_in);
       const users = await this.chatService.getChannelUsers(
         setAdminDto.channelId,
       );
