@@ -95,10 +95,8 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  async getDirectMessages(userId: number, channelId: number) {
-    const blockedUserId = await this.relationshipService.getBlockingIds(userId);
-
-    const allChannelMessages = await this.messageRepository
+  getDirectMessages(channelId: number) {
+    return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')
       .select([
@@ -113,10 +111,5 @@ export class MessageService {
       .where('message.channelId = :Id', { Id: channelId })
       .orderBy('message.createDate', 'ASC')
       .execute();
-
-    const userNotJoinChannels = allChannelMessages.filter(
-      (channel) => !blockedUserId.includes(channel.author),
-    );
-    return userNotJoinChannels;
   }
 }

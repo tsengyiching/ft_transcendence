@@ -5,6 +5,7 @@ import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   OnGatewayInit,
+  WsException,
 } from '@nestjs/websockets';
 import { Socket, Server } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
@@ -16,7 +17,7 @@ import { CreateMessageDto } from '../dto/create-message.dto';
 import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
-import { CreateDirectDto } from '../dto/create-direct.dto';
+import { LoadDirectDto } from '../dto/load-direct.dto';
 import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
@@ -339,25 +340,6 @@ export class ChatGateway
   /****************************************************************************/
 
   /**
-   * Create new direct channel
-   * @param data
-   */
-  @SubscribeMessage('private-create')
-  async createDirect(client: Socket, data: CreateDirectDto) {
-    try {
-      const [user1, user2] = await Promise.all([
-        this.authService.getUserFromSocket(client),
-        this.userService.getOneById(data.UserId),
-      ]);
-      await this.chatService.createDirectChannel(user1, user2);
-      console.log('Channel created successfully !');
-      this.server.emit('private-need-reload');
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  /**
    * Ask to (Re)load the direct Channels list
    */
   @SubscribeMessage('private-ask-reload')
@@ -376,20 +358,36 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('private-load')
-  async loadDirect(client: Socket, channelId: number) {
+  async loadDirect(client: Socket, loadDirectDto: LoadDirectDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
-      if (user) {
-        const channelParticipant =
-          await this.chatService.getOneChannelParticipant(user.id, channelId);
-        if (channelParticipant) {
-          client.join('private-' + channelId);
-          const messages = await this.messageService.getDirectMessages(
-            user.id,
-            channelId,
+      const user1 = await this.authService.getUserFromSocket(client);
+      if (user1) {
+        if (typeof loadDirectDto.channelId !== 'undefined') {
+          const channelParticipant =
+            await this.chatService.getOneChannelParticipant(
+              user1.id,
+              loadDirectDto.channelId,
+            );
+          if (!channelParticipant)
+            throw new WsException(
+              'you are not in conversation with this user !',
+            );
+        } else if (typeof loadDirectDto.userId !== 'undefined') {
+          const user2 = await this.userService.getOneById(loadDirectDto.userId);
+          const channel = await this.chatService.createDirectChannel(
+            user1,
+            user2,
           );
-          client.emit('private-message-list', messages);
-        }
+          loadDirectDto.channelId = channel.id;
+          console.log('Channel created successfully !');
+        } else throw new WsException('Invalid socket request.');
+
+        client.join('private-' + loadDirectDto.channelId);
+        const messages = await this.messageService.getDirectMessages(
+          loadDirectDto.channelId,
+        );
+        client.emit('private-message-list', messages);
+        console.log('Channel loaded successfully !');
       }
     } catch (error) {
       console.log(error);
