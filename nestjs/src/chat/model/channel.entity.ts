@@ -25,8 +25,8 @@ export class Channel {
   /**
    * Contain Bcrypt hashed password of channel if is private
    */
-  @Column()
-  password?: string;
+  @Column({ nullable: true })
+  password: string;
 
   @Column({
     type: 'enum',

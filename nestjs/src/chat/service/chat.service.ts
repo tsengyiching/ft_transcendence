@@ -49,7 +49,7 @@ export class ChatService {
       if (newChannel.password) {
         newChannel.type = ChannelType.PRIVATE;
         newChannel.password = await bcrypt.hash(newChannel.password, 10);
-      }
+      } else newChannel.password = null;
       await this.channelRepository.save(newChannel);
 
       /* Add channel owner*/
@@ -281,6 +281,7 @@ export class ChatService {
         }
       } else if (
         channelDto.action === OptionPassword.REMOVE &&
+        channelDto.password === null &&
         this.checkChannelType(channel, ChannelType.PRIVATE)
       ) {
         channel.type = ChannelType.PUBLIC;
