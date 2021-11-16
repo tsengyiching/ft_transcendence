@@ -18,8 +18,9 @@ import {
 
 @Injectable()
 export class PongService {
+  
   private parties: Party[] = [];
-
+  
   getPartById(id: number) {
     return this.parties.find((e) => {e.id === id});
   }
@@ -57,8 +58,8 @@ export class PongService {
       scoreR: 0,
       lastp: false,
       lasty: false,
-      pOne: p1,
-      pTwo: p2,
+      pOne: {...p1},
+      pTwo: {...p2},
     };
     return newParty;
   }
@@ -83,8 +84,9 @@ export class PongService {
   } 
   /**
    *
-   * @param pOne player one, gets left paddle
-   * @param pTwo player two, gets right paddle
+   * @param id party id
+   * @param userIdArr ids of the 2 players
+   * @param userService YOU KNOW
    * @returns id of the party ??(voir avec Felix) // TODO
    */
   async createNewParty(id: number, usersIdArr:number[], userService:UserService) {
@@ -92,4 +94,5 @@ export class PongService {
 	const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
     this.parties.push(this.setNewParty(id, pOne, pTwo));
   }
+
 }
