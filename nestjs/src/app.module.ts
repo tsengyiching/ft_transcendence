@@ -9,6 +9,9 @@ import { AuthModule } from './auth/auth.module';
 import { RelationshipModule } from './relationship/relationship.module';
 import { ChatModule } from './chat/chat.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AdminService } from './admin/admin.service';
+import { AdminController } from './admin/admin.controller';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -25,8 +28,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     RelationshipModule,
     ChatModule,
     ScheduleModule.forRoot(),
+    AdminModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, AdminController],
+  providers: [AppService, AdminService],
 })
 export class AppModule {}

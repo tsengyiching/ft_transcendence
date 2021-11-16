@@ -25,7 +25,7 @@ export class UserController {
 
   /**
    * getCurrentUser
-   * @returns : id, nickname, createDate, userStatus, email, 2fa enable
+   * @returns : id, nickname, createDate, userStatus, siteStatus, email, 2fa enable
    */
   @Get('me')
   getCurrentUser(@CurrentUser() user: User): Promise<User> {
