@@ -27,14 +27,11 @@ export default function ListUsers()
 	
 		return (
 		<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
-	
-			{ props.User.userStatus !== 'Offline' &&
 			<div>
 			<MenuItem>
 				Send a message
 			</MenuItem>
 			</div>
-			}
 			<MenuItem onClick={() => history.push(`/profile/${props.User.id}`)}>
 				View Profile
 			</MenuItem>
