@@ -160,13 +160,13 @@ function SanctionModal(props: IPropsModal)
 		console.log({
 			channelId: props.channelid,
 			userId: props.user?.user_id,
-			statusExpiration: convertTime(time),
+			sanctionDuration: convertTime(time),
 			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),	
 		})
 		socket.emit('channel-status-change', {
 			channelId: props.channelid,
 			userId: props.user?.user_id,
-			statusExpiration: convertTime(time),
+			sanctionDuration: convertTime(time),
 			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),
 		})
 		onHide()
