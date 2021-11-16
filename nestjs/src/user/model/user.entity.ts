@@ -56,7 +56,7 @@ export class User {
   @Column({ default: false })
   isTwoFactorAuthenticationEnabled: boolean;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   twoFactorAuthenticationSecret?: string;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
