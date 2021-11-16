@@ -59,6 +59,18 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 						Ban
 					</MenuItem>
 					</div>}
+					{ Mygrade > Usergrade && props.user.status !== 'Normal' &&
+						<MenuItem onClick={() => {
+						socket.emit('channel-status-change', {
+							channelId: props.channelId,
+							userId: props.user.user_id,
+							sanctionDuration: 0,
+							status: "Normal"
+						})
+						}}>
+							Remove the sanction
+						</MenuItem>
+					}
 
 					{ Mygrade === 3 && Usergrade === 1 &&
 					<MenuItem onClick={() => {socket.emit("channel-admin", {channelId: props.channelId, participantId: props.user.user_id, action: 'Set'})}}>
