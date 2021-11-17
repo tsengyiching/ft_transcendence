@@ -46,21 +46,18 @@ function ListChannel(props: IUseStateChannel) {
         useEffect(() => {
                 socket.on("channels-user-in", (data: IMyChannel[]) => {
                         SetMyChannels(data);
+                        //reload ChannelSelected if his role in the channel or the type of the channel change
                         let NewSelectedChannel = MyChannels.find((elem) => elem.channel_id === props.channelSelected?.channel_id);
                         if (NewSelectedChannel !== undefined && props.channelSelected !== undefined
                                 && (NewSelectedChannel.role !== props.channelSelected.role || NewSelectedChannel.channel_type))
                                 props.setChannelSelected({...NewSelectedChannel});
                 });
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
-
-                //console.log("my channels: "); console.log(MyChannels);
-                //console.log("Other channels: "); console.log(OthersChannels);
                 return (() => {
                         socket.off("channels-user-in");
                         socket.off("channels-user-out");
-                })
+                });
         }, [MyChannels, OthersChannels, socket]);
-
 
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;
@@ -118,20 +115,25 @@ function ListChannel(props: IUseStateChannel) {
 	return(
                 <Row className="ScrollingListChannel">
                         <Col className="ChannelsJoined" lg={6} >
-                                Channels Joined:
                                 { MyChannels.length !== 0 
-                                        ? <div style={{overflow: 'auto', height: '7.9em'}} > 
-                                                {MyChannels.map(ButtonMyChannel) }
+                                        ?
+                                        <div>
+                                                <h4> My Channels </h4>
+                                                <div style={{overflow: 'auto', height: '7.9em'}} > 
+                                                        { MyChannels.map(ButtonMyChannel) }
+                                                </div>
                                         </div>
                                         : <div/>
                                 }
                         </Col>
                         <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} lg={6}>
-
-                                Channels not Joined:
                                 { OthersChannels.length !== 0 
-                                        ? <div style={{overflow: 'auto', height: '7.9em'}}>
-                                                {OthersChannels.map(ButtonOtherChannel)}
+                                        ?
+                                        <div>
+                                                <h4> Other Channels </h4>
+                                                <div style={{overflow: 'auto', height: '7.9em'}}>
+                                                        {OthersChannels.map(ButtonOtherChannel)}
+                                                </div>
                                         </div>
                                         : <div/>
                                 }

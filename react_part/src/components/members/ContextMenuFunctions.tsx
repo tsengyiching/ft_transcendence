@@ -32,11 +32,6 @@ export function Unblock(id: number)
 	axios.delete('http://localhost:8080/relationship/unblock', {withCredentials: true, data: {addresseeUserId: id}})
 }
 
-export function SendMessage(id: number)
-{
-	console.log(`Send message to ${id}`);
-}
-
 /*
 	Approve or Decline a friend invitation
 	param: relationship_id: id of the request, isAccepted: does the user accept or decline the invitation

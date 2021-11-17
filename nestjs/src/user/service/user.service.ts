@@ -5,6 +5,11 @@ import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
 import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
+import {
+  OptionSiteStatus,
+  SetUserSiteStatusDto,
+} from 'src/admin/dto/set-user-site-status.dto';
+import { Response } from 'express';
 
 @Injectable()
 export class UserService {
@@ -203,6 +208,166 @@ export class UserService {
       .set({ userStatus: status })
       .where('id = :id', { id: userId })
       .execute();
+  }
+
+  /****************************************************************************/
+  /*                              site admin                                  */
+  /****************************************************************************/
+
+  async getUsersWithSiteStatus(id: number, reqStatus: string): Promise<User[]> {
+    const status = this.checkSiteStatus(reqStatus);
+    const user = await this.getOneById(id);
+    if (this.checkUserExisted(user)) {
+      if (
+        user.siteStatus === SiteStatus.OWNER ||
+        user.siteStatus === SiteStatus.MODERATOR
+      ) {
+        const users = this.userRepository.find({
+          where: { siteStatus: status },
+          select: ['id', 'nickname', 'avatar', 'siteStatus'],
+        });
+        return users;
+      } else {
+        throw new HttpException(
+          `This user ${user.nickname} does not have the right !`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  }
+
+  async modifyUserSiteStatus(
+    id: number,
+    setUserSiteStatusDto: SetUserSiteStatusDto,
+  ): Promise<User> {
+    if (id === setUserSiteStatusDto.id) {
+      throw new HttpException(
+        `You cannot modify your own site status !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const [operator, user] = await Promise.all([
+      this.getOneById(id),
+      this.getOneById(setUserSiteStatusDto.id),
+    ]);
+
+    if (this.checkUserExisted(operator) && this.checkUserExisted(user)) {
+      if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
+        return this.setModerator(operator, user);
+      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
+        return this.setUser(operator, user);
+      }
+    }
+  }
+
+  setModerator(operator: User, user: User): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to set site moderators !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus !== SiteStatus.USER) {
+      throw new HttpException(
+        `The appointed user's site status is not user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.MODERATOR;
+    return this.userRepository.save(user);
+  }
+
+  setUser(operator: User, user: User): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to change user site status !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (
+      operator.siteStatus === SiteStatus.MODERATOR &&
+      user.siteStatus === SiteStatus.OWNER
+    ) {
+      throw new HttpException(
+        `You don't have the right to change the status of the site owner !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus === SiteStatus.USER) {
+      throw new HttpException(
+        `The appointed user's site status is already user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.USER;
+    return this.userRepository.save(user);
+  }
+
+  ban(operator: User, user: User, res: Response): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to ban a user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (
+      operator.siteStatus === SiteStatus.MODERATOR &&
+      user.siteStatus === SiteStatus.OWNER
+    ) {
+      throw new HttpException(
+        `You don't have the right to ban the site owner !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus === SiteStatus.BANNED) {
+      throw new HttpException(
+        `The appointed user's site status is already banned !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.BANNED;
+    res.clearCookie('jwt');
+    res.clearCookie('jwt-two-factor');
+    res.redirect('http://localhost:3000/banned');
+    return this.userRepository.save(user);
+  }
+
+  /****************************************************************************/
+  /*                                 checkers                                 */
+  /****************************************************************************/
+
+  checkSiteStatus(reqStatus: string): SiteStatus {
+    let status: SiteStatus;
+    if (reqStatus === 'owner') status = SiteStatus.OWNER;
+    else if (reqStatus === 'moderator') status = SiteStatus.MODERATOR;
+    else if (reqStatus === 'user') status = SiteStatus.USER;
+    else if (reqStatus === 'banned') status = SiteStatus.BANNED;
+    else
+      throw new HttpException(
+        `The request status does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    return status;
+  }
+
+  checkUserExisted(user: User): boolean {
+    if (!user) {
+      throw new HttpException(
+        `This user does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return true;
   }
 
   /****************************************************************************/
