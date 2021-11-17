@@ -425,13 +425,13 @@ export class ChatService {
     const channel = await this.channelParticipantRepository
       .createQueryBuilder()
       .leftJoinAndSelect('ChannelParticipant.channel', 'channel')
-      .select(['channel.id'])
       .where('channel.type = :Type', { Type: ChannelType.DIRECT })
       .andWhere('participant.userId = :Id', { Id: user1.id })
       .andWhere('participant.userId = :Id', { Id: user2.id })
       .execute();
-    // if not true ???
-    if (!channel) throw new WsException('The convesation already exists');
+    //   .select(['channel.id'])
+
+    if (channel) return channel; // return existing channel.
 
     const newChannel = this.channelRepository.create();
     newChannel.name = `${user1.nickname} , ${user2.nickname}`;
