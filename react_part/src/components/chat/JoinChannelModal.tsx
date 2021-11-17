@@ -13,10 +13,16 @@ interface Props {
 function JoinChannelModal(props: Props) {
 
     const [password, setPassword] = useState("");
+    const [isEmptyPassword, setisEmptyPassword] = useState(false);
     const socket = useContext(SocketContext);
 
     function SubmitForm(event: any) {
       event.preventDefault();
+      if (password == "" && props.channel.channel_type === 'Private')
+      {
+        setisEmptyPassword(true);
+        return ;
+      }
       let data = {channelId: props.channel.channel_id, password: password};
       socket.emit('channel-join', data);
       onHide();
@@ -44,9 +50,12 @@ function JoinChannelModal(props: Props) {
       <Modal.Body>
       {
         props.channel.channel_type === 'Private' ?
-        <Form>
+        <Form onSubmit={SubmitForm}>
           <Form.Label> Password </Form.Label>
-          <Form.Control type="password" value={password} name="password" placeholder="Enter the password pls" onChange={ChangePassword} />
+            <Form.Control isInvalid={isEmptyPassword} type="password" value={password} name="password" placeholder="Enter the password pls" onChange={ChangePassword} />
+            <Form.Control.Feedback type="invalid">
+                enter a password pls
+            </Form.Control.Feedback>
         </Form>
         : <div></div>
       }
