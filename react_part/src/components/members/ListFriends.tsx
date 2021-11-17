@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react"
+import {SwitchContext} from '../chat/InterfaceUser'
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -6,7 +7,7 @@ import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {Block, InvitateToGame, SendMessage, SpectateGame, Unfriend} from './ContextMenuFunctions'
+import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
 import { DataContext } from "../../App";
 import { useHistory } from "react-router";
 
@@ -37,7 +38,7 @@ export default function ListFriends()
 				Spectate Game
 			</MenuItem>}
 	
-			<MenuItem onClick={() => SendMessage(props.Friend.user_id)}>
+			<MenuItem onClick={() => SwitchToPrivate(props.Friend.user_id)}>
 				Send a message
 			</MenuItem>
 	
@@ -86,6 +87,7 @@ export default function ListFriends()
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	let history = useHistory();
+	const SwitchToPrivate = useContext(SwitchContext);
 
 	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
 

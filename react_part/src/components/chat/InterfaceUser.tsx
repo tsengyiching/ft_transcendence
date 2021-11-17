@@ -1,6 +1,6 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
-import {useState, useContext, useEffect} from 'react'
+import React, {useState, useContext, useEffect} from 'react'
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
 import ListPrivateMessage from "./ListPrivateMessage"
@@ -27,6 +27,8 @@ export type messageType = 'Channel' | 'MP'
 
 /* * ALL THE USER INTERFACE */
 
+export const SwitchContext = React.createContext((userId: number) => {});
+
 function InterfaceUser() {
 
     const [interfaceRadioValue, setinterfaceRadioValue] = useState<string>('Channel');
@@ -43,7 +45,7 @@ function InterfaceUser() {
         socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
     }, [socket])
 
-    function SwitchMP(userId: number)
+    function SwitchPrivateMessage(userId: number)
     {
         setinterfaceRadioValue('MP');
         setPrivateMessageSelected({user_id: userId});
@@ -84,13 +86,14 @@ function InterfaceUser() {
                         <LeaveChannelButton channel={channelSelected} CallBackFunction={ResetChannel} />
                     :   <Button disabled className="ButtonCreate bg-secondary"> Leave Channel</Button>}
                 </div>
-                : <button className="ButtonCreate bg-success"> Create Private Conversation </button>
+                : <div></div>
             }
         </Col>
         </Row>
     )}
 
 	return (
+        <SwitchContext.Provider value={SwitchPrivateMessage}>
         <div>
         <Row as={InterfaceChannel}/>
         <Row>
@@ -103,6 +106,7 @@ function InterfaceUser() {
           </Col>
         </Row>
         </div>
+        </SwitchContext.Provider>
 	);
 }
 

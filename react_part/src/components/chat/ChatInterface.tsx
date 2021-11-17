@@ -81,7 +81,6 @@ export function Message(props: {message: IMessage, userData: Data})
 	</div>)
 }
 
-
 export default function InterfaceChat(props: {channelSelected: IChannel | undefined, privateSelected: IPrivateMessage | undefined, messageType: messageType}) {
     return (
     <div>
@@ -92,7 +91,7 @@ export default function InterfaceChat(props: {channelSelected: IChannel | undefi
 			: <ChatChannelDisabled/>
 	    :
 	    	props.privateSelected !== undefined ?
-			<ChatPrivate/>
+			<ChatPrivate privateSelected={props.privateSelected}/>
 			: <div> private Message Chat Disabled </div>}
     </div>
 )}

@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext} from "react"
 import { socket } from "../../context/socket";
+import { SwitchContext } from "../chat/InterfaceUser";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListUsers.css"
@@ -28,7 +29,7 @@ export default function ListUsers()
 		return (
 		<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
 			<div>
-			<MenuItem>
+			<MenuItem onClick={() => {SwitchToPrivate(props.User.id)}}>
 				Send a message
 			</MenuItem>
 			</div>
@@ -83,6 +84,7 @@ export default function ListUsers()
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const userData = useContext(DataContext);
 	let history = useHistory();
+	const SwitchToPrivate = useContext(SwitchContext);
 
 	useEffect(() => {
 		let isMounted = true;
