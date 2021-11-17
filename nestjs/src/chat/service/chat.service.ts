@@ -423,15 +423,16 @@ export class ChatService {
   async createDirectChannel(user1: User, user2: User): Promise<Channel> {
     // Check if the channel already exists.
     const channel = await this.channelParticipantRepository
-      .createQueryBuilder()
-      .leftJoinAndSelect('ChannelParticipant.channel', 'channel')
+      .createQueryBuilder('participant')
+      .leftJoinAndSelect('participant.channel', 'channel')
+      // .select(['channel.id'])
       .where('channel.type = :Type', { Type: ChannelType.DIRECT })
       .andWhere('participant.userId = :Id', { Id: user1.id })
       .andWhere('participant.userId = :Id', { Id: user2.id })
       .execute();
-    //   .select(['channel.id'])
 
-    if (channel) return channel; // return existing channel.
+    console.log(channel.length == 1, channel);
+    if (channel.length == 1) return channel; // return existing channel.
 
     const newChannel = this.channelRepository.create();
     newChannel.name = `${user1.nickname} , ${user2.nickname}`;
@@ -448,7 +449,7 @@ export class ChatService {
   async getDirectChannelList(userId: number): Promise<Channel[]> {
     return this.channelRepository
       .createQueryBuilder('channel')
-      .leftJoinAndSelect('channelParticipant', 'participant')
+      .leftJoinAndSelect('channel.participant', 'participant')
       .select(['channel.id', 'channel.name'])
       .where('channel.type = :Type', { Type: ChannelType.DIRECT })
       .andWhere('participant.userId = :Id', { Id: userId })

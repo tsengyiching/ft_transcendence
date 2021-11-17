@@ -282,6 +282,7 @@ export class ChatGateway
           await this.chatService.getOneChannelParticipant(user.id, channelId);
         if (channelParticipant) client.join('channel-' + channelId);
         const messages = await this.messageService.getChannelMessages(
+          //   user.id,
           channelId,
         );
         const users = await this.chatService.getChannelUsers(channelId);
@@ -386,6 +387,7 @@ export class ChatGateway
         const messages = await this.messageService.getDirectMessages(
           loadDirectDto.channelId,
         );
+        // client.emit('private-info')
         client.emit('private-message-list', messages);
         console.log('Channel loaded successfully !');
       }
