@@ -9,7 +9,6 @@ import {
   OptionSiteStatus,
   SetUserSiteStatusDto,
 } from 'src/admin/dto/set-user-site-status.dto';
-import { Response } from 'express';
 
 @Injectable()
 export class UserService {
@@ -257,6 +256,8 @@ export class UserService {
         return this.setModerator(operator, user);
       } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
         return this.setUser(operator, user);
+      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
+        return this.banUser(operator, user);
       }
     }
   }
@@ -310,7 +311,7 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
-  ban(operator: User, user: User, res: Response): Promise<User> {
+  banUser(operator: User, user: User): Promise<User> {
     if (
       operator.siteStatus !== SiteStatus.OWNER &&
       operator.siteStatus !== SiteStatus.MODERATOR
@@ -336,9 +337,6 @@ export class UserService {
       );
     }
     user.siteStatus = SiteStatus.BANNED;
-    res.clearCookie('jwt');
-    res.clearCookie('jwt-two-factor');
-    res.redirect('http://localhost:3000/banned');
     return this.userRepository.save(user);
   }
 
