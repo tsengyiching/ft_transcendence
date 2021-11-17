@@ -37,7 +37,7 @@ export default function InterfaceMembers()
 		    { radioMembersValue === '1' ? <ListFriends />
 		    : radioMembersValue === '2' ? <ListUsers/>
 		    : radioMembersValue === '3' ? <ListBlockedUsers/>
-		    : 							  <ListFriendRequests/> }
+		    : 				  <ListFriendRequests/> }
 		</div>
 	)
 }

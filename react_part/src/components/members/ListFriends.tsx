@@ -38,7 +38,7 @@ export default function ListFriends()
 				Spectate Game
 			</MenuItem>}
 	
-			<MenuItem onClick={() => SwitchToPrivate(props.Friend.user_id)}>
+			<MenuItem onClick={() => SwitchPrivateConversation(props.Friend.user_id)}>
 				Send a message
 			</MenuItem>
 	
@@ -87,7 +87,7 @@ export default function ListFriends()
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	let history = useHistory();
-	const SwitchToPrivate = useContext(SwitchContext);
+	const SwitchPrivateConversation = useContext(SwitchContext);
 
 	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
 

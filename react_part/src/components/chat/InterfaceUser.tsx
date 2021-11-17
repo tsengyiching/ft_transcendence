@@ -3,7 +3,7 @@ import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstr
 import React, {useState, useContext, useEffect} from 'react'
 import CreateChannelButton from './create_channel';
 import ListChannel from "./ListChannel";
-import ListPrivateMessage from "./ListPrivateMessage"
+import ListPrivateConversation from "./ListPrivateConversation"
 import {SocketContext} from '../../context/socket'
 import InterfaceMembers from '../members/members';
 import LeaveChannelButton from './LeaveChannelModal'
@@ -19,7 +19,12 @@ export interface IChannel {
     role: Role,
 }
 
-export interface IPrivateMessage {
+export interface IPrivateConversation {
+    conversation_id: number,
+    conversation_name: string,
+}
+
+export interface IUserConversation {
     user_id: number,
 }
 
@@ -33,7 +38,7 @@ function InterfaceUser() {
 
     const [interfaceRadioValue, setinterfaceRadioValue] = useState<string>('Channel');
     const [channelSelected, setChannelSelected] = useState<IChannel | undefined>();
-    const [PrivateMessageSelected, setPrivateMessageSelected] = useState<IPrivateMessage | undefined>();
+    const [UserConversationSelected, setUserConversationSelected] = useState<IUserConversation | undefined>();
     const socket = useContext(SocketContext);
 
     const channelradios = [
@@ -45,10 +50,10 @@ function InterfaceUser() {
         socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
     }, [socket])
 
-    function SwitchPrivateMessage(userId: number)
+    function SwitchPrivateConversation(userId: number)
     {
         setinterfaceRadioValue('MP');
-        setPrivateMessageSelected({user_id: userId});
+        setUserConversationSelected({user_id: userId});
     }
 
     function ResetChannel() { setChannelSelected(undefined)}
@@ -76,7 +81,7 @@ function InterfaceUser() {
         <Col lg={10}>
             {interfaceRadioValue ==='Channel' ? 
             <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> 
-            : <ListPrivateMessage />}
+            : <ListPrivateConversation />}
         </Col>
         <Col>
             {interfaceRadioValue ==='Channel' ? 
@@ -93,12 +98,12 @@ function InterfaceUser() {
     )}
 
 	return (
-        <SwitchContext.Provider value={SwitchPrivateMessage}>
+        <SwitchContext.Provider value={SwitchPrivateConversation}>
         <div>
         <Row as={InterfaceChannel}/>
         <Row>
           <Col className="ColumnChat" lg={{span: 8, offset: 0}} style={{borderRight:"1px solid #aaa", height: "48em"}}>
-              <InterfaceChat channelSelected={channelSelected} privateSelected={PrivateMessageSelected}
+              <InterfaceChat channelSelected={channelSelected} privateSelected={UserConversationSelected}
               messageType={interfaceRadioValue === 'MP' ? 'MP' : 'Channel'}/>
           </Col>
           <Col className="ColumnChat" lg={{span: 4, offset: 0}} >

@@ -10,7 +10,7 @@ import {Unblock} from './ContextMenuFunctions'
 import {DataContext} from "../../App"
 import { useHistory } from "react-router";
 
-interface IBlockedUser {
+export interface IBlockedUser {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;

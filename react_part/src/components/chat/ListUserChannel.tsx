@@ -7,7 +7,7 @@ import {socket, SocketContext} from '../../context/socket'
 import {DataContext, Data} from '../../App'
 import {Modal, Form} from 'react-bootstrap'
 import {IUser} from './ChatInterface'
-import {Role} from './InterfaceUser'
+import {Role, SwitchContext} from './InterfaceUser'
 
 interface IPropsModal {
 	show: boolean,
@@ -47,7 +47,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 					<MenuItem onClick={() => history.push(`/profile/${props.user.user_id}`)}>
 						View Profile
 					</MenuItem>
-					<MenuItem>
+					<MenuItem onClick={() => SwitchPrivateConversation(props.user.user_id)}>
 						Send a message
 					</MenuItem>
 					{ Mygrade > Usergrade &&
@@ -129,6 +129,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 	let history = useHistory();
 	const userData = useContext(DataContext);
 	const socket = useContext(SocketContext);
+	const SwitchPrivateConversation = useContext(SwitchContext);
 
 	return (
 		<div className="overflow-auto" style={{marginTop: "15%"}}>

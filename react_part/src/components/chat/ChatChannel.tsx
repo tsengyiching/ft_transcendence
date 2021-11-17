@@ -10,7 +10,8 @@ import {IChannel, } from './InterfaceUser'
 import ListChannelUser from './ListUserChannel'
 import ParametersChannel from './ParametersChannel'
 import ParametersIcon from '../pictures/parameters-icon.png'
-
+import axios from 'axios'
+import ListBlockedUsers, { IBlockedUser } from '../members/ListBlockedUsers'
 
 function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 
@@ -41,17 +42,61 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 
 export function ChatChannel(channelSelected: IChannel)
 {
-    const socket = useContext(SocketContext);
-    const userData = useContext(DataContext);
-    const [ListUsers, SetListUsers] = useState<IUser[]>([]);
-    const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
-    const [message, SetMessage] = useState<string>("");
+	const socket = useContext(SocketContext);
+	const userData = useContext(DataContext);
+	const [ListUsers, SetListUsers] = useState<IUser[]>([]);
+	const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
+	const [message, SetMessage] = useState<string>("");
+	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
+	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 
+	//get list blocked at the mount of the component + start listening socket
+	useEffect(() => {
+		let isMounted = true;
+		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+		.then(res => { if(isMounted)
+			SetBlockedUsers(res.data);
+		})
+		.catch(res => { if (isMounted)
+			console.log("error on getting data blocked users");
+		})
+
+		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
+			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
+
+		return (() => {socket.off('reload-users'); isMounted = false; });
+	}, []);
+
+	//actualize the blockedlist
+	useEffect(() => {
+		let isMounted = true
+		console.log('actualize blocked list in ChatChannel');
+		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id === ReloadBlockedUserlist.user_id2)
+		{
+			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+			.then(res => { if (isMounted)
+				SetBlockedUsers(res.data);
+			})
+			.catch(res => { if (isMounted)
+				console.log(res.data);
+			})
+		}
+	}, [ReloadBlockedUserlist, userData.id])
+
+	// load to the channel then get list user and message of the channel
 	useEffect(() => {
 		//console.log(`channel-load : ${channelSelected.channel_id}`);
 		socket.emit('channel-load', channelSelected.channel_id);
 	        socket.on('channel-users', (data: IUser[]) => { SetListUsers(data); });
-	        socket.on('channel-message-list', (data: IMessage[]) => {SetListMessage(data);});
+	        socket.on('channel-message-list', (data: IMessage[]) => {
+			let newlist: IMessage[] = [];
+			for (const message of data)
+			{
+				if (BlockedUsers.find((user) => user.user_id === message.message_authorId) === undefined)
+					newlist.push(message);
+			}
+			SetListMessage(newlist);
+		});
 
 		return (() => {
 			//console.log(`channel-unload: ${channelSelected.channel_id}`);
@@ -59,17 +104,22 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.off('channel-users');
 			socket.off('channel-message-list');
 			SetMessage("");});
-	}, [channelSelected])
+	}, [channelSelected, BlockedUsers])
 
+	//add a new message to the chat
 	useEffect(() => {
 		socket.on('channel-new-message', (new_message: IMessage) => {
-			const buffer = [...ListMessage];
-			buffer.push(new_message);
-			SetListMessage(buffer)
-			});
 
-			return (() => {socket.off('channel-new-message');});
-    }, [ListMessage])
+			if (BlockedUsers.find((user) => user.user_id === new_message.message_authorId) === undefined)
+			{
+				const buffer = [...ListMessage];
+				buffer.push(new_message);
+				SetListMessage(buffer)
+			}
+		})
+		return (() => {socket.off('channel-new-message');});
+		
+	}, [ListMessage, BlockedUsers])
 
     //Form management
     const handleSubmit = (event: any) => {

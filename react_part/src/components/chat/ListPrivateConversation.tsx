@@ -3,35 +3,34 @@ import { useContext, useEffect, useState } from 'react'
 import {Row, Col} from 'react-bootstrap'
 import { SocketContext } from '../../context/socket'
 import { IChannel } from './InterfaceUser';
-import './ListPrivateMessage.css'
+import './ListPrivateConversation.css'
 
-function ButtonPrivateMessage(Channel: IChannel)
+function ButtonPrivateConversation(Channel: IChannel)
 {
 	<div> {Channel.channel_name} </div>
 }
 
-export default function ListPrivateMessage()
+export default function ListPrivateConversation()
 {
 	let socket = useContext(SocketContext);
-	const [PrivateMessages, setPrivateMessages] = useState<IChannel[]>([]);
+	const [PrivateConversation, setPrivateConversation] = useState<IChannel[]>([]);
 
 	useEffect(() => {
 		socket.emit("private-ask-reload");
 	}, [socket])
 
 	useEffect(() => {
-		socket.on("private-list", (list: IChannel[]) => {setPrivateMessages(list); console.log(list)});
-		
+		socket.on("private-list", (list: IChannel[]) => {setPrivateConversation(list); console.log(list)});
 		return (() => {socket.off('private-list')})
-	}, [PrivateMessages])
+	}, [PrivateConversation])
 
 	return (
 		<Row className="ScrollingListPrivate">
-			{ PrivateMessages.length !== 0
+			{ PrivateConversation.length !== 0
 			? <div style={{overflow: 'auto', height: '7.9em'}}>
-				{ PrivateMessages.map(ButtonPrivateMessage) }
+				{ PrivateConversation.map(ButtonPrivateConversation) }
 			</div>
-			: <div> No private message</div>
+			: <div> No private Conversation</div>
 		}
 		</Row>
 	)
