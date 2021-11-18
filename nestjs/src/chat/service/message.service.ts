@@ -58,7 +58,7 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  getChannelMessages(channelId: number): Promise<Message> {
+  getChannelMessages(channelId: number) {
     return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')
