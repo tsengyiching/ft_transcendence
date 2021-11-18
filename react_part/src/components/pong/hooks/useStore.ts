@@ -53,9 +53,11 @@ type Store = {
 	scoreBar: Score;
 	BonusLeft: Bonus;
 	radius: number; // ?
-	setScore: (L:number, R:number) => void,
+	setScore: (L:number, R:number) => void;
 	right:number;
 	left:number;
+	gameStatus:number;
+	setGameStatus: (status:number) => void;
 }
 
 const useStore = create<Store>((set) => {
@@ -118,6 +120,8 @@ const useStore = create<Store>((set) => {
 		setScore: (L, R) => set(() => ({ left:L, right:R})),
 		left:0,
 		right:0,
+		gameStatus:0,
+		setGameStatus: (status) => set((s) => ({gameStatus:status})),
 	}
 });
 

@@ -60,6 +60,7 @@ export class PongService {
       lasty: false,
       pOne: {...p1},
       pTwo: {...p2},
+	  run: false,
     };
     return newParty;
   }
