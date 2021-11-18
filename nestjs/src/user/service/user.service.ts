@@ -235,6 +235,15 @@ export class UserService {
     }
   }
 
+  async getBannedUserIds(): Promise<number[]> {
+    const users = await this.userRepository.find({
+      where: { siteStatus: SiteStatus.BANNED },
+      select: ['id'],
+    });
+    const ids = users.map((obj) => obj.id);
+    return ids;
+  }
+
   async modifyUserSiteStatus(
     id: number,
     setUserSiteStatusDto: SetUserSiteStatusDto,
@@ -337,6 +346,8 @@ export class UserService {
       );
     }
     user.siteStatus = SiteStatus.BANNED;
+    user.isTwoFactorAuthenticationEnabled = false;
+    user.twoFactorAuthenticationSecret = null;
     return this.userRepository.save(user);
   }
 

@@ -78,7 +78,7 @@ export class RelationshipController {
     @Query('status') status: string,
   ): Promise<SendSpecificListRelationshipDto[]> {
     await this.userService.getUserProfileById(id);
-    if (status !== RelationshipStatus.FRIEND && id !== user.id)
+    if (status !== 'friend' && id !== user.id)
       throw new HttpException(
         `User has no right to get other lists.`,
         HttpStatus.BAD_REQUEST,
