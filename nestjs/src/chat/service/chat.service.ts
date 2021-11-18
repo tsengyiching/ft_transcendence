@@ -448,11 +448,6 @@ export class ChatService {
   }
 
   async getDirectInfo(userId: number, channelId: number): Promise<any> {
-    // return this.channelRepository.findOne({
-    //   relations: ['participant', 'participant.user'],
-    //   where: { id: channelId, type: ChannelType.DIRECT },
-    // });
-
     const channelInfos = await this.channelRepository
       .createQueryBuilder('channel')
       .leftJoinAndSelect('channel.participant', 'participant')
@@ -463,7 +458,6 @@ export class ChatService {
       .addSelect('user.avatar', 'user_avatar')
       .where('channel.id = :Id', { Id: channelId })
       .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
-      // .andWhere('participant.userId != :Id', { Id: userId })
       .execute();
 
     const channelInfo = channelInfos.filter(
@@ -500,8 +494,6 @@ export class ChatService {
       .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
       .andWhereInIds(channelIds)
       .execute();
-
-    // return privateChannelList.filter((channel) => channel.user_id != userId);
   }
 
   /****************************************************************************/

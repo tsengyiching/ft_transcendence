@@ -348,7 +348,6 @@ export class ChatGateway
       const user: User = await this.authService.getUserFromSocket(client);
       const direct = this.chatService.getDirectChannelList(user.id);
       client.emit('private-list', await direct);
-      console.log('direct list', await direct);
     } catch (error) {
       console.log(error);
     }

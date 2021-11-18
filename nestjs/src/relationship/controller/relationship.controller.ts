@@ -182,7 +182,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
@@ -203,6 +203,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
