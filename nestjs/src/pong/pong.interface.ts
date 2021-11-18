@@ -47,5 +47,6 @@ export type Party = {
   lastp: boolean;
   pOne: Player;
   pTwo: Player;
+  run: boolean;
   // viewer id ??
 };

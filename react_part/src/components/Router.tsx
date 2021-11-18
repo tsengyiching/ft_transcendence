@@ -4,14 +4,11 @@ import Profile from './Profile';
 import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
-
 import axios from 'axios';
 import { useEffect, useState } from "react";
-
 function Router() {
 
   const [isConnected, setConnexion] = useState(true);
-
   useEffect(() => {
     axios.get('http://localhost:8080/profile/me/',{
         withCredentials:true,

@@ -4,11 +4,16 @@ import './Game.css'
 import Container from 'react-bootstrap/Container';
 import {GameSocketContext, gameSocket} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
+import useStore from './pong/hooks/useStore';
+
+const NONE = 0;
+const START = 1;
+const IG = 2;
 
 const Game:React.FC = () => {
     const [toggleMatchMaking, setToggleMatchMaking] = useState<boolean>();
-	const [gameId, setGameId] = useState<null | number>(null);
-	const [inGame, setInGame] = useState<boolean>(false)
+	const gameStatus = useStore(s => s.gameStatus);
+	const setGameStatus = useStore(s => s.setGameStatus);
     const socket:Socket = useContext(GameSocketContext);
 
     socket.emit('isInMatchmaking?');
@@ -18,10 +23,6 @@ const Game:React.FC = () => {
             console.log(e);
             setToggleMatchMaking(e);
         });
-		socket.on('inGame', (e) => { // METTRE LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
-			setGameId(e);
-			socket.emit('NewGame', e);
-		})
     })
     
     const handleClickON = () => socket.emit('matchmakingON');
@@ -53,7 +54,7 @@ const Game:React.FC = () => {
 
 	return (
         <Container className='no-padding' fluid>
-			{gameId != null ? 'yes' : 'nope'}
+			{/* {gameId != null ? 'yes' : 'nope'} */}
             {toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);

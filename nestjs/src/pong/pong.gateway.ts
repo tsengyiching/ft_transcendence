@@ -81,6 +81,7 @@ export class PongGateway {
 		  const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ?? 
 		  userArray.forEach((e) => {
 			  this.server.to(e.toString()).emit('inMatchMaking', false);
+			  this.pongService.createNewParty(GameId, userArray, this.userService);
 			  this.server.to(e.toString()).emit('inGame', GameId);
 			  // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
 		  })
