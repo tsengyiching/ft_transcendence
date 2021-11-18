@@ -3,7 +3,7 @@ import "./Header.css"
 
 import axios from 'axios';
 import { useEffect, useState} from "react";
-import { Image } from "react-bootstrap";
+import { Form, Button, Image } from "react-bootstrap";
 
 function PongButton (){
 	return(
@@ -27,17 +27,24 @@ function Header () {
     const [id, setId] = useState(0);
 
     useEffect(() => {
+        let isMounted = true;
         axios.get('http://localhost:8080/profile/me/',{
             withCredentials:true,
         })
         .then(res => {
-            setId(res.data.id);
-            setAvatar(res.data.avatar)
-            setConnexion(true);
+            console.log(isMounted)
+            //if(isMounted) {
+                setId(res.data.id);
+                setAvatar(res.data.avatar)
+                setConnexion(true);
+            //}
         })
         .catch(res => {
-            setConnexion(false);
+            //if(isMounted) {
+                setConnexion(false);
+            //}
         })
+        isMounted = false;
     }, []);
     
     if (isConnected)
