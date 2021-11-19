@@ -1,31 +1,40 @@
 import { Form, Button, Image } from 'react-bootstrap'
-import { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
 
-function Twofa () {
+interface STATE {
+    setConnection:Function;
+    isConnected:boolean;
+}
+
+const Twofa:JSX.Element = (props:STATE) => {
     const [code, setCode] = useState("")
 
     let history = useHistory();
 
-    function authenticate() {
-        axios.post('http://localhost:8080/2fa/authenticate/',{twoFactorAuthenticationCode: code},
+    const authenticate() = useCallback(
+        async (event: React.FormEvent<HTMLInputElement>) => {
+        event.preventDefault();
+
+        await axios.post('http://localhost:8080/2fa/authenticate/',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
         })
         .then(res => {
-            history.push("/accueil");
+            props.setConnection(true);
         })
         .catch(res => {
             console.log(res)
         })
-    }
+    }, []);
+
 
     function SubmitCode(event: any) {
-        event.preventDefault();
         authenticate();
     }
 
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
+
     return (
         <div>
             <Form className="" onSubmit={SubmitCode} >
