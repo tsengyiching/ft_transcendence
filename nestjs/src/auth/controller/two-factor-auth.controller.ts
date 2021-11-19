@@ -104,7 +104,7 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     const { accessToken } = this.authService.login(user, true);
-    res.cookie('jwt-two-factor', { accessToken });
+    res.cookie('jwt-two-factor', accessToken);
     userPayload.twoFA = true;
     return userPayload;
   }
