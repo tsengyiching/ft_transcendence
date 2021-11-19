@@ -5,7 +5,9 @@ import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 import axios from 'axios';
+import Header from './Header';
 import { useEffect, useState } from "react";
+
 function Router() {
 
   const [isConnected, setConnexion] = useState(true);
@@ -24,12 +26,13 @@ function Router() {
   function Authorized() {
     return (
       <BrowserRouter>
+        <Header />
         <Switch>
-          <Route exact path="/accueil" component={Home} />
+          <Route exact path="/" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/auth/disconnect" component={Disconnect} />
-          <Redirect to="/accueil"/>
+          <Redirect to="/"/>
         </Switch>
       </BrowserRouter>
     )

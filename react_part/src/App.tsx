@@ -48,7 +48,6 @@ function App():React.ReactElement {
       <GameSocketContext.Provider value={gameSocket}>
 			<GameStartModal />
     		<Container fluid className="App">
-    		    <Header/>
     		    <Router/>
     		</Container>
         </GameSocketContext.Provider>
