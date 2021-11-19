@@ -1,5 +1,5 @@
 import {IMessage, Message, IUser} from './ChatInterface'
-import {DataContext, } from '../../App'
+import {DataContext, Data} from '../../App'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, Image, } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
@@ -11,7 +11,7 @@ import ListChannelUser from './ListUserChannel'
 import ParametersChannel from './ParametersChannel'
 import ParametersIcon from '../pictures/parameters-icon.png'
 import axios from 'axios'
-import ListBlockedUsers, { IBlockedUser } from '../members/ListBlockedUsers'
+import { IBlockedUser } from '../members/ListBlockedUsers'
 
 function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 
@@ -40,15 +40,56 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
+export function FormMessageChannel(props: {channelSelected: IChannel, ListUsers: IUser[], userData: Data})
+{
+	const socket = useContext(SocketContext);
+	const [messageForm, SetMessageForm] = useState<string>("");
+
+	useEffect(() => {
+		return (() => {SetMessageForm("");});
+	}, [])
+
+	const ChangeMsg = (e: React.ChangeEvent<HTMLInputElement>) => { SetMessageForm(e.currentTarget.value);}
+
+   	 //Form management
+    	const handleSubmit = (event: any) => {
+		event.preventDefault();
+		if (messageForm === "")
+		{
+			event.stopPropagation();
+			return ;
+		}
+		socket.emit('channel-message', {channelId: props.channelSelected.channel_id, message: messageForm});
+		//console.log(`channel ${channelSelected.channel_name} send : ${message}`);
+		SetMessageForm("");
+	}
+
+	return (
+		<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
+			<Form.Control type="text" value={messageForm} placeholder="Message" onChange={ChangeMsg}/>
+			{
+				props.ListUsers.find((element) => element.user_id === props.userData.id) !== undefined 
+				&& props.ListUsers.find((element) => element.user_id === props.userData.id)?.status !== 'Mute' 
+				?	<Button type="submit" onClick={handleSubmit}> Send </Button>
+				:	<Button type="submit" variant="danger" disabled> Send </Button>
+			}
+		</Form>
+	)
+}
+
 export function ChatChannel(channelSelected: IChannel)
 {
 	const socket = useContext(SocketContext);
 	const userData = useContext(DataContext);
 	const [ListUsers, SetListUsers] = useState<IUser[]>([]);
-	const [ListMessage, SetListMessage] = useState<IMessage[]>([]);
-	const [message, SetMessage] = useState<string>("");
+	// list of all messages including the blocked messages
+	const [ListAllMessage, SetListAllMessage] = useState<IMessage[]>([]);
+	// list message shown to user
+	const [ListShownMessage, SetListShownMessage] = useState<IMessage[]>([]);
+	// list blocked user
 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
-	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	// state asking to reload list of blocked users
+	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<number>(0);
 
 	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
@@ -61,27 +102,10 @@ export function ChatChannel(channelSelected: IChannel)
 			console.log("error on getting data blocked users");
 		})
 
-		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
+		socket.on("reload-block", () => { SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
-		return (() => {socket.off('reload-users'); isMounted = false; });
-	}, []);
-
-	//actualize the blockedlist
-	useEffect(() => {
-		let isMounted = true
-		console.log('actualize blocked list in ChatChannel');
-		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id === ReloadBlockedUserlist.user_id2)
-		{
-			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
-			.then(res => { if (isMounted)
-				SetBlockedUsers(res.data);
-			})
-			.catch(res => { if (isMounted)
-				console.log(res.data);
-			})
-		}
-	}, [ReloadBlockedUserlist, userData.id])
+		return (() => { socket.off("reload-block"); isMounted = false; });
+	}, [ReloadBlockedUserlist]);
 
 	// load to the channel then get list user and message of the channel
 	useEffect(() => {
@@ -95,7 +119,8 @@ export function ChatChannel(channelSelected: IChannel)
 				if (BlockedUsers.find((user) => user.user_id === message.message_authorId) === undefined)
 					newlist.push(message);
 			}
-			SetListMessage(newlist);
+			SetListAllMessage(data);
+			SetListShownMessage(newlist);
 		});
 
 		return (() => {
@@ -103,38 +128,34 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.emit('channel-unload', channelSelected.channel_id);
 			socket.off('channel-users');
 			socket.off('channel-message-list');
-			SetMessage("");});
-	}, [channelSelected, BlockedUsers])
+			})
+	}, [channelSelected])
+
+	// change list message if list blocked users change
+	useEffect(() => {
+		let newlist: IMessage[] = [];
+		for (const message of ListAllMessage)
+		{
+			if (BlockedUsers.find((user) => user.user_id === message.message_authorId) === undefined)
+				newlist.push(message);
+		}
+		SetListShownMessage(newlist);
+	}, [BlockedUsers])
 
 	//add a new message to the chat
 	useEffect(() => {
 		socket.on('channel-new-message', (new_message: IMessage) => {
-
 			if (BlockedUsers.find((user) => user.user_id === new_message.message_authorId) === undefined)
 			{
-				const buffer = [...ListMessage];
+				const buffer = [...ListShownMessage];
 				buffer.push(new_message);
-				SetListMessage(buffer)
+				SetListShownMessage(buffer);
+				ListAllMessage.push(new_message);
 			}
 		})
 		return (() => {socket.off('channel-new-message');});
-		
-	}, [ListMessage, BlockedUsers])
 
-    //Form management
-    const handleSubmit = (event: any) => {
-		event.preventDefault();
-		if (message === "")
-		{
-			event.stopPropagation();
-			return ;
-		}
-		socket.emit('channel-message', {channelId: channelSelected.channel_id, message: message});
-		//console.log(`channel ${channelSelected.channel_name} send : ${message}`);
-		SetMessage("");
-	}
-
-	const ChangeMsg = (e: React.ChangeEvent<HTMLInputElement>) => { SetMessage(e.currentTarget.value);}
+	}, [ListShownMessage, BlockedUsers])
 
 	return (
 		<Row className="TitleChannel">
@@ -142,14 +163,8 @@ export function ChatChannel(channelSelected: IChannel)
 			<ParametersChannel {...channelSelected} />
 		: <h2 style={{height:"1.2em"}}></h2>}
 		<Col lg={8}>
-			<ListChannelMessage ListMessage={ListMessage}/>
-			<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
-				<Form.Control type="text" value={message} placeholder="Message" onChange={ChangeMsg}/>
-				{ListUsers.find((element) => element.user_id === userData.id) !== undefined && ListUsers.find((element) => element.user_id === userData.id)?.status !== 'Mute' ?
-					<Button type="submit" onClick={handleSubmit}> Send </Button>
-				:	<Button type="submit" variant="danger" disabled> Send </Button>
-				}
-			</Form>
+			<ListChannelMessage ListMessage={ListShownMessage}/>
+			<FormMessageChannel channelSelected={channelSelected} ListUsers={ListUsers} userData={userData} />
 		</Col>
 		<Col>
 			<ListChannelUser ListUsers={ListUsers} myrole={channelSelected.role} channelId={channelSelected.channel_id}/>
