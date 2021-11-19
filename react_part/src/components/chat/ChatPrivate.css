@@ -1,12 +1,19 @@
 
 .OtherUser {
-	height: "20em";
+	font-size: large;
+	background-color: #A0B4D1;
+	text-align: center;
+	max-height: 40px;
+	height: 1.2em;
+	max-width: 100%;
+	margin: 0;
+	border: 1px solid black
 }
 
 .ChatPrivate {
-	height: "60em"
+	height: 40em;
 }
 
 .MessageForm {
-	height: "20em"
+	height: 20em;
 }

@@ -158,10 +158,10 @@ export function ChatChannel(channelSelected: IChannel)
 	}, [ListShownMessage, BlockedUsers])
 
 	return (
-		<Row className="TitleChannel">
+	<Row className="TitleChannel">
 		{channelSelected !== undefined ?
 			<ParametersChannel {...channelSelected} />
-		: <h2 style={{height:"1.2em"}}></h2>}
+		: <div></div>}
 		<Col lg={8}>
 			<ListChannelMessage ListMessage={ListShownMessage}/>
 			<FormMessageChannel channelSelected={channelSelected} ListUsers={ListUsers} userData={userData} />
