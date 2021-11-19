@@ -14,7 +14,7 @@ function PageConnexion() {
             withCredentials:true,
         })
         .then(res => {
-                history.push("/accueil");
+            history.push("/");
         })
         .catch(res => {
                 history.push("/connexion");

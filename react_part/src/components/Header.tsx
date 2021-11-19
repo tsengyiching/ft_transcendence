@@ -3,7 +3,6 @@ import "./Header.css"
 
 import axios from 'axios';
 import { useEffect, useState} from "react";
-import { useHistory } from "react-router-dom";
 import { Image } from "react-bootstrap";
 import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
