@@ -81,7 +81,7 @@ function InterfaceUser() {
         <Col lg={10}>
             {interfaceRadioValue ==='Channel' ? 
             <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> 
-            : <ListPrivateConversation />}
+            : <ListPrivateConversation setUserConversationSelected={setUserConversationSelected}/>}
         </Col>
         <Col>
             {interfaceRadioValue ==='Channel' ? 

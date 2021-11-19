@@ -142,7 +142,7 @@ export function ChatChannel(channelSelected: IChannel)
 		SetListShownMessage(newlist);
 	}, [BlockedUsers])
 
-	//add a new message to the chat
+	//add a new message to the chat if user is not blocked
 	useEffect(() => {
 		socket.on('channel-new-message', (new_message: IMessage) => {
 			if (BlockedUsers.find((user) => user.user_id === new_message.message_authorId) === undefined)
@@ -150,18 +150,18 @@ export function ChatChannel(channelSelected: IChannel)
 				const buffer = [...ListShownMessage];
 				buffer.push(new_message);
 				SetListShownMessage(buffer);
-				ListAllMessage.push(new_message);
 			}
+			ListAllMessage.push(new_message);
 		})
 		return (() => {socket.off('channel-new-message');});
 
 	}, [ListShownMessage, BlockedUsers])
 
 	return (
-		<Row className="TitleChannel">
+	<Row className="TitleChannel">
 		{channelSelected !== undefined ?
 			<ParametersChannel {...channelSelected} />
-		: <h2 style={{height:"1.2em"}}></h2>}
+		: <div></div>}
 		<Col lg={8}>
 			<ListChannelMessage ListMessage={ListShownMessage}/>
 			<FormMessageChannel channelSelected={channelSelected} ListUsers={ListUsers} userData={userData} />

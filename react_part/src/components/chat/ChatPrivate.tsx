@@ -37,21 +37,15 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 
 	return (
 		<div>
-			<Row className="OtherUser">
-				<Col>
+			<div className="OtherUser">
 					name user {props.privateSelected.user_id}
-				</Col>
-			</Row>
-			<Row className="ChatPrivate">
-				<Col>
+			</div>
+			<div className="ChatPrivate">
 					chat
-				</Col>
-			</Row>
-			<Row className="MessageForm">
-				<Col>
+			</div>
+			<div className="MessageForm">
 					send a message
-				</Col>
-			</Row>
+			</div>
 		</div>
 	)
 }
