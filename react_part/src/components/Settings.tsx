@@ -6,8 +6,8 @@ function Parametre () {
 
     const [nickname, setNickname] = useState("");
     const [image, setImage] = useState("");
-    const [qrCode, setQRCode] = useState("")
     const [printQR, setPrintQR] = useState(0)
+    const [code, setCode] = useState("")
 
     function modifyNickname() {
         axios.patch('http://localhost:8080/profile/name/',{nickname: nickname},
@@ -34,13 +34,26 @@ function Parametre () {
     }
 
     function twoFactorAuth() {
-        axios.defaults.withCredentials = true;
-        axios.post('http://localhost:8080/2fa/generate/', {
-            withCredentials:true,
+        if (printQR !== 1) {
+            axios.defaults.withCredentials = true;
+            axios.get('http://localhost:8080/2fa/generate/', {
+                withCredentials:true,
+            })
+            .then(res => {
+                setPrintQR(1);
+            })
+            .catch(res => {
+                console.log(res)
+            })
+        }
+    }
+
+    function turnOn() {
+        axios.post('http://localhost:8080/2fa/turn-on/',{twoFactorAuthenticationCode: code},
+            {withCredentials:true,
         })
         .then(res => {
-            setQRCode(res.data)
-            setPrintQR(1);
+            console.log(res)
         })
         .catch(res => {
             console.log(res)
@@ -57,11 +70,22 @@ function Parametre () {
         modifyImage();
     }
 
+    function SubmitCode(event: any) {
+        event.preventDefault();
+        turnOn();
+    }
+
     function PrintQRCode () {
         if (printQR) {
             return (
                 <div>
-                    <Image src={`${qrCode}`} width="100"/>
+                    <Image src="http://localhost:8080/2fa/generate/"/>
+                    <Form className="" onSubmit={SubmitCode} >
+                    <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
+                        <Button variant="success" type="submit">
+                            activate
+                        </Button>
+                    </Form>
                 </div>
             )
         }
@@ -69,6 +93,7 @@ function Parametre () {
 
     function ChangeNickname(e: React.ChangeEvent<HTMLInputElement>) { setNickname(e.currentTarget.value);}
     function ChangeImage(e: React.ChangeEvent<HTMLInputElement>) { setImage(e.currentTarget.value);}
+    function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     return (
         <div>
@@ -95,7 +120,7 @@ function Parametre () {
                         </div>
                         <div className="row w-50 p-3">
                             <h4>Activate 2FA : </h4>
-                            <Button onClick={twoFactorAuth} type="submit">submit</Button>
+                            <Button onClick={twoFactorAuth} type="submit">activate</Button>
                             {PrintQRCode()}
                         </div>
                     </div>

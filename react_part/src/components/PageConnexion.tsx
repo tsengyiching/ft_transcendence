@@ -10,15 +10,17 @@ function PageConnexion() {
     let history = useHistory();
 
     useEffect(() => {
+        let isMounted = true;
         axios.get('http://localhost:8080/profile/me/',{
             withCredentials:true,
         })
         .then(res => {
-            history.push("/accueil");
+                history.push("/accueil");
         })
         .catch(res => {
-            history.push("/connexion");
+                history.push("/connexion");
         })
+        isMounted = false;
     })
 }
 

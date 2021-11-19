@@ -282,7 +282,6 @@ export class ChatGateway
           await this.chatService.getOneChannelParticipant(user.id, channelId);
         if (channelParticipant) client.join('channel-' + channelId);
         const messages = await this.messageService.getChannelMessages(
-          //   user.id,
           channelId,
         );
         const users = await this.chatService.getChannelUsers(channelId);
@@ -361,33 +360,38 @@ export class ChatGateway
   @SubscribeMessage('private-load')
   async loadDirect(client: Socket, loadDirectDto: LoadDirectDto) {
     try {
+      let channelId = loadDirectDto.channelId;
+      const UserId = loadDirectDto.userId;
+
       const user1 = await this.authService.getUserFromSocket(client);
       if (user1) {
-        if (typeof loadDirectDto.channelId !== 'undefined') {
+        if (typeof channelId !== 'undefined') {
           const channelParticipant =
             await this.chatService.getOneChannelParticipant(
               user1.id,
-              loadDirectDto.channelId,
+              channelId,
             );
           if (!channelParticipant)
             throw new WsException(
               'you are not in conversation with this user !',
             );
-        } else if (typeof loadDirectDto.userId !== 'undefined') {
-          const user2 = await this.userService.getOneById(loadDirectDto.userId);
+        } else if (typeof UserId !== 'undefined') {
+          const user2 = await this.userService.getOneById(UserId);
           const channel = await this.chatService.createDirectChannel(
             user1,
             user2,
           );
-          loadDirectDto.channelId = channel.id;
-          console.log('Channel created successfully !');
+          channelId = channel[0].id;
+          //   console.log('Channel created successfully !');
         } else throw new WsException('Invalid socket request.');
 
-        client.join('private-' + loadDirectDto.channelId);
-        const messages = await this.messageService.getDirectMessages(
-          loadDirectDto.channelId,
+        client.join('private-' + channelId);
+        const messages = await this.messageService.getDirectMessages(channelId);
+        const channelInfo = await this.chatService.getDirectInfo(
+          user1.id,
+          channelId,
         );
-        // client.emit('private-info')
+        client.emit('private-info', channelInfo);
         client.emit('private-message-list', messages);
         console.log('Channel loaded successfully !');
       }
