@@ -38,12 +38,6 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two') {
     );
     if (!data) throw new UnauthorizedException();
 
-    /* Check if user is bannd */
-    // const bannedIds = await this.userServices.getBannedUserIds();
-    // if (bannedIds.includes(data.id)) {
-    //   throw new UnauthorizedException();
-    // }
-
     /* Check if user is already created */
     let user = await this.userServices.getOneById(data.id);
 

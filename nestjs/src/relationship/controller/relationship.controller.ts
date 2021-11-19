@@ -12,7 +12,7 @@ import {
   HttpException,
   HttpStatus,
 } from '@nestjs/common';
-import { Relationship, RelationshipStatus } from '../model/relationship.entity';
+import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
 import { RelationshipDto } from '../dto/relationship.dto';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
