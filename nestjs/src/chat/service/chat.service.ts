@@ -113,12 +113,16 @@ export class ChatService {
    * leaveChannel checks and removes a channel current participant.
    * (channel-leave)
    * @param LeaveChannelDto: channel id
-   * @returns bool, true If channels as been deleted false if is not.
+   * @returns number,
+   *  - -1 : If channels as been deleted
+   *  - 0 : if user not as promote to channel owner,
+   *  - id : of new channel owner.
    */
   async leaveChannel(
     userId: number,
     leaveChannelDto: LeaveChannelDto,
-  ): Promise<boolean> {
+  ): Promise<number> {
+    let result;
     const [channel, participant, otherUsers] = await Promise.all([
       this.getChannelById(leaveChannelDto.channelId),
       this.getOneChannelParticipant(userId, leaveChannelDto.channelId),
@@ -142,7 +146,7 @@ export class ChatService {
     if (otherUsers.length === 0) {
       console.log(`Channel ${channel.name} has been deleted.`);
       await this.channelRepository.remove(channel);
-      return true;
+      return -1;
     }
     if (participant.role === ChannelRole.OWNER) {
       const admin = otherUsers.filter(
@@ -151,13 +155,15 @@ export class ChatService {
       if (admin.length !== 0) {
         admin[0].role = ChannelRole.OWNER;
         await this.channelParticipantRepository.save(admin[0]);
+        result = admin[0].userId;
       } else {
         otherUsers[0].role = ChannelRole.OWNER;
         await this.channelParticipantRepository.save(otherUsers[0]);
+        result = otherUsers[0].userId;
       }
     }
     await this.channelParticipantRepository.remove(participant);
-    return false;
+    return result;
   }
 
   async changeChannelUserStatus(

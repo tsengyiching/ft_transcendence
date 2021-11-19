@@ -152,13 +152,32 @@ export class ChatGateway
    */
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
+    /* TODO: ? SEND USER LEAVING MSG IN THE CHANNEL ? */
     try {
       const user = await this.authService.getUserFromSocket(client);
-      if (await this.chatService.leaveChannel(user.id, leaveChannelDto)) {
+      const channel = await this.chatService.leaveChannel(
+        user.id,
+        leaveChannelDto,
+      );
+      if (channel == -1) {
         this.server.emit('channel-need-reload');
       } else {
-        /* ? SEND USER LEAVING MSG IN THE CHANNEL ? */
-        /* ? NOTIFY THE NEW OWNER ? */
+        if (channel > 0) {
+          /* NOTIFY THE NEW OWNER */
+          console.log(channel);
+          const new_onwer_channels_in = await this.chatService.getUserChannels(
+            channel,
+          );
+          this.server
+            .to('user-' + channel)
+            .emit('channels-user-in', new_onwer_channels_in);
+          this.server.to('user-' + channel).emit(`alert`, {
+            alert: {
+              type: `info`,
+              message: 'You are now promote as channel owner !',
+            },
+          });
+        }
 
         const [channels_in, channels_out, users] = await Promise.all([
           this.chatService.getUserChannels(user.id),
