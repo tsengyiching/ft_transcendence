@@ -36,10 +36,18 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two') {
         headers: { Authorization: `Bearer ${accessToken}` },
       }),
     );
-
     if (!data) throw new UnauthorizedException();
 
+    /* Check if user is bannd */
+    // const bannedIds = await this.userServices.getBannedUserIds();
+    // if (bannedIds.includes(data.id)) {
+    //   throw new UnauthorizedException();
+    // }
+
+    /* Check if user is already created */
     let user = await this.userServices.getOneById(data.id);
+
+    /* If not, create new user in database */
     if (!user) user = await this.userServices.createUser(data);
 
     return user;

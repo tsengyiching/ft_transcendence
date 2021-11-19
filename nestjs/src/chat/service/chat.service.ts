@@ -355,6 +355,7 @@ export class ChatService {
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .where('channelParticipant.userId = :Id', { Id: userId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
+      .andWhere('channel.type != :type', { type: ChannelType.DIRECT })
       .execute();
   }
 
@@ -381,6 +382,7 @@ export class ChatService {
           'channel.type',
           'channel.name',
         ])
+        .where('channel.type != :type', { type: ChannelType.DIRECT })
         .execute(),
     ]);
     const channelIds = userChannels.map((data) => data.channelId);
@@ -425,13 +427,12 @@ export class ChatService {
     const channel = await this.channelParticipantRepository
       .createQueryBuilder('participant')
       .leftJoinAndSelect('participant.channel', 'channel')
-      // .select(['channel.id'])
+      .select('channel.id', 'id')
       .where('channel.type = :Type', { Type: ChannelType.DIRECT })
       .andWhere('participant.userId = :Id', { Id: user1.id })
       .andWhere('participant.userId = :Id', { Id: user2.id })
       .execute();
 
-    console.log(channel.length == 1, channel);
     if (channel.length == 1) return channel; // return existing channel.
 
     const newChannel = this.channelRepository.create();
@@ -446,13 +447,52 @@ export class ChatService {
     return newChannel;
   }
 
+  async getDirectInfo(userId: number, channelId: number): Promise<any> {
+    const channelInfos = await this.channelRepository
+      .createQueryBuilder('channel')
+      .leftJoinAndSelect('channel.participant', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
+      .select(['channel.id'])
+      .addSelect('user.id', 'user_id')
+      .addSelect('user.nickname', 'user_name')
+      .addSelect('user.avatar', 'user_avatar')
+      .where('channel.id = :Id', { Id: channelId })
+      .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .execute();
+
+    const channelInfo = channelInfos.filter(
+      (channel) => channel.user_id != userId,
+    );
+
+    return channelInfo[0];
+  }
+
+  getUserDirectChannelIds(userId: number): Promise<any> {
+    return this.channelParticipantRepository
+      .createQueryBuilder('participant')
+      .leftJoinAndSelect('participant.channel', 'channel')
+      .select('participant.channelId', 'channelId')
+      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhere('participant.userId = :Id', { Id: userId })
+      .execute();
+  }
+
   async getDirectChannelList(userId: number): Promise<Channel[]> {
+    let channelIds = await this.getUserDirectChannelIds(userId);
+
+    channelIds = channelIds.map((a) => a.channelId);
+
     return this.channelRepository
       .createQueryBuilder('channel')
       .leftJoinAndSelect('channel.participant', 'participant')
-      .select(['channel.id', 'channel.name'])
-      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
-      .andWhere('participant.userId = :Id', { Id: userId })
+      .leftJoinAndSelect('participant.user', 'user')
+      .select(['channel.id'])
+      .addSelect('user.id', 'user_id')
+      .addSelect('user.nickname', 'user_name')
+      .addSelect('user.avatar', 'user_avatar')
+      .where('participant.userId != :Id', { Id: userId })
+      .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhereInIds(channelIds)
       .execute();
   }
 

@@ -2,10 +2,6 @@ import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { WsException } from '@nestjs/websockets';
 import { Channel } from 'diagnostics_channel';
-import {
-  Relationship,
-  RelationshipStatus,
-} from 'src/relationship/model/relationship.entity';
 import { RelationshipService } from 'src/relationship/service/relationship.service';
 import { Repository } from 'typeorm';
 import { CreateMessageDto } from '../dto/create-message.dto';
@@ -58,7 +54,7 @@ export class MessageService {
     return this.messageRepository.save(newMessage);
   }
 
-  getChannelMessages(channelId: number): Promise<Message> {
+  getChannelMessages(channelId: number) {
     return this.messageRepository
       .createQueryBuilder('message')
       .leftJoinAndSelect('message.author', 'author')

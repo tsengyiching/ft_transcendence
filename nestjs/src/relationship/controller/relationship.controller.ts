@@ -78,7 +78,7 @@ export class RelationshipController {
     @Query('status') status: string,
   ): Promise<SendSpecificListRelationshipDto[]> {
     await this.userService.getUserProfileById(id);
-    if (status !== RelationshipStatus.FRIEND && id !== user.id)
+    if (status !== 'friend' && id !== user.id)
       throw new HttpException(
         `User has no right to get other lists.`,
         HttpStatus.BAD_REQUEST,
@@ -182,7 +182,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
@@ -203,6 +203,7 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
     this.chatGateway.server.emit('reload-users', {
       user_id1: user.id,
       user_id2: relationshipDto.addresseeUserId,
