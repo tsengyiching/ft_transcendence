@@ -5,6 +5,7 @@ import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 import Twofa from "./Twofa";
+import Header from "./Header";
 import { useHistory } from "react-router-dom";
 
 import axios from 'axios';
@@ -22,54 +23,23 @@ function Router() {
         withCredentials:true,
     })
     .then(res => {
-        setTwofa(res.data.isTwoFactorAuthenticationEnabled);
-        if (!twofa)
-          setConnection(true)
+        // setTwofa(res.data.isTwoFactorAuthenticationEnabled);
+        // //if (!twofa)
+        setConnection(true)
     })
     .catch(res => {
+        console.log('DIABLERIE');
         setConnection(false)
     })
   });
 
-//   function Twofa () {
-//     const [code, setCode] = useState("")
-
-//     function authenticate() {
-//         axios.post('http://localhost:8080/2fa/authenticate/',{twoFactorAuthenticationCode: code},
-//             {withCredentials:true,
-//         })
-//         .then(res => {
-//           setConnection(true)
-//         })
-//         .catch(res => {
-//             console.log(res)
-//         })
-//     }
-
-//     function SubmitCode(event: any) {
-//         event.preventDefault();
-//         authenticate();
-//     }
-
-//     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
-
-//     return (
-//         <div>
-//             <Form className="" onSubmit={SubmitCode} >
-//             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
-//                 <Button variant="success" type="submit">
-//                     activate
-//                 </Button>
-//             </Form>
-//         </div>
-//     )
-// }
 
   function Authorized() {
     return (
       <BrowserRouter>
+        <Header/>
         <Switch>
-          <Route exact path="/accueil" component={Home} />
+          <Route exact path="/" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/auth/disconnect" component={Disconnect} />
@@ -85,7 +55,7 @@ function Router() {
       <BrowserRouter>
         <Switch>
           <Route exact path="/connexion" component={Connexion} />
-          <Route path="/2fa" element={<Twofa isConnected={isConnected} setConnection={setConnection}/>}/>
+          <Route path="/2fa" component={() => <Twofa setConnection={setConnection}/>}/>
           <Route component={Connexion} />
         </Switch>
       </BrowserRouter>

@@ -5,23 +5,22 @@ import { useHistory } from "react-router-dom";
 
 interface STATE {
     setConnection:Function;
-    isConnected:boolean;
+    //isConnected:boolean;
 }
 
-const Twofa:JSX.Element = (props:STATE) => {
+const Twofa = (props:STATE) => {
     const [code, setCode] = useState("")
+    const setConnection = props.setConnection;
 
-    let history = useHistory();
-
-    const authenticate() = useCallback(
-        async (event: React.FormEvent<HTMLInputElement>) => {
+    const SubmitCode = useCallback(
+        async (event) => {
         event.preventDefault();
 
         await axios.post('http://localhost:8080/2fa/authenticate/',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
         })
         .then(res => {
-            props.setConnection(true);
+            setConnection(true);
         })
         .catch(res => {
             console.log(res)
@@ -29,15 +28,12 @@ const Twofa:JSX.Element = (props:STATE) => {
     }, []);
 
 
-    function SubmitCode(event: any) {
-        authenticate();
-    }
-
+  
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     return (
         <div>
-            <Form className="" onSubmit={SubmitCode} >
+            <Form onSubmit={SubmitCode} >
             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
                 <Button variant="success" type="submit">
                     activate
