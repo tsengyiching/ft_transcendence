@@ -20,18 +20,23 @@ function Header () {
 
 // console.log(history);
     useEffect(() => {
+		let isMounted = true;
+
         axios.get('http://localhost:8080/profile/me/',{
             withCredentials:true,
         })
         .then(res => {
+			if (isMounted) {
             setId(res.data.id);
             setAvatar(res.data.avatar)
 			setNick(res.data.nickname)
             setConnexion(true);
+			}
         })
         .catch(res => {
             setConnexion(false);
-        })
+        });
+		return (() => {isMounted = false});
     }, []);
 
     if (isConnected)

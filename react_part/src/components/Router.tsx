@@ -23,9 +23,9 @@ function Router() {
         withCredentials:true,
     })
     .then(res => {
-        // setTwofa(res.data.isTwoFactorAuthenticationEnabled);
-        // //if (!twofa)
-        setConnection(true)
+        setTwofa(res.data.isTwoFactorAuthenticationEnabled);
+        if (!twofa)
+          setConnection(true)
     })
     .catch(res => {
         console.log('DIABLERIE');
