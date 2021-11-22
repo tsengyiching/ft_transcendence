@@ -20,16 +20,19 @@ export function Unfriend(id: number)
 export function Askfriend(id: number)
 {
 	axios.post('http://localhost:8080/relationship/add', {addresseeUserId: id}, {withCredentials: true})
+	.catch((res) => console.log(res));
 }
 
 export function Block(id: number)
 {
 	axios.post('http://localhost:8080/relationship/block', {addresseeUserId: id}, {withCredentials: true})
+	.catch((res) => console.log(res));
 }
 
 export function Unblock(id: number)
 {
 	axios.delete('http://localhost:8080/relationship/unblock', {withCredentials: true, data: {addresseeUserId: id}})
+	.catch((res) => console.log(res));
 }
 
 /*
