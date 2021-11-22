@@ -208,7 +208,7 @@ function SanctionModal(props: IPropsModal)
 					{props.sanctionstatus === "mute" ?
 					<Form.Select aria-label="Default select example"
 						value={time} 
-						onChange={(e: any) => {setTime(e.target.value); console.log(`time: [${time}]`)}}
+						onChange={(e: any) => {setTime(e.target.value);}}
 					>
 						<option value="">Time {props.sanctionstatus}</option>
 						<option value="5min">5 minutes</option>
@@ -219,8 +219,8 @@ function SanctionModal(props: IPropsModal)
 					</Form.Select>
 					:
 					<Form.Select aria-label="Default select example"
-						value={time} 
-						onChange={(e: any) => {setTime(e.target.value); console.log(`time: [${time}]`)}}
+						value={time}
+						onChange={(e: any) => {setTime(e.target.value);}}
 					>
 						<option value="">Time {props.sanctionstatus}</option>
 						<option value="5min">5 minutes</option>
