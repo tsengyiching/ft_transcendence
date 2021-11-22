@@ -1,0 +1,11 @@
+
+.Ban {
+	font-size: 1500%;
+	padding-top: 7%;
+	padding-bottom: 5%;
+	color: red;
+	border-color: red;
+	border-style: solid;
+	margin-top: 40vh; /* poussé de la moitié de hauteur de viewport */
+	transform: translateY(-45%); /* tiré de la moitié de sa propre hauteur */
+}
