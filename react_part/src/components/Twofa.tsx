@@ -15,7 +15,6 @@ const Twofa = (props:STATE) => {
     const SubmitCode = useCallback(
         async (event) => {
         event.preventDefault();
-             console.log(code);
         await axios.post('http://localhost:8080/2fa/authenticate',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
         })
@@ -26,7 +25,7 @@ const Twofa = (props:STATE) => {
         .catch(res => {
             console.log('2factorauth failded :', res);
         })
-    }, []);
+    }, [code, setConnection]);
 
 
   

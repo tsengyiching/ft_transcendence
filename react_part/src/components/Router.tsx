@@ -6,11 +6,8 @@ import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 import Twofa from "./Twofa";
 import Header from "./Header";
-import { useHistory } from "react-router-dom";
-
 import axios from 'axios';
 import { useEffect, useState } from "react";
-import { Form, Button, Image } from "react-bootstrap";
 import Ban from "./Ban";
 
 function Router() {
@@ -28,7 +25,6 @@ function Router() {
           setConnection(true)
     })
     .catch(res => {
-        console.log('DIABLERIE');
         setConnection(false)
     })
   });
