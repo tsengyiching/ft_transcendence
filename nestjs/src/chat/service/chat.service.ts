@@ -12,14 +12,12 @@ import {
 import { JoinChannelDto } from '../dto/join-channel.dto';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/model/user.entity';
-import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { OptionAdmin, SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import {
   OptionPassword,
   SetChannelPasswordDto,
 } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
-import e from 'cors';
 
 @Injectable()
 export class ChatService {
@@ -112,58 +110,58 @@ export class ChatService {
   /**
    * leaveChannel checks and removes a channel current participant.
    * (channel-leave)
-   * @param LeaveChannelDto: channel id
+   * @param : channel id
    * @returns number,
    *  - -1 : If channels as been deleted
-   *  - 0 : if user not as promote to channel owner,
    *  - id : of new channel owner.
    */
-  async leaveChannel(
-    userId: number,
-    leaveChannelDto: LeaveChannelDto,
-  ): Promise<number> {
-    let result;
+  async leaveChannel(userId: number, channelId: number): Promise<number> {
     const [channel, participant, otherUsers] = await Promise.all([
-      this.getChannelById(leaveChannelDto.channelId),
-      this.getOneChannelParticipant(userId, leaveChannelDto.channelId),
+      this.getChannelById(channelId),
+      this.getOneChannelParticipant(userId, channelId),
       this.channelParticipantRepository.find({
         where: {
-          channelId: leaveChannelDto.channelId,
+          channelId: channelId,
           userId: Not(userId),
           status: StatusInChannel.NORMAL,
         },
       }),
     ]);
     if (this.isChannelParticipant(participant, channel)) {
+      /* check participant's status */
       if (
         participant.status === StatusInChannel.BAN ||
         participant.status === StatusInChannel.MUTE
-      )
+      ) {
         throw new WsException(
           'You could not leave a channel from which you were banned or mute.',
         );
-    }
-    if (otherUsers.length === 0) {
-      console.log(`Channel ${channel.name} has been deleted.`);
-      await this.channelRepository.remove(channel);
-      return -1;
-    }
-    if (participant.role === ChannelRole.OWNER) {
-      const admin = otherUsers.filter(
-        (data) => data.role === ChannelRole.ADMIN,
-      );
-      if (admin.length !== 0) {
-        admin[0].role = ChannelRole.OWNER;
-        await this.channelParticipantRepository.save(admin[0]);
-        result = admin[0].userId;
-      } else {
-        otherUsers[0].role = ChannelRole.OWNER;
-        await this.channelParticipantRepository.save(otherUsers[0]);
-        result = otherUsers[0].userId;
       }
+      /* no other participant with normal status left, delete the channel */
+      if (otherUsers.length === 0) {
+        console.log(`Channel ${channel.name} has been deleted.`);
+        await this.channelRepository.remove(channel);
+        return -1;
+      }
+      /* If participant is the channel user, and there are normal users left */
+      let newOwnerId: number;
+      if (participant.role === ChannelRole.OWNER) {
+        const admin = otherUsers.filter(
+          (data) => data.role === ChannelRole.ADMIN,
+        );
+        if (admin.length !== 0) {
+          admin[0].role = ChannelRole.OWNER;
+          await this.channelParticipantRepository.save(admin[0]);
+          newOwnerId = admin[0].userId;
+        } else {
+          otherUsers[0].role = ChannelRole.OWNER;
+          await this.channelParticipantRepository.save(otherUsers[0]);
+          newOwnerId = otherUsers[0].userId;
+        }
+      }
+      await this.channelParticipantRepository.remove(participant);
+      return newOwnerId;
     }
-    await this.channelParticipantRepository.remove(participant);
-    return result;
   }
 
   async changeChannelUserStatus(
@@ -547,7 +545,7 @@ export class ChatService {
   isChannelOwner(participant: ChannelParticipant, channel: Channel): boolean {
     if (participant.role !== ChannelRole.OWNER) {
       throw new WsException(
-        `${participant.user.nickname} is not the owner of channel [${channel.name}].
+        `Participant is not the owner of channel [${channel.name}].
         Only the owner can add/change/delete password and set/unset administrators.`,
       );
     }
@@ -557,7 +555,7 @@ export class ChatService {
   isChannelAdmin(participant: ChannelParticipant, channel: Channel): boolean {
     if (participant.role !== ChannelRole.ADMIN) {
       throw new WsException(
-        `${participant.user.nickname} is not the administrator of channel [${channel.name}].`,
+        `Participant is not the administrator of channel [${channel.name}].`,
       );
     }
     return true;
@@ -569,12 +567,12 @@ export class ChatService {
   ): boolean {
     if (participant.role !== ChannelRole.USER) {
       throw new WsException(
-        `${participant.user.nickname} is already the owner/administrator of channel [${channel.name}].`,
+        `Participant is already the owner/administrator of channel [${channel.name}].`,
       );
     }
     if (participant.status !== StatusInChannel.NORMAL) {
       throw new WsException(
-        `${participant.user.nickname} is muted/banned in channel [${channel.name}].`,
+        `The participant is muted/banned in channel [${channel.name}].`,
       );
     }
     return true;
