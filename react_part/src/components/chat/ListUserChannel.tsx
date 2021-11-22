@@ -170,19 +170,24 @@ function SanctionModal(props: IPropsModal)
 	function SubmitForm(event: any)
 	{
 		event.preventDefault();
-		console.log({
+/* 		console.log({
 			channelId: props.channelid,
 			userId: props.user?.user_id,
 			sanctionDuration: convertTime(time),
 			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),	
-		})
-		socket.emit('channel-status-change', {
-			channelId: props.channelid,
-			userId: props.user?.user_id,
-			sanctionDuration: convertTime(time),
-			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),
-		})
-		onHide()
+		}) */
+		if (time !== "")
+		{
+
+			socket.emit('channel-status-change', {
+				channelId: props.channelid,
+				userId: props.user?.user_id,
+				sanctionDuration: convertTime(time),
+				status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),
+			})
+			onHide()
+		}
+		event.stopPropagation()
 	}
 
 	if (props.user === undefined)
@@ -205,7 +210,7 @@ function SanctionModal(props: IPropsModal)
 						value={time} 
 						onChange={(e: any) => {setTime(e.target.value);}}
 					>
-						<option>Time {props.sanctionstatus}</option>
+						<option value="">Time {props.sanctionstatus}</option>
 						<option value="5min">5 minutes</option>
 						<option value="15min">15 minutes</option>
 						<option value="1hour">1 hour</option>
@@ -214,9 +219,10 @@ function SanctionModal(props: IPropsModal)
 					</Form.Select>
 					:
 					<Form.Select aria-label="Default select example"
-						value={time} 
-						onChange={(e: any) => {setTime(e.target.value); console.log(`time: ${time}`)}}
+						value={time}
+						onChange={(e: any) => {setTime(e.target.value);}}
 					>
+						<option value="">Time {props.sanctionstatus}</option>
 						<option value="5min">5 minutes</option>
 						<option value="15min">15 minutes</option>
 						<option value="1hour">1 hour</option>

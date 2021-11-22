@@ -40,7 +40,7 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
     )
 }
 
-export function FormMessageChannel(props: {channelSelected: IChannel, ListUsers: IUser[], userData: Data})
+function FormMessageChannel(props: {channelSelected: IChannel, ListUsers: IUser[], userData: Data})
 {
 	const socket = useContext(SocketContext);
 	const [messageForm, SetMessageForm] = useState<string>("");
