@@ -21,6 +21,7 @@ function ButtonPrivateConversation(props: {Conversation: IConversation, setUserC
 		className="ButtonConversation"
 		onClick={() => props.setUserConversationSelected({user_id: props.Conversation.user_id})}>
 			{props.Conversation.user_name}
+
 		</Button>
 	)
 }
@@ -44,7 +45,7 @@ export default function ListPrivateConversation(props: {setUserConversationSelec
 		<Col style={{overflow: 'auto', marginBottom: '20px'}} lg={6}>
 		{ PrivateConversation.length !== 0 
 		?	PrivateConversation.map((Conversation) => ButtonPrivateConversation({Conversation: Conversation, setUserConversationSelected: props.setUserConversationSelected}))
-		:	<div> No private Conversation</div>
+		:	<div></div>
 		}
 		</Col>
 	</Row>

@@ -17,3 +17,9 @@
 .MessageForm {
 	height: 20em;
 }
+
+.FormSendMessage {
+	width: 100%;
+	padding: 1em;
+	display: flex;
+}

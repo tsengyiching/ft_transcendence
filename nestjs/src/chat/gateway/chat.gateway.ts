@@ -412,7 +412,7 @@ export class ChatGateway
         );
         client.emit('private-info', channelInfo);
         client.emit('private-message-list', messages);
-        console.log('Channel loaded successfully !');
+        console.log('Conversation loaded successfully !');
       }
     } catch (error) {
       console.log(error);
