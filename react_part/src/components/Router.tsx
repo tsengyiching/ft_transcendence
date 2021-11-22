@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import axios from 'axios';
 import { useEffect, useState } from "react";
 import { Form, Button, Image } from "react-bootstrap";
+import Ban from "./Ban";
 
 function Router() {
 
@@ -72,6 +73,7 @@ function Router() {
           <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/settings" component={Settings} />
           <Route exact path="/auth/disconnect" component={Disconnect} />
+          <Route exact path="/ban" component={Ban} />
           <Route component={Home} />
         </Switch>
       </BrowserRouter>
