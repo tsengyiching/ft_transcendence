@@ -1,10 +1,9 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Res } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/service/user.service';
-import { Request, Response } from 'express';
-import { WsException } from '@nestjs/websockets';
+import { Request } from 'express';
 
 export type JwtPayload = {
   id: number;

@@ -35,7 +35,7 @@ export class User {
   @Column()
   avatar: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate: Date;
 
   @Column({
