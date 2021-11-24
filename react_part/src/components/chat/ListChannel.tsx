@@ -12,7 +12,8 @@ import MuteImage from "../pictures/volume-off.jpeg"
 import BlockImage from "../pictures/redx.png"
 import JoinChannelModal from "./JoinChannelModal"
 import {IChannel, Role} from './InterfaceUser'
-
+import { DataContext, SiteStatus } from "../../App"
+import QuitCross from "../pictures/quit-icon.png"
 
 interface IMyChannel {
         channel_id: number,
@@ -38,6 +39,7 @@ function ListChannel(props: IUseStateChannel) {
         const [MyChannels, SetMyChannels] = useState<IMyChannel[]>([]);
         const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
         const [ShowJoinModal, setShowJoinModal] = useState(0);
+        const userData = useContext(DataContext);
 
         useEffect( () => { 
                 socket.emit("ask-reload-channel");
@@ -84,7 +86,7 @@ function ListChannel(props: IUseStateChannel) {
                         <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
                         : Channel.status !== "Mute" ?
                         <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
-                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}       
+                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
                 </Button>
                 </div>
                 )
@@ -101,6 +103,8 @@ function ListChannel(props: IUseStateChannel) {
                                 <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                                 : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
                                 {channel_name}
+                                { (userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR) &&
+                                        <Image src={QuitCross} className="LogoChannel" roundedCircle alt="quit" />}
                         </Button>
                         <JoinChannelModal
                         show={ShowJoinModal === channel_id}

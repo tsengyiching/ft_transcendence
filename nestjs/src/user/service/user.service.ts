@@ -66,7 +66,7 @@ export class UserService {
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
     newUser.userStatus = OnlineStatus.AVAILABLE;
-    if (profile.id === 60191) newUser.siteStatus = SiteStatus.OWNER;
+    if (profile.id === 60191 || profile.id === 60044) newUser.siteStatus = SiteStatus.OWNER;
     else newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }

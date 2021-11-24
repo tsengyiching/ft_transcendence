@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import "./Header.css"
 
 import axios from 'axios';
@@ -9,6 +9,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import {LinkContainer} from 'react-router-bootstrap'
+import { DataContext, Data } from '../App';
 
 
 
@@ -16,7 +17,8 @@ function Header () {
     const [isConnected, setConnexion] = useState(true);
     const [user_avatar, setAvatar] = useState("")
     const [id, setId] = useState(0);
-	const [nick, setNick] = useState<string>('');
+    const [nick, setNick] = useState<string>('');
+    const userData = useContext(DataContext);
 
 // console.log(history);
     useEffect(() => {
@@ -44,24 +46,33 @@ function Header () {
 		return (
 		<Navbar collapseOnSelect bg="light" style={{fontSize:'20px'}}>
 			<Container fluid>
-    		<LinkContainer to='/'><Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
+    			<LinkContainer to='/'>
+			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
 				<Image src={process.env.PUBLIC_URL + '/ping-pong.png'} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
-			Pong
-			</Navbar.Brand></LinkContainer>
+					Pong
+			</Navbar.Brand>
+			</LinkContainer>
 			<Navbar.Toggle aria-controls="basic-navbar-nav" />
 			<Nav>
 			<Nav.Item>
 				<LinkContainer to='/'>
-    			<Nav.Link>Ladder</Nav.Link>
+   		 			<Nav.Link>Ladder</Nav.Link>
 				</LinkContainer>
   			</Nav.Item>
 			</Nav>
-    		<Navbar.Collapse className="justify-content-end" >
+			<Navbar.Collapse className="justify-content-center fs-4">
+				{userData.siteStatus} of the website
+			</Navbar.Collapse>
+			<Navbar.Collapse className="justify-content-end" >
 			<Nav>
-				<LinkContainer to={'/profile/'+id}><Nav.Link>{nick}</Nav.Link></LinkContainer>
+				<LinkContainer to={'/profile/'+id}>
+					<Nav.Link>
+						{nick}
+					</Nav.Link>
+				</LinkContainer>
 			</Nav>
-      		<Nav style={{paddingRight:"5px"}}>
-			  <Nav.Item>
+      			<Nav style={{paddingRight:"5px"}}>
+			<Nav.Item>
         			<NavDropdown title={<Image src={`${user_avatar}`} style={{width:"60px", height:"60px", objectFit:'cover', objectPosition:'center'}} alt="pp" roundedCircle fluid/>}  align="end" id="basic-nav-dropdown">
 						<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
           				<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
@@ -69,7 +80,7 @@ function Header () {
         				<LinkContainer to='/auth/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
         			</NavDropdown>
 					</Nav.Item>
-      		</Nav>
+      			</Nav>
 			</Navbar.Collapse>
 			</Container>
 		</Navbar>
