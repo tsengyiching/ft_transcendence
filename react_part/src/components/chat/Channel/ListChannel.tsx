@@ -1,19 +1,20 @@
 import React, { useState, useEffect, useContext } from "react"
 import { Col, Row, Button, Image } from "react-bootstrap"
-import {SocketContext} from "../../context/socket"
+import {SocketContext} from "../../../context/socket"
 import './ListChannel.css'
-import PadlockImage from "../pictures/Padlock-symbol.png"
-import GlobeImage from "../pictures/earth-globe-world-globe-drawing-sticker.jpeg"
-import CrownImage from "../pictures/Crown.jpg"
-import StarImage from "../pictures/star1.jpeg"
-import MSNImage from "../pictures/people.jpeg"
-import NormalImage from "../pictures/volume-on.png"
-import MuteImage from "../pictures/volume-off.jpeg"
-import BlockImage from "../pictures/redx.png"
+import PadlockImage from "../../pictures/Padlock-symbol.png"
+import GlobeImage from "../../pictures/earth-globe-world-globe-drawing-sticker.jpeg"
+import CrownImage from "../../pictures/Crown.jpg"
+import StarImage from "../../pictures/star1.jpeg"
+import MSNImage from "../../pictures/people.jpeg"
+import NormalImage from "../../pictures/volume-on.png"
+import MuteImage from "../../pictures/volume-off.jpeg"
+import BlockImage from "../../pictures/redx.png"
+import QuitCross from "../../pictures/quit-icon.png"
 import JoinChannelModal from "./JoinChannelModal"
-import {IChannel, Role} from './InterfaceUser'
-import { DataContext, SiteStatus } from "../../App"
-import QuitCross from "../pictures/quit-icon.png"
+import DestroyChannelModal from "./DestroyChannelModal"
+import {IChannel, Role} from '../../InterfaceUser'
+import { DataContext, SiteStatus } from "../../../App"
 
 interface IMyChannel {
         channel_id: number,
@@ -66,10 +67,16 @@ function ListChannel(props: IUseStateChannel) {
                 let channel_name = Channel.channel_name;
                 let role = Channel.role;
                 let channel_type = Channel.channel_type;
+                let isDestroying = false;
 
                 return (
                 <div key={channel_id}>
-                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => (props.setChannelSelected({channel_id, channel_name, channel_type, role,}))}>
+                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => {
+                        if (!isDestroying)
+                                props.setChannelSelected({channel_id, channel_name, channel_type, role,})
+                        else
+                                isDestroying = false;
+                        }}>
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
@@ -95,16 +102,20 @@ function ListChannel(props: IUseStateChannel) {
         function ButtonOtherChannel(Channel: IOtherChannel) {
                 let channel_id = Channel.channel_id;
                 let channel_name = Channel.channel_name;
+                let isDestroying = false;
 
                 return (
                         <div key={channel_id}>
-                        <Button  className="ButtonChannel ButtonOtherChannel" onClick={() => {setShowJoinModal(channel_id); console.log(channel_name)}}>
+                        <Button  className="ButtonChannel ButtonOtherChannel"
+                        onClick={(event) => { !isDestroying ? setShowJoinModal(channel_id) : isDestroying = false; }}>
+
                                 {Channel.channel_type === 'Private' ?
                                 <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                                 : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
                                 {channel_name}
                                 { (userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR) &&
-                                        <Image src={QuitCross} className="LogoChannel" roundedCircle alt="quit" />}
+                                        <Image src={QuitCross} className="LogoChannel" roundedCircle alt="quit"
+                                        onClick={(event)=>{isDestroying = true; console.log("click")}}/>}
                         </Button>
                         <JoinChannelModal
                         show={ShowJoinModal === channel_id}

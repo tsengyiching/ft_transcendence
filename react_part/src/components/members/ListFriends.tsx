@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react"
-import {SwitchContext} from '../chat/InterfaceUser'
+import {SwitchContext} from '../InterfaceUser'
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'

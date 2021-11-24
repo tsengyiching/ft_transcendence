@@ -3,11 +3,11 @@ import {Button} from 'react-bootstrap'
 import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
 import { useHistory } from 'react-router'
 import {useState, useContext, useEffect} from 'react'
-import {socket, SocketContext} from '../../context/socket'
-import {DataContext, Data} from '../../App'
+import {socket, SocketContext} from '../../../context/socket'
+import {DataContext, Data} from '../../../App'
 import {Modal, Form} from 'react-bootstrap'
-import {IUser} from './ChatInterface'
-import {Role, SwitchContext} from './InterfaceUser'
+import {IUser} from '../ChatInterface'
+import {Role, SwitchContext} from '../../InterfaceUser'
 
 interface IPropsModal {
 	show: boolean,

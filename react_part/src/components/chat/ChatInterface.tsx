@@ -2,10 +2,10 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Row, Col, Image, } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './ChatInterface.css'
-import {IChannel, IUserConversation, messageType, Role} from './InterfaceUser'
+import {IChannel, IUserConversation, messageType, Role} from '../InterfaceUser'
 import {Data} from '../../App'
-import {ChatChannel, ChatChannelDisabled} from './ChatChannel'
-import {ChatPrivate, ChatPrivateDisabled} from './ChatPrivate'
+import {ChatChannel, ChatChannelDisabled} from './Channel/ChatChannel'
+import {ChatPrivate, ChatPrivateDisabled} from './PrivateConversation/ChatPrivate'
 
 /* 
 ****CHAT****

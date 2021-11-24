@@ -1,15 +1,15 @@
 import { useState, useEffect, useContext} from "react"
-import { socket } from "../../context/socket";
-import { SwitchContext } from "../chat/InterfaceUser";
-import {Image, Col, Row} from 'react-bootstrap'
-import axios from 'axios'
-import "./ListUsers.css"
-import './members.css'
-import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
+import {Image, Col, Row} from 'react-bootstrap'
+import {useHistory} from "react-router-dom"
+import axios from 'axios'
+import { socket } from "../../context/socket";
+import { SwitchContext } from "../InterfaceUser";
+import status from './Status'
 import {DataContext} from "../../App" 
 import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
-import {useHistory} from "react-router-dom"
+import './members.css'
+import "./ListUsers.css"
 
 interface IUser {
 	id: number;

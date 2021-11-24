@@ -1,8 +1,8 @@
-import ParametersIcon from '../pictures/parameters-icon.png'
+import ParametersIcon from '../../pictures/parameters-icon.png'
 import { Row, Col, Image, Modal, Form, Button, CloseButton} from 'react-bootstrap'
-import {IChannel, } from './InterfaceUser'
+import {IChannel, } from '../../InterfaceUser'
 import { useEffect, useState } from 'react'
-import { socket } from '../../context/socket';
+import { socket } from '../../../context/socket';
 
 interface Props {
 	show: boolean,

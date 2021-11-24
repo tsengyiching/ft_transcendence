@@ -1,14 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import React, {useState, useContext, useEffect} from 'react'
-import CreateChannelButton from './create_channel';
-import ListChannel from "./ListChannel";
-import ListPrivateConversation from "./ListPrivateConversation"
-import {SocketContext} from '../../context/socket'
-import InterfaceMembers from '../members/members';
-import LeaveChannelButton from './LeaveChannelModal'
+import CreateChannelButton from './chat/Channel/create_channel';
+import ListChannel from "./chat/Channel/ListChannel";
+import ListPrivateConversation from "./chat/PrivateConversation/ListPrivateConversation"
+import {SocketContext} from '../context/socket'
+import InterfaceMembers from './members/members';
+import LeaveChannelButton from './chat/Channel/LeaveChannelModal'
 import './InterfaceUser.css'
-import InterfaceChat from './ChatInterface';
+import InterfaceChat from './chat/ChatInterface';
 
 export type Role = 'Owner' | 'Admin' | 'User';
 

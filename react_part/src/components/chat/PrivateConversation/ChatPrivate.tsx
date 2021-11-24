@@ -1,10 +1,10 @@
 
 import { useEffect, useContext, useState, useRef } from 'react'
 import {Row, Col, Form, Button} from 'react-bootstrap'
-import { SocketContext } from '../../context/socket'
-import { DataContext, Data } from '../../App'
-import { IUserConversation } from './InterfaceUser'
-import {IMessage, Message} from './ChatInterface'
+import { SocketContext } from '../../../context/socket'
+import { DataContext, Data } from '../../../App'
+import { IUserConversation } from '../../InterfaceUser'
+import {IMessage, Message} from '../ChatInterface'
 import './ChatPrivate.css'
 
 interface IUser {

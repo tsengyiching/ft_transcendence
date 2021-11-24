@@ -1,8 +1,8 @@
 
 import React, { useContext, useEffect, useState } from 'react'
 import {Row, Button, Col} from 'react-bootstrap'
-import { SocketContext } from '../../context/socket'
-import { IUserConversation } from './InterfaceUser';
+import { SocketContext } from '../../../context/socket'
+import { IUserConversation } from '../../InterfaceUser';
 import './ListPrivateConversation.css'
 
 interface IConversation {
