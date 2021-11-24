@@ -3,6 +3,10 @@ import { FunctionTypeNode } from 'typescript'
 import create from 'zustand'
 import {Paddle, Ball, Pos} from './../types/ObjectTypes'
 
+type Player = {
+	avatar:string;
+	name: string;
+}
 type Box = {
 	x:number;
 	y:number;
@@ -23,17 +27,13 @@ type Score = {
 	fontSize: number;
 }
 
-type Controls = {
-	up: boolean;
-	down: boolean;
-}
-
 type Bonus = {
 	up: boolean;
 	x: number;
 	y: number;
 	id: number;
 }
+
 type Infos = {
 	pOneY: number;
 	pTwoY: number;
@@ -58,6 +58,8 @@ type Store = {
 	left:number;
 	gameStatus:number;
 	setGameStatus: (status:number) => void;
+	playerL:Player;
+	playerR:Player;
 }
 
 const useStore = create<Store>((set) => {
@@ -89,7 +91,7 @@ const useStore = create<Store>((set) => {
 			},
 			radius: 0,
 		},
-	setNewPos: (infos) => set((state) => ({ ////////// FAIRE RATIO POUR 
+	setNewPos: (infos:Infos) => set((state:Store) => ({ ////////// FAIRE RATIO POUR 
 		ball:{...state.ball, pos:{x:infos.ballX, y:infos.ballY}},
 		paddleR:{...state.paddleR, pos:{x:state.paddleR.pos.x, y:infos.pTwoY}},
 		paddleL:{...state.paddleL, pos:{x:state.paddleL.pos.x, y:infos.pOneY}}
@@ -121,9 +123,11 @@ const useStore = create<Store>((set) => {
 		left:0,
 		right:0,
 		gameStatus:0,
-		setGameStatus: (status) => set((s) => ({gameStatus:status})),
+		setGameStatus: (status) => set((s:Store) => ({gameStatus:status})),
+		playerL :{ name: '', avatar: ''},
+		playerR :{ name: '', avatar: ''},
 	}
 });
 
 export default useStore;
-export type { Ball, Paddle, Score, Bonus };
+export type { Ball, Paddle, Score, Bonus, Player };

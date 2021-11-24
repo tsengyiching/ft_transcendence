@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Ball, Paddle, Player, ObjectToCollide, Party } from './pong.interface';
+import { Ball, Paddle, Player, ObjectToCollide, Match } from './pong.interface';
 import { UserService } from 'src/user/service/user.service';
 import { OnlineStatus, User } from 'src/user/model/user.entity';
 
@@ -16,17 +16,27 @@ import {
   FRAMERATE,
 } from './pong.env';
 
+
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 @Injectable()
 export class PongService {
   
-  private parties: Party[] = [];
+  private matches: Match[] = [];
   
-  getPartById(id: number) {
-    return this.parties.find((e) => {e.id === id});
+  getMatchById(id: number) {
+    return this.matches.find((e) => {e.id === id});
   }
 
-  private setNewParty(id:number, p1: Player, p2: Player): Party {
-    const newParty: Party = {
+  getMatchIdByPlayerId(playerId:number) {
+    return this.matches.find(e => e.pOne.id === playerId || e.pTwo.id === playerId).id;
+  }
+
+  private setNewMatch(id:number, p1: Player, p2: Player): Match {
+    const newMatch: Match = {
 	  id: id,
       ball: {
         pos: { x: W * 0.5, y: H * 0.5 },
@@ -62,7 +72,7 @@ export class PongService {
       pTwo: {...p2},
 	  run: false,
     };
-    return newParty;
+    return newMatch;
   }
 
   private async createPlayerById(id:number, userService:UserService, paddle:number):Promise<Player> {
@@ -71,29 +81,66 @@ export class PongService {
 		let newPlayer:Player = {
 			name: user.nickname,
 			id: id,
+      socketId: '',
   			avatar: user.avatar,
   			paddle: paddle,
   			score: 0,
   			up: false,
-  			down: false
+  			down: false,
+        ready: false
 		}
 		return newPlayer;
 	}
 	catch (error) {
 		console.log(error);
 	}
-  } 
-  /**
-   *
-   * @param id party id
-   * @param userIdArr ids of the 2 players
-   * @param userService YOU KNOW
-   * @returns id of the party ??(voir avec Felix) // TODO
-   */
-  async createNewParty(id: number, usersIdArr:number[], userService:UserService) {
-	const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
-	const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
-    this.parties.push(this.setNewParty(id, pOne, pTwo));
   }
 
+
+  /**
+   *
+   * @param id Match id
+   * @param userIdArr ids of the 2 players
+   * @param userService YOU KNOW
+   * @returns id of the Match ??(voir avec Felix) // TODO
+   */
+  async createNewMatch(id: number, usersIdArr:number[], userService:UserService) {
+	const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
+	const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
+    this.matches.push(this.setNewMatch(id, pOne, pTwo));
+  }
+
+
+  sendPlayersInfos(gameId) {
+    const currentGame = this.matches.find(e => e.id === gameId)
+    return {
+      pLName:currentGame.pOne.name,
+      pLAvatar:currentGame.pOne.avatar,
+      pRName:currentGame.pTwo.name,
+      pRAvatar:currentGame.pTwo.avatar,
+    }
+  }
+
+  playersSetReady(gameId:number, playerId:number, socketId:string)
+  {
+    const currentGame = this.matches.find(e => e.id === gameId);
+    if (playerId === currentGame.pOne.id)
+    {
+      currentGame.pOne.socketId = socketId;
+      currentGame.pOne.ready = true;
+    }
+    if (playerId === currentGame.pTwo.id)
+    {
+      currentGame.pTwo.socketId = socketId;
+      currentGame.pTwo.ready = true;
+    }
+  }
+
+  playersReadyCheck(gameId) : boolean {
+    const currentGame = this.matches.find(e => e.id === gameId);
+    if (currentGame.pOne.ready && currentGame.pTwo.ready)
+      return true;
+    return false;
+  }
 }
+

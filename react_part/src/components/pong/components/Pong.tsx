@@ -8,9 +8,6 @@ import BonusHandler from "./Handlers/BonusHandler";
 const Pong:React.VFC<{h:number, w:number}> = (props) => {
 	const set = useStore.setState;
 	const score = useStore(s => s.scoreBar);
-	console.log('render');
-	console.log(score.imgLeft.x)
-
 	useEffect(() => {
 		set(s => ({...s,
 			paddleL: {

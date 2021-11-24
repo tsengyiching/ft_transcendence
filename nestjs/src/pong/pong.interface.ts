@@ -29,14 +29,16 @@ export type Ball = {
 export type Player = {
   name: string;
   id: number;
+  socketId: string;
   avatar: string;
   paddle: number;
   score: number;
   up: boolean;
   down: boolean;
+  ready:boolean;
 };
 
-export type Party = {
+export type Match = {
   id: number;
   ball: Ball;
   paddleL: Paddle;
