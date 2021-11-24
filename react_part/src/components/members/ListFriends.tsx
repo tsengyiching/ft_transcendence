@@ -82,7 +82,8 @@ export default function ListFriends()
 		}
 
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	//const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
@@ -104,28 +105,12 @@ export default function ListFriends()
 		})
 		
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
+		socket.on("reload-users", () => {
+			console.log("reload in ListFriends")
+			setReload(Reload + 1);
 		})
 		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
-	}, [])
-
-	//actualize the friendlist
-	useEffect(() => {
-		//console.log("in reload friendlist");
-		let isMounted = true;
-		if (userData.id === ReloadFriendlist.user_id1 || userData.id === ReloadFriendlist.user_id2)
-		{
-		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
-		.then(res => { if (isMounted)
-			SetFriends(res.data);
-		})
-		.catch(res => { if (isMounted)
-			console.log("error");
-		})
-		}
-		return (() => {isMounted = false});
-	}, [ReloadFriendlist, userData.id])
+	}, [Reload])
 
 	//actualize the status
 	useEffect(() => {

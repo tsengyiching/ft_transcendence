@@ -60,7 +60,8 @@ export default function ListBlockedUsers()
 
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
-	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	//const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const userData = useContext(DataContext);
 	let history = useHistory();
@@ -77,26 +78,10 @@ export default function ListBlockedUsers()
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
+		socket.on("reload-users", () => { setReload(Reload + 1); });
 
 		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
-	}, []);
-
-	//actualize the blockedlist
-	useEffect(() => {
-		let isMounted = true
-		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id === ReloadBlockedUserlist.user_id2)
-		{
-			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
-			.then(res => { if (isMounted)
-				SetBlockedUsers(res.data);
-			})
-			.catch(res => { if (isMounted)
-				console.log(res.data);
-			})
-		}
-	}, [ReloadBlockedUserlist, userData.id])
+	}, [Reload]);
 
 	//actualize the status
 	useEffect(() => {
