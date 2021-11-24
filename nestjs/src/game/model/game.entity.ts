@@ -31,10 +31,10 @@ export class Game {
   })
   mode: GameMode;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamptz' })
   updateDate: Date;
 
   @Column({

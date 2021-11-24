@@ -426,18 +426,33 @@ export class ChatService {
   /*                               Direct Channel                             */
   /****************************************************************************/
 
-  async createDirectChannel(user1: User, user2: User): Promise<Channel> {
+  async createDirectChannel(user1: User, user2: User): Promise<number> {
     // Check if the channel already exists.
-    const channel = await this.channelParticipantRepository
-      .createQueryBuilder('participant')
-      .leftJoinAndSelect('participant.channel', 'channel')
-      .select('channel.id', 'id')
-      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
-      .andWhere('participant.userId = :Id', { Id: user1.id })
-      .andWhere('participant.userId = :Id', { Id: user2.id })
-      .execute();
+    const channelUser1 = (
+      await this.channelParticipantRepository
+        .createQueryBuilder('participant')
+        .leftJoinAndSelect('participant.channel', 'channel')
+        .select('channel.id', 'id')
+        .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+        .andWhere('participant.userId = :Id', { Id: user1.id })
+        .execute()
+    ).map((channel) => channel.id);
 
-    if (channel.length == 1) return channel; // return existing channel.
+    const channelUser2 = (
+      await this.channelParticipantRepository
+        .createQueryBuilder('participant')
+        .leftJoinAndSelect('participant.channel', 'channel')
+        .select('channel.id', 'id')
+        .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+        .andWhere('participant.userId = :Id', { Id: user2.id })
+        .execute()
+    ).map((channel) => channel.id);
+
+    const channel = channelUser1.filter((channel) =>
+      channelUser2.includes(channel),
+    );
+
+    if (channel.length == 1) return channel[0]; // return existing channel id.
 
     const newChannel = this.channelRepository.create();
     newChannel.name = `${user1.nickname} , ${user2.nickname}`;
@@ -448,7 +463,7 @@ export class ChatService {
       this.addChannelParticipant(newChannel.id, user1.id, ChannelRole.OWNER),
       this.addChannelParticipant(newChannel.id, user2.id, ChannelRole.OWNER),
     ]);
-    return newChannel;
+    return newChannel.id;
   }
 
   async getDirectInfo(userId: number, channelId: number): Promise<any> {
