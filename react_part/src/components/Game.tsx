@@ -5,10 +5,17 @@ import Container from 'react-bootstrap/Container';
 import {GameSocketContext, gameSocket} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
-
+import Pong from './pong/components/Pong';
 const NONE = 0;
 const START = 1;
 const IG = 2;
+
+type GameInfos = {
+    pLName: string;
+    pLAvatar: string;
+    pRName: string;
+    pRAvatar: string;
+}
 
 const Game:React.FC = () => {
     const [toggleMatchMaking, setToggleMatchMaking] = useState<boolean>();
@@ -23,6 +30,10 @@ const Game:React.FC = () => {
             console.log(e);
             setToggleMatchMaking(e);
         });
+        socket.on('startPong', (e:GameInfos) => {
+            setGameStatus(2);
+            useStore.setState((s) => ({...s, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
+        } );
     })
     
     const handleClickON = () => socket.emit('matchmakingON');
@@ -54,12 +65,11 @@ const Game:React.FC = () => {
 
 	return (
         <Container className='no-padding' fluid>
-			{/* {gameId != null ? 'yes' : 'nope'} */}
-            {toggleMatchMaking ? waitingForGame() : showButtons()}
+			{gameStatus === 2 ? <Pong h={800} w={1000}/> : toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);
 }
-//  https://culturezvous.com/wp-content/uploads/2018/09/ping-pong-the-animation-109667.jpg
+// https://culturezvous.com/wp-content/uploads/2018/09/ping-pong-the-animation-109667.jpg
 // https://media4.giphy.com/media/gx54W1mSpeYMg/giphy.gif
 // https://thumbs.dreamstime.com/z/one-continuous-line-drawing-young-sporty-woman-table-tennis-player-practicing-her-smash-hit-competitive-sport-concept-single-201088082.jpg
 // https://images.takeshape.io/fd194db7-7b25-4b5a-8cc7-da7f31fab475/dev/c235b62a-9442-4325-b9c9-ec1b7bfcb8f2/xdVFewf.gif?w=1200&q=80 popup defi

@@ -81,7 +81,7 @@ export class PongGateway {
 		  const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ?? 
 		  userArray.forEach((e) => {
 			  this.server.to(e.toString()).emit('inMatchMaking', false);
-			  this.pongService.createNewParty(GameId, userArray, this.userService);
+			  this.pongService.createNewMatch(GameId, userArray, this.userService);
 			  this.server.to(e.toString()).emit('inGame', GameId);
 			  // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
 		  })
@@ -169,6 +169,24 @@ export class PongGateway {
 	  } catch (error) {
 		console.log(error);
 	  }
+  }
+
+  @SubscribeMessage('ready')
+  async readyForGame(client:Socket, payload:number) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      this.pongService.playersSetReady(payload, user.id, client.id);
+      await sleep(1000);
+      const waitForReady = setInterval(() => {
+        if(this.pongService.playersReadyCheck(payload))
+        {
+          client.emit('startPong', this.pongService.sendPlayersInfos(payload));
+          clearInterval(waitForReady)
+        }
+      }, 1000);
+      } catch (error) {
+      console.log(error);
+      }
   }
 
   // @SubscribeMessage('start')

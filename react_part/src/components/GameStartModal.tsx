@@ -1,22 +1,25 @@
-import React, {useContext, useEffect} from "react";
+import React, {useContext, useEffect, useState} from "react";
 import { GameSocketContext } from "../context/gameSocket";
 import {Modal, Button} from 'react-bootstrap';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
+import { useHistory } from "react-router";
+import { LinkContainer } from "react-router-bootstrap";
 
 const GameStartModal:React.FC = () => {
     const socket:Socket = useContext(GameSocketContext);
+	const [gameId, setGameId] =useState<number>(-1);
 	const setGameState = useStore(s => s.setGameStatus);
 	const gameState = useStore(s => s.gameStatus);
 	const enter = () => {
-		socket.emit('ready');
-		setGameState(2);
+		socket.emit('ready', gameId);
+		setGameState(0);
 	}
 
 	useEffect(() => {
-		socket.on('inGame', (e) => { // METTRE LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
+		socket.on('inGame', (e) => { //   LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
+			setGameId(e);
 			setGameState(1);
-			socket.emit('NewGame', e);
 		})
 	})
 	return (
@@ -33,12 +36,9 @@ const GameStartModal:React.FC = () => {
 		</Modal.Header>
 		<Modal.Body>
 		  <h4>Your game is ready</h4>
-		  <p>
-			
-		  </p>
 		</Modal.Body>
 		<Modal.Footer>
-		  <Button onClick={enter}>Enter the game</Button>
+		  <LinkContainer to='/'><Button onClick={enter}>Enter the game</Button></LinkContainer>
 		</Modal.Footer>
 	  </Modal>
 	);
