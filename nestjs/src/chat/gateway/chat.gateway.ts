@@ -429,7 +429,7 @@ export class ChatGateway
    * channel send messages
    * @param data
    */
-  @SubscribeMessage('direct-message')
+  @SubscribeMessage('private-message')
   async newDirectMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);

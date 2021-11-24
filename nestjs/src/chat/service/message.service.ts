@@ -25,12 +25,12 @@ export class MessageService {
     authorId: number,
     createMessageDto: CreateMessageDto,
   ): Promise<Message> {
-    // Check if channel exit
     const participant = await this.channelService.getOneChannelParticipant(
       authorId,
       createMessageDto.channelId,
-    ); // check if user participate to the channel
+    );
 
+    // Check if channel exit and  if user participate to the channel
     if (!participant)
       throw new WsException(
         'You cannot post message if you not participating to the channel !',
@@ -54,6 +54,7 @@ export class MessageService {
           'Cannot post message in channel if you are ban or mute !',
         );
     }
+
     const newMessage = this.messageRepository.create({ ...createMessageDto });
     newMessage.authorId = authorId;
     return this.messageRepository.save(newMessage);
