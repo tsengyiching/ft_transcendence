@@ -43,7 +43,6 @@ function App() {
     <DataContext.Provider value={userData}>
     <SocketContext.Provider value={socket}>
       <Container fluid className="App">
-        <Header/>
         <Router/>
       </Container>
     </SocketContext.Provider>

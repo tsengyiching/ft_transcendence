@@ -14,7 +14,6 @@ import { UserService } from 'src/user/service/user.service';
 import { CreateChannelDto } from '../dto/create-channel.dto';
 import { JoinChannelDto } from '../dto/join-channel.dto';
 import { CreateMessageDto } from '../dto/create-message.dto';
-import { LeaveChannelDto } from '../dto/leave-channel.dto';
 import { ChatService } from '../service/chat.service';
 import { MessageService } from '../service/message.service';
 import { LoadDirectDto } from '../dto/load-direct.dto';
@@ -148,17 +147,18 @@ export class ChatGateway
 
   /**
    * leave channel
-   * @param LeaveChannelDto : channel id
+   * @param : channel id
    */
   @SubscribeMessage('channel-leave')
-  async leaveChannel(client: Socket, leaveChannelDto: LeaveChannelDto) {
-    /* TODO: ? SEND USER LEAVING MSG IN THE CHANNEL ? */
+  async leaveChannel(client: Socket, { channelId }) {
     try {
+      /* check arg type */
+      if (typeof channelId !== 'number') {
+        throw new WsException('ChannelId type is not number.');
+      }
+
       const user = await this.authService.getUserFromSocket(client);
-      const channel = await this.chatService.leaveChannel(
-        user.id,
-        leaveChannelDto,
-      );
+      const channel = await this.chatService.leaveChannel(user.id, channelId);
       if (channel == -1) {
         this.server.emit('channel-need-reload');
       } else {
@@ -182,11 +182,9 @@ export class ChatGateway
         const [channels_in, channels_out, users] = await Promise.all([
           this.chatService.getUserChannels(user.id),
           this.chatService.getUserNotParticipateChannels(user.id),
-          this.chatService.getChannelUsers(leaveChannelDto.channelId),
+          this.chatService.getChannelUsers(channelId),
         ]);
-        this.server
-          .to('channel-' + leaveChannelDto.channelId)
-          .emit('channel-users', users);
+        this.server.to('channel-' + channelId).emit('channel-users', users);
         this.server.to('user-' + user.id).emit('channels-user-in', channels_in);
         this.server
           .to('user-' + user.id)

@@ -18,7 +18,7 @@ export class Relationship {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate: Date;
 
   @Column({

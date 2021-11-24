@@ -1,34 +1,39 @@
 import { Form, Button, Image } from 'react-bootstrap'
-import { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
 
-function Twofa () {
+interface STATE {
+    setConnection:Function;
+    //isConnected:boolean;
+}
+
+const Twofa = (props:STATE) => {
     const [code, setCode] = useState("")
+    const setConnection = props.setConnection;
 
-    let history = useHistory();
-
-    function authenticate() {
-        axios.post('http://localhost:8080/2fa/authenticate/',{twoFactorAuthenticationCode: code},
+    const SubmitCode = useCallback(
+        async (event) => {
+        event.preventDefault();
+        await axios.post('http://localhost:8080/2fa/authenticate',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
         })
         .then(res => {
-            history.push("/accueil");
+            console.log('hello', code);
+            setConnection(true);
         })
         .catch(res => {
-            console.log(res)
+            console.log('2factorauth failded :', res);
         })
-    }
+    }, [code, setConnection]);
 
-    function SubmitCode(event: any) {
-        event.preventDefault();
-        authenticate();
-    }
 
+  
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
+
     return (
         <div>
-            <Form className="" onSubmit={SubmitCode} >
+            <Form onSubmit={SubmitCode} >
             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
                 <Button variant="success" type="submit">
                     activate

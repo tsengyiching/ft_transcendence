@@ -30,6 +30,6 @@ export class Message {
   @Column()
   message: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate: Date;
 }

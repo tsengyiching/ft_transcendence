@@ -35,7 +35,7 @@ export class Channel {
   })
   type: ChannelType;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate!: Date;
 
   @OneToMany(() => ChannelParticipant, (participant) => participant.channel, {
