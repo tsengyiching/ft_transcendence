@@ -25,7 +25,7 @@ export class ChatTasksService {
         .select([])
         .where('channelParticipant.statusExpiration <= NOW()')
         .execute();
-    console.log(expiredStatusParticipants);
+    // console.log(expiredStatusParticipants);
 
     expiredStatusParticipants.forEach(async (participant) => {
       const users = await this.chatService.getChannelUsers(

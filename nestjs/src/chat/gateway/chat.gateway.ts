@@ -396,12 +396,11 @@ export class ChatGateway
             );
         } else if (typeof UserId !== 'undefined') {
           const user2 = await this.userService.getOneById(UserId);
-          const channel = await this.chatService.createDirectChannel(
-            user1,
-            user2,
-          );
-          channelId = channel[0].id;
+
+          channelId = await this.chatService.createDirectChannel(user1, user2);
           //   console.log('Channel created successfully !');
+          const direct = this.chatService.getDirectChannelList(user1.id);
+          client.emit('private-list', await direct);
         } else throw new WsException('Invalid socket request.');
 
         client.join('private-' + channelId);
@@ -415,7 +414,7 @@ export class ChatGateway
         console.log('Conversation loaded successfully !');
       }
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
