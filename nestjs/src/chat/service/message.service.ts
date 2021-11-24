@@ -31,6 +31,11 @@ export class MessageService {
       createMessageDto.channelId,
     ); // check if user participate to the channel
 
+    if (!participant)
+      throw new WsException(
+        'You cannot post message if you not participating to the channel !',
+      );
+
     if (
       participant.status == StatusInChannel.MUTE ||
       participant.status == StatusInChannel.BAN
@@ -75,21 +80,6 @@ export class MessageService {
   /****************************************************************************/
   /*                               Direct Channel                             */
   /****************************************************************************/
-
-  async createDirectMessage(
-    authorId: number,
-    createMessageDto: CreateMessageDto,
-  ): Promise<Message> {
-    // Check if channel exit
-    await this.channelService.getOneChannelParticipant(
-      authorId,
-      createMessageDto.channelId,
-    ); // check if user participate to the channel
-
-    const newMessage = this.messageRepository.create({ ...createMessageDto });
-    newMessage.authorId = authorId;
-    return this.messageRepository.save(newMessage);
-  }
 
   getDirectMessages(channelId: number) {
     return this.messageRepository

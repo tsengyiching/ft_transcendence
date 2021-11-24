@@ -430,15 +430,31 @@ export class ChatGateway
    * @param data
    */
   @SubscribeMessage('direct-message')
-  async newDirectMessage(client: Socket, message: CreateMessageDto) {
+  async newDirectMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       // Save message in db
-      await this.messageService.createChannelMessage(user.id, message);
+      const message = await this.messageService.createChannelMessage(
+        user.id,
+        messageDto,
+      );
+
+      const sendMessage = {
+        message_id: message.id,
+        message_channelId: message.channelId,
+        message_authorId: user.id,
+        message_createDate: message.createDate,
+        author_nickname: user.nickname,
+        author_avatar: user.avatar,
+        message_content: message.message,
+      };
+
       // Send message to all people connected in channel
-      this.server.to('direct-' + message.channelId).emit('message', message);
+      this.server
+        .to('private-' + message.channelId)
+        .emit('private-new-message', sendMessage);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 }
