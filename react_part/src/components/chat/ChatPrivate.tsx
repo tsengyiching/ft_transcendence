@@ -59,7 +59,7 @@ function FormMessageConversation(props: {OtherUser: IUser, userData: Data, socke
 			event.stopPropagation();
 			return ;
 		}
-		props.socket.emit('channel-message', {channelId: props.OtherUser.channel_id, message: messageForm});
+		props.socket.emit('private-message', {channelId: props.OtherUser.channel_id, message: messageForm});
 		//console.log(`channel ${channelSelected.channel_name} send : ${message}`);
 		SetMessageForm("");
 	}
@@ -83,8 +83,8 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 
 	useEffect(() => {
 		socket.emit('private-load', {userId: props.privateSelected.user_id});
-		socket.on('private-message-list', (list: IMessage[]) => setListMessage(list));
-		socket.on('private-info', (user: IUser) => setOtherUser(user));
+		socket.on('private-message-list', (list: IMessage[]) => {setListMessage(list); console.log(list)});
+		socket.on('private-info', (user: IUser) => {setOtherUser(user); console.log(user);});
 		return (() => {
 			socket.emit('private-unload', {channelId: OtherUser.channel_id});
 			socket.off('private-message-list');
