@@ -6,7 +6,11 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Res,
+  StreamableFile,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
@@ -16,6 +20,9 @@ import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { ChangeUserNameDto } from '../model/change-username.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express, Response } from 'express';
+import { Readable } from 'stream';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
@@ -71,14 +78,28 @@ export class UserController {
     return this.userService.changeUserName(user.id, changeUserNameDto);
   }
 
-  /**
-   * changeUserAvatar
-   */
-  @Patch('avatar')
-  changeUserAvatar(
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(
     @CurrentUser() user: User,
-    @Body() changeUserAvatarDto: ChangeUserAvatarDto,
-  ): Promise<User> {
-    return this.userService.changeUserAvatar(user.id, changeUserAvatarDto);
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.userService.addAvatar(user.id, file.buffer, file.originalname);
+  }
+
+  @Get('avatarfile/:id')
+  async getDatabaseFileById(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const file = await this.userService.getFileById(id);
+    const stream = Readable.from(file.data);
+
+    response.set({
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Type': 'image',
+    });
+
+    return new StreamableFile(stream);
   }
 }

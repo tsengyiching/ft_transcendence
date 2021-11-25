@@ -7,9 +7,11 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
+import DatabaseFile from './databasefile.entity';
 
 export enum SiteStatus {
   OWNER = 'Owner',
@@ -32,7 +34,7 @@ export class User {
   @Column()
   nickname: string;
 
-  @Column()
+  @Column({ nullable: true })
   avatar: string;
 
   @CreateDateColumn({ type: 'timestamptz' })
@@ -79,4 +81,9 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.author)
   public message!: Message[];
+
+  @OneToOne(() => DatabaseFile, (databaseFile) => databaseFile.user, {
+    nullable: true,
+  })
+  avatarFile?: DatabaseFile;
 }

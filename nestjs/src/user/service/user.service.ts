@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OnlineStatus, SiteStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
@@ -9,11 +14,14 @@ import {
   OptionSiteStatus,
   SetUserSiteStatusDto,
 } from 'src/admin/dto/set-user-site-status.dto';
+import DatabaseFile from '../model/databasefile.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(DatabaseFile)
+    private databaseFilesRepository: Repository<DatabaseFile>,
   ) {}
 
   /**
@@ -66,7 +74,8 @@ export class UserService {
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
     newUser.userStatus = OnlineStatus.AVAILABLE;
-    if (profile.id === 60191 || profile.id === 60044) newUser.siteStatus = SiteStatus.OWNER;
+    if (profile.id === 60191 || profile.id === 60044)
+      newUser.siteStatus = SiteStatus.OWNER;
     else newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
@@ -139,6 +148,31 @@ export class UserService {
     }
     user.avatar = changeUserAvatarDto.avatar;
     return this.userRepository.save(user);
+  }
+
+  async addAvatar(
+    id: number,
+    imageBuffer: Buffer,
+    filename: string,
+  ): Promise<DatabaseFile> {
+    const user = await this.getOneById(id);
+    if (!user) {
+      throw new HttpException(
+        `This User ${id} does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    const oldDatafile = await this.databaseFilesRepository.findOne({
+      where: { userId: id },
+    });
+    if (oldDatafile) {
+      await this.databaseFilesRepository.remove(oldDatafile);
+    }
+    console.log(filename);
+    const avatar = await this.uploadDatabaseFile(id, imageBuffer, filename);
+    user.avatar = `http://localhost:8080/profile/avatarfile/${avatar.id}`;
+    await this.userRepository.save(user);
+    return avatar;
   }
 
   /**
@@ -396,5 +430,30 @@ export class UserService {
     const users = await this.getAll();
     const names = users.map((obj) => obj.nickname);
     return names;
+  }
+
+  /****************************************************************************/
+  /*                            Database File                                 */
+  /****************************************************************************/
+
+  async uploadDatabaseFile(
+    id: number,
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<DatabaseFile> {
+    const newFile = this.databaseFilesRepository.create({
+      filename,
+      data: dataBuffer,
+      userId: id,
+    });
+    return this.databaseFilesRepository.save(newFile);
+  }
+
+  async getFileById(fileId: number): Promise<DatabaseFile> {
+    const file = await this.databaseFilesRepository.findOne(fileId);
+    if (!file) {
+      throw new NotFoundException();
+    }
+    return file;
   }
 }
