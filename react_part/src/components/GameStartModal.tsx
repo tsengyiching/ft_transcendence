@@ -37,8 +37,9 @@ const GameStartModal:React.FC = () => {
 		<Modal.Body>
 		  <h4>Your game is ready</h4>
 		</Modal.Body>
+
 		<Modal.Footer>
-		  <LinkContainer to='/'><Button onClick={enter}>Enter the game</Button></LinkContainer>
+		  <Button onClick={enter}>Enter the game</Button>
 		</Modal.Footer>
 	  </Modal>
 	);

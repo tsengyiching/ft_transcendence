@@ -117,18 +117,14 @@ export class PongGateway {
       console.log(error);
     }
   }
-  // @SubscribeMessage('down')
-  // onDown(client: any, payload: any) {
-  //   users.map((e) => {
-  //     if (e.name === client.id) e.down = payload;
-  //   });
-  // }
-  // @SubscribeMessage('up')
-  // onUp(client: any, payload: any) {
-  //   users.map((e) => {
-  //     if (e.name === client.id) e.up = payload;
-  //   });
-  // }
+  @SubscribeMessage('down')
+  onDown(client: Socket, payload: boolean) {
+    this.pongService.setKeyValue(false, client.id, payload);
+  }
+  @SubscribeMessage('up')
+  onUp(client: Socket, payload: boolean) {
+	this.pongService.setKeyValue(true, client.id, payload);
+  }
 
   // @SubscribeMessage('sub')
   // subscribe(client: Socket, payload: number) {
@@ -183,20 +179,19 @@ export class PongGateway {
           client.emit('startPong', this.pongService.sendPlayersInfos(payload));
           clearInterval(waitForReady)
         }
-      }, 1000);
+      }, 10);
       } catch (error) {
       console.log(error);
       }
   }
 
-  // @SubscribeMessage('start')
-  // startGame(client: Socket, Payload: any) {
-  //   const IntervalID = setInterval(() => {
-  //     party = UpdateGame(users, party);
-  //     client.volatile.emit('infos', gameInfos(party));
-  //     if (playing === false) {
-  //       clearInterval(IntervalID);
-  //     }
-  //   }, 1000 / FRAMERATE);
-  // }
+  @SubscribeMessage('start')
+  startGame(client: Socket, payload:any) {
+    const IntervalID = setInterval(() => {
+      
+      if () {
+        clearInterval(IntervalID);
+      }
+    }, 1000 / FRAMERATE);
+  }
 }

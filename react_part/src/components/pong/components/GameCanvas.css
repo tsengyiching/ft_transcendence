@@ -15,8 +15,6 @@ body {
 
 #stage {
 	position: relative;
-    border: 2px solid #374B43;
-	background-color: aquamarine;
 }
 
 #wrapper { position:static;}
