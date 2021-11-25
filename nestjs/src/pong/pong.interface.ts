@@ -5,7 +5,7 @@ export type ObjectToCollide = {
   br: Pos;
 };
 
-type Pos = {
+export type Pos = {
   x: number;
   y: number;
 };
