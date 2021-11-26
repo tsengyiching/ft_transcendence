@@ -214,58 +214,58 @@ export type Party = {
 //     scoreR: party.scoreR,
 //   };
 // }
-export function UpdateGame(users: Player[], party: Party) {
-  const mouv: number[] = [0, 0];
-  users.map((e) => {
-    if (e.paddle == 1) mouv[0] = e.down && !e.up ? 1 : e.up && !e.down ? -1 : 0;
-    if (e.paddle == 2) mouv[1] = e.down && !e.up ? 1 : e.up && !e.down ? -1 : 0;
-  });
-  const touch = ballCollisionToPaddle(party.ball, party.paddleL, party.paddleR);
-  if (touch.x || touch.y) {
-    if (party.lastp === false) {
-      console.log('HOP');
-      party.ball.vx = touch.x;
-      party.ball.vy = touch.y;
-      party.lastp = true;
-      if (mouv[0] || mouv[1]) party.ball.acceleration += 0.6;
-    }
-  } else {
-    party.lastp = false;
-    const toWall = ballCollisiontoWall(party.ball, {
-      tl: { x: 0, y: 0 },
-      tr: { x: W, y: 0 },
-      bl: { x: 0, y: H },
-      br: { x: W, y: H },
-    });
-    if (toWall === XR || toWall === XL) {
-      return newScore(toWall, party);
-    } else if (toWall === Y && !party.lasty) {
-      party.lasty = true;
-      party.ball.vy *= -1;
-    }
-    if (toWall !== Y) {
-      party.lasty = false;
-    }
-  }
-  if (party.ball.acceleration > 1) {
-    party.ball.acceleration -= 0.005;
-  }
-  party.ball.pos.x +=
-    party.ball.vx * party.ball.speed * party.ball.acceleration;
-  party.ball.pos.y +=
-    party.ball.vy * party.ball.speed * party.ball.acceleration;
-  if (mouv[0]) {
-    party.paddleL.pos.y += mouv[0] * party.paddleL.speed;
-    if (party.paddleL.pos.y < 0) party.paddleL.pos.y = 0;
-    if (party.paddleL.pos.y + party.paddleL.h > H)
-      party.paddleL.pos.y = H - party.paddleL.h;
-  }
-  if (mouv[1]) {
-    party.paddleR.pos.y += mouv[1] * party.paddleR.speed;
-    if (party.paddleR.pos.y < 0) party.paddleR.pos.y = 0;
-    if (party.paddleR.pos.y + party.paddleR.h > H)
-      party.paddleR.pos.y = H - party.paddleR.h;
-  }
+// export function UpdateGame(users: Player[], party: Party) {
+//   const mouv: number[] = [0, 0];
+//   users.map((e) => {
+//     if (e.paddle == 1) mouv[0] = e.down && !e.up ? 1 : e.up && !e.down ? -1 : 0;
+//     if (e.paddle == 2) mouv[1] = e.down && !e.up ? 1 : e.up && !e.down ? -1 : 0;
+//   });
+//   const touch = ballCollisionToPaddle(party.ball, party.paddleL, party.paddleR);
+//   if (touch.x || touch.y) {
+//     if (party.lastp === false) {
+//       console.log('HOP');
+//       party.ball.vx = touch.x;
+//       party.ball.vy = touch.y;
+//       party.lastp = true;
+//       if (mouv[0] || mouv[1]) party.ball.acceleration += 0.6;
+//     }
+//   } else {
+//     party.lastp = false;
+//     const toWall = ballCollisiontoWall(party.ball, {
+//       tl: { x: 0, y: 0 },
+//       tr: { x: W, y: 0 },
+//       bl: { x: 0, y: H },
+//       br: { x: W, y: H },
+//     });
+//     if (toWall === XR || toWall === XL) {
+//       return newScore(toWall, party);
+//     } else if (toWall === Y && !party.lasty) {
+//       party.lasty = true;
+//       party.ball.vy *= -1;
+//     }
+//     if (toWall !== Y) {
+//       party.lasty = false;
+//     }
+//   }
+//   if (party.ball.acceleration > 1) {
+//     party.ball.acceleration -= 0.005;
+//   }
+//   party.ball.pos.x +=
+//     party.ball.vx * party.ball.speed * party.ball.acceleration;
+//   party.ball.pos.y +=
+//     party.ball.vy * party.ball.speed * party.ball.acceleration;
+//   if (mouv[0]) {
+//     party.paddleL.pos.y += mouv[0] * party.paddleL.speed;
+//     if (party.paddleL.pos.y < 0) party.paddleL.pos.y = 0;
+//     if (party.paddleL.pos.y + party.paddleL.h > H)
+//       party.paddleL.pos.y = H - party.paddleL.h;
+//   }
+//   if (mouv[1]) {
+//     party.paddleR.pos.y += mouv[1] * party.paddleR.speed;
+//     if (party.paddleR.pos.y < 0) party.paddleR.pos.y = 0;
+//     if (party.paddleR.pos.y + party.paddleR.h > H)
+//       party.paddleR.pos.y = H - party.paddleR.h;
+//   }
 
-  return party;
-}
+//   return party;
+// }
