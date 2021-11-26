@@ -12,7 +12,6 @@ import MuteImage from "../../pictures/volume-off.jpeg"
 import BlockImage from "../../pictures/redx.png"
 import QuitCross from "../../pictures/quit-icon.png"
 import JoinChannelModal from "./JoinChannelModal"
-import DestroyChannelModal from "./DestroyChannelModal"
 import {IChannel, Role} from '../../InterfaceUser'
 import { DataContext, SiteStatus } from "../../../App"
 
