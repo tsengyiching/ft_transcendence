@@ -8,6 +8,26 @@ function Parametre () {
     const [image, setImage] = useState("");
     const [printQR, setPrintQR] = useState(0)
     const [code, setCode] = useState("")
+    const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
+
+    const handleImageChange = function (e: React.ChangeEvent<HTMLInputElement>) {
+        const fileList = e.target.files;
+    
+        if (!fileList)
+            return;
+        setSelectedFile(fileList[0]);
+      };
+
+    const uploadFile = function (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
+        if (selectedFile == undefined)
+            return ;
+        const formData = new FormData();
+        formData.append("image", selectedFile, selectedFile.name);
+        axios.post('http://localhost:8080/profile/upload', {file: formData}, {withCredentials: true})
+        .catch(res => {
+            console.log(res);
+        });
+    };
 
     function modifyNickname() {
         axios.patch('http://localhost:8080/profile/name/',{nickname: nickname},
@@ -111,12 +131,23 @@ function Parametre () {
                         </div>
                         <div className="row w-50 p-3">
                             <h4>Change profile picture : </h4>
-                            <Form className="" onSubmit={SubmitImage} >
-                            <Form.Control type="text" value={image} name="image" placeholder="Enter your new image" onChange={ChangeImage} />
-                                <Button variant="success" type="submit">
+                            <label className="btn btn-default">
+                                <input type="file" onChange={handleImageChange} />
+                            </label>
+                            <Button
+                                className="btn btn-success"
+                                disabled={!selectedFile}
+                                onClick={uploadFile}
+                                style={{width: "15%", marginLeft: "30%"}}
+                            >
+                                Upload
+                            </Button>
+{/*                             <Form>
+                            <Form.Control type="file" name="image" placeholder="Enter your new image" onChange={handleImageChange} />
+                                <Button variant="success" onClick={uploadFile}>
                                     submit
                                 </Button>
-                            </Form>
+                            </Form> */}
                         </div>
                         <div className="row w-50 p-3">
                             <h4>Activate 2FA : </h4>
