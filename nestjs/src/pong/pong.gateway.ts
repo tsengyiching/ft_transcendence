@@ -184,9 +184,11 @@ export class PongGateway {
       console.log(error);
       }
   }
-
+ // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
+ //
   @SubscribeMessage('start')
   startGame(client: Socket, payload:any) {
+	
     const IntervalID = setInterval(() => {
       
       if () {
