@@ -9,7 +9,6 @@ import { OnlineStatus, SiteStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
-import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
 import {
   OptionSiteStatus,
   SetUserSiteStatusDto,
@@ -125,36 +124,15 @@ export class UserService {
   }
 
   /**
-   * changeUserAvatar
-   * @param : user id and new avatar url
+   * addAvatar
+   * @param : user id and new avatar
    * @returns : user
    */
-  async changeUserAvatar(
-    id: number,
-    changeUserAvatarDto: ChangeUserAvatarDto,
-  ): Promise<User> {
-    const user = await this.getOneById(id);
-    if (!user) {
-      throw new HttpException(
-        `This User ${id} does not exist !`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    if (user.avatar === changeUserAvatarDto.avatar) {
-      throw new HttpException(
-        `${user.avatar} is your current avatar url!`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-    user.avatar = changeUserAvatarDto.avatar;
-    return this.userRepository.save(user);
-  }
-
   async addAvatar(
     id: number,
     imageBuffer: Buffer,
     filename: string,
-  ): Promise<DatabaseFile> {
+  ): Promise<User> {
     const user = await this.getOneById(id);
     if (!user) {
       throw new HttpException(
@@ -168,11 +146,9 @@ export class UserService {
     if (oldDatafile) {
       await this.databaseFilesRepository.remove(oldDatafile);
     }
-    console.log(filename);
     const avatar = await this.uploadDatabaseFile(id, imageBuffer, filename);
     user.avatar = `http://localhost:8080/profile/avatarfile/${avatar.id}`;
-    await this.userRepository.save(user);
-    return avatar;
+    return this.userRepository.save(user);
   }
 
   /**

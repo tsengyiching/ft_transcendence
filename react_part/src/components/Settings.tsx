@@ -19,7 +19,7 @@ function Parametre () {
       };
 
     const uploadFile = function (e: React.MouseEvent<HTMLSpanElement, MouseEvent>) {
-        if (selectedFile == undefined)
+        if (selectedFile === undefined)
             return ;
         const formData = new FormData();
         formData.append("file", selectedFile, selectedFile.name);
