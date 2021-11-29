@@ -14,7 +14,9 @@ export interface IBlockedUser {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: StatusType}
+	user_userStatus: StatusType;
+	user_siteStatus: SiteStatus;
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 

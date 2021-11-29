@@ -7,7 +7,7 @@ import './members.css'
 import ApprovedButton from '../pictures/check.svg'
 import DeclineButton from '../pictures/cross.svg'
 import {ValidationFriend} from "./ContextMenuFunctions"
-import {DataContext} from '../../App'
+import {DataContext, SiteStatus} from '../../App'
 import status from "./Status";
 
 interface IFriendRequest {
@@ -16,6 +16,7 @@ interface IFriendRequest {
 	user_avatar: string;
 	user_userStatus: 'Available' | 'Playing' | 'Offline';
 	relation_id: number;
+	user_siteStatus: SiteStatus;
 }
 
 export default function ListFriendRequests()

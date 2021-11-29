@@ -6,7 +6,7 @@ import axios from 'axios'
 import { socket } from "../../context/socket";
 import { SwitchContext } from "../InterfaceUser";
 import status from './Status'
-import {DataContext} from "../../App" 
+import {DataContext, SiteStatus} from "../../App" 
 import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
 import './members.css'
 import "./ListUsers.css"
@@ -16,7 +16,9 @@ interface IUser {
 	nickname: string;
 	avatar: string;
 	userStatus: 'Available' | 'Playing' | 'Offline';
-	relationship: null | 'Friend' | 'Block' | 'Not confirmed'}
+	relationship: null | 'Friend' | 'Block' | 'Not confirmed';
+	user_siteStatus: SiteStatus;
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
