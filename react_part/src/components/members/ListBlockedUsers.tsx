@@ -7,14 +7,16 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Unblock} from './ContextMenuFunctions'
-import {DataContext} from "../../App"
+import {DataContext, SiteStatus} from "../../App"
 import { useHistory } from "react-router";
 
 export interface IBlockedUser {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: StatusType}
+	user_userStatus: StatusType;
+	user_siteStatus: SiteStatus;
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 

@@ -578,6 +578,7 @@ export class RelationshipService {
         user_nickname: data.user.nickname,
         user_avatar: data.user.avatar,
         user_userStatus: data.user.userStatus,
+        user_siteStatus: data.user.siteStatus,
         relation_id: data.relationshipId,
       };
       return obj;
