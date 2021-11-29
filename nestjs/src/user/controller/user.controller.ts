@@ -88,7 +88,6 @@ export class UserController {
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    console.log('req', req);
     if (req.file.size > 1024 * 1024) {
       throw new PayloadTooLargeException();
     }
@@ -101,7 +100,6 @@ export class UserController {
     const index = req.file.originalname.indexOf('.', 0);
     if (index !== -1) {
       const filetype = req.file.originalname.slice(index + 1);
-      console.log(filetype);
       if (filetype !== 'jpeg' && filetype !== 'png' && filetype !== 'gif') {
         throw new HttpException(
           `The file type ${req.file.originalname} is not acceptable.`,
