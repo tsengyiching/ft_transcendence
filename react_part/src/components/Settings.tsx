@@ -22,8 +22,10 @@ function Parametre () {
         if (selectedFile == undefined)
             return ;
         const formData = new FormData();
-        formData.append("image", selectedFile, selectedFile.name);
-        axios.post('http://localhost:8080/profile/upload', {file: formData}, {withCredentials: true})
+        formData.append("file", selectedFile, selectedFile.name);
+        axios.post('http://localhost:8080/profile/upload',
+            formData,
+            {withCredentials: true})
         .catch(res => {
             console.log(res);
         });
