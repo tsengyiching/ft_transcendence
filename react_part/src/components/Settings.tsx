@@ -26,6 +26,9 @@ function Parametre () {
         axios.post('http://localhost:8080/profile/upload',
             formData,
             {withCredentials: true})
+        .then(res => {
+            setSelectedFile(undefined);
+        })
         .catch(res => {
             console.log(res);
         });
