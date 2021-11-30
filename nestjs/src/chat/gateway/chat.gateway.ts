@@ -65,7 +65,7 @@ export class ChatGateway
       console.log('New User Join');
 
       const user: User = await this.authService.getUserFromSocket(client);
-      this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+      await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
       client.join('user-' + user.id);
       this.server.emit('reload-status', {
         user_id: user.id,
@@ -262,6 +262,27 @@ export class ChatGateway
       await this.chatService.changeChannelPassword(user.id, channelDto);
       console.log('Channel password has been changed successfully !');
       this.server.emit('channel-need-reload');
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  /**
+   * destroy Channel
+   * @param : channel id
+   */
+  @SubscribeMessage('channel-destroy')
+  async destroyChannel(client: Socket, { channelId }) {
+    try {
+      if (typeof channelId !== 'number') {
+        throw new WsException('ChannelId type is not number.');
+      }
+      const user = await this.authService.getUserFromSocket(client);
+      const channel = await this.chatService.destroyChannel(user, channelId);
+      if (channel) {
+        console.log(`${channel.name} has been destroyed successfully !`);
+        this.server.emit('channel-need-reload');
+      }
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }

@@ -11,7 +11,7 @@ import {
 } from '../model/channelParticipant.entity';
 import { JoinChannelDto } from '../dto/join-channel.dto';
 import { WsException } from '@nestjs/websockets';
-import { User } from 'src/user/model/user.entity';
+import { SiteStatus, User } from 'src/user/model/user.entity';
 import { OptionAdmin, SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import {
   OptionPassword,
@@ -295,6 +295,24 @@ export class ChatService {
         throw new WsException('Wrong password setting action.');
       }
     }
+  }
+
+  async destroyChannel(user: User, channelId: number): Promise<Channel> {
+    if (
+      user.siteStatus !== SiteStatus.OWNER &&
+      user.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new WsException(
+        `Only site owner or moderator can destroy a group channel.`,
+      );
+    }
+    const channel = await this.getChannelById(channelId);
+    if (channel.type === ChannelType.DIRECT) {
+      throw new WsException(
+        `Channel ${channel.name} is a direct chat, you cannot destroy it.`,
+      );
+    }
+    return this.channelRepository.remove(channel);
   }
 
   /****************************************************************************/
