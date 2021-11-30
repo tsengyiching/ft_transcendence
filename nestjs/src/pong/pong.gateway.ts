@@ -12,6 +12,7 @@ import { OnlineStatus, User } from 'src/user/model/user.entity';
 import { UserService } from 'src/user/service/user.service';
 import { PongService } from './pong.game.service';
 import { PongUsersService } from './pong.users.service';
+import { FRAMERATE } from './pong.env';
 // https://www.generacodice.com/en/articolo/713202/how-can-i-find-the-response-time-latency-of-a-client-in-nodejs-with-sockets-socket-
 
 function sleep(ms) {
@@ -74,18 +75,18 @@ export class PongGateway {
       //client.emit('inMatchMaking', true);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayer(user.id);
-	  await sleep(5000);
-	  const userArray = this.pongUsersService.makeMatchMaking();
-	  if (userArray) {
-		  console.log(userArray);
-		  const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ?? 
-		  userArray.forEach((e) => {
-			  this.server.to(e.toString()).emit('inMatchMaking', false);
-			  this.pongService.createNewMatch(GameId, userArray, this.userService);
-			  this.server.to(e.toString()).emit('inGame', GameId);
-			  // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
-		  })
-	  }
+      await sleep(5000);
+      const userArray = this.pongUsersService.makeMatchMaking();
+      if (userArray) {
+        console.log(userArray);
+        const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ??
+        userArray.forEach((e) => {
+          this.server.to(e.toString()).emit('inMatchMaking', false);
+          this.pongService.createNewMatch(GameId, userArray, this.userService);
+          this.server.to(e.toString()).emit('inGame', GameId);
+          // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
+        });
+      }
       ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
@@ -111,7 +112,7 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       const resp = this.pongUsersService.isInMatchmaking(user.id);
-      console.log(resp);
+      console.log('isINMATCH',resp);
       client.emit('inMatchMaking', resp);
     } catch (error) {
       console.log(error);
@@ -123,7 +124,7 @@ export class PongGateway {
   }
   @SubscribeMessage('up')
   onUp(client: Socket, payload: boolean) {
-	this.pongService.setKeyValue(true, client.id, payload);
+    this.pongService.setKeyValue(true, client.id, payload);
   }
 
   // @SubscribeMessage('sub')
@@ -161,39 +162,41 @@ export class PongGateway {
   @SubscribeMessage('newGame')
   async gameOn(client: any) {
     try {
-		const user: User = await this.authService.getUserFromSocket(client);
-	  } catch (error) {
-		console.log(error);
-	  }
+      const user: User = await this.authService.getUserFromSocket(client);
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   @SubscribeMessage('ready')
-  async readyForGame(client:Socket, payload:number) {
+  async readyForGame(client: Socket, payload: number) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       this.pongService.playersSetReady(payload, user.id, client.id);
       await sleep(1000);
       const waitForReady = setInterval(() => {
-        if(this.pongService.playersReadyCheck(payload))
-        {
+        if (this.pongService.playersReadyCheck(payload)) {
           client.emit('startPong', this.pongService.sendPlayersInfos(payload));
-          clearInterval(waitForReady)
+          clearInterval(waitForReady);
         }
       }, 10);
-      } catch (error) {
+    } catch (error) {
       console.log(error);
-      }
+    }
   }
- // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
- //
+  // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
+  //
   @SubscribeMessage('start')
-  startGame(client: Socket, payload:any) {
-	
-    const IntervalID = setInterval(() => {
-      
-      if () {
-        clearInterval(IntervalID);
-      }
-    }, 1000 / FRAMERATE);
+  startGame(client: Socket, payload: any) {
+	  const gameId = this.pongService.setGameRunning(client.id, true);
+	  console.log('start', this.pongService.gameInfos(gameId));
+	  if (gameId >= 0) {
+		  const IntervalID = setInterval(() => {
+        client.emit('infos', this.pongService.gameInfos(gameId));
+        if (NaN) {
+          clearInterval(IntervalID);
+        }
+      }, 1000 / FRAMERATE);
+    }
   }
 }

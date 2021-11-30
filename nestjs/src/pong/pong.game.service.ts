@@ -21,6 +21,7 @@ import {
   W,
   FRAMERATE,
 } from './pong.env';
+import { Interval } from '@nestjs/schedule';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -262,7 +263,7 @@ export class PongService {
   }
 
   private afterGoalUpdate(matchId: number, scored: boolean) {
-    this.matches.forEach((match) => {
+    this.matches.map((match) => {
       if (match.id === matchId) {
         match.ball = {
           pos: { x: W * 0.5, y: H * 0.5 },
@@ -299,9 +300,97 @@ export class PongService {
     match.lasty = false;
   }
 
-  UpdateGame(gameId: number) {
+  //   UpdateGame(gameId: number) {
+  //     this.matches.forEach((match) => {
+  //       if (match.id === gameId) {
+  //         const touch = this.ballCollisionToPaddle(
+  //           match.ball,
+  //           match.paddleL,
+  //           match.paddleR,
+  //         );
+  //         const mouv: number[] = [0, 0];
+
+  //         mouv[0] =
+  //           match.pOne.down && !match.pOne.up
+  //             ? 1
+  //             : match.pOne.up && !match.pOne.down
+  //             ? -1
+  //             : 0;
+  //         mouv[1] =
+  //           match.pTwo.down && !match.pTwo.up
+  //             ? 1
+  //             : match.pTwo.up && !match.pTwo.down
+  //             ? -1
+  //             : 0;
+  //         if (touch.x || touch.y) {
+  //           if (match.lastp === false) {
+  //             match.ball.vx = touch.x;
+  //             match.ball.vy = touch.y;
+  //             match.lastp = true;
+  //             if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+  //           }
+  //         } else {
+  //           match.lastp = false;
+  //           const toWall = this.ballCollisiontoWall(match.ball, {
+  //             tl: { x: 0, y: 0 },
+  //             tr: { x: W, y: 0 },
+  //             bl: { x: 0, y: H },
+  //             br: { x: W, y: H },
+  //           });
+  //           if (toWall === XR || toWall === XL) {
+  //             return this.afterGoalUpdateref(match, !!(toWall === XL));
+  //           } else if (toWall === Y && !match.lasty) {
+  //             match.lasty = true;
+  //             match.ball.vy *= -1;
+  //           }
+  //           if (toWall !== Y) {
+  //             match.lasty = false;
+  //           }
+  //         }
+  //         if (match.ball.acceleration > 1) {
+  //           match.ball.acceleration -= 0.005;
+  //         }
+  //         match.ball.pos.x +=
+  //           match.ball.vx * match.ball.speed * match.ball.acceleration;
+  //         match.ball.pos.y +=
+  //           match.ball.vy * match.ball.speed * match.ball.acceleration;
+  //         if (mouv[0]) {
+  //           match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+  //           if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+  //           if (match.paddleL.pos.y + match.paddleL.h > H)
+  //             match.paddleL.pos.y = H - match.paddleL.h;
+  //         }
+  //         if (mouv[1]) {
+  //           match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+  //           if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+  //           if (match.paddleR.pos.y + match.paddleR.h > H)
+  //             match.paddleR.pos.y = H - match.paddleR.h;
+  //         }
+  //       }
+  //     });
+  //   }
+
+  setGameRunning(socketId: string, running: boolean) {
+    let matchId = -1;
     this.matches.forEach((match) => {
-      if (match.id === gameId) {
+      if (
+        match.pOne.socketId === socketId ||
+        match.pTwo.socketId === socketId
+      ) {
+        console.log(match.id);
+        match.run = running;
+        matchId = match.id;
+      }
+    });
+    return matchId;
+  }
+
+  @Interval('gameLoop', 1000 / FRAMERATE)
+  updateGames() {
+	  console.log('HELLO');
+    this.matches.forEach((match) => {
+      if (match.run) {
+        console.log('RUNNING');
         const touch = this.ballCollisionToPaddle(
           match.ball,
           match.paddleL,
