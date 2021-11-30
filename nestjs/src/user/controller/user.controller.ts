@@ -87,7 +87,7 @@ export class UserController {
     @CurrentUser() user: User,
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     if (req.file.size > 1024 * 1024) {
       throw new PayloadTooLargeException();
     }
@@ -99,18 +99,19 @@ export class UserController {
     }
     const index = req.file.originalname.indexOf('.', 0);
     if (index !== -1) {
-      const filetype = req.file.originalname.slice(index + 1);
-      if (
-        filetype !== 'jpeg' &&
-        filetype !== 'jpg' &&
-        filetype !== 'png' &&
-        filetype !== 'gif'
-      ) {
+      const extension = req.file.originalname.slice(index + 1);
+      const acceptExtension = ['jpeg', 'jpg', 'png', 'gif'];
+      if (!acceptExtension.includes(extension)) {
         throw new HttpException(
-          `The file type ${req.file.originalname} is not acceptable.`,
+          `The file extension ${extension} is not acceptable.`,
           HttpStatus.NOT_ACCEPTABLE,
         );
       }
+    } else {
+      throw new HttpException(
+        `There's no file extension.`,
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
     return `Image ${req.file.originalname} uploaded successfully !`;
