@@ -225,13 +225,13 @@ export class ChatGateway
 
   /**
    * set administrator
-   * @param SetChannelAdminDto (channel id and admin id)
+   * @param : SetChannelAdminDto (channel id, participant id, action)
    */
   @SubscribeMessage('channel-admin')
   async setChannelAdmin(client: Socket, setAdminDto: SetChannelAdminDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.setChannelAdmin(user.id, setAdminDto);
+      await this.chatService.setChannelAdmin(user, setAdminDto);
       console.log('Channel admin has been set/unset successfully !');
       const channels_in = await this.chatService.getUserChannels(user.id);
       this.server
@@ -283,6 +283,33 @@ export class ChatGateway
         console.log(`${channel.name} has been destroyed successfully !`);
         this.server.emit('channel-need-reload');
       }
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  /**
+   * set administrator by SiteModerator
+   * @param : SetChannelAdminDto (channel id, participant id, action)
+   */
+  @SubscribeMessage('channel-admin-site-moderator')
+  async setChannelAdminbySite(client: Socket, setAdminDto: SetChannelAdminDto) {
+    try {
+      const user = await this.authService.getUserFromSocket(client);
+      await this.chatService.setChannelAdminbySiteModerator(user, setAdminDto);
+      console.log(
+        'Site Moderator: Channel admin has been set/unset successfully !',
+      );
+      const channels_in = await this.chatService.getUserChannels(user.id);
+      this.server
+        .to('user-' + setAdminDto.participantId)
+        .emit('channels-user-in', channels_in);
+      const users = await this.chatService.getChannelUsers(
+        setAdminDto.channelId,
+      );
+      this.server
+        .to('channel-' + setAdminDto.channelId)
+        .emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }

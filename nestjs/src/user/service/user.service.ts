@@ -29,7 +29,7 @@ export class UserService {
    */
   getAll(): Promise<User[]> {
     return this.userRepository.find({
-      select: ['id', 'nickname', 'avatar', 'createDate', 'userStatus', 'email'],
+      select: ['id', 'nickname', 'avatar', 'userStatus', 'siteStatus'],
       order: { createDate: 'ASC' },
     });
   }
