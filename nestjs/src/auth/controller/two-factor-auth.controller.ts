@@ -10,6 +10,7 @@ import {
   UnauthorizedException,
   HttpException,
   HttpStatus,
+  Get,
 } from '@nestjs/common';
 import { User } from 'src/user/model/user.entity';
 import { CurrentUser } from '../decorator/currrent.user.decorator';
@@ -35,12 +36,13 @@ export class TwoFactorAuthController {
    * register sets secret in user database, and
    * generates a qrcode in order to active Google two factor auth
    */
-  @Post('generate')
+  @Get('generate')
   async register(@Res() response: Response, @CurrentUser() user: User) {
     const { otpauthUrl } =
       await this.twoFactorAuthService.generateTwoFactorAuthenticationSecret(
         user,
       );
+    response.setHeader('content-type', 'image/png');
     return this.twoFactorAuthService.pipeQrCodeStream(response, otpauthUrl);
   }
 
@@ -102,7 +104,7 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     const { accessToken } = this.authService.login(user, true);
-    res.cookie('jwt-two-factor', { accessToken });
+    res.cookie('jwt-two-factor', accessToken);
     userPayload.twoFA = true;
     return userPayload;
   }

@@ -14,10 +14,10 @@ function PageConnexion() {
             withCredentials:true,
         })
         .then(res => {
-            history.push("/accueil");
+                history.push("/accueil");
         })
         .catch(res => {
-            history.push("/connexion");
+                history.push("/connexion");
         })
     })
 }

@@ -82,24 +82,25 @@ export class RelationshipService {
 
   /*get user's relationship with other users */
   async getAllRelationList(id: number): Promise<SendAllUsersRelationshipDto[]> {
-    const res = await Promise.all([
-      this.userService.getAllWithConditions(id),
-      this.getUserIdsWithStatus(id, RelationshipStatus.FRIEND),
-      this.getUserIdsWithStatus(id, RelationshipStatus.NOTCONFIRMED),
-      this.getUserIdsWithStatus(id, RelationshipStatus.BLOCK),
-      this.getBlockingIds(id),
-    ]);
-    const relations = res[0]
+    const [users, friendIds, notconfirmeIds, blockIds, blockingIds] =
+      await Promise.all([
+        this.userService.getAllWithConditions(id),
+        this.getUserIdsWithStatus(id, RelationshipStatus.FRIEND),
+        this.getUserIdsWithStatus(id, RelationshipStatus.NOTCONFIRMED),
+        this.getUserIdsWithStatus(id, RelationshipStatus.BLOCK),
+        this.getBlockingIds(id),
+      ]);
+    const relations = users
       .map((data) => ({ ...data, relationship: null }))
       .map((data) => {
-        if (res[1].includes(data.id))
+        if (friendIds.includes(data.id))
           data.relationship = RelationshipStatus.FRIEND;
-        else if (res[2].includes(data.id))
+        else if (notconfirmeIds.includes(data.id))
           data.relationship = RelationshipStatus.NOTCONFIRMED;
         return data;
       })
-      .filter((data) => (res[3].includes(data.id) ? false : true))
-      .filter((data) => (res[4].includes(data.id) ? false : true));
+      .filter((data) => (blockIds.includes(data.id) ? false : true))
+      .filter((data) => (blockingIds.includes(data.id) ? false : true));
     return this.reformAllRelationListSendingData(relations);
   }
 
@@ -490,7 +491,7 @@ export class RelationshipService {
     userOne: number,
     userTwo: number,
   ): Promise<Relationship> {
-    const res = await Promise.all([
+    const [friendRelationId, notconfirmRelationId] = await Promise.all([
       this.findUserRelationshipId(userOne, userTwo, RelationshipStatus.FRIEND),
       this.findUserRelationshipId(
         userOne,
@@ -498,11 +499,11 @@ export class RelationshipService {
         RelationshipStatus.NOTCONFIRMED,
       ),
     ]);
-    if (res[0]) {
-      const delRelationship = await this.getOneById(res[0]);
+    if (friendRelationId) {
+      const delRelationship = await this.getOneById(friendRelationId);
       return this.relationshipRepository.remove(delRelationship);
-    } else if (res[1]) {
-      const delRelationship = await this.getOneById(res[1]);
+    } else if (notconfirmRelationId) {
+      const delRelationship = await this.getOneById(notconfirmRelationId);
       return this.relationshipRepository.remove(delRelationship);
     }
   }
@@ -577,6 +578,7 @@ export class RelationshipService {
         user_nickname: data.user.nickname,
         user_avatar: data.user.avatar,
         user_userStatus: data.user.userStatus,
+        user_siteStatus: data.user.siteStatus,
         relation_id: data.relationshipId,
       };
       return obj;

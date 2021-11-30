@@ -9,10 +9,15 @@ import {
   ChannelRole,
   StatusInChannel,
 } from '../model/channelParticipant.entity';
-import { GeneralChannelDto } from '../dto/general-channel.dto';
+import { JoinChannelDto } from '../dto/join-channel.dto';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/model/user.entity';
-import { LeaveChannelDto } from '../dto/leave-channel.dto';
+import { OptionAdmin, SetChannelAdminDto } from '../dto/set-channel-admin.dto';
+import {
+  OptionPassword,
+  SetChannelPasswordDto,
+} from '../dto/set-channel-password.dto';
+import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @Injectable()
 export class ChatService {
@@ -33,45 +38,48 @@ export class ChatService {
     channelCreatorId: number,
     createChannelDto: CreateChannelDto,
   ): Promise<Channel> {
-    await this.checkChannelNameAndPassword(createChannelDto);
-    /* Create new channel*/
-    const newChannel = this.channelRepository.create({ ...createChannelDto });
-    if (newChannel.password) {
-      newChannel.type = ChannelType.PRIVATE;
-      newChannel.password = await bcrypt.hash(newChannel.password, 10);
-    }
-    await this.channelRepository.save(newChannel);
+    if (await this.checkChannelName(createChannelDto)) {
+      if (createChannelDto.password) {
+        this.checkChannelPassword(createChannelDto.password);
+      }
+      /* Create new channel*/
+      const newChannel = this.channelRepository.create({ ...createChannelDto });
+      if (newChannel.password) {
+        newChannel.type = ChannelType.PRIVATE;
+        newChannel.password = await bcrypt.hash(newChannel.password, 10);
+      } else newChannel.password = null;
+      await this.channelRepository.save(newChannel);
 
-    /* Add channel owner*/
-    await this.addChannelParticipant(
-      newChannel.id,
-      channelCreatorId,
-      ChannelRole.OWNER,
-    );
-    return newChannel;
+      /* Add channel owner*/
+      await this.addChannelParticipant(
+        newChannel.id,
+        channelCreatorId,
+        ChannelRole.OWNER,
+      );
+      return newChannel;
+    }
   }
+
   /**
    * joinChannel checks and adds a new channel participant.
    * (channel-join)
-   * @param GeneralChannelDto: channel id and password
+   * @param JoinChannelDto: channel id and password
    * @returns ChannelParticipant
    */
   async joinChannel(
     userId: number,
-    channelDto: GeneralChannelDto,
+    channelDto: JoinChannelDto,
   ): Promise<ChannelParticipant> {
-    const channel = await this.getChannelById(channelDto.channelId);
-    const participant = await this.getOneChannelParticipant(
-      userId,
-      channelDto.channelId,
-    );
+    const [channel, participant] = await Promise.all([
+      this.getChannelById(channelDto.channelId),
+      this.getOneChannelParticipant(userId, channelDto.channelId),
+    ]);
     if (channel.type === ChannelType.DIRECT)
       throw new WsException('You cannot join a private chat channel.');
     if (participant)
       throw new WsException('You are already a member of this channel.');
     if (channel.type === ChannelType.PRIVATE) {
       if (!(await bcrypt.compare(channelDto.password, channel.password))) {
-        console.log('Invalid channel password !');
         throw new WsException('Invalid channel password !');
       }
     }
@@ -87,7 +95,7 @@ export class ChatService {
    * @param channel id, user id, user role
    * @returns ChannelParticipant
    */
-  async addChannelParticipant(
+  addChannelParticipant(
     channelId: number,
     userId: number,
     role: ChannelRole,
@@ -102,105 +110,191 @@ export class ChatService {
   /**
    * leaveChannel checks and removes a channel current participant.
    * (channel-leave)
-   * @param LeaveChannelDto: channel id
-   * @returns deleted ChannelParticipant
+   * @param : channel id
+   * @returns number,
+   *  - -1 : If channels as been deleted
+   *  - id : of new channel owner.
    */
-  async leaveChannel(userId: number, leaveChannelDto: LeaveChannelDto) {
-    /* check channel */
-    const channel = await this.getChannelById(leaveChannelDto.channelId);
-    /* check participant */
-    const participant = await this.getOneChannelParticipant(
-      userId,
-      leaveChannelDto.channelId,
-    );
-    await this.isChanelParticipant(participant);
-    if (participant.status === StatusInChannel.BAN)
-      throw new WsException('User is banned in this channel.');
-    /* check channel other participants */
-    const channelUsers = await this.channelParticipantRepository.find({
-      where: {
-        channelId: leaveChannelDto.channelId,
-        userId: Not(userId),
-        status: StatusInChannel.NORMAL,
-      },
-    });
-    console.log(channelUsers);
-    if (channelUsers.length === 0) {
-      console.log(`Channel ${channel.name} has been deleted.`);
-      await this.channelRepository.remove(channel);
+  async leaveChannel(userId: number, channelId: number): Promise<number> {
+    const [channel, participant, otherUsers] = await Promise.all([
+      this.getChannelById(channelId),
+      this.getOneChannelParticipant(userId, channelId),
+      this.channelParticipantRepository.find({
+        where: {
+          channelId: channelId,
+          userId: Not(userId),
+          status: StatusInChannel.NORMAL,
+        },
+      }),
+    ]);
+    if (this.isChannelParticipant(participant, channel)) {
+      /* check participant's status */
+      if (
+        participant.status === StatusInChannel.BAN ||
+        participant.status === StatusInChannel.MUTE
+      ) {
+        throw new WsException(
+          'You could not leave a channel from which you were banned or mute.',
+        );
+      }
+      /* no other participant with normal status left, delete the channel */
+      if (otherUsers.length === 0) {
+        console.log(`Channel ${channel.name} has been deleted.`);
+        await this.channelRepository.remove(channel);
+        return -1;
+      }
+      /* If participant is the channel user, and there are normal users left */
+      let newOwnerId: number;
+      if (participant.role === ChannelRole.OWNER) {
+        const admin = otherUsers.filter(
+          (data) => data.role === ChannelRole.ADMIN,
+        );
+        if (admin.length !== 0) {
+          admin[0].role = ChannelRole.OWNER;
+          await this.channelParticipantRepository.save(admin[0]);
+          newOwnerId = admin[0].userId;
+        } else {
+          otherUsers[0].role = ChannelRole.OWNER;
+          await this.channelParticipantRepository.save(otherUsers[0]);
+          newOwnerId = otherUsers[0].userId;
+        }
+      }
+      await this.channelParticipantRepository.remove(participant);
+      return newOwnerId;
     }
-    // if (participant.role === ChannelRole.OWNER) {
-    //   const admin = channelUsers.filter(
-    //     (data) => data.role === ChannelRole.ADMIN,
-    //   );
+  }
 
-    // }
-    //{ -> admin becomes owner/ no admin -> random}
-    return this.channelParticipantRepository.remove(participant);
+  async changeChannelUserStatus(
+    user: User,
+    statusChange: ChangeStatusDto,
+  ): Promise<ChannelParticipant> {
+    const channelOperator = await this.getOneChannelParticipant(
+      user.id,
+      statusChange.channelId,
+    );
+
+    const channelUser = await this.getOneChannelParticipant(
+      statusChange.userId,
+      statusChange.channelId,
+    );
+
+    if (
+      channelOperator.role != ChannelRole.OWNER &&
+      channelOperator.role != ChannelRole.ADMIN
+    )
+      throw new WsException(
+        'You must be an administrator or owner to change the status of a user.',
+      );
+
+    if (
+      (channelOperator.role == ChannelRole.ADMIN &&
+        channelUser.role == ChannelRole.ADMIN) ||
+      channelUser.role == ChannelRole.OWNER
+    )
+      throw new WsException(
+        'you must have a higher role to change the status of a user.',
+      );
+
+    if (
+      statusChange.status != StatusInChannel.BAN &&
+      statusChange.status != StatusInChannel.MUTE &&
+      statusChange.status != StatusInChannel.NORMAL
+    )
+      throw new WsException('The status does not exist.');
+
+    channelUser.status = statusChange.status;
+    if (statusChange.sanctionDuration == 0) channelUser.statusExpiration = null;
+    else
+      channelUser.statusExpiration = new Date(
+        Date.now() + statusChange.sanctionDuration * 60 * 1000,
+      );
+
+    return this.channelParticipantRepository.save(channelUser);
   }
 
   /**
-   * addChannelPassword
-   * (channel-add-password)
-   * @param : GeneralChannelDto (channel id and password)
+   * setChannelAdmin
+   * (channel-set-admin)
+   * @param : SetChannelAdminDto (channel id, admin id, action)
    */
-  async addChannelPassword(
+  async setChannelAdmin(
     userId: number,
-    channelDto: GeneralChannelDto,
-  ): Promise<Channel> {
-    const channel = await this.getChannelById(channelDto.channelId);
-    const participant = await this.getOneChannelParticipant(
-      userId,
-      channelDto.channelId,
-    );
-    await this.checkChannelType(channel, ChannelType.PUBLIC);
-    await this.isChanelParticipant(participant);
-    await this.isChannelParticipantOwner(participant);
-    await this.checkChannelPassword(channelDto.password);
-    channel.password = await bcrypt.hash(channelDto.password, 10);
-    channel.type = ChannelType.PRIVATE;
-    return this.channelRepository.save(channel);
+    setAdminDto: SetChannelAdminDto,
+  ): Promise<ChannelParticipant> {
+    if (
+      setAdminDto.action === OptionAdmin.SET ||
+      setAdminDto.action === OptionAdmin.UNSET
+    ) {
+      const [channel, operator, participant] = await Promise.all([
+        this.getChannelById(setAdminDto.channelId),
+        this.getOneChannelParticipant(userId, setAdminDto.channelId),
+        this.getOneChannelParticipant(
+          setAdminDto.participantId,
+          setAdminDto.channelId,
+        ),
+      ]);
+      if (channel.type === ChannelType.DIRECT)
+        throw new WsException(`${channel.name} is a direct channel.`);
+      if (
+        this.isChannelParticipant(operator, channel) &&
+        this.isChannelParticipant(participant, channel) &&
+        this.isChannelOwner(operator, channel)
+      ) {
+        if (setAdminDto.action === OptionAdmin.SET) {
+          if (this.isChannelParticipantNormalUser(participant, channel)) {
+            participant.role = ChannelRole.ADMIN;
+            return this.channelParticipantRepository.save(participant);
+          }
+        } else {
+          if (this.isChannelAdmin(participant, channel)) {
+            participant.role = ChannelRole.USER;
+            return this.channelParticipantRepository.save(participant);
+          }
+        }
+      }
+    } else throw new WsException('Wrong admin setting action.');
   }
 
   /**
    * changeChannelPassword
    * (channel-change-password)
-   * @param : GeneralChannelDto (channel id and password)
+   * @param : SetChannelPasswordDto (channel id, action, password)
    */
   async changeChannelPassword(
     userId: number,
-    channelDto: GeneralChannelDto,
+    channelDto: SetChannelPasswordDto,
   ): Promise<Channel> {
-    const channel = await this.getChannelById(channelDto.channelId);
-    const participant = await this.getOneChannelParticipant(
-      userId,
-      channelDto.channelId,
-    );
-    await this.checkChannelType(channel, ChannelType.PRIVATE);
-    await this.isChanelParticipant(participant);
-    await this.isChannelParticipantOwner(participant);
-    await this.checkChannelPassword(channelDto.password);
-    channel.password = await bcrypt.hash(channelDto.password, 10);
-    return this.channelRepository.save(channel);
-  }
-
-  /**
-   * deleteChannelPassword
-   * (channel-delete-password)
-   * @param : channel id
-   */
-  async deleteChannelPassword(
-    userId: number,
-    channelId: number,
-  ): Promise<Channel> {
-    const channel = await this.getChannelById(channelId);
-    const participant = await this.getOneChannelParticipant(userId, channelId);
-    await this.checkChannelType(channel, ChannelType.PRIVATE);
-    await this.isChanelParticipant(participant);
-    await this.isChannelParticipantOwner(participant);
-    channel.type = ChannelType.PUBLIC;
-    channel.password = null;
-    return this.channelRepository.save(channel);
+    const [channel, user] = await Promise.all([
+      this.getChannelById(channelDto.channelId),
+      this.getOneChannelParticipant(userId, channelDto.channelId),
+    ]);
+    if (
+      this.isChannelParticipant(user, channel) &&
+      this.isChannelOwner(user, channel)
+    ) {
+      if (
+        (channelDto.action === OptionPassword.ADD &&
+          this.checkChannelType(channel, ChannelType.PUBLIC)) ||
+        (channelDto.action === OptionPassword.CHANGE &&
+          this.checkChannelType(channel, ChannelType.PRIVATE))
+      ) {
+        if (this.checkChannelPassword(channelDto.password)) {
+          channel.password = await bcrypt.hash(channelDto.password, 10);
+          channel.type = ChannelType.PRIVATE;
+          return this.channelRepository.save(channel);
+        }
+      } else if (
+        channelDto.action === OptionPassword.REMOVE &&
+        channelDto.password === null &&
+        this.checkChannelType(channel, ChannelType.PRIVATE)
+      ) {
+        channel.type = ChannelType.PUBLIC;
+        channel.password = null;
+        return this.channelRepository.save(channel);
+      } else {
+        throw new WsException('Wrong password setting action.');
+      }
+    }
   }
 
   /****************************************************************************/
@@ -228,15 +322,15 @@ export class ChatService {
   /**
    * getChannelUsers get the channel's users
    * @param channelId channel id
-   * @returns Promise<ChannelParticipant> return
+   * @returns Promise<any> return
    */
-  getChannelUsers(channelId: number): Promise<ChannelParticipant> {
+  async getChannelUsers(channelId: number): Promise<any> {
+    await this.getChannelById(channelId);
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.user', 'user')
-      .select(['role', 'user.id', 'user.nickname', 'user.avatar'])
+      .select(['role', 'status', 'user.id', 'user.nickname', 'user.avatar'])
       .where('channelParticipant.channelId = :Id', { Id: channelId })
-      .andWhere('status != :status', { status: StatusInChannel.BAN })
       .execute();
   }
 
@@ -258,13 +352,14 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  getUserChannels(userId: number): Promise<ChannelParticipant> {
+  getUserChannels(userId: number): Promise<any> {
     return this.channelParticipantRepository
       .createQueryBuilder('channelParticipant')
       .leftJoinAndSelect('channelParticipant.channel', 'channel')
       .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
       .where('channelParticipant.userId = :Id', { Id: userId })
       .andWhere('status != :status', { status: StatusInChannel.BAN })
+      .andWhere('channel.type != :type', { type: ChannelType.DIRECT })
       .execute();
   }
 
@@ -277,17 +372,24 @@ export class ChatService {
     userId: number,
   ): Promise<ChannelParticipant> {
     /* Get channels' ids in which the user participate*/
-    /* if user status is ban, HAVE TO CHECK WHAT WE WANT TO DO LATER*/
-    const userChannels = await this.channelParticipantRepository.find({
-      where: { userId: userId },
-    });
+    const [userChannels, allUserChannels] = await Promise.all([
+      this.channelParticipantRepository.find({
+        where: { userId: userId },
+      }),
+      this.channelParticipantRepository
+        .createQueryBuilder('channelParticipant')
+        .leftJoinAndSelect('channelParticipant.channel', 'channel')
+        .select([
+          'role',
+          'status',
+          'channel.id',
+          'channel.type',
+          'channel.name',
+        ])
+        .where('channel.type != :type', { type: ChannelType.DIRECT })
+        .execute(),
+    ]);
     const channelIds = userChannels.map((data) => data.channelId);
-
-    const allUserChannels = await this.channelParticipantRepository
-      .createQueryBuilder('channelParticipant')
-      .leftJoinAndSelect('channelParticipant.channel', 'channel')
-      .select(['role', 'status', 'channel.id', 'channel.type', 'channel.name'])
-      .execute();
     const seen = [];
     const userNotJoinChannels = allUserChannels
       .filter((data) => (channelIds.includes(data.channel_id) ? false : true))
@@ -324,44 +426,92 @@ export class ChatService {
   /*                               Direct Channel                             */
   /****************************************************************************/
 
-  async createDirectChannel(user1: User, user2: User): Promise<Channel> {
+  async createDirectChannel(user1: User, user2: User): Promise<number> {
     // Check if the channel already exists.
-    let channel = await this.channelParticipantRepository
-      .createQueryBuilder()
-      .leftJoinAndSelect('ChannelParticipant.channel', 'channel')
-      .select(['channel.id'])
-      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
-      .andWhere('participant.userId = :Id', { Id: user1.id })
-      .andWhere('participant.userId = :Id', { Id: user2.id })
-      .execute();
+    const channelUser1 = (
+      await this.channelParticipantRepository
+        .createQueryBuilder('participant')
+        .leftJoinAndSelect('participant.channel', 'channel')
+        .select('channel.id', 'id')
+        .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+        .andWhere('participant.userId = :Id', { Id: user1.id })
+        .execute()
+    ).map((channel) => channel.id);
 
-    if (!channel) throw new WsException('The convesation already exists');
+    const channelUser2 = (
+      await this.channelParticipantRepository
+        .createQueryBuilder('participant')
+        .leftJoinAndSelect('participant.channel', 'channel')
+        .select('channel.id', 'id')
+        .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+        .andWhere('participant.userId = :Id', { Id: user2.id })
+        .execute()
+    ).map((channel) => channel.id);
+
+    const channel = channelUser1.filter((channel) =>
+      channelUser2.includes(channel),
+    );
+
+    if (channel.length == 1) return channel[0]; // return existing channel id.
 
     const newChannel = this.channelRepository.create();
-    newChannel.name = user1.nickname + ', ' + user2.nickname;
+    newChannel.name = `${user1.nickname} , ${user2.nickname}`;
     newChannel.type = ChannelType.DIRECT;
-    channel = this.channelRepository.save(newChannel);
+    await this.channelRepository.save(newChannel);
 
-    this.createDirectChannelParticipant(await channel, user1);
-    this.createDirectChannelParticipant(await channel, user2);
-    return channel;
+    await Promise.all([
+      this.addChannelParticipant(newChannel.id, user1.id, ChannelRole.OWNER),
+      this.addChannelParticipant(newChannel.id, user2.id, ChannelRole.OWNER),
+    ]);
+    return newChannel.id;
   }
 
-  async createDirectChannelParticipant(channel: Channel, user: User) {
-    const newUserparticipant = this.channelParticipantRepository.create();
-    newUserparticipant.channelId = channel.id;
-    newUserparticipant.role = ChannelRole.OWNER;
-    newUserparticipant.userId = user.id;
-    this.channelParticipantRepository.save(newUserparticipant);
+  async getDirectInfo(userId: number, channelId: number): Promise<any> {
+    const channelInfos = await this.channelRepository
+      .createQueryBuilder('channel')
+      .leftJoinAndSelect('channel.participant', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
+      .select(['channel.id'])
+      .addSelect('user.id', 'user_id')
+      .addSelect('user.nickname', 'user_name')
+      .addSelect('user.avatar', 'user_avatar')
+      .where('channel.id = :Id', { Id: channelId })
+      .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .execute();
+
+    const channelInfo = channelInfos.filter(
+      (channel) => channel.user_id != userId,
+    );
+
+    return channelInfo[0];
+  }
+
+  getUserDirectChannelIds(userId: number): Promise<any> {
+    return this.channelParticipantRepository
+      .createQueryBuilder('participant')
+      .leftJoinAndSelect('participant.channel', 'channel')
+      .select('participant.channelId', 'channelId')
+      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhere('participant.userId = :Id', { Id: userId })
+      .execute();
   }
 
   async getDirectChannelList(userId: number): Promise<Channel[]> {
+    let channelIds = await this.getUserDirectChannelIds(userId);
+
+    channelIds = channelIds.map((a) => a.channelId);
+
     return this.channelRepository
       .createQueryBuilder('channel')
-      .leftJoinAndSelect('channelParticipant', 'participant')
-      .select(['channel.id', 'channel.name'])
-      .where('channel.type = :Type', { Type: ChannelType.DIRECT })
-      .andWhere('participant.userId = :Id', { Id: userId })
+      .leftJoinAndSelect('channel.participant', 'participant')
+      .leftJoinAndSelect('participant.user', 'user')
+      .select(['channel.id'])
+      .addSelect('user.id', 'user_id')
+      .addSelect('user.nickname', 'user_name')
+      .addSelect('user.avatar', 'user_avatar')
+      .where('participant.userId != :Id', { Id: userId })
+      .andWhere('channel.type = :Type', { Type: ChannelType.DIRECT })
+      .andWhereInIds(channelIds)
       .execute();
   }
 
@@ -369,58 +519,77 @@ export class ChatService {
   /*                                 checkers                                 */
   /****************************************************************************/
 
-  async checkChannelNameAndPassword(
-    createChannelDto: CreateChannelDto,
-  ): Promise<void> {
-    const channelNames = await (
-      await this.getAllChannels()
-    ).map((data) => data.name);
+  async checkChannelName(createChannelDto: CreateChannelDto): Promise<boolean> {
+    const channelNames = (await this.getAllChannels()).map((data) => data.name);
     if (channelNames.includes(createChannelDto.name)) {
-      console.log('Channel name has been taken.');
       throw new WsException('Channel name has been taken, choose a new one.');
     }
-    if (createChannelDto.password) {
-      await this.checkChannelPassword(createChannelDto.password);
-    }
+    return true;
   }
 
-  async checkChannelPassword(password: string): Promise<void> {
-    if (!password) {
-      console.log('Empty password');
-      throw new WsException('Channel password is empty.');
-    }
+  checkChannelPassword(password: string): boolean {
     if (password.length < 4 || password.length > 16) {
-      console.log('Wrong password');
       throw new WsException(
         'Channel password should consist 4 to 16 letters including alphabets numbers and specials.',
       );
     }
+    return true;
   }
 
-  async checkChannelType(channel: Channel, type: ChannelType): Promise<void> {
+  checkChannelType(channel: Channel, type: ChannelType): boolean {
     if (channel.type !== type) {
-      console.log('The channel type is not correct.');
-      throw new WsException('The channel type is not correct.');
-    }
-  }
-
-  async isChanelParticipant(participant: ChannelParticipant): Promise<void> {
-    if (!participant) {
-      console.log('You are not a member of this channel.');
-      throw new WsException('You are not a member of this channel.');
-    }
-  }
-
-  async isChannelParticipantOwner(
-    participant: ChannelParticipant,
-  ): Promise<void> {
-    if (participant.role !== ChannelRole.OWNER) {
-      console.log(
-        'Only channel owner have the right to add/change/delete password.',
-      );
       throw new WsException(
-        'Only channel owner have the right to add/change/delete password.',
+        `The channel [${channel.name}] type is not correct.`,
       );
     }
+    return true;
+  }
+
+  isChannelParticipant(
+    participant: ChannelParticipant,
+    channel: Channel,
+  ): boolean {
+    if (!participant) {
+      throw new WsException(
+        `User is not a member of channel [${channel.name}].`,
+      );
+    }
+    return true;
+  }
+
+  isChannelOwner(participant: ChannelParticipant, channel: Channel): boolean {
+    if (participant.role !== ChannelRole.OWNER) {
+      throw new WsException(
+        `Participant is not the owner of channel [${channel.name}].
+        Only the owner can add/change/delete password and set/unset administrators.`,
+      );
+    }
+    return true;
+  }
+
+  isChannelAdmin(participant: ChannelParticipant, channel: Channel): boolean {
+    if (participant.role !== ChannelRole.ADMIN) {
+      throw new WsException(
+        `Participant is not the administrator of channel [${channel.name}].`,
+      );
+    }
+    return true;
+  }
+
+  isChannelParticipantNormalUser(
+    participant: ChannelParticipant,
+    channel: Channel,
+  ): boolean {
+    if (participant.role !== ChannelRole.USER) {
+      throw new WsException(
+        `Participant is already the owner/administrator of channel [${channel.name}].`,
+      );
+    }
+    if (participant.status !== StatusInChannel.NORMAL) {
+      throw new WsException(
+        `The participant is muted/banned in channel [${channel.name}].`,
+      );
+    }
+    return true;
   }
 }

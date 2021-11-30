@@ -1,34 +1,43 @@
 import { useEffect, useState } from 'react';
 import {Toast, ToastContainer, Button } from 'react-bootstrap'
 import { socket } from '../context/socket';
+import {useBetween} from 'use-between'
 
 type NotificationType = 'success' | 'warning' | 'danger'
 
-interface INotification
+export interface INotification
 {
 	type: NotificationType
 	message: string,
 }
 
+export const useShareableState = () => {
+	const [NotificationList, SetNotifications] = useState<INotification[]>([]);
+	return {
+		NotificationList,
+		SetNotifications,
+	}
+}
+
+function ToastComponent(props: {Notification: INotification, idx: number, closeNotif: Function})
+{
+	return (
+		<div key={`Toast_${props.idx}`}>
+		<Toast bg={props.Notification.type} onClose={() => props.closeNotif(props.idx)} delay={10000} autohide>
+			<Toast.Header>
+				<strong style={{width: "21em"}}> Notification </strong>
+			</Toast.Header>
+			<Toast.Body>
+				{`${props.Notification.message}`}
+			</Toast.Body>
+		</Toast>
+		</div>
+	)
+}
+
 function Notifications() {
 
-	function ToastComponent(props: {Notification: INotification, idx: number})
-	{
-		return (
-			<div key={`Toast_${props.idx}`}>
-			<Toast bg={props.Notification.type} onClose={() => closeNotif(props.idx)}>
-				<Toast.Header>
-					<strong style={{width: "21em"}}> Notification </strong>
-				</Toast.Header>
-				<Toast.Body>
-					{`${props.Notification.message}`}
-				</Toast.Body>
-			</Toast>
-			</div>
-		)
-	}
-
-	const [NotificationList, SetNotifications] = useState<INotification[]>([]);
+	const { NotificationList, SetNotifications} = useBetween(useShareableState);
 
 	function closeNotif(idx: number)
 	{
@@ -42,33 +51,15 @@ function Notifications() {
 			NotificationList.push(data.alert);
 			SetNotifications([...NotificationList]);
 		});
-		//console.log(`NotificationList changed!`);
-		//console.log(NotificationList);
 		return (() => {socket.off('alert')})
 	}, [NotificationList]);
 
-/* 	const successnotif: INotification = {type: 'success', message: 'bonjour a tous'}
-	const [compt, setcompt] = useState(0); */
     return (
  	<div style={{zIndex:2}}>
-
-	<ToastContainer position='top-start' className='ToastList'>
-	{
-		NotificationList.map((Notification, idx) => ToastComponent({Notification, idx}))
-	}
-	</ToastContainer>
-{/*  	<Button onClick={ () => {
-		console.log('click');
-		successnotif.message = `message : ${compt}`;
-		successnotif.type = 'success';
-		setcompt(compt + 2);
-		NotificationList.push(successnotif);
-		let newlist: INotification[] = [...NotificationList]
-		SetNotifications(newlist);
-	}}> Create a notif </Button> */}
+		<ToastContainer position='top-start' className='ToastList'>
+			{ NotificationList.map((Notification, idx) => ToastComponent({Notification, idx, closeNotif})) }
+		</ToastContainer>
 	</div>
     )
-
 }
-
 export default Notifications;

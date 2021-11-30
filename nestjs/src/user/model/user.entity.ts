@@ -7,9 +7,18 @@ import {
   CreateDateColumn,
   Entity,
   OneToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
 import UserGameRecords from '../../game/model/userGameRecords.entity';
+import DatabaseFile from './databasefile.entity';
+
+export enum SiteStatus {
+  OWNER = 'Owner',
+  MODERATOR = 'Moderator',
+  USER = 'User',
+  BANNED = 'Banned',
+}
 
 export enum OnlineStatus {
   AVAILABLE = 'Available',
@@ -25,10 +34,10 @@ export class User {
   @Column()
   nickname: string;
 
-  @Column()
+  @Column({ nullable: true })
   avatar: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate: Date;
 
   @Column({
@@ -37,13 +46,19 @@ export class User {
   })
   userStatus: OnlineStatus;
 
+  @Column({
+    type: 'enum',
+    enum: SiteStatus,
+  })
+  siteStatus: SiteStatus;
+
   @Column({ nullable: true })
   email?: string;
 
   @Column({ default: false })
   isTwoFactorAuthenticationEnabled: boolean;
 
-  @Column({ nullable: true, select: false })
+  @Column({ nullable: true })
   twoFactorAuthenticationSecret?: string;
 
   @OneToMany(() => UserGameRecords, (userGameRecords) => userGameRecords.user)
@@ -66,4 +81,9 @@ export class User {
 
   @OneToMany(() => Message, (message) => message.author)
   public message!: Message[];
+
+  @OneToOne(() => DatabaseFile, (databaseFile) => databaseFile.user, {
+    nullable: true,
+  })
+  avatarFile?: DatabaseFile;
 }

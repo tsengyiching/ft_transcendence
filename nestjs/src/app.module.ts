@@ -8,6 +8,8 @@ import { GameModule } from './game/game.module';
 import { AuthModule } from './auth/auth.module';
 import { RelationshipModule } from './relationship/relationship.module';
 import { ChatModule } from './chat/chat.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { ChatModule } from './chat/chat.module';
     AuthModule,
     RelationshipModule,
     ChatModule,
+    ScheduleModule.forRoot(),
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

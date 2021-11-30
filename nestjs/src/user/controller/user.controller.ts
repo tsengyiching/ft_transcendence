@@ -2,11 +2,19 @@ import {
   Body,
   Controller,
   Get,
+  HttpException,
+  HttpStatus,
   Param,
   ParseIntPipe,
   Patch,
+  PayloadTooLargeException,
   Post,
+  Req,
+  Res,
+  StreamableFile,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { CreateUserDto } from '../model/create-user.dto';
 import { UserService } from '../service/user.service';
@@ -15,7 +23,9 @@ import { JwtAuthGuard } from 'src/auth/guard/jwt.guard';
 import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { ChangeUserNameDto } from '../model/change-username.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
-import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { Express, Response, Request } from 'express';
+import { Readable } from 'stream';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
@@ -25,7 +35,7 @@ export class UserController {
 
   /**
    * getCurrentUser
-   * @returns : id, nickname, createDate, userStatus, email, 2fa enable
+   * @returns : id, nickname, createDate, userStatus, siteStatus, email, 2fa enable
    */
   @Get('me')
   getCurrentUser(@CurrentUser() user: User): Promise<User> {
@@ -71,14 +81,49 @@ export class UserController {
     return this.userService.changeUserName(user.id, changeUserNameDto);
   }
 
-  /**
-   * changeUserAvatar
-   */
-  @Patch('avatar')
-  changeUserAvatar(
+  @Post('upload')
+  @UseInterceptors(FileInterceptor('file'))
+  async addAvatar(
     @CurrentUser() user: User,
-    @Body() changeUserAvatarDto: ChangeUserAvatarDto,
-  ): Promise<User> {
-    return this.userService.changeUserAvatar(user.id, changeUserAvatarDto);
+    @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    if (req.file.size > 1024 * 1024) {
+      throw new PayloadTooLargeException();
+    }
+    if (req.file.mimetype.indexOf('image') === -1) {
+      throw new HttpException(
+        `The mimetype ${req.file.mimetype} is not acceptable.`,
+        HttpStatus.NOT_ACCEPTABLE,
+      );
+    }
+    const index = req.file.originalname.indexOf('.', 0);
+    if (index !== -1) {
+      const filetype = req.file.originalname.slice(index + 1);
+      if (filetype !== 'jpeg' && filetype !== 'png' && filetype !== 'gif') {
+        throw new HttpException(
+          `The file type ${req.file.originalname} is not acceptable.`,
+          HttpStatus.NOT_ACCEPTABLE,
+        );
+      }
+    }
+    await this.userService.addAvatar(user.id, file.buffer, file.originalname);
+    return `Image ${req.file.originalname} uploaded successfully !`;
+  }
+
+  @Get('avatarfile/:id')
+  async getDatabaseFileById(
+    @Param('id', ParseIntPipe) id: number,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const file = await this.userService.getFileById(id);
+    const stream = Readable.from(file.data);
+
+    response.set({
+      'Content-Disposition': `inline; filename="${file.filename}"`,
+      'Content-Type': 'image',
+    });
+
+    return new StreamableFile(stream);
   }
 }

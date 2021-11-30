@@ -1,21 +1,24 @@
 import { useState, useEffect, useContext} from "react"
-import { socket } from "../../context/socket";
-import {Image, Col, Row} from 'react-bootstrap'
-import axios from 'axios'
-import "./ListUsers.css"
-import './members.css'
-import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {DataContext} from "../../App" 
-import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
+import {Image, Col, Row} from 'react-bootstrap'
 import {useHistory} from "react-router-dom"
+import axios from 'axios'
+import { socket } from "../../context/socket";
+import { SwitchContext } from "../InterfaceUser";
+import status from './Status'
+import {DataContext, SiteStatus} from "../../App" 
+import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
+import './members.css'
+import "./ListUsers.css"
 
 interface IUser {
 	id: number;
 	nickname: string;
 	avatar: string;
 	userStatus: 'Available' | 'Playing' | 'Offline';
-	relationship: null | 'Friend' | 'Block' | 'Not confirmed'}
+	relationship: null | 'Friend' | 'Block' | 'Not confirmed';
+	user_siteStatus: SiteStatus;
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
@@ -27,14 +30,11 @@ export default function ListUsers()
 	
 		return (
 		<ContextMenu id={`ContextMenuUser_${props.User.id}`}>
-	
-			{ props.User.userStatus !== 'Offline' &&
 			<div>
-			<MenuItem>
+			<MenuItem onClick={() => {SwitchToPrivate(props.User.id)}}>
 				Send a message
 			</MenuItem>
 			</div>
-			}
 			<MenuItem onClick={() => history.push(`/profile/${props.User.id}`)}>
 				View Profile
 			</MenuItem>
@@ -63,17 +63,15 @@ export default function ListUsers()
 			<div key={`User_${User.id}`}>
 			<ContextMenuTrigger id={`ContextMenuUser_${User.id}`}>
 			<div className="User UserButton">
-			<Row>
-				<Col lg={3}>
-					<Image src={User.avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={5}>
-					<div style={{margin:"1em"}}> {User.nickname} </div>
-				</Col>
-				<Col>
-					{status(User.userStatus)}
-				</Col>
-			</Row>
+				<Row>
+					<Col lg={3} className="position-relative">
+						<Image src={User.avatar} className="PictureUser" alt="picture" fluid/>
+						{status(User.userStatus)}
+					</Col>
+					<Col lg={5}>
+						<div style={{margin:"1em"}}> {User.nickname} </div>
+					</Col>
+				</Row>
 			</div>
 			</ContextMenuTrigger>
 			<ContextMenuUser User={User}/>
@@ -84,11 +82,12 @@ export default function ListUsers()
 	}
 
 	const [Users, SetUsers] = useState<IUser[]>([]);
-	const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
+	//const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
+	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
-	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	let history = useHistory();
+	const SwitchToPrivate = useContext(SwitchContext);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -100,26 +99,12 @@ export default function ListUsers()
 			console.log("error");
 		})
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on('reload-users', (data: {user_id1: number, user_id2: number}) => {SetReloadUserlist(data)});
+		socket.on('reload-users', () => {
+			setReload(Reload + 1)
+		});
 		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
 		//console.log(Users);
-	}, []);
-
-	//actualize the list of users	
-	useEffect(() => {
-		let isMounted = true;
-		if (userData.id === ReloadUserlist.user_id1 || userData.id === ReloadUserlist.user_id2)
-		{
-			axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
-			.then(res => { if (isMounted)
-				SetUsers(res.data);
-			})
-			.catch(res => { if (isMounted)
-				console.log("error");
-			})
-		}
-		return (() => {isMounted = false})
-	}, [ReloadUserlist, userData.id])
+	}, [Reload]);
 
 	//actualize the status
 	useEffect(() => {
@@ -131,7 +116,7 @@ export default function ListUsers()
 			{
 			//console.log("change status");
 			user.userStatus = ReloadStatus.status;
-			SetRefreshVar(!RefreshVar);
+			//SetRefreshVar(!RefreshVar);
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps

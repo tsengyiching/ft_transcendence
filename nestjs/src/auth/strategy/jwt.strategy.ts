@@ -2,6 +2,7 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { UserService } from 'src/user/service/user.service';
 import { Request } from 'express';
 
 export type JwtPayload = {
@@ -13,28 +14,33 @@ export type JwtPayload = {
 
 @Injectable()
 export class JwtAuthStrategy extends PassportStrategy(Strategy) {
-  constructor(configService: ConfigService) {
-    const extractJwtFromCookie = (req: Request) => {
-      let token = null;
-      if (req && req.cookies) {
-        token = req.cookies['jwt'];
-      }
-      return token || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
-    };
-
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly userService: UserService,
+  ) {
     super({
-      jwtFromRequest: extractJwtFromCookie,
+      jwtFromRequest: (req: Request): string => {
+        let tokenJwt = null;
+
+        if (req && req.cookies) {
+          tokenJwt = req.cookies['jwt'];
+        }
+        return tokenJwt || ExtractJwt.fromAuthHeaderAsBearerToken()(req);
+      },
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('JWT_SECRET'),
     });
   }
 
   async validate(payload: JwtPayload): Promise<JwtPayload> {
-    return {
-      id: payload.id,
-      username: payload.username,
-      email: payload.email,
-      twoFA: payload.twoFA,
-    };
+    const bannedIds = await this.userService.getBannedUserIds();
+    if (!bannedIds.includes(payload.id)) {
+      return {
+        id: payload.id,
+        username: payload.username,
+        email: payload.email,
+        twoFA: payload.twoFA,
+      };
+    }
   }
 }

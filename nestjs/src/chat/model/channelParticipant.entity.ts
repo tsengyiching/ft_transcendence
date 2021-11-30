@@ -53,6 +53,12 @@ export class ChannelParticipant {
   })
   public status: StatusInChannel;
 
-  @CreateDateColumn()
+  @Column({
+    type: 'timestamptz',
+    default: null,
+  })
+  statusExpiration: Date;
+
+  @CreateDateColumn({ type: 'timestamptz' })
   public createDate: Date;
 }

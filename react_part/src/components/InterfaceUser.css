@@ -8,16 +8,6 @@
 	padding-top: 2px;
 }
 
-.TitleChannel {
-	font-size: large;
-	background-color: #A0B4D1;
-	text-align: center;
-	max-height: 40px;
-	max-width: 100%;
-	margin: 0;
-	border: 1px solid black
-}
-
 .ButtonCreate {
 	border-radius: 5px;
 	border-color: none;
@@ -31,3 +21,4 @@
 	width: 40%;
 	padding: 50px;
 }
+

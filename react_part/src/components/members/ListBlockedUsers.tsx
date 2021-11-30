@@ -7,14 +7,16 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Unblock} from './ContextMenuFunctions'
-import {DataContext} from "../../App"
+import {DataContext, SiteStatus} from "../../App"
 import { useHistory } from "react-router";
 
-interface IBlockedUser {
+export interface IBlockedUser {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: StatusType}
+	user_userStatus: StatusType;
+	user_siteStatus: SiteStatus;
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
@@ -41,15 +43,13 @@ export default function ListBlockedUsers()
 				<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
 				<div className="BlockedUser UserButton">
 				<Row>
-				<Col lg={3}>
-					<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-				</Col>
-				<Col lg={5}>
-					<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
-				</Col>
-				<Col>
-					{status(BlockedUser.user_userStatus)}
-				</Col>
+					<Col lg={3} className="position-relative">
+						<Image src={BlockedUser.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(BlockedUser.user_userStatus)}
+					</Col>
+					<Col lg={5}>
+						<div style={{margin:"1em"}}> {BlockedUser.user_nickname} </div>
+					</Col>
 				</Row>
 				</div>
 				</ContextMenuTrigger>
@@ -62,7 +62,8 @@ export default function ListBlockedUsers()
 
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([]);
-	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	//const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const userData = useContext(DataContext);
 	let history = useHistory();
@@ -79,26 +80,10 @@ export default function ListBlockedUsers()
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadBlockedUserlist({user_id1: data.user_id1, user_id2: data.user_id2})});
+		socket.on("reload-users", () => { setReload(Reload + 1); });
 
 		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
-	}, []);
-
-	//actualize the blockedlist
-	useEffect(() => {
-		let isMounted = true
-		if (userData.id === ReloadBlockedUserlist.user_id1 || userData.id === ReloadBlockedUserlist.user_id2)
-		{
-			axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
-			.then(res => { if (isMounted)
-				SetBlockedUsers(res.data);
-			})
-			.catch(res => { if (isMounted)
-				console.log(res.data);
-			})
-		}
-	}, [ReloadBlockedUserlist, userData.id])
+	}, [Reload]);
 
 	//actualize the status
 	useEffect(() => {

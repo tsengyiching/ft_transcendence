@@ -9,6 +9,8 @@ import {
   Post,
   Query,
   UseGuards,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { Relationship } from '../model/relationship.entity';
 import { RelationshipService } from '../service/relationship.service';
@@ -71,10 +73,16 @@ export class RelationshipController {
    */
   @Get(':id/list')
   async getSpecificRelationList(
+    @CurrentUser() user: User,
     @Param('id', ParseIntPipe) id: number,
     @Query('status') status: string,
   ): Promise<SendSpecificListRelationshipDto[]> {
     await this.userService.getUserProfileById(id);
+    if (status !== 'friend' && id !== user.id)
+      throw new HttpException(
+        `User has no right to get other lists.`,
+        HttpStatus.BAD_REQUEST,
+      );
     return this.relationshipService.getSpecificRelationList(id, status);
   }
 
@@ -102,10 +110,10 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-    this.chatGateway.server.emit('reload-users', {
-      user_id1: relationshipDto.addresseeUserId,
-      user_id2: user.id,
-    });
+    this.chatGateway.server
+      .to('user-' + relationshipDto.addresseeUserId)
+      .emit('reload-users');
+    this.chatGateway.server.to('user-' + user.id).emit('reload-users');
     return relationship;
   }
 
@@ -121,10 +129,13 @@ export class RelationshipController {
       id,
       user.id,
     );
-    this.chatGateway.server.emit('reload-users', {
-      user_id1: relationship.users[0],
-      user_id2: relationship.users[1],
-    });
+    this.chatGateway.server
+      .to('user-' + relationship.users[0])
+      .emit('reload-users');
+    this.chatGateway.server
+      .to('user-' + relationship.users[1])
+      .emit('reload-users');
+
     return relationship;
   }
 
@@ -152,10 +163,10 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-    this.chatGateway.server.emit('reload-users', {
-      user_id1: relationship.users[0],
-      user_id2: relationship.users[1],
-    });
+    this.chatGateway.server
+      .to('user-' + relationshipDto.addresseeUserId)
+      .emit('reload-users');
+    this.chatGateway.server.to('user-' + user.id).emit('reload-users');
     return relationship;
   }
 
@@ -174,11 +185,11 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-
-    this.chatGateway.server.emit('reload-users', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
+    this.chatGateway.server
+      .to('user-' + relationshipDto.addresseeUserId)
+      .emit('reload-users');
+    this.chatGateway.server.to('user-' + user.id).emit('reload-users');
     return relationship;
   }
 
@@ -195,10 +206,11 @@ export class RelationshipController {
       user.id,
       relationshipDto,
     );
-    this.chatGateway.server.emit('reload-users', {
-      user_id1: user.id,
-      user_id2: relationshipDto.addresseeUserId,
-    });
+    this.chatGateway.server.to('user-' + user.id).emit('reload-block');
+    this.chatGateway.server
+      .to('user-' + relationshipDto.addresseeUserId)
+      .emit('reload-users');
+    this.chatGateway.server.to('user-' + user.id).emit('reload-users');
     return relationship;
   }
 }

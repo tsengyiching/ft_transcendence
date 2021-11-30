@@ -1,15 +1,26 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { OnlineStatus, User } from '../model/user.entity';
+import { OnlineStatus, SiteStatus, User } from '../model/user.entity';
 import { CreateUserDto } from '../model/create-user.dto';
 import { Repository, UpdateResult } from 'typeorm';
 import { ChangeUserNameDto } from '../model/change-username.dto';
-import { ChangeUserAvatarDto } from '../model/change-useravatar.dto';
+import {
+  OptionSiteStatus,
+  SetUserSiteStatusDto,
+} from 'src/admin/dto/set-user-site-status.dto';
+import DatabaseFile from '../model/databasefile.entity';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(DatabaseFile)
+    private databaseFilesRepository: Repository<DatabaseFile>,
   ) {}
 
   /**
@@ -62,6 +73,9 @@ export class UserService {
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
     newUser.userStatus = OnlineStatus.AVAILABLE;
+    if (profile.id === 60191 || profile.id === 60044)
+      newUser.siteStatus = SiteStatus.OWNER;
+    else newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
 
@@ -72,6 +86,7 @@ export class UserService {
     const newUser = this.userRepository.create({ ...createUserDto });
     newUser.isTwoFactorAuthenticationEnabled = false;
     newUser.userStatus = OnlineStatus.AVAILABLE;
+    newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
 
@@ -109,13 +124,14 @@ export class UserService {
   }
 
   /**
-   * changeUserAvatar
-   * @param : user id and new avatar url
+   * addAvatar
+   * @param : user id and new avatar
    * @returns : user
    */
-  async changeUserAvatar(
+  async addAvatar(
     id: number,
-    changeUserAvatarDto: ChangeUserAvatarDto,
+    imageBuffer: Buffer,
+    filename: string,
   ): Promise<User> {
     const user = await this.getOneById(id);
     if (!user) {
@@ -124,13 +140,14 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
-    if (user.avatar === changeUserAvatarDto.avatar) {
-      throw new HttpException(
-        `${user.avatar} is your current avatar url!`,
-        HttpStatus.BAD_REQUEST,
-      );
+    const oldDatafile = await this.databaseFilesRepository.findOne({
+      where: { userId: id },
+    });
+    if (oldDatafile) {
+      await this.databaseFilesRepository.remove(oldDatafile);
     }
-    user.avatar = changeUserAvatarDto.avatar;
+    const avatar = await this.uploadDatabaseFile(id, imageBuffer, filename);
+    user.avatar = `http://localhost:8080/profile/avatarfile/${avatar.id}`;
     return this.userRepository.save(user);
   }
 
@@ -203,6 +220,176 @@ export class UserService {
   }
 
   /****************************************************************************/
+  /*                              site admin                                  */
+  /****************************************************************************/
+
+  async getUsersWithSiteStatus(id: number, reqStatus: string): Promise<User[]> {
+    const status = this.checkSiteStatus(reqStatus);
+    const user = await this.getOneById(id);
+    if (this.checkUserExisted(user)) {
+      if (
+        user.siteStatus === SiteStatus.OWNER ||
+        user.siteStatus === SiteStatus.MODERATOR
+      ) {
+        const users = this.userRepository.find({
+          where: { siteStatus: status },
+          select: ['id', 'nickname', 'avatar', 'siteStatus'],
+        });
+        return users;
+      } else {
+        throw new HttpException(
+          `This user ${user.nickname} does not have the right !`,
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+  }
+
+  async getBannedUserIds(): Promise<number[]> {
+    const users = await this.userRepository.find({
+      where: { siteStatus: SiteStatus.BANNED },
+      select: ['id'],
+    });
+    const ids = users.map((obj) => obj.id);
+    return ids;
+  }
+
+  async modifyUserSiteStatus(
+    id: number,
+    setUserSiteStatusDto: SetUserSiteStatusDto,
+  ): Promise<User> {
+    if (id === setUserSiteStatusDto.id) {
+      throw new HttpException(
+        `You cannot modify your own site status !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const [operator, user] = await Promise.all([
+      this.getOneById(id),
+      this.getOneById(setUserSiteStatusDto.id),
+    ]);
+
+    if (this.checkUserExisted(operator) && this.checkUserExisted(user)) {
+      if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
+        return this.setModerator(operator, user);
+      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
+        return this.setUser(operator, user);
+      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
+        return this.banUser(operator, user);
+      }
+    }
+  }
+
+  setModerator(operator: User, user: User): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to set site moderators !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus !== SiteStatus.USER) {
+      throw new HttpException(
+        `The appointed user's site status is not user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.MODERATOR;
+    return this.userRepository.save(user);
+  }
+
+  setUser(operator: User, user: User): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to change user site status !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (
+      operator.siteStatus === SiteStatus.MODERATOR &&
+      user.siteStatus === SiteStatus.OWNER
+    ) {
+      throw new HttpException(
+        `You don't have the right to change the status of the site owner !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus === SiteStatus.USER) {
+      throw new HttpException(
+        `The appointed user's site status is already user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.USER;
+    return this.userRepository.save(user);
+  }
+
+  banUser(operator: User, user: User): Promise<User> {
+    if (
+      operator.siteStatus !== SiteStatus.OWNER &&
+      operator.siteStatus !== SiteStatus.MODERATOR
+    ) {
+      throw new HttpException(
+        `You don't have the right to ban a user !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (
+      operator.siteStatus === SiteStatus.MODERATOR &&
+      user.siteStatus === SiteStatus.OWNER
+    ) {
+      throw new HttpException(
+        `You don't have the right to ban the site owner !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    if (user.siteStatus === SiteStatus.BANNED) {
+      throw new HttpException(
+        `The appointed user's site status is already banned !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    user.siteStatus = SiteStatus.BANNED;
+    user.isTwoFactorAuthenticationEnabled = false;
+    user.twoFactorAuthenticationSecret = null;
+    return this.userRepository.save(user);
+  }
+
+  /****************************************************************************/
+  /*                                 checkers                                 */
+  /****************************************************************************/
+
+  checkSiteStatus(reqStatus: string): SiteStatus {
+    let status: SiteStatus;
+    if (reqStatus === 'owner') status = SiteStatus.OWNER;
+    else if (reqStatus === 'moderator') status = SiteStatus.MODERATOR;
+    else if (reqStatus === 'user') status = SiteStatus.USER;
+    else if (reqStatus === 'banned') status = SiteStatus.BANNED;
+    else
+      throw new HttpException(
+        `The request status does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    return status;
+  }
+
+  checkUserExisted(user: User): boolean {
+    if (!user) {
+      throw new HttpException(
+        `This user does not exist !`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return true;
+  }
+
+  /****************************************************************************/
   /*                                 utils                                    */
   /****************************************************************************/
 
@@ -219,5 +406,30 @@ export class UserService {
     const users = await this.getAll();
     const names = users.map((obj) => obj.nickname);
     return names;
+  }
+
+  /****************************************************************************/
+  /*                            Database File                                 */
+  /****************************************************************************/
+
+  async uploadDatabaseFile(
+    id: number,
+    dataBuffer: Buffer,
+    filename: string,
+  ): Promise<DatabaseFile> {
+    const newFile = this.databaseFilesRepository.create({
+      filename,
+      data: dataBuffer,
+      userId: id,
+    });
+    return this.databaseFilesRepository.save(newFile);
+  }
+
+  async getFileById(fileId: number): Promise<DatabaseFile> {
+    const file = await this.databaseFilesRepository.findOne(fileId);
+    if (!file) {
+      throw new NotFoundException();
+    }
+    return file;
   }
 }

@@ -25,8 +25,8 @@ export class Channel {
   /**
    * Contain Bcrypt hashed password of channel if is private
    */
-  @Column()
-  password?: string;
+  @Column({ nullable: true })
+  password: string;
 
   @Column({
     type: 'enum',
@@ -35,7 +35,7 @@ export class Channel {
   })
   type: ChannelType;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamptz' })
   createDate!: Date;
 
   @OneToMany(() => ChannelParticipant, (participant) => participant.channel, {

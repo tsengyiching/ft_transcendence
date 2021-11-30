@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext } from "react"
+import {SwitchContext} from '../InterfaceUser'
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -6,15 +7,17 @@ import "./ListFriends.css"
 import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {Block, InvitateToGame, SendMessage, SpectateGame, Unfriend} from './ContextMenuFunctions'
-import { DataContext } from "../../App";
+import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
+import { DataContext, SiteStatus } from "../../App";
 import { useHistory } from "react-router";
 
 interface IFriend {
 	user_id: number;
 	user_nickname: string;
 	user_avatar: string;
-	user_userStatus: StatusType}
+	user_userStatus: StatusType,
+	user_siteStatus: SiteStatus,
+}
 
 type StatusType = 'Available' | 'Playing' | 'Offline';
 
@@ -37,7 +40,7 @@ export default function ListFriends()
 				Spectate Game
 			</MenuItem>}
 	
-			<MenuItem onClick={() => SendMessage(props.Friend.user_id)}>
+			<MenuItem onClick={() => SwitchPrivateConversation(props.Friend.user_id)}>
 				Send a message
 			</MenuItem>
 	
@@ -63,14 +66,12 @@ export default function ListFriends()
 				<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
 				<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
 				<Row>
-					<Col lg={3}>
+					<Col lg={3} className="position-relative">
 						<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(Friend.user_userStatus)}
 					</Col>
 					<Col lg={5}>
 						<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
-					</Col>
-					<Col>
-						{status(Friend.user_userStatus)}
 					</Col>
 				</Row>
 				</div>
@@ -83,11 +84,13 @@ export default function ListFriends()
 		}
 
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	//const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
+	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	const userData = useContext(DataContext);
 	let history = useHistory();
+	const SwitchPrivateConversation = useContext(SwitchContext);
 
 	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
 
@@ -104,28 +107,12 @@ export default function ListFriends()
 		})
 		
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
-		socket.on("reload-users", (data: {user_id1: number, user_id2: number}) => {
-			SetReloadFriendlist({user_id1: data.user_id1, user_id2: data.user_id2});
+		socket.on("reload-users", () => {
+			console.log("reload in ListFriends")
+			setReload(Reload + 1);
 		})
 		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
-	}, [])
-
-	//actualize the friendlist
-	useEffect(() => {
-		//console.log("in reload friendlist");
-		let isMounted = true;
-		if (userData.id === ReloadFriendlist.user_id1 || userData.id === ReloadFriendlist.user_id2)
-		{
-		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
-		.then(res => { if (isMounted)
-			SetFriends(res.data);
-		})
-		.catch(res => { if (isMounted)
-			console.log("error");
-		})
-		}
-		return (() => {isMounted = false});
-	}, [ReloadFriendlist, userData.id])
+	}, [Reload])
 
 	//actualize the status
 	useEffect(() => {
