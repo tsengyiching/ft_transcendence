@@ -22,7 +22,6 @@ import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
 
 @WebSocketGateway({
-  namespace: 'chat',
   cors: {
     origin: 'http://localhost:3000',
     methods: ['GET', 'POST'],

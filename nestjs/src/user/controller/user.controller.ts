@@ -26,12 +26,16 @@ import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response, Request } from 'express';
 import { Readable } from 'stream';
+import { UserGateway } from '../user.gateway';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
 @Controller('profile')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private userGateway: UserGateway,
+  ) {}
 
   /**
    * getCurrentUser
@@ -78,7 +82,12 @@ export class UserController {
     @CurrentUser() user: User,
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    return this.userService.changeUserName(user.id, changeUserNameDto);
+    const updatedUser = this.userService.changeUserName(
+      user.id,
+      changeUserNameDto,
+    );
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
+    return updatedUser;
   }
 
   @Post('upload')
@@ -114,6 +123,7 @@ export class UserController {
       );
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
     return `Image ${req.file.originalname} uploaded successfully !`;
   }
 
