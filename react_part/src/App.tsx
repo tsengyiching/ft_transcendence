@@ -53,11 +53,11 @@ function App():React.ReactElement {
 
   return (
     <DataContext.Provider value={userData}>
-    	<SocketContext.Provider value={socket}>
-    		<Container fluid className="App">
-    		    <Router/>
-    		</Container>
-    	</SocketContext.Provider>
+    <SocketContext.Provider value={socket}>
+      <div className="App">
+        <Router/>
+      </div>
+    </SocketContext.Provider>
     </DataContext.Provider>
   );
 }
