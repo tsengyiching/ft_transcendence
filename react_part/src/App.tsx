@@ -52,9 +52,9 @@ function App() {
   return (
     <DataContext.Provider value={userData}>
     <SocketContext.Provider value={socket}>
-      <Container fluid className="App">
+      <div className="App">
         <Router/>
-      </Container>
+      </div>
     </SocketContext.Provider>
     </DataContext.Provider>
   );
