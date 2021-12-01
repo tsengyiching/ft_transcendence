@@ -12,10 +12,10 @@ function Home() {
         <Container className='no-padding' fluid>
                 <Notifications/>	
                 <Row>
-                    <Col lg={8}  className="LeftColHome">
+                    <Col lg={8} className="LeftColHome m-1 p-1">
 				    	<Game />
                     </Col>
-                    <Col lg={4} className="RightColHome">
+                    <Col className="RightColHome m-1">
                         <InterfaceUser/>
 					</Col>
                 </Row>

@@ -13,8 +13,8 @@ const ScoreBar:React.VFC<{}> = () => {
 	return (
 		<div id="score-canvas" style={{width:`${props.w}px`, height:`${props.h}px`}}>
 			<ScoreCanvasPlayers />
-			<ScoreCanvasBonusLeft />
 			<ScoreCanvasScore />
+			<ScoreCanvasBonusLeft />
 			<ScoreCanvasBonusRight />
 		</div>
 	);}

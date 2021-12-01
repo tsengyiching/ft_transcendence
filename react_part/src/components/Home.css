@@ -1,8 +1,17 @@
 .RightColHome {
-	border: 1px solid black;
-	max-height: 1100px;
+	/* border-left: 1px solid black; */
+	/* max-height: 80%; */
+	border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+	/* border-left:solid 2px #d3d3d3; */
+	/* box-shadow: -5px -5px 10px #d3d3d3; */
+	background-color: rgb(247, 247, 247);
+	/* padding-right:10px; */
+
 }
 
 .LeftColHome {
-	border: 1px solid black;
+	border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+	background-color: rgb(255, 255, 255);
 }
+
+/* https://codepen.io/tmrDevelops/pen/VeRvKX */
