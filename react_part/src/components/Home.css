@@ -4,5 +4,8 @@
 }
 
 .LeftColHome {
-	border: 1px solid black;
+	border-radius: 255px 15px 225px 15px/15px 225px 15px 255px;
+	background-color: rgb(255, 255, 255);
 }
+
+/* https://codepen.io/tmrDevelops/pen/VeRvKX */

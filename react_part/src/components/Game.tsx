@@ -24,14 +24,14 @@ const Game:React.FC = () => {
     const socket:Socket = useContext(GameSocketContext);
 	const imgeL = useStore(s => s.playerL.avatar);
 	const imgeR = useStore(s => s.playerR.avatar)
-
-    socket.emit('isInMatchmaking?');
     
     useEffect(() => {
+        if (gameStatus !== 2) {
         socket.on('inMatchMaking', (e) => {
             console.log(e);
             setToggleMatchMaking(e);
         });
+        }   
         socket.on('startPong', (e:GameInfos) => {
 			setGameStatus(2);
             useStore.setState((s) => ({...s, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));

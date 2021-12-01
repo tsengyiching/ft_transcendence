@@ -21,7 +21,7 @@ import {
   W,
   FRAMERATE,
 } from './pong.env';
-import { Interval } from '@nestjs/schedule';
+import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -29,8 +29,8 @@ function sleep(ms) {
 
 @Injectable()
 export class PongService {
+  // constructor(private schedulerRegistry: SchedulerRegistry){}
   private matches: Match[] = [];
-
   getMatchById(id: number) {
     return this.matches.find((e) => {
       e.id === id;
@@ -385,7 +385,7 @@ export class PongService {
     return matchId;
   }
 
-  @Interval('gameLoop', 1000 / FRAMERATE)
+  @Interval(1000 / FRAMERATE)
   updateGames() {
 	  console.log('HELLO');
     this.matches.forEach((match) => {

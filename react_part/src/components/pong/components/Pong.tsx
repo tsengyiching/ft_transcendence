@@ -25,13 +25,17 @@ const Pong:React.VFC<{h:number, w:number}> = (props) => {
 				h: props.h / 6,
 				w: props.w * 0.02,
 				pos:{
-					y: props.h - (props.h / 6),
+					y: props.h * 0.9 - (props.h / 6),
 					x: props.w * 0.97,
 				}
 			},
 			// ball
 			ball:{
 				...s.ball,
+				pos: {
+					x:props.w * 0.5,
+					y:props.h * 0.9 *0.5
+				},
 				radius: 15,
 			},
 			s:0,
