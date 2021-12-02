@@ -78,11 +78,11 @@ export class UserController {
    * changeUserName
    */
   @Patch('name')
-  changeUserName(
+  async changeUserName(
     @CurrentUser() user: User,
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    const updatedUser = this.userService.changeUserName(
+    const updatedUser = await this.userService.changeUserName(
       user.id,
       changeUserNameDto,
     );
