@@ -210,7 +210,7 @@ export class ChatService {
   async setChannelAdminbySiteModerator(
     operatedUser: User,
     body: SetChannelAdminDto,
-  ) {
+  ): Promise<ChannelParticipant> {
     this.setChannelAdminDtoValidation(body);
     if (
       operatedUser.siteStatus === SiteStatus.OWNER ||
@@ -355,9 +355,7 @@ export class ChatService {
    * @param userId the id of user
    * @returns Promise<ChannelParticipant> [{ channel_id, channel_name, channel_type, role, status}]
    */
-  async getUserNotParticipateChannels(
-    userId: number,
-  ): Promise<ChannelParticipant> {
+  async getUserNotParticipateChannels(userId: number): Promise<any> {
     /* Get channels' ids in which the user participate*/
     const [userChannels, allUserChannels] = await Promise.all([
       this.channelParticipantRepository.find({
@@ -504,7 +502,7 @@ export class ChatService {
     }
   }
 
-  async findUserDirectChannels(userId: number) {
+  async findUserDirectChannels(userId: number): Promise<number[]> {
     const channelIds = (
       await this.channelParticipantRepository
         .createQueryBuilder('participant')
@@ -516,6 +514,7 @@ export class ChatService {
     ).map((channel) => channel.id);
     return channelIds;
   }
+
   /****************************************************************************/
   /*                                 Checkers                                 */
   /****************************************************************************/
@@ -591,6 +590,7 @@ export class ChatService {
     this.isChannelParticipant(participant1, channel);
     this.isChannelParticipant(participant2, channel);
   }
+
   /****************************************************************************/
   /*                              Validations                                 */
   /****************************************************************************/

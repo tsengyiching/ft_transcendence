@@ -226,22 +226,21 @@ export class UserService {
   async getUsersWithSiteStatus(id: number, reqStatus: string): Promise<User[]> {
     const status = this.checkSiteStatus(reqStatus);
     const user = await this.getOneById(id);
-    if (this.checkUserExisted(user)) {
-      if (
-        user.siteStatus === SiteStatus.OWNER ||
-        user.siteStatus === SiteStatus.MODERATOR
-      ) {
-        const users = this.userRepository.find({
-          where: { siteStatus: status },
-          select: ['id', 'nickname', 'avatar', 'siteStatus'],
-        });
-        return users;
-      } else {
-        throw new HttpException(
-          `This user ${user.nickname} does not have the right !`,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+    this.checkUserExisted(user);
+    if (
+      user.siteStatus === SiteStatus.OWNER ||
+      user.siteStatus === SiteStatus.MODERATOR
+    ) {
+      const users = this.userRepository.find({
+        where: { siteStatus: status },
+        select: ['id', 'nickname', 'avatar', 'siteStatus'],
+      });
+      return users;
+    } else {
+      throw new HttpException(
+        `This user ${user.nickname} does not have the right !`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -270,14 +269,14 @@ export class UserService {
       this.getOneById(setUserSiteStatusDto.id),
     ]);
 
-    if (this.checkUserExisted(operator) && this.checkUserExisted(user)) {
-      if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
-        return this.setModerator(operator, user);
-      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
-        return this.setUser(operator, user);
-      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
-        return this.banUser(operator, user);
-      }
+    this.checkUserExisted(operator);
+    this.checkUserExisted(user);
+    if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
+      return this.setModerator(operator, user);
+    } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
+      return this.setUser(operator, user);
+    } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
+      return this.banUser(operator, user);
     }
   }
 
@@ -382,14 +381,13 @@ export class UserService {
     return status;
   }
 
-  checkUserExisted(user: User): boolean {
+  checkUserExisted(user: User): void {
     if (!user) {
       throw new HttpException(
         `This user does not exist !`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    return true;
   }
 
   /****************************************************************************/

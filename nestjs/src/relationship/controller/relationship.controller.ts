@@ -37,25 +37,6 @@ export class RelationshipController {
   ) {}
 
   /*
-   ** getAll returns all relations with details
-   */
-  @Get('all')
-  getAll(): Promise<SendRelationshipDto[]> {
-    return this.relationshipService.getAll();
-  }
-
-  /*
-   ** getOneById returns the relationship with details
-   ** parameter relationship's id
-   */
-  @Get(':id')
-  getRelationshipById(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<SendRelationshipDto> {
-    return this.relationshipService.getRelationshipById(id);
-  }
-
-  /*
    ** getMySpecificRelationList takes query relation_status to request corresponding list,
    ** returns an array with user friends' id, nickname, avatar and status
    */
