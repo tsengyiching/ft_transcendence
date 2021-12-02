@@ -62,8 +62,6 @@ export class ChatGateway
    */
   async handleConnection(client: Socket) {
     try {
-      console.log('New User Join');
-
       const user: User = await this.authService.getUserFromSocket(client);
       await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
       client.join('user-' + user.id);
@@ -71,6 +69,7 @@ export class ChatGateway
         user_id: user.id,
         status: OnlineStatus.AVAILABLE,
       });
+      console.log('New User Join');
       const [channels_in, channels_out] = await Promise.all([
         this.chatService.getUserChannels(user.id),
         this.chatService.getUserNotParticipateChannels(user.id),
@@ -88,7 +87,6 @@ export class ChatGateway
    */
   async handleDisconnect(client: Socket) {
     try {
-      console.log('Remove active user');
       const user: User = await this.authService.getUserFromSocket(client);
       await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
       client.leave('user-' + user.id);
@@ -96,6 +94,7 @@ export class ChatGateway
         user_id: user.id,
         status: OnlineStatus.OFFLINE,
       });
+      console.log('Remove active user');
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -127,7 +126,6 @@ export class ChatGateway
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.joinChannel(user.id, channelDto);
       console.log('User joined channel successfully !');
-      /* ? SEND USER JOINING MSG IN THE CHANNEL ? */
 
       const [channels_in, channels_out, users] = await Promise.all([
         this.chatService.getUserChannels(user.id),
@@ -152,32 +150,24 @@ export class ChatGateway
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, { channelId }) {
     try {
-      /* check arg type */
-      if (typeof channelId !== 'number') {
-        throw new WsException('ChannelId type is not number.');
-      }
-
       const user = await this.authService.getUserFromSocket(client);
       const channel = await this.chatService.leaveChannel(user.id, channelId);
-      if (channel == -1) {
+      if (channel === -1) {
         this.server.emit('channel-need-reload');
       } else {
-        if (channel > 0) {
-          /* NOTIFY THE NEW OWNER */
-          console.log(channel);
-          const new_onwer_channels_in = await this.chatService.getUserChannels(
-            channel,
-          );
-          this.server
-            .to('user-' + channel)
-            .emit('channels-user-in', new_onwer_channels_in);
-          this.server.to('user-' + channel).emit(`alert`, {
-            alert: {
-              type: `info`,
-              message: 'You are now promote as channel owner !',
-            },
-          });
-        }
+        /* NOTIFY THE NEW OWNER */
+        const new_onwer_channels_in = await this.chatService.getUserChannels(
+          channel,
+        );
+        this.server
+          .to('user-' + channel)
+          .emit('channels-user-in', new_onwer_channels_in);
+        this.server.to('user-' + channel).emit(`alert`, {
+          alert: {
+            type: `info`,
+            message: 'You are now promote as channel owner !',
+          },
+        });
 
         const [channels_in, channels_out, users] = await Promise.all([
           this.chatService.getUserChannels(user.id),
@@ -274,9 +264,6 @@ export class ChatGateway
   @SubscribeMessage('channel-destroy')
   async destroyChannel(client: Socket, { channelId }) {
     try {
-      if (typeof channelId !== 'number') {
-        throw new WsException('ChannelId type is not number.');
-      }
       const user = await this.authService.getUserFromSocket(client);
       const channel = await this.chatService.destroyChannel(user, channelId);
       if (channel) {
