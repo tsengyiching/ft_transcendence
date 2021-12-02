@@ -23,25 +23,17 @@ export class MessageService {
 
   async createChannelMessage(
     authorId: number,
-    createMessageDto: CreateMessageDto,
+    body: CreateMessageDto,
   ): Promise<Message> {
-    const participant = await this.channelService.getOneChannelParticipant(
-      authorId,
-      createMessageDto.channelId,
-    );
+    this.createMessageDtoValidation(body);
+    const [channel, participant] = await Promise.all([
+      this.channelService.getChannelById(body.channelId),
+      this.channelService.getOneChannelParticipant(authorId, body.channelId),
+    ]);
+    this.channelService.isChannelParticipant(participant, channel);
 
-    // Check if channel exit and  if user participate to the channel
-    if (!participant)
-      throw new WsException(
-        'You cannot post message if you not participating to the channel !',
-      );
-
-    if (
-      participant.status == StatusInChannel.MUTE ||
-      participant.status == StatusInChannel.BAN
-    ) {
-      // if mute expire
-      if (participant.statusExpiration == null)
+    if (participant.status !== StatusInChannel.NORMAL) {
+      if (participant.statusExpiration === null)
         throw new WsException(
           'Cannot post message in channel if you are ban or mute !',
         );
@@ -55,7 +47,7 @@ export class MessageService {
         );
     }
 
-    const newMessage = this.messageRepository.create({ ...createMessageDto });
+    const newMessage = this.messageRepository.create({ ...body });
     newMessage.authorId = authorId;
     return this.messageRepository.save(newMessage);
   }
@@ -79,24 +71,20 @@ export class MessageService {
   }
 
   /****************************************************************************/
-  /*                               Direct Channel                             */
+  /*                              Validations                                 */
   /****************************************************************************/
 
-  getDirectMessages(channelId: number) {
-    return this.messageRepository
-      .createQueryBuilder('message')
-      .leftJoinAndSelect('message.author', 'author')
-      .select([
-        'message.id',
-        'message.channelId',
-        'message.authorId',
-        'author.nickname',
-        'author.avatar',
-        'message.createDate',
-      ])
-      .addSelect('message.message', 'message_content')
-      .where('message.channelId = :Id', { Id: channelId })
-      .orderBy('message.createDate', 'ASC')
-      .execute();
+  createMessageDtoValidation(body: CreateMessageDto): void {
+    if (
+      typeof body.channelId !== 'number' ||
+      typeof body.message !== 'string'
+    ) {
+      throw new WsException(`Channel message create: wrong type of arguments.`);
+    }
+    if (body.message.length === 0 || body.message.length > 125) {
+      throw new WsException(
+        `Channel message create: message cannot be empty or longer than 125 characters.`,
+      );
+    }
   }
 }
