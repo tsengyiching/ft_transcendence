@@ -104,10 +104,10 @@ export class ChatGateway
    * @param CreateChannelDto : channel name and password
    */
   @SubscribeMessage('channel-create')
-  async createChannel(client: Socket, data: CreateChannelDto) {
+  async createChannel(client: Socket, body: CreateChannelDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.createChannel(user.id, data);
+      await this.chatService.createChannel(user.id, body);
       console.log('Channel created successfully !');
       this.server.emit('channel-need-reload');
     } catch (error) {
@@ -120,21 +120,19 @@ export class ChatGateway
    * @param JoinChannelDto : channelId and password
    */
   @SubscribeMessage('channel-join')
-  async joinChannel(client: Socket, channelDto: JoinChannelDto) {
+  async joinChannel(client: Socket, body: JoinChannelDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.joinChannel(user.id, channelDto);
+      await this.chatService.joinChannel(user.id, body);
       console.log('User joined channel successfully !');
 
       const [channels_in, channels_out, users] = await Promise.all([
         this.chatService.getUserChannels(user.id),
         this.chatService.getUserNotParticipateChannels(user.id),
-        this.chatService.getChannelUsers(channelDto.channelId),
+        this.chatService.getChannelUsers(body.channelId),
       ]);
 
-      this.server
-        .to('channel-' + channelDto.channelId)
-        .emit('channel-users', users);
+      this.server.to('channel-' + body.channelId).emit('channel-users', users);
       this.server.to('user-' + user.id).emit('channels-user-in', channels_in);
       this.server.to('user-' + user.id).emit('channels-user-out', channels_out);
     } catch (error) {
@@ -187,26 +185,19 @@ export class ChatGateway
 
   /**
    * change user status
-   * @param ChangeStatusDto : channel id
+   * @param ChangeStatusDto : channel id, user id, saction duration and status
    */
   @SubscribeMessage('channel-status-change')
-  async changeChannelUserStatus(
-    client: Socket,
-    statusChangeDto: ChangeStatusDto,
-  ) {
+  async changeChannelUserStatus(client: Socket, body: ChangeStatusDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.changeChannelUserStatus(user, statusChangeDto);
+      await this.chatService.changeChannelUserStatus(user, body);
       const channels_in = this.chatService.getUserChannels(user.id);
       this.server
         .to('user-' + user.id)
         .emit('channels-user-in', await channels_in);
-      const users = await this.chatService.getChannelUsers(
-        statusChangeDto.channelId,
-      );
-      this.server
-        .to('channel-' + statusChangeDto.channelId)
-        .emit('channel-users', users);
+      const users = await this.chatService.getChannelUsers(body.channelId);
+      this.server.to('channel-' + body.channelId).emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -214,24 +205,20 @@ export class ChatGateway
 
   /**
    * set administrator
-   * @param : SetChannelAdminDto (channel id, participant id, action)
+   * @param SetChannelAdminDto : channel id, participant id, action
    */
   @SubscribeMessage('channel-admin')
-  async setChannelAdmin(client: Socket, setAdminDto: SetChannelAdminDto) {
+  async setChannelAdmin(client: Socket, body: SetChannelAdminDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.setChannelAdmin(user, setAdminDto);
+      await this.chatService.setChannelAdmin(user, body);
       console.log('Channel admin has been set/unset successfully !');
       const channels_in = await this.chatService.getUserChannels(user.id);
       this.server
-        .to('user-' + setAdminDto.participantId)
+        .to('user-' + body.participantId)
         .emit('channels-user-in', channels_in);
-      const users = await this.chatService.getChannelUsers(
-        setAdminDto.channelId,
-      );
-      this.server
-        .to('channel-' + setAdminDto.channelId)
-        .emit('channel-users', users);
+      const users = await this.chatService.getChannelUsers(body.channelId);
+      this.server.to('channel-' + body.channelId).emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -239,16 +226,13 @@ export class ChatGateway
 
   /**
    * change Password
-   * @param SetChannelPasswordDto : (channel id, action, password)
+   * @param SetChannelPasswordDto : channel id, action, password
    */
   @SubscribeMessage('channel-change-password')
-  async changeChannelPassword(
-    client: Socket,
-    channelDto: SetChannelPasswordDto,
-  ) {
+  async changeChannelPassword(client: Socket, body: SetChannelPasswordDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.changeChannelPassword(user.id, channelDto);
+      await this.chatService.changeChannelPassword(user.id, body);
       console.log('Channel password has been changed successfully !');
       this.server.emit('channel-need-reload');
     } catch (error) {
@@ -276,26 +260,22 @@ export class ChatGateway
 
   /**
    * set administrator by SiteModerator
-   * @param : SetChannelAdminDto (channel id, participant id, action)
+   * @param SetChannelAdminDto : channel id, participant id and action
    */
   @SubscribeMessage('channel-admin-site-moderator')
-  async setChannelAdminbySite(client: Socket, setAdminDto: SetChannelAdminDto) {
+  async setChannelAdminbySite(client: Socket, body: SetChannelAdminDto) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.setChannelAdminbySiteModerator(user, setAdminDto);
+      await this.chatService.setChannelAdminbySiteModerator(user, body);
       console.log(
         'Site Moderator: Channel admin has been set/unset successfully !',
       );
       const channels_in = await this.chatService.getUserChannels(user.id);
       this.server
-        .to('user-' + setAdminDto.participantId)
+        .to('user-' + body.participantId)
         .emit('channels-user-in', channels_in);
-      const users = await this.chatService.getChannelUsers(
-        setAdminDto.channelId,
-      );
-      this.server
-        .to('channel-' + setAdminDto.channelId)
-        .emit('channel-users', users);
+      const users = await this.chatService.getChannelUsers(body.channelId);
+      this.server.to('channel-' + body.channelId).emit('channel-users', users);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -322,23 +302,19 @@ export class ChatGateway
 
   /**
    * Load channel data (message) and register to the room event
-   * @param data
+   * @param : channel id
    */
   @SubscribeMessage('channel-load')
   async loadChannel(client: Socket, channelId: number) {
     try {
       const user = await this.authService.getUserFromSocket(client);
-      if (user) {
-        const channelParticipant =
-          await this.chatService.getOneChannelParticipant(user.id, channelId);
-        if (channelParticipant) client.join('channel-' + channelId);
-        const messages = await this.messageService.getChannelMessages(
-          channelId,
-        );
-        const users = await this.chatService.getChannelUsers(channelId);
-        client.emit('channel-message-list', messages);
-        client.emit('channel-users', users);
-      }
+      const channelParticipant =
+        await this.chatService.getOneChannelParticipant(user.id, channelId);
+      if (channelParticipant) client.join('channel-' + channelId);
+      const messages = await this.messageService.getChannelMessages(channelId);
+      const users = await this.chatService.getChannelUsers(channelId);
+      client.emit('channel-message-list', messages);
+      client.emit('channel-users', users);
     } catch (error) {
       console.log(error);
     }
@@ -346,7 +322,7 @@ export class ChatGateway
 
   /**
    * Unload Channel data
-   * @param data
+   * @param : channel id
    */
   @SubscribeMessage('channel-unload')
   async unloadChannel(client: Socket, channelId: number) {
@@ -355,13 +331,13 @@ export class ChatGateway
 
   /**
    * channel send messages
-   * @param data
+   * @param CreateMessageDto : channel id and message
    */
   @SubscribeMessage('channel-message')
   async newChannelMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      // Save message in db
+      /* Save message in db */
       const message = await this.messageService.createChannelMessage(
         user.id,
         messageDto,
@@ -377,7 +353,7 @@ export class ChatGateway
         message_content: message.message,
       };
 
-      // Send message to all people connected in channel
+      /* Send message to all people connected in channel */
       this.server
         .to('channel-' + message.channelId)
         .emit('channel-new-message', sendMessage);
@@ -406,45 +382,38 @@ export class ChatGateway
 
   /**
    * Load channel data (message) and register to the room event
-   * @param data
+   * @param LoadDirectDto : user id and channel id
    */
   @SubscribeMessage('private-load')
-  async loadDirect(client: Socket, loadDirectDto: LoadDirectDto) {
+  async loadDirect(client: Socket, body: LoadDirectDto) {
     try {
-      let channelId = loadDirectDto.channelId;
-      const UserId = loadDirectDto.userId;
-
+      let channelId = body.channelId;
       const user1 = await this.authService.getUserFromSocket(client);
-      if (user1) {
-        if (typeof channelId !== 'undefined') {
-          const channelParticipant =
-            await this.chatService.getOneChannelParticipant(
-              user1.id,
-              channelId,
-            );
-          if (!channelParticipant)
-            throw new WsException(
-              'you are not in conversation with this user !',
-            );
-        } else if (typeof UserId !== 'undefined') {
-          const user2 = await this.userService.getOneById(UserId);
 
-          channelId = await this.chatService.createDirectChannel(user1, user2);
-          //   console.log('Channel created successfully !');
-          const direct = this.chatService.getDirectChannelList(user1.id);
-          client.emit('private-list', await direct);
-        } else throw new WsException('Invalid socket request.');
+      if (typeof channelId !== 'undefined') {
+        const channelParticipant =
+          await this.chatService.getOneChannelParticipant(user1.id, channelId);
+        if (!channelParticipant)
+          throw new WsException('You are not in conversation with this user !');
+      } else if (typeof body.userId !== 'undefined') {
+        const user2 = await this.userService.getOneById(body.userId);
+        if (!user2)
+          throw new WsException(`This user id ${body.userId} does not exist !`);
 
-        client.join('private-' + channelId);
-        const messages = await this.messageService.getDirectMessages(channelId);
-        const channelInfo = await this.chatService.getDirectInfo(
-          user1.id,
-          channelId,
-        );
-        client.emit('private-info', channelInfo);
-        client.emit('private-message-list', messages);
-        console.log('Conversation loaded successfully !');
-      }
+        channelId = await this.chatService.createDirectChannel(user1, user2);
+        const direct = await this.chatService.getDirectChannelList(user1.id);
+        client.emit('private-list', direct);
+      } else throw new WsException('Invalid socket request.');
+
+      client.join('private-' + channelId);
+      const messages = await this.messageService.getChannelMessages(channelId);
+      const channelInfo = await this.chatService.getDirectInfo(
+        user1.id,
+        channelId,
+      );
+      client.emit('private-info', channelInfo);
+      client.emit('private-message-list', messages);
+      console.log('Conversation loaded successfully !');
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -467,7 +436,7 @@ export class ChatGateway
   async newDirectMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      // Save message in db
+      /* Save message in db */
       const message = await this.messageService.createChannelMessage(
         user.id,
         messageDto,
@@ -483,7 +452,7 @@ export class ChatGateway
         message_content: message.message,
       };
 
-      // Send message to all people connected in channel
+      /*Send message to all people connected in channel*/
       this.server
         .to('private-' + message.channelId)
         .emit('private-new-message', sendMessage);
