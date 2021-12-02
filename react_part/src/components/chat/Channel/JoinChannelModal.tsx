@@ -18,7 +18,7 @@ function JoinChannelModal(props: Props) {
 
     function SubmitForm(event: any) {
       event.preventDefault();
-      if (password == "" && props.channel.channel_type === 'Private')
+      if (password === "" && props.channel.channel_type === 'Private')
       {
         setisEmptyPassword(true);
         return ;

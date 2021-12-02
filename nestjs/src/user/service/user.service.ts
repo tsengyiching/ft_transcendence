@@ -282,10 +282,7 @@ export class UserService {
   }
 
   setModerator(operator: User, user: User): Promise<User> {
-    if (
-      operator.siteStatus !== SiteStatus.OWNER &&
-      operator.siteStatus !== SiteStatus.MODERATOR
-    ) {
+    if (operator.siteStatus !== SiteStatus.OWNER) {
       throw new HttpException(
         `You don't have the right to set site moderators !`,
         HttpStatus.BAD_REQUEST,
@@ -312,11 +309,14 @@ export class UserService {
       );
     }
     if (
-      operator.siteStatus === SiteStatus.MODERATOR &&
-      user.siteStatus === SiteStatus.OWNER
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        user.siteStatus === SiteStatus.OWNER) ||
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        operator.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
-        `You don't have the right to change the status of the site owner !`,
+        `You don't have the right to change the status of the site owner 
+        or moderator, you need to have a higher status to do this !`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -341,11 +341,14 @@ export class UserService {
       );
     }
     if (
-      operator.siteStatus === SiteStatus.MODERATOR &&
-      user.siteStatus === SiteStatus.OWNER
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        user.siteStatus === SiteStatus.OWNER) ||
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        operator.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
-        `You don't have the right to ban the site owner !`,
+        `You don't have the right to ban the site owner or moderator,
+        you need to have a higher status to do this !`,
         HttpStatus.BAD_REQUEST,
       );
     }
