@@ -1,5 +1,5 @@
-import React, { useContext } from 'react'
-import "./Header.css"
+import { useContext } from 'react';
+import "./Header.css";
 
 import axios from 'axios';
 import { useEffect, useState} from "react";
@@ -8,8 +8,9 @@ import Navbar from 'react-bootstrap/Navbar';
 import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
-import {LinkContainer} from 'react-router-bootstrap'
-import { DataContext, Data } from '../App';
+import {LinkContainer} from 'react-router-bootstrap';
+import { DataContext } from '../App';
+import logoPong from './pictures/ping-pong.png';
 
 
 
@@ -48,7 +49,7 @@ function Header () {
 			<Container fluid>
     			<LinkContainer to='/'>
 			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
-				<Image src={process.env.PUBLIC_URL + '/ping-pong.png'} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
+				<Image src={logoPong} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
 					Pong
 			</Navbar.Brand>
 			</LinkContainer>
@@ -92,7 +93,7 @@ function Header () {
 			<Navbar collapseOnSelect bg="light" style={{fontSize:'20px'}}>
 			<Container fluid>
     		<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}} href="/">
-				<Image src={process.env.PUBLIC_URL + '/ping-pong.png'} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
+				<Image src={logoPong} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
 			Pong
 			</Navbar.Brand>
 			<Navbar.Collapse className="justify-content-end" >
