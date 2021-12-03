@@ -1,7 +1,6 @@
 import './App.css';
+import "bootswatch/dist/lux/bootstrap.min.css"
 import Router from './components/Router';
-import Header from './components/web_pages/Header';
-import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
