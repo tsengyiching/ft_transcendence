@@ -17,10 +17,10 @@ function Connexion () {
 				Connexion avec <Image className="logo-42" src={Logo42} alt="42" />
 			</Button>
 			<span className="credits">Codé avec beaucoup de <i style={{color: "pink"}}>♥</i> par <a href="https://profile.intra.42.fr/users/abourbou" title="Arthur Bourbousson">abourbou</a>,{' '}
-			<a href="https://profile.intra.42.fr/users/lolopez" title="Lou Lopez">lolopez</a>,{' '}
-			<a href="https://profile.intra.42.fr/users/fgalaup" title="Félix Galaup">fgalaup</a>,{' '}
-			<a href="https://profile.intra.42.fr/users/yictseng" title="Yiching Tseng">yictseng</a>,{' '}
-			<a href="https://profile.intra.42.fr/users/fbuthod-" title="Fabien Buthod Garcon">fbuthod-</a>.
+				<a href="https://profile.intra.42.fr/users/lolopez" title="Lou Lopez">lolopez</a>,{' '}
+				<a href="https://profile.intra.42.fr/users/fgalaup" title="Félix Galaup">fgalaup</a>,{' '}
+				<a href="https://profile.intra.42.fr/users/yictseng" title="Yiching Tseng">yictseng</a>,{' '}
+				<a href="https://profile.intra.42.fr/users/fbuthod-" title="Fabien Buthod Garcon">fbuthod-</a>.
 			</span>
 		</div>
     );
