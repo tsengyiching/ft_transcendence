@@ -1,7 +1,7 @@
-import { BrowserRouter, Route, Switch } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Home from './web_pages/Home';
 import Profile from './web_pages/Profile';
-import Settings from './web_pages/Settings';
+import Settings from './settings/Settings';
 import Connexion from './web_pages/Connexion';
 import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
@@ -9,6 +9,7 @@ import Header from "./web_pages/Header";
 import axios from 'axios';
 import { useEffect, useState } from "react";
 import Ban from "./web_pages/Ban";
+import Ladder from "./Ladder";
 
 function Router() {
 
@@ -35,12 +36,13 @@ function Router() {
       <BrowserRouter>
         <Header />
         <Switch>
-          <Route exact path="/" component={Home} />
+          <Route exact path="/home" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/settings" component={Settings} />
-          <Route exact path="/auth/disconnect" component={Disconnect} />
+          <Route exact path="/disconnect" component={Disconnect} />
           <Route exact path="/ban" component={Ban} />
-          <Route component={Home} />
+          <Route exact path="/ladder" component={Ladder}/>
+          <Redirect to="/home"/>
         </Switch>
       </BrowserRouter>
     )
@@ -52,7 +54,7 @@ function Router() {
         <Switch>
           <Route exact path="/connexion" component={Connexion} />
           <Route path="/2fa" component={() => <Twofa setConnection={setConnection}/>}/>
-          <Route component={Connexion} />
+          <Redirect to="/connexion"/>
         </Switch>
       </BrowserRouter>
     )

@@ -1,4 +1,4 @@
-import { Form, Button, Image } from 'react-bootstrap'
+import { Form, Button, Image, Alert } from 'react-bootstrap'
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
@@ -9,7 +9,9 @@ interface STATE {
 }
 
 const Twofa = (props:STATE) => {
+    const history = useHistory()
     const [code, setCode] = useState("")
+    const [alert, setAlert] = useState(0);
     const setConnection = props.setConnection;
 
     const SubmitCode = useCallback(
@@ -19,17 +21,28 @@ const Twofa = (props:STATE) => {
             {withCredentials:true,
         })
         .then(res => {
-            console.log('hello', code);
+            setAlert(0)
             setConnection(true);
+            history.push("/home")
         })
         .catch(res => {
-            console.log('2factorauth failded :', res);
+            setAlert(1)
         })
     }, [code, setConnection]);
 
 
-  
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
+
+    function showAlert () {
+        if (alert == 1)
+        return (
+            <div>
+                <Alert variant={'danger'}>
+                    2FA code invalid
+                </Alert>
+            </div>
+        )
+    }
 
     return (
         <div>
@@ -39,6 +52,7 @@ const Twofa = (props:STATE) => {
                     activate
                 </Button>
             </Form>
+            {showAlert()}
         </div>
     )
 }

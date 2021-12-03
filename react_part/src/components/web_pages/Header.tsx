@@ -45,7 +45,7 @@ function Header () {
 		return (
 		<Navbar collapseOnSelect bg='light' variant='light' style={{fontSize:'20px'}}>
 			<Container fluid>
-    			<LinkContainer to='/'>
+    			<LinkContainer to='/home'>
 			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
 				<Image src={process.env.PUBLIC_URL + '/ping-pong.png'} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
 					Pong
@@ -54,7 +54,7 @@ function Header () {
 			<Navbar.Toggle aria-controls="basic-navbar-nav" />
 			<Nav>
 			<Nav.Item>
-				<LinkContainer to='/'>
+				<LinkContainer to='/Ladder'>
    		 			<Nav.Link>Ladder</Nav.Link>
 				</LinkContainer>
   			</Nav.Item>
@@ -76,7 +76,7 @@ function Header () {
 						<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
           				<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
 						<NavDropdown.Divider />
-        				<LinkContainer to='/auth/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
+        				<LinkContainer to='/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
         			</NavDropdown>
 					</Nav.Item>
       			</Nav>
