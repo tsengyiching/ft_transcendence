@@ -70,7 +70,7 @@ function ModalParameters(props: Props)
 		if (action !== "Remove")
 			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: password});
 		else
-			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: null});
+			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: ""});
 		onHide();
 	      }
 

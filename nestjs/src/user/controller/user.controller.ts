@@ -26,12 +26,16 @@ import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response, Request } from 'express';
 import { Readable } from 'stream';
+import { UserGateway } from '../user.gateway';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
 @Controller('profile')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private userGateway: UserGateway,
+  ) {}
 
   /**
    * getCurrentUser
@@ -74,11 +78,16 @@ export class UserController {
    * changeUserName
    */
   @Patch('name')
-  changeUserName(
+  async changeUserName(
     @CurrentUser() user: User,
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    return this.userService.changeUserName(user.id, changeUserNameDto);
+    const updatedUser = await this.userService.changeUserName(
+      user.id,
+      changeUserNameDto,
+    );
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
+    return updatedUser;
   }
 
   @Post('upload')
@@ -87,7 +96,7 @@ export class UserController {
     @CurrentUser() user: User,
     @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ) {
+  ): Promise<string> {
     if (req.file.size > 1024 * 1024) {
       throw new PayloadTooLargeException();
     }
@@ -99,15 +108,22 @@ export class UserController {
     }
     const index = req.file.originalname.indexOf('.', 0);
     if (index !== -1) {
-      const filetype = req.file.originalname.slice(index + 1);
-      if (filetype !== 'jpeg' && filetype !== 'png' && filetype !== 'gif') {
+      const extension = req.file.originalname.slice(index + 1);
+      const acceptExtension = ['jpeg', 'jpg', 'png', 'gif'];
+      if (!acceptExtension.includes(extension)) {
         throw new HttpException(
-          `The file type ${req.file.originalname} is not acceptable.`,
+          `The file extension ${extension} is not acceptable.`,
           HttpStatus.NOT_ACCEPTABLE,
         );
       }
+    } else {
+      throw new HttpException(
+        `There's no file extension.`,
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
     return `Image ${req.file.originalname} uploaded successfully !`;
   }
 

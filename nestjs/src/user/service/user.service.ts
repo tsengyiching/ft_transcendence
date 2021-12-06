@@ -29,7 +29,7 @@ export class UserService {
    */
   getAll(): Promise<User[]> {
     return this.userRepository.find({
-      select: ['id', 'nickname', 'avatar', 'createDate', 'userStatus', 'email'],
+      select: ['id', 'nickname', 'avatar', 'userStatus', 'siteStatus'],
       order: { createDate: 'ASC' },
     });
   }
@@ -226,22 +226,21 @@ export class UserService {
   async getUsersWithSiteStatus(id: number, reqStatus: string): Promise<User[]> {
     const status = this.checkSiteStatus(reqStatus);
     const user = await this.getOneById(id);
-    if (this.checkUserExisted(user)) {
-      if (
-        user.siteStatus === SiteStatus.OWNER ||
-        user.siteStatus === SiteStatus.MODERATOR
-      ) {
-        const users = this.userRepository.find({
-          where: { siteStatus: status },
-          select: ['id', 'nickname', 'avatar', 'siteStatus'],
-        });
-        return users;
-      } else {
-        throw new HttpException(
-          `This user ${user.nickname} does not have the right !`,
-          HttpStatus.BAD_REQUEST,
-        );
-      }
+    this.checkUserExisted(user);
+    if (
+      user.siteStatus === SiteStatus.OWNER ||
+      user.siteStatus === SiteStatus.MODERATOR
+    ) {
+      const users = this.userRepository.find({
+        where: { siteStatus: status },
+        select: ['id', 'nickname', 'avatar', 'siteStatus'],
+      });
+      return users;
+    } else {
+      throw new HttpException(
+        `This user ${user.nickname} does not have the right !`,
+        HttpStatus.BAD_REQUEST,
+      );
     }
   }
 
@@ -270,22 +269,19 @@ export class UserService {
       this.getOneById(setUserSiteStatusDto.id),
     ]);
 
-    if (this.checkUserExisted(operator) && this.checkUserExisted(user)) {
-      if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
-        return this.setModerator(operator, user);
-      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
-        return this.setUser(operator, user);
-      } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
-        return this.banUser(operator, user);
-      }
+    this.checkUserExisted(operator);
+    this.checkUserExisted(user);
+    if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
+      return this.setModerator(operator, user);
+    } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
+      return this.setUser(operator, user);
+    } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
+      return this.banUser(operator, user);
     }
   }
 
   setModerator(operator: User, user: User): Promise<User> {
-    if (
-      operator.siteStatus !== SiteStatus.OWNER &&
-      operator.siteStatus !== SiteStatus.MODERATOR
-    ) {
+    if (operator.siteStatus !== SiteStatus.OWNER) {
       throw new HttpException(
         `You don't have the right to set site moderators !`,
         HttpStatus.BAD_REQUEST,
@@ -312,11 +308,14 @@ export class UserService {
       );
     }
     if (
-      operator.siteStatus === SiteStatus.MODERATOR &&
-      user.siteStatus === SiteStatus.OWNER
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        user.siteStatus === SiteStatus.OWNER) ||
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        operator.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
-        `You don't have the right to change the status of the site owner !`,
+        `You don't have the right to change the status of the site owner 
+        or moderator, you need to have a higher status to do this !`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -341,11 +340,14 @@ export class UserService {
       );
     }
     if (
-      operator.siteStatus === SiteStatus.MODERATOR &&
-      user.siteStatus === SiteStatus.OWNER
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        user.siteStatus === SiteStatus.OWNER) ||
+      (operator.siteStatus === SiteStatus.MODERATOR &&
+        operator.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
-        `You don't have the right to ban the site owner !`,
+        `You don't have the right to ban the site owner or moderator,
+        you need to have a higher status to do this !`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -379,14 +381,13 @@ export class UserService {
     return status;
   }
 
-  checkUserExisted(user: User): boolean {
+  checkUserExisted(user: User): void {
     if (!user) {
       throw new HttpException(
         `This user does not exist !`,
         HttpStatus.BAD_REQUEST,
       );
     }
-    return true;
   }
 
   /****************************************************************************/
