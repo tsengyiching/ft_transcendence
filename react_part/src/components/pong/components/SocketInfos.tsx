@@ -35,7 +35,7 @@ type Infos = {
 			setinfos(d);
 		});	
 		setPosition(infos);
-		if (scoreL != infos.scoreL || scoreR != infos.scoreR)
+		if (scoreL !== infos.scoreL || scoreR !== infos.scoreR)
 			setScore(infos.scoreL, infos.scoreR);
 		})
 		return (<div>

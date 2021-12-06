@@ -1,3 +1,5 @@
+import { Socket } from 'socket.io';
+
 export type ObjectToCollide = {
   tl: Pos;
   tr: Pos;
@@ -29,7 +31,7 @@ export type Ball = {
 export type Player = {
   name: string;
   id: number;
-  socketId: string;
+  client: Socket | undefined;
   avatar: string;
   paddle: number;
   score: number;

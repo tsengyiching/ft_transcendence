@@ -3,7 +3,8 @@ import useStore from './../hooks/useStore'
 import ScoreBar from './ScoreCanvas'
 import GameCanvas from './GameCanvas'
 import BonusHandler from "./Handlers/BonusHandler";
-
+import SocketEvent from "./SocketEvent";
+import SocketInfos from "./SocketInfos";
 
 const Pong:React.VFC<{h:number, w:number}> = (props) => {
 	const set = useStore.setState;
@@ -88,6 +89,8 @@ const Pong:React.VFC<{h:number, w:number}> = (props) => {
 								
 return (
 		<div>
+			 <SocketEvent />
+              <SocketInfos />
 			<ScoreBar />
 			<GameCanvas />
 			<BonusHandler />

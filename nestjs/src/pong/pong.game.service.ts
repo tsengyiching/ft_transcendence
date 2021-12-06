@@ -7,6 +7,7 @@ import {
   Match,
   Pos,
 } from './pong.interface';
+import { Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
 import { User } from 'src/user/model/user.entity';
 import {
@@ -22,6 +23,7 @@ import {
   FRAMERATE,
 } from './pong.env';
 import { Interval, SchedulerRegistry } from '@nestjs/schedule';
+import { throwIfEmpty } from 'rxjs';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -93,7 +95,7 @@ export class PongService {
       const newPlayer: Player = {
         name: user.nickname,
         id: id,
-        socketId: '',
+        client: undefined,
         avatar: user.avatar,
         paddle: paddle,
         score: 0,
@@ -134,16 +136,27 @@ export class PongService {
     };
   }
 
-  playersSetReady(gameId: number, playerId: number, socketId: string) {
-    const currentGame = this.matches.find((e) => e.id === gameId);
-    if (playerId === currentGame.pOne.id) {
-      currentGame.pOne.socketId = socketId;
-      currentGame.pOne.ready = true;
-    }
-    if (playerId === currentGame.pTwo.id) {
-      currentGame.pTwo.socketId = socketId;
-      currentGame.pTwo.ready = true;
-    }
+  playersSetReady(
+    gameId: number,
+    playerId: number,
+    client: Socket,
+  ): { GameId: number; Player: number } {
+    let player = 0;
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        if (playerId === match.pOne.id) {
+          match.pOne.client = client;
+          match.pOne.ready = true;
+          player = 1;
+        }
+        if (playerId === match.pTwo.id) {
+          match.pTwo.client = client;
+          match.pTwo.ready = true;
+          player = 2;
+        }
+      }
+    });
+    return { GameId: gameId, Player: player };
   }
 
   playersReadyCheck(gameId): boolean {
@@ -158,11 +171,11 @@ export class PongService {
 
   setKeyValue(up: boolean, socketId: string, value: boolean) {
     this.matches.forEach((match) => {
-      if (match.pOne.socketId === socketId) {
+      if (match.pOne.client.id === socketId) {
         if (up) match.pOne.up = value;
         else match.pOne.down = value;
       }
-      if (match.pTwo.socketId === socketId) {
+      if (match.pTwo.client.id === socketId) {
         if (up) match.pTwo.up = value;
         else match.pTwo.down = value;
       }
@@ -219,7 +232,6 @@ export class PongService {
         return { x: Math.cos(angleRebound), y: Math.sin(angleRebound) }; ////////
       } else return { x: 0, y: 0 };
     } else if (ball.pos.x + ball.radius + ball.speed >= paddleR.pos.x) {
-      console.log(ball.pos.x, paddleR.pos.x);
       rect.x =
         ball.pos.x < paddleR.pos.x
           ? paddleR.pos.x
@@ -300,97 +312,9 @@ export class PongService {
     match.lasty = false;
   }
 
-  //   UpdateGame(gameId: number) {
-  //     this.matches.forEach((match) => {
-  //       if (match.id === gameId) {
-  //         const touch = this.ballCollisionToPaddle(
-  //           match.ball,
-  //           match.paddleL,
-  //           match.paddleR,
-  //         );
-  //         const mouv: number[] = [0, 0];
-
-  //         mouv[0] =
-  //           match.pOne.down && !match.pOne.up
-  //             ? 1
-  //             : match.pOne.up && !match.pOne.down
-  //             ? -1
-  //             : 0;
-  //         mouv[1] =
-  //           match.pTwo.down && !match.pTwo.up
-  //             ? 1
-  //             : match.pTwo.up && !match.pTwo.down
-  //             ? -1
-  //             : 0;
-  //         if (touch.x || touch.y) {
-  //           if (match.lastp === false) {
-  //             match.ball.vx = touch.x;
-  //             match.ball.vy = touch.y;
-  //             match.lastp = true;
-  //             if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
-  //           }
-  //         } else {
-  //           match.lastp = false;
-  //           const toWall = this.ballCollisiontoWall(match.ball, {
-  //             tl: { x: 0, y: 0 },
-  //             tr: { x: W, y: 0 },
-  //             bl: { x: 0, y: H },
-  //             br: { x: W, y: H },
-  //           });
-  //           if (toWall === XR || toWall === XL) {
-  //             return this.afterGoalUpdateref(match, !!(toWall === XL));
-  //           } else if (toWall === Y && !match.lasty) {
-  //             match.lasty = true;
-  //             match.ball.vy *= -1;
-  //           }
-  //           if (toWall !== Y) {
-  //             match.lasty = false;
-  //           }
-  //         }
-  //         if (match.ball.acceleration > 1) {
-  //           match.ball.acceleration -= 0.005;
-  //         }
-  //         match.ball.pos.x +=
-  //           match.ball.vx * match.ball.speed * match.ball.acceleration;
-  //         match.ball.pos.y +=
-  //           match.ball.vy * match.ball.speed * match.ball.acceleration;
-  //         if (mouv[0]) {
-  //           match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
-  //           if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
-  //           if (match.paddleL.pos.y + match.paddleL.h > H)
-  //             match.paddleL.pos.y = H - match.paddleL.h;
-  //         }
-  //         if (mouv[1]) {
-  //           match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
-  //           if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
-  //           if (match.paddleR.pos.y + match.paddleR.h > H)
-  //             match.paddleR.pos.y = H - match.paddleR.h;
-  //         }
-  //       }
-  //     });
-  //   }
-
-  setGameRunning(socketId: string, running: boolean) {
-    let matchId = -1;
+  UpdateGame(gameId: number) {
     this.matches.forEach((match) => {
-      if (
-        match.pOne.socketId === socketId ||
-        match.pTwo.socketId === socketId
-      ) {
-        console.log(match.id);
-        match.run = running;
-        matchId = match.id;
-      }
-    });
-    return matchId;
-  }
-
-  @Interval(1000 / FRAMERATE)
-  updateGames() {
-	  console.log('HELLO');
-    this.matches.forEach((match) => {
-      if (match.run) {
-        console.log('RUNNING');
+      if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,
           match.paddleL,
@@ -457,5 +381,104 @@ export class PongService {
       }
     });
   }
+
+  setGameRunning(gameId: number, running: boolean) {
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        match.run = running;
+      }
+    });
+  }
+
+  isGameRunning(gameId: number): boolean {
+    let ret = false;
+    this.matches.forEach((match) => {
+      if (match.id === gameId) ret = match.run;
+    });
+    return ret;
+  }
+
+  userDiconnectFromGame(userId: number) {
+    let ret = 0;
+    this.matches.forEach((match) => {
+      if (match.pOne.id === userId || match.pTwo.id === userId)
+        match.run = false;
+      // TODO ajouter si user regarde la partie ?
+      ret = match.id;
+    });
+    return ret;
+  }
+  // @Interval(1000 / FRAMERATE)
+  // updateGames() {
+  //   console.log('HELLO');
+  //   this.matches.forEach((match) => {
+  //     if (match.run) {
+  //       console.log('RUNNING');
+  //       const touch = this.ballCollisionToPaddle(
+  //         match.ball,
+  //         match.paddleL,
+  //         match.paddleR,
+  //       );
+  //       const mouv: number[] = [0, 0];
+
+  //       mouv[0] =
+  //         match.pOne.down && !match.pOne.up
+  //           ? 1
+  //           : match.pOne.up && !match.pOne.down
+  //           ? -1
+  //           : 0;
+  //       mouv[1] =
+  //         match.pTwo.down && !match.pTwo.up
+  //           ? 1
+  //           : match.pTwo.up && !match.pTwo.down
+  //           ? -1
+  //           : 0;
+  //       if (touch.x || touch.y) {
+  //         if (match.lastp === false) {
+  //           match.ball.vx = touch.x;
+  //           match.ball.vy = touch.y;
+  //           match.lastp = true;
+  //           if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+  //         }
+  //       } else {
+  //         match.lastp = false;
+  //         const toWall = this.ballCollisiontoWall(match.ball, {
+  //           tl: { x: 0, y: 0 },
+  //           tr: { x: W, y: 0 },
+  //           bl: { x: 0, y: H },
+  //           br: { x: W, y: H },
+  //         });
+  //         if (toWall === XR || toWall === XL) {
+  //           return this.afterGoalUpdateref(match, !!(toWall === XL));
+  //         } else if (toWall === Y && !match.lasty) {
+  //           match.lasty = true;
+  //           match.ball.vy *= -1;
+  //         }
+  //         if (toWall !== Y) {
+  //           match.lasty = false;
+  //         }
+  //       }
+  //       if (match.ball.acceleration > 1) {
+  //         match.ball.acceleration -= 0.005;
+  //       }
+  //       match.ball.pos.x +=
+  //         match.ball.vx * match.ball.speed * match.ball.acceleration;
+  //       match.ball.pos.y +=
+  //         match.ball.vy * match.ball.speed * match.ball.acceleration;
+  //       if (mouv[0]) {
+  //         match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+  //         if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+  //         if (match.paddleL.pos.y + match.paddleL.h > H)
+  //           match.paddleL.pos.y = H - match.paddleL.h;
+  //       }
+  //       if (mouv[1]) {
+  //         match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+  //         if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+  //         if (match.paddleR.pos.y + match.paddleR.h > H)
+  //           match.paddleR.pos.y = H - match.paddleR.h;
+  //       }
+  //     }
+  //   });
+  // }
   // https://gamedev.stackexchange.com/questions/174240/server-game-loop
 }
