@@ -22,7 +22,8 @@ In this file, you'll find the list of api created in the back-end.
 |GET|:id|user id|an object<br />`{"id":1,"nickname":"Jo","createDate":"xxx","email":"xxx","isTwoFactorAuthenticationEnabled":true}`|
 |POST||Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object<br />`{"id":2,"nickname":"Bar","createDate":"xxx"}`<br /> *For testing only, delete later*|
 |PATCH|name|Body <br />`{"nickname":"alphanumeric string (len 10 max, and unique)"}`|an object with user's new nickname<br />`{"id": 6,"nickname": "yi","createDate": "xxx","avatar": "url","userStatus": "Available","email": "xxx","isTwoFactorAuthenticationEnabled": false}`<br />*If name format is uncorrect return HttpStatus:Bad_Request*`|
-|PATCH|avatar|Body <br />`{"avatar":"url"}`|an object with user's new avatar<br />`{"id": 6,"nickname": "yi","createDate": "xxx","avatar": "url","userStatus": "Available","email": "xxx","isTwoFactorAuthenticationEnabled": false}`<br />*If avatar's url is uncorrect, return HttpStatus:Bad_Request*|
+|POST|upload|Body *form data* <br />`{fieldname: 'file', originalname: 'blathersnhpng.png', encoding: '7bit', mimetype: 'image/png',buffer: <>, size: 12 }`|String : Image xxx uploaded successfully !<br />*If file is not jpg, jpeg, png or gif, or file size > 1M, return HttpStatus:NOT_ACCEPTABLE*|
+|GET|avatarfile/:id|id: file id| file stream|
 ## /game/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
@@ -38,8 +39,6 @@ In this file, you'll find the list of api created in the back-end.
 ## /relationship/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
-|GET|all|-|an array contains objects<br />`[{"id": 1, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [1, 3]}, {}...]`|
-|GET|:id|relationship id| an object<br />`{"id": 2, "createDate": "xxx", "status": "Not confirmed/Friend/Block", "users": [60191,244]}`<br />*If relationship id doesn't exist, throw HttpStatus:Not_Found*|
 |GET|me/allusers|-|an array <br />`[{"id": 1,"nickname": "Tim","avatar": "xxx","userStatus": "Available","relationship": null/Friend/Block/Not confirmed},]`|
 |GET|me/list|Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available", "relation_id": 1}, {}...]`|
 |GET|:id/list|user id<br />Query<br />?status=friend/notconfirmed/block|an array`[ {"user_id": 1,"user_nickname": "Lo","user_avatar": "xxx","user_userStatus": "Available", "relation_id": 1}, {}...]`|
@@ -49,3 +48,8 @@ In this file, you'll find the list of api created in the back-end.
 |DELETE|unfriend|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />Users should be friends, other situation would throw HttpStatus:Bad_Request|
 |POST|block|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object with a new relationship id`{"status": "Block", "id": 3,"createDate": "xxx"}`<br />*If users have existing status: unconfirmed/friend, it will be remove and create the new relationship with status Block.<br />If users already in status Block, throw HttpStatus:Bad_Request.*|
 |DELETE|unblock|Body<br />`{"addresseeUserId": number;}`<br />*Note: requester is the login user*|an object that was deleted <br />`{"createDate": "xxx", "status": "Friend", "users": [1, 3]}`<br />User id should be on the blocklist, other situation would throw HttpStatus:Bad_Request|
+## /admin/
+| Method | Root | Parameters | Return    |
+|:----:|:-----:|-------|:-----------|
+|GET|list|Query<br />?status=owner/moderator/user/banned|an array <br />`[{"id":123, "nickname":yuyu, "avatar":xxx, "siteStatus":Owner}]`
+|PATCH|Body <br />`{"id": 1, "newStatus": "Moderator/User/Banned"}`|an object <br />`{"id": 1, "nickname": "Tim", "avatar": "xxx", "userStatus": "Offline", "siteStatus": "Moderator",}`
