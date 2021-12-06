@@ -1,7 +1,8 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Form, Col, Row, Button, Image, Modal} from "react-bootstrap";
 import { Data, } from "../../App";
+import { SocketContext } from "../../context/socket";
 
 enum SiteStatus {
 	OWNER = 'Owner',
@@ -105,10 +106,11 @@ export default function UserView()
 	const [listUser, setListUser] = useState<Data[]>([]);
 	const [siteStatus, setSiteStatus] = useState<undefined | SiteStatus>(undefined);
 	const [siteUser, setSiteUser] = useState<undefined | Data>(undefined);
+	const [ReloadUserList, setReloadUserList] = useState<number>(0);
+	const socket = useContext(SocketContext);
 
 	const [ViewModal, SetViewModal] = useState(false);
 	const onHide = () => SetViewModal(false);
-	const ShowModal = () => SetViewModal(true);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -124,8 +126,12 @@ export default function UserView()
 			if (isMounted)
 				console.log(`error get admin list : ${res.data}`);
 		})
-		return(() => {isMounted = false})
-	}, [])
+		socket.on('reload-users', () => {setReloadUserList(ReloadUserList + 1);})
+		return(() => {
+			isMounted = false;
+			socket.off('reload-users');
+		});
+	}, [ReloadUserList])
 
 	return (
 		<div style={{overflow: 'auto', backgroundColor: 'grey', height: '70em', fontSize: '2em'}}>
