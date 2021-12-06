@@ -52,6 +52,8 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       client.leave(user.id.toString());
+      const currentGame = this.pongService.userDiconnectFromGame(user.id);
+      if (currentGame) client.leave(currentGame.toString() + '-Game');
       await sleep(2000);
       const left = this.pongUsersService.userDisconnect(user.id);
       if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
@@ -112,7 +114,7 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       const resp = this.pongUsersService.isInMatchmaking(user.id);
-      console.log('isINMATCH',resp);
+      console.log('isINMATCH', resp);
       client.emit('inMatchMaking', resp);
     } catch (error) {
       console.log(error);
@@ -159,6 +161,7 @@ export class PongGateway {
   //   }
   //   console.log(playing);
   // }
+
   @SubscribeMessage('newGame')
   async gameOn(client: any) {
     try {
@@ -172,28 +175,38 @@ export class PongGateway {
   async readyForGame(client: Socket, payload: number) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      this.pongService.playersSetReady(payload, user.id, client.id);
-      await sleep(1000);
+      const infos = this.pongService.playersSetReady(payload, user.id, client);
+      client.join(infos.GameId.toString() + '-Game');
       const waitForReady = setInterval(() => {
         if (this.pongService.playersReadyCheck(payload)) {
-          client.emit('startPong', this.pongService.sendPlayersInfos(payload));
           clearInterval(waitForReady);
+          if (infos.Player === 1) {
+            console.log('matchINTHE GO');
+            this.server
+              .to(infos.GameId.toString() + '-Game')
+              .emit('startPong', this.pongService.sendPlayersInfos(payload));
+            this.startGame(infos.GameId);
+          }
+          // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
         }
-      }, 10);
+      }, 100);
     } catch (error) {
       console.log(error);
     }
   }
   // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
   //
-  @SubscribeMessage('start')
-  startGame(client: Socket, payload: any) {
-	  const gameId = this.pongService.setGameRunning(client.id, true);
-	  console.log('start', this.pongService.gameInfos(gameId));
-	  if (gameId >= 0) {
-		  const IntervalID = setInterval(() => {
-        client.emit('infos', this.pongService.gameInfos(gameId));
-        if (NaN) {
+  startGame(gameId: number) {
+    this.pongService.setGameRunning(gameId, true);
+    const roomName = gameId.toString() + '-Game';
+    if (gameId >= 0) {
+      const IntervalID = setInterval(() => {
+        this.pongService.UpdateGame(gameId);
+        this.server
+          .to(roomName)
+          .volatile.emit('infos', this.pongService.gameInfos(gameId));
+        if (!this.pongService.isGameRunning(gameId)) {
+          console.log(`Game ${gameId} stopped`);
           clearInterval(IntervalID);
         }
       }, 1000 / FRAMERATE);

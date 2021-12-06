@@ -90,9 +90,9 @@ function CreateChannelButton(props: {socketid: Socket}) {
 
   return (
     <React.Fragment>
-      <button className='ButtonCreate bg-danger' onClick={() => setModalShow(true)}>
+      <Button className='ButtonCreate bg-danger' onClick={() => setModalShow(true)}>
         Create Channel
-      </button>
+      </Button>
       <CreateChannelModal
         show={modalShow}
         onHide={() => setModalShow(false)}
