@@ -6,7 +6,7 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import React, {useState, useContext, useEffect, useRef} from 'react'
 import {SocketContext} from '../../../context/socket'
 import '../ChatInterface.css'
-import {IChannel, } from '../../InterfaceUser'
+import {IChannel, } from '../../web_pages/UserPart'
 import ListChannelUser from './ListUserChannel'
 import ParametersChannel from './ParametersChannel'
 import ParametersIcon from '../../pictures/parameters-icon.png'
@@ -23,7 +23,7 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 		//console.log(props.ListMessage);
 		scrollToBottom();
 	}, [props.ListMessage])
-	
+
 	const scrollToBottom = () => {
 		if (messagesEndRef.current !== null && messagesEndRef.current.id == 'bottomchatmessage')
 	  		messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: 'end', inline: 'nearest' })
@@ -32,7 +32,7 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
     return (
         <div className="overflow-auto" style={{height: '38em', border:'1px solid black',}}>
 		{props.ListMessage.map((message) => <Message
-			key={`message_${message.message_channelId}_${message.message_id}`} 
+			key={`message_${message.message_channelId}_${message.message_id}`}
 			message={message}
 			userData={userData}/>)}
 		<div id="bottomchatmessage" ref={messagesEndRef} />
@@ -68,8 +68,8 @@ function FormMessageChannel(props: {channelSelected: IChannel, ListUsers: IUser[
 		<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 			<Form.Control type="text" value={messageForm} placeholder="Message" onChange={ChangeMsg}/>
 			{
-				props.ListUsers.find((element) => element.user_id === props.userData.id) !== undefined 
-				&& props.ListUsers.find((element) => element.user_id === props.userData.id)?.status !== 'Mute' 
+				props.ListUsers.find((element) => element.user_id === props.userData.id) !== undefined
+				&& props.ListUsers.find((element) => element.user_id === props.userData.id)?.status !== 'Mute'
 				?	<Button type="submit" onClick={handleSubmit}> Send </Button>
 				:	<Button type="submit" variant="danger" disabled> Send </Button>
 			}

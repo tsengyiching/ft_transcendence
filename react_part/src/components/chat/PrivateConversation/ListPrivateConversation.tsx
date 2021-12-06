@@ -2,7 +2,7 @@
 import React, { useContext, useEffect, useState } from 'react'
 import {Row, Button, Col} from 'react-bootstrap'
 import { SocketContext } from '../../../context/socket'
-import { IUserConversation } from '../../InterfaceUser';
+import { IUserConversation } from '../../web_pages/UserPart';
 import './ListPrivateConversation.css'
 
 interface IConversation {
@@ -43,7 +43,7 @@ export default function ListPrivateConversation(props: {setUserConversationSelec
 	return (
 	<Row className="ScrollingListPrivate">
 		<Col style={{overflow: 'auto', marginBottom: '20px'}} lg={6}>
-		{ PrivateConversation.length !== 0 
+		{ PrivateConversation.length !== 0
 		?	PrivateConversation.map((Conversation) => ButtonPrivateConversation({Conversation: Conversation, setUserConversationSelected: props.setUserConversationSelected}))
 		:	<div></div>
 		}

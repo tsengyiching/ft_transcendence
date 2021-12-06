@@ -7,7 +7,7 @@ import ListPrivateConversation from "../chat/PrivateConversation/ListPrivateConv
 import {SocketContext} from '../../context/socket'
 import InterfaceMembers from '../members/members';
 import LeaveChannelButton from '../chat/Channel/LeaveChannelModal'
-import './InterfaceUser.css'
+import './UserPart.css'
 import InterfaceChat from '../chat/ChatInterface';
 
 export type Role = 'Owner' | 'Admin' | 'User';

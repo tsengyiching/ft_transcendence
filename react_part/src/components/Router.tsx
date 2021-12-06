@@ -1,12 +1,12 @@
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
 import Home from './web_pages/Home';
 import Profile from './web_pages/Profile';
-import Settings from './web_pages/Settings';
+import Settings from './settings/Settings';
 import Connexion from './web_pages/Connexion';
 import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
 import Header from "./web_pages/Header";
-import Ladder from "./Ladder";
+import Ladder from "./web_pages/Ladder";
 import axios from 'axios';
 import { useEffect, useState } from "react";
 import Ban from "./web_pages/Ban";
