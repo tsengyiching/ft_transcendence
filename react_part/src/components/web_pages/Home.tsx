@@ -8,18 +8,21 @@ import Notifications from '../Notifications'
 function Home() {
 
     return (
-        <Container className='no-padding' fluid>
-                <Notifications/>
-                <Row>
-                    <Col lg={8} className="LeftColHome m-1 p-1">
-				    	<Game />
-                    </Col>
-                    <Col className="RightColHome m-1">
-                        <InterfaceUser/>
-					</Col>
-                </Row>
-		</Container>
-
+        <div className="Body">
+            <Notifications/>
+			<Row className="gx-3">
+				<Col xl={6} lg={12}>
+					<div className="p-3 border bg-white shadow-sm">
+						<Game/>
+					</div>
+				</Col>
+				<Col xl={6} lg={12}>
+					<div className="p-3 border bg-white shadow-sm">
+						<InterfaceUser/>
+					</div>
+				</Col>
+			</Row>
+        </div>
     )
 }
 
