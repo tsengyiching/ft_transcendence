@@ -1,7 +1,6 @@
 import { Button, Image } from "react-bootstrap"
-// import { Logo } from "pictures/ping-pong.png"
-import LogoPong from "./pictures/ping-pong.png"
-import Logo42 from "./pictures/42-Logo.svg"
+import LogoPong from "../pictures/ping-pong.png"
+import Logo42 from "../pictures/42-Logo.svg"
 import "./connexion.css"
 
 function Connexion () {
