@@ -272,12 +272,23 @@ export class UserService {
     this.checkUserExisted(operator);
     this.checkUserExisted(user);
     if (setUserSiteStatusDto.newStatus === OptionSiteStatus.MODERATOR) {
-      return this.setModerator(operator, user);
+      await this.setModerator(operator, user);
     } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.USER) {
-      return this.setUser(operator, user);
+      await this.setUser(operator, user);
     } else if (setUserSiteStatusDto.newStatus === OptionSiteStatus.BANNED) {
-      return this.banUser(operator, user);
+      await this.banUser(operator, user);
     }
+    return this.userRepository
+      .createQueryBuilder('user')
+      .select([
+        'user.id',
+        'user.nickname',
+        'user.avatar',
+        'user.userStatus',
+        'user.siteStatus',
+      ])
+      .where('user.id = :id', { id: user.id })
+      .execute();
   }
 
   setModerator(operator: User, user: User): Promise<User> {
