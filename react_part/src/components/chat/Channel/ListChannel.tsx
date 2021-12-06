@@ -12,7 +12,7 @@ import MuteImage from "../../pictures/volume-off.jpeg"
 import BlockImage from "../../pictures/redx.png"
 import QuitCross from "../../pictures/quit-icon.png"
 import JoinChannelModal from "./JoinChannelModal"
-import {IChannel, Role} from '../../InterfaceUser'
+import {IChannel, Role} from '../../web_pages/UserPart'
 import { DataContext, SiteStatus } from "../../../App"
 
 interface IMyChannel {
@@ -41,7 +41,7 @@ function ListChannel(props: IUseStateChannel) {
         const [ShowJoinModal, setShowJoinModal] = useState(0);
         const userData = useContext(DataContext);
 
-        useEffect( () => { 
+        useEffect( () => {
                 socket.emit("ask-reload-channel");
                 }, [socket])
 
@@ -79,16 +79,16 @@ function ListChannel(props: IUseStateChannel) {
                         {Channel.channel_type === 'Private' ?
                         <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                         : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
-                        
+
                         {Channel.channel_name}
-                        
-                        {Channel.role === 'Owner' ? 
+
+                        {Channel.role === 'Owner' ?
                         <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
                         : Channel.role === "Admin" ?
                         <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
                         : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
-                        
-                        {Channel.status === 'Normal' ? 
+
+                        {Channel.status === 'Normal' ?
                         <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
                         : Channel.status !== "Mute" ?
                         <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
@@ -129,11 +129,11 @@ function ListChannel(props: IUseStateChannel) {
 	return(
                 <Row className="ScrollingListChannel">
                         <Col className="ChannelsJoined" lg={6} >
-                                { MyChannels.length !== 0 
+                                { MyChannels.length !== 0
                                         ?
                                         <div>
                                                 <h4> My Channels </h4>
-                                                <div style={{overflow: 'auto', height: '7.9em'}} > 
+                                                <div style={{overflow: 'auto', height: '7.9em'}} >
                                                         { MyChannels.map(ButtonMyChannel) }
                                                 </div>
                                         </div>
@@ -141,7 +141,7 @@ function ListChannel(props: IUseStateChannel) {
                                 }
                         </Col>
                         <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} lg={6}>
-                                { OthersChannels.length !== 0 
+                                { OthersChannels.length !== 0
                                         ?
                                         <div>
                                                 <h4> Other Channels </h4>

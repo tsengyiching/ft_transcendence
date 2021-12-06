@@ -7,7 +7,7 @@ import {socket, SocketContext} from '../../../context/socket'
 import {DataContext, Data} from '../../../App'
 import {Modal, Form} from 'react-bootstrap'
 import {IUser} from '../ChatInterface'
-import {Role, SwitchContext} from '../../InterfaceUser'
+import {Role, SwitchContext} from '../../web_pages/UserPart'
 
 interface IPropsModal {
 	show: boolean,
@@ -34,7 +34,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 
 		const Mygrade = props.myrole === 'Owner' ? 3 : props.myrole === 'Admin' ? 2 : 1;
 		const Usergrade = props.user.role === 'Owner' ? 3 : props.user.role === 'Admin' ? 2 : 1;
-		
+
 		return (<div>
 			{props.user.user_id === userData.id ?
 				<ContextMenu id={`ContextMenuChannelUser_${props.user.user_id}`}>
@@ -90,7 +90,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 
 	function ChannelUser(props: {user: IUser, myrole: Role, channelId: number})
 	{
-		const [ViewModal, SetViewModal] = useState(false);		
+		const [ViewModal, SetViewModal] = useState(false);
 		const onHide = () => SetViewModal(false);
 		const ShowModal = () => SetViewModal(true);
 
@@ -174,7 +174,7 @@ function SanctionModal(props: IPropsModal)
 			channelId: props.channelid,
 			userId: props.user?.user_id,
 			sanctionDuration: convertTime(time),
-			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),	
+			status: props.sanctionstatus.charAt(0).toUpperCase() + props.sanctionstatus.slice(1),
 		}) */
 		if (time !== "")
 		{
@@ -207,7 +207,7 @@ function SanctionModal(props: IPropsModal)
 				<Form>
 					{props.sanctionstatus === "mute" ?
 					<Form.Select aria-label="Default select example"
-						value={time} 
+						value={time}
 						onChange={(e: any) => {setTime(e.target.value);}}
 					>
 						<option value="">Time {props.sanctionstatus}</option>

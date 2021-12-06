@@ -6,10 +6,10 @@ import Connexion from './web_pages/Connexion';
 import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
 import Header from "./web_pages/Header";
+import Ladder from "./web_pages/Ladder";
 import axios from 'axios';
 import { useEffect, useState } from "react";
 import Ban from "./web_pages/Ban";
-import Ladder from "./Ladder";
 
 function Router() {
 

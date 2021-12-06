@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react"
-import {SwitchContext} from '../InterfaceUser'
+import {SwitchContext} from '../web_pages/UserPart'
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -29,36 +29,36 @@ export default function ListFriends()
 	{
 		return (
 		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
-	
+
 			{ props.Friend.user_userStatus === 'Available' &&
 			<MenuItem onClick={() => InvitateToGame(props.Friend.user_id)}>
 				Invitate to game
 			</MenuItem>}
-	
+
 			{ props.Friend.user_userStatus === 'Playing' &&
 			<MenuItem onClick={() => SpectateGame(props.Friend.user_id)}>
 				Spectate Game
 			</MenuItem>}
-	
+
 			<MenuItem onClick={() => SwitchPrivateConversation(props.Friend.user_id)}>
 				Send a message
 			</MenuItem>
-	
+
 			<MenuItem onClick={() => history.push(`/profile/${props.Friend.user_id}`)}>
 				View Profile
 			</MenuItem>
-	
+
 			<MenuItem onClick={() => Unfriend(props.Friend.user_id)} >
 				Unfriend
 			</MenuItem>
-	
+
 			<MenuItem onClick={() => Block(props.Friend.user_id)}>
 				Block
 			</MenuItem>
 		</ContextMenu>
 		)
 	}
-	
+
 	function Friend(Friend: IFriend)
 		{
 			return (
@@ -77,7 +77,7 @@ export default function ListFriends()
 				</div>
 				</ContextMenuTrigger>
 				<ContextMenuFriend Friend={Friend}/>
-	
+
 				</div>
 			)
 			//console.log(`Friend : ${Friend}`)
@@ -105,7 +105,7 @@ export default function ListFriends()
 		.catch(res => { if (isMounted)
 			console.log("error");
 		})
-		
+
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on("reload-users", () => {
 			console.log("reload in ListFriends")
