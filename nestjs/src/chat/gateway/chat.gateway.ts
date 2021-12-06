@@ -295,7 +295,6 @@ export class ChatGateway
       client.emit('channels-user-in', channels_in);
       client.emit('channels-user-out', channels_out);
     } catch (error) {
-      // FIX -> can't use client alert here, check with Felix
       console.log(error);
     }
   }
@@ -307,14 +306,24 @@ export class ChatGateway
   @SubscribeMessage('channel-load')
   async loadChannel(client: Socket, channelId: number) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      if (typeof channelId !== 'number') {
+        throw new WsException(`Channel reload: wrong type of arguments.`);
+      }
+      /* Check channel exists */
+      await this.chatService.getChannelById(channelId);
+      const [user, msgs, users] = await Promise.all([
+        this.authService.getUserFromSocket(client),
+        this.messageService.getChannelMessages(channelId),
+        this.chatService.getChannelUsers(channelId),
+      ]);
       const channelParticipant =
         await this.chatService.getOneChannelParticipant(user.id, channelId);
-      if (channelParticipant) client.join('channel-' + channelId);
-      const messages = await this.messageService.getChannelMessages(channelId);
-      const users = await this.chatService.getChannelUsers(channelId);
-      client.emit('channel-message-list', messages);
-      client.emit('channel-users', users);
+      const admin = ['Owner', 'Moderator'];
+      if (admin.includes(user.siteStatus) || channelParticipant) {
+        client.join('channel-' + channelId);
+        client.emit('channel-message-list', msgs);
+        client.emit('channel-users', users);
+      }
     } catch (error) {
       console.log(error);
     }
