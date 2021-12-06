@@ -1,16 +1,21 @@
-.ProfilePicture {
-	max-width: 200px;
-	max-height: 200px;
+.Header .navbar-brand
+{ font-size: 1.5em; }
+
+.Header .navbar-brand img
+{
+	margin-right: 0.5rem;
+	width: 3rem;
 }
 
-.Header {
-	list-style-type: none;
-	margin: 0;
-	padding: 0;
-	max-height: 15%;
+.Header .Profile
+{ margin-left: 2rem; }
+
+.Header .Profile > a
+{ padding: 0px; }
+
+.Header .Avatar
+{
+	width: 3rem;
+	height: 3rem;
 }
 
-.content-wrap {
-	justify-content: space-between;
-	background-color: red;
-}

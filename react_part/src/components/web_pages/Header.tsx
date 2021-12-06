@@ -12,16 +12,13 @@ import {LinkContainer} from 'react-router-bootstrap';
 import { DataContext } from '../App';
 import logoPong from './pictures/ping-pong.png';
 
-
-
 function Header () {
     const [isConnected, setConnexion] = useState(true);
     const [user_avatar, setAvatar] = useState("")
     const [id, setId] = useState(0);
     const [nick, setNick] = useState<string>('');
-    const userData = useContext(DataContext);
+    // const userData = useContext(DataContext);
 
-// console.log(history);
     useEffect(() => {
 		let isMounted = true;
 
@@ -45,50 +42,39 @@ function Header () {
     if (isConnected)
     { // https://cdn-icons.flaticon.com/png/128/3322/premium/3322434.png?token=exp=1636118252~hmac=d6b9c64cb59fc8fcdd055bbebc86fbb8
 		return (
-		<Navbar collapseOnSelect bg="light" style={{fontSize:'20px'}}>
-			<Container fluid>
-    			<LinkContainer to='/home'>
-			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
-				<Image src={logoPong} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
-					Pong
-			</Navbar.Brand>
-			</LinkContainer>
-			<Navbar.Toggle aria-controls="basic-navbar-nav" />
-			<Nav>
-			<Nav.Item>
-				<LinkContainer to='/Ladder'>
-   		 			<Nav.Link>Ladder</Nav.Link>
-				</LinkContainer>
-  			</Nav.Item>
-			</Nav>
-			<Navbar.Collapse className="justify-content-center fs-4">
-				{userData.siteStatus} of the website
-			</Navbar.Collapse>
-			<Navbar.Collapse className="justify-content-end" >
-			<Nav>
-				<LinkContainer to={'/profile/'+id}>
-					<Nav.Link>
-						{nick}
-					</Nav.Link>
-				</LinkContainer>
-			</Nav>
-      			<Nav style={{paddingRight:"5px"}}>
-			<Nav.Item>
-        			<NavDropdown title={<Image src={`${user_avatar}`} style={{width:"60px", height:"60px", objectFit:'cover', objectPosition:'center'}} alt="pp" roundedCircle fluid/>}  align="end" id="basic-nav-dropdown">
-						<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
-          				<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
-						<NavDropdown.Divider />
-        				<LinkContainer to='/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
-        			</NavDropdown>
-					</Nav.Item>
-      			</Nav>
-			</Navbar.Collapse>
-			</Container>
-		</Navbar>
-		)
-
+			<Navbar className='Header shadow-sm' bg='white' expand="lg"  >
+				<Container fluid>
+    				<LinkContainer to='/'>
+						<Navbar.Brand>
+							<Image src={logoPong} alt="Logo" />
+							Pong
+						</Navbar.Brand>
+					</LinkContainer>
+					<Navbar.Toggle aria-controls="responsive-navbar-nav" />
+					<Navbar.Collapse id="responsive-navbar-nav">
+						<Nav className="me-auto">
+							<LinkContainer to='/'><Nav.Link>Ladder</Nav.Link></LinkContainer>
+						</Nav>
+						<Nav>
+							<NavDropdown className="Profile" id="responsive-nav-dropdown" align="end" title={
+								<span>
+									{nick}
+									<Image className="Avatar" src={`${user_avatar}`} alt='avatar' roundedCircle/>
+								</span>
+								}>
+									<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
+									<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
+									<NavDropdown.Divider />
+									<LinkContainer to='/auth/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
+							</NavDropdown>
+						</Nav>
+					</Navbar.Collapse>
+				</Container>
+			</Navbar>
+		);
     }
-    else {
+    else
+	{
         return (
 			<Navbar collapseOnSelect bg="light" style={{fontSize:'20px'}}>
 			<Container fluid>
@@ -104,7 +90,7 @@ function Header () {
 
 			</Container>
 		</Navbar>
-        )
+        );
     }
 }
 // /connexion
