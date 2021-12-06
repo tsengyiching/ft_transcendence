@@ -1,8 +1,5 @@
-.RightColHome {
-	border: 1px solid black;
-	height: 65em;
-}
+.Body
+{ padding: 1rem; }
 
-.LeftColHome {
-	border: 1px solid black;
-}
+.Body .row > div
+{ padding-bottom: 1rem; }
