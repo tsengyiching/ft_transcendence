@@ -1,6 +1,5 @@
 import './App.css';
 import Router from './components/Router';
-import Header from './components/Header';
 import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
 import {GameSocketContext, gameSocket} from './context/gameSocket';
@@ -51,7 +50,7 @@ function App():React.ReactElement {
 
     return (() => {isMounted = false});
   }, [])
-  
+
 //add useEffect for changing status site
 
   return (

@@ -1,14 +1,14 @@
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import Home from './Home';
-import Profile from './Profile';
-import Settings from './Settings';
-import Connexion from './Connexion';
-import Disconnect from './Disconnect';
+import { BrowserRouter, Route, Switch } from "react-router-dom";
+import Home from './web_pages/Home';
+import Profile from './web_pages/Profile';
+import Settings from './web_pages/Settings';
+import Connexion from './web_pages/Connexion';
+import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
+import Header from "./web_pages/Header";
 import axios from 'axios';
-import Header from './Header';
 import { useEffect, useState } from "react";
-import Ban from "./Ban";
+import Ban from "./web_pages/Ban";
 
 function Router() {
 
