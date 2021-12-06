@@ -7,14 +7,17 @@ import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
 import Header from "./web_pages/Header";
 import Ladder from "./web_pages/Ladder";
+import Admin from "./Admin/Admin";
 import axios from 'axios';
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Ban from "./web_pages/Ban";
+import {DataContext, SiteStatus} from "../App"
 
 function Router() {
 
   const [isConnected, setConnection] = useState<boolean>(false);
   const [twofa, setTwofa] = useState<boolean>(false);
+  const userData = useContext(DataContext);
 
   useEffect(() => {
     axios.get('http://localhost:8080/profile/me/',{
@@ -42,6 +45,8 @@ function Router() {
           <Route exact path="/disconnect" component={Disconnect} />
           <Route exact path="/ban" component={Ban} />
           <Route exact path="/ladder" component={Ladder}/>
+          {(userData.siteStatus == SiteStatus.MODERATOR || userData.siteStatus == SiteStatus.OWNER) &&
+          <Route exact path="/admin" component={Admin}/>}
           <Redirect to="/home"/>
         </Switch>
       </BrowserRouter>
