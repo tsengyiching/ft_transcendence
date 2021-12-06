@@ -9,7 +9,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import {LinkContainer} from 'react-router-bootstrap';
-import logoPong from '../pictures/ping-pong.png';
+import logoPong from './pictures/ping-pong.png';
 
 function Header () {
     const [isConnected, setConnexion] = useState(true);
