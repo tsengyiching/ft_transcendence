@@ -1,14 +1,14 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import React, {useState, useContext, useEffect} from 'react'
-import CreateChannelButton from './chat/Channel/create_channel';
-import ListChannel from "./chat/Channel/ListChannel";
-import ListPrivateConversation from "./chat/PrivateConversation/ListPrivateConversation"
-import {SocketContext} from '../context/socket'
-import InterfaceMembers from './members/members';
-import LeaveChannelButton from './chat/Channel/LeaveChannelModal'
+import CreateChannelButton from '../chat/Channel/create_channel';
+import ListChannel from "../chat/Channel/ListChannel";
+import ListPrivateConversation from "../chat/PrivateConversation/ListPrivateConversation"
+import {SocketContext} from '../../context/socket'
+import InterfaceMembers from '../members/members';
+import LeaveChannelButton from '../chat/Channel/LeaveChannelModal'
 import './InterfaceUser.css'
-import InterfaceChat from './chat/ChatInterface';
+import InterfaceChat from '../chat/ChatInterface';
 
 export type Role = 'Owner' | 'Admin' | 'User';
 
@@ -77,14 +77,14 @@ function InterfaceUser() {
                 </ToggleButton>
             ))}
         </ButtonGroup>
-        
+
         <Col lg={10}>
-            {interfaceRadioValue ==='Channel' ? 
-            <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> 
+            {interfaceRadioValue ==='Channel' ?
+            <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/>
             : <ListPrivateConversation setUserConversationSelected={setUserConversationSelected}/>}
         </Col>
         <Col>
-            {interfaceRadioValue ==='Channel' ? 
+            {interfaceRadioValue ==='Channel' ?
                 <div>
                     <CreateChannelButton socketid={socket}/>
                     { channelSelected !== undefined ?

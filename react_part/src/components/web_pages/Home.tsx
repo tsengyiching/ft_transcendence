@@ -1,9 +1,9 @@
 import { Row, Col } from 'react-bootstrap'
-import InterfaceUser from './InterfaceUser'
-import Game from './Game'
+import InterfaceUser from '../InterfaceUser'
+import Game from '../Game'
 import "./Home.css"
 import "./members/members.css"
-import Notifications from './Notifications'
+import Notifications from '../Notifications'
 
 function Home() {
 

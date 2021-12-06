@@ -1,6 +1,6 @@
 import './App.css';
 import Router from './components/Router';
-import Header from './components/Header';
+import Header from './components/web_pages/Header';
 import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
 import axios from 'axios'
@@ -35,7 +35,7 @@ userStatus: OnlineStatus.AVAILABLE, siteStatus: SiteStatus.USER, email: "", isTw
 export const DataContext = React.createContext(emptyuser);
 
 function App() {
-  
+
   const [userData, SetuserData] = useState<Data>(emptyuser);
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function App() {
 
     return (() => {isMounted = false});
   }, [])
-  
+
 //add useEffect for changing status site
 
   return (
