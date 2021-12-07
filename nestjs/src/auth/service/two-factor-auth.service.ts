@@ -44,7 +44,7 @@ export class TwoFactorAuthService {
     twoFactorAuthenticationCode: string,
     user: User,
   ): Promise<boolean> {
-    const userData = await this.userService.getOneById(user.id);
+    const userData = await this.userService.getUserWithTwoFactor(user.id);
     if (userData.twoFactorAuthenticationSecret === null) {
       throw new HttpException(
         `User ${userData.id} has to scan two factor QrCode first.`,

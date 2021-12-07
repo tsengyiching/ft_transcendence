@@ -16,14 +16,6 @@ export class AdminController {
     private chatGateway: ChatGateway,
   ) {}
 
-  @Get('list')
-  getUserlist(
-    @CurrentUser() user: User,
-    @Query('status') status: string,
-  ): Promise<User[]> {
-    return this.userService.getUsersWithSiteStatus(user.id, status);
-  }
-
   @Patch('set')
   async modifySiteStatus(
     @CurrentUser() operator: User,

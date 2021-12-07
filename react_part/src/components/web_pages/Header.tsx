@@ -53,7 +53,7 @@ function Header () {
 			<Navbar.Toggle aria-controls="basic-navbar-nav" />
 			<Nav>
 			<Nav.Item>
-				<LinkContainer to='/Ladder'>
+				<LinkContainer to='/ladder'>
    		 			<Nav.Link>Ladder</Nav.Link>
 				</LinkContainer>
   			</Nav.Item>

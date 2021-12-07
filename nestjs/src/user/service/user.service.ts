@@ -40,6 +40,26 @@ export class UserService {
    * @returns : user
    */
   getOneById(id: number): Promise<User> {
+    return this.userRepository.findOne(id, {
+      select: [
+        'id',
+        'nickname',
+        'avatar',
+        'createDate',
+        'userStatus',
+        'siteStatus',
+        'email',
+        'isTwoFactorAuthenticationEnabled',
+      ],
+    });
+  }
+
+  /**
+   * getUserWithTwoFactor
+   * @param : user id
+   * @returns : user
+   */
+  getUserWithTwoFactor(id: number): Promise<User> {
     return this.userRepository.findOne(id);
   }
 
@@ -223,27 +243,6 @@ export class UserService {
   /*                              site admin                                  */
   /****************************************************************************/
 
-  async getUsersWithSiteStatus(id: number, reqStatus: string): Promise<User[]> {
-    const status = this.checkSiteStatus(reqStatus);
-    const user = await this.getOneById(id);
-    this.checkUserExisted(user);
-    if (
-      user.siteStatus === SiteStatus.OWNER ||
-      user.siteStatus === SiteStatus.MODERATOR
-    ) {
-      const users = this.userRepository.find({
-        where: { siteStatus: status },
-        select: ['id', 'nickname', 'avatar', 'siteStatus'],
-      });
-      return users;
-    } else {
-      throw new HttpException(
-        `This user ${user.nickname} does not have the right !`,
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-  }
-
   async getBannedUserIds(): Promise<number[]> {
     const users = await this.userRepository.find({
       where: { siteStatus: SiteStatus.BANNED },
@@ -377,20 +376,6 @@ export class UserService {
   /****************************************************************************/
   /*                                 checkers                                 */
   /****************************************************************************/
-
-  checkSiteStatus(reqStatus: string): SiteStatus {
-    let status: SiteStatus;
-    if (reqStatus === 'owner') status = SiteStatus.OWNER;
-    else if (reqStatus === 'moderator') status = SiteStatus.MODERATOR;
-    else if (reqStatus === 'user') status = SiteStatus.USER;
-    else if (reqStatus === 'banned') status = SiteStatus.BANNED;
-    else
-      throw new HttpException(
-        `The request status does not exist !`,
-        HttpStatus.BAD_REQUEST,
-      );
-    return status;
-  }
 
   checkUserExisted(user: User): void {
     if (!user) {
