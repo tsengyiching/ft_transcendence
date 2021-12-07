@@ -129,7 +129,7 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.off('channel-users');
 			socket.off('channel-message-list');
 			})
-	}, [channelSelected, BlockedUsers, socket])
+	}, [channelSelected, BlockedUsers, socket, ListUsers])
 
 	// change list message if list blocked users change
 	useEffect(() => {
