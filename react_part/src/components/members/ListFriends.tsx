@@ -8,7 +8,7 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
-import { DataContext, SiteStatus } from "../../App";
+import { SiteStatus } from "../../App";
 import { useHistory } from "react-router";
 
 interface IFriend {
@@ -88,7 +88,7 @@ export default function ListFriends()
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
-	const userData = useContext(DataContext);
+	//const userData = useContext(DataContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 

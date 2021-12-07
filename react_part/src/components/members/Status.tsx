@@ -1,4 +1,4 @@
-import { Badge, Image } from 'react-bootstrap'
+import { Badge } from 'react-bootstrap'
 import './Status.css'
 
 type StatusType = 'Available' | 'Playing' | 'Offline';

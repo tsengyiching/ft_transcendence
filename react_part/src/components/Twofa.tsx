@@ -1,4 +1,4 @@
-import { Form, Button, Image, Alert } from 'react-bootstrap'
+import { Form, Button, Alert } from 'react-bootstrap'
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 import { useHistory } from "react-router-dom";
@@ -28,13 +28,13 @@ const Twofa = (props:STATE) => {
         .catch(res => {
             setAlert(1)
         })
-    }, [code, setConnection]);
+    }, [code, setConnection, history]);
 
 
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert == 1)
+        if (alert === 1)
         return (
             <div>
                 <Alert variant={'danger'}>

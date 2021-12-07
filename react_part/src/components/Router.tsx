@@ -33,7 +33,6 @@ function Router() {
     })
   });
 
-
   function Authorized() {
     return (
       <BrowserRouter>
@@ -45,7 +44,7 @@ function Router() {
           <Route exact path="/disconnect" component={Disconnect} />
           <Route exact path="/ban" component={Ban} />
           <Route exact path="/ladder" component={Ladder}/>
-          {(userData.siteStatus == SiteStatus.MODERATOR || userData.siteStatus == SiteStatus.OWNER) &&
+          {(userData.siteStatus === SiteStatus.MODERATOR || userData.siteStatus === SiteStatus.OWNER) &&
           <Route exact path="/admin" component={Admin}/>}
           <Redirect to="/home"/>
         </Switch>

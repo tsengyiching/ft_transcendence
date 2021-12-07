@@ -1,6 +1,6 @@
 
 import { useEffect, useContext, useState, useRef } from 'react'
-import {Row, Col, Form, Button} from 'react-bootstrap'
+import {Form, Button} from 'react-bootstrap'
 import { SocketContext } from '../../../context/socket'
 import { DataContext, Data } from '../../../App'
 import { IUserConversation } from '../../web_pages/UserPart'
@@ -26,7 +26,7 @@ function ListConversationMessage(props: {ListMessage: IMessage[]}) {
 	}, [props.ListMessage])
 
 	const scrollToBottom = () => {
-		if (messagesEndRef.current !== null && messagesEndRef.current.id == 'bottomchatmessage')
+		if (messagesEndRef.current !== null && messagesEndRef.current.id === 'bottomchatmessage')
 	  		messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: 'end', inline: 'nearest' })
 	}
 
@@ -90,7 +90,7 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 			socket.off('private-message-list');
 			socket.off('private-info');
 		});
-	}, [socket, props.privateSelected])
+	}, [socket, props.privateSelected, OtherUser.channel_id])
 
 	useEffect(() => {
 		socket.on('private-new-message', (new_message: IMessage) => {
@@ -98,7 +98,7 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 			buffer.push(new_message);
 			setListMessage(buffer);
 		})
-	}, [listMessage])
+	}, [listMessage, socket])
 
 	return (
 		<div>
