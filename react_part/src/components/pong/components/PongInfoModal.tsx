@@ -44,14 +44,10 @@ const PongInfoModal:React.FC = () => {
 		aria-labelledby="contained-modal-title-vcenter"
 		centered
 	  >
-		<Modal.Header closeButton>
-		  <Modal.Title id="contained-modal-title-vcenter">
-			{infos?.type === 'win' ? <Image src={process.env.PUBLIC_URL + 'crown.png'}/> : <Image src={process.env.PUBLIC_URL + 'accident.png'} />}
-		  </Modal.Title>
-		</Modal.Header>
-		<Modal.Body>
-		<h2>{infos?.type === 'win' ? `${infos.winner} won !!!` : `${infos?.loser} left !!!`}</h2>
-		<p>{infos?.type === 'win' ? `${infos.winner} ${infos.winnerScore} - ${infos.loser} ${infos.loserScore}` : `They lose by forfait.`}</p>
+		<Modal.Body style={{alignContent: 'center', margin: '0 auto'}}>
+		{infos?.type === 'win' ? <Image src={process.env.PUBLIC_URL + 'crown.png'}/> : <Image src={process.env.PUBLIC_URL + 'accident.png'} />}
+		<h2 style={{textAlign:'center'}}>{infos?.type === 'win' ? `${infos.winner} won !!!` : `${infos?.loser} left !!!`}</h2>
+		<p style={{textAlign:'center'}}>{infos?.type === 'win' ? `${infos.winner} ${infos.winnerScore} - ${infos.loser} ${infos.loserScore}` : `They lose by forfait.`}</p>
 
 		</Modal.Body>
 

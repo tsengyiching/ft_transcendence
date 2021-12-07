@@ -7,8 +7,9 @@ function draw(ctx:CanvasRenderingContext2D, p:Score, playerL:Player, playerR:Pla
 	ctx.clearRect(0,0, p.w, p.h);
 	// player Left
 	// // avatar
+	const leftavatar = playerL.avatar;
 	let avatarL = new Image();
-	avatarL.src = playerL.avatar;
+	avatarL.src = leftavatar;
 	const sizeL = avatarL.width < avatarL.height ? avatarL.width : avatarL.height;
 	avatarL.onload = function () {ctx.drawImage(avatarL, (avatarL.width - sizeL) * 0.5, (avatarL.height - sizeL) * 0.5, sizeL, sizeL, p.imgLeft.x, p.imgLeft.y, p.imgLeft.w, p.imgLeft.h);}
 	// // name
@@ -20,8 +21,9 @@ function draw(ctx:CanvasRenderingContext2D, p:Score, playerL:Player, playerR:Pla
 	ctx.closePath();
 	// player Right
 	// // avatar
+	const rightavatar = playerR.avatar;
 	let avatarR = new Image();
-	avatarR.src = playerR.avatar;
+	avatarR.src = rightavatar;
 	const sizeR = avatarR.width < avatarR.height ? avatarR.width : avatarR.height;
 	avatarR.onload = function () {ctx.drawImage(avatarR, (avatarR.width - sizeR) * 0.5, (avatarR.height - sizeR) * 0.5, sizeR, sizeR,p.imgRight.x, p.imgRight.y, p.imgRight.w, p.imgRight.h)};
 	// // name
@@ -37,8 +39,8 @@ const ScoreCanvasPlayers:React.VFC<{}> = () => {
 	const props = useStore(s => s.scoreBar);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-	const playerL = useStore(s => s.playerL);
-	const playerR = useStore(s => s.playerR);
+	const playerL:Player = useStore(s => s.playerL);
+	const playerR:Player = useStore(s => s.playerR);
 	useEffect(() => {
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
 		canvas!.width = props.w;
