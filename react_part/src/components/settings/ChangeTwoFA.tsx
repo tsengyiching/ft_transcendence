@@ -48,22 +48,18 @@ export const ChangeTwoFA = () => {
     function showAlert () {
         if (alert === 1)
         return (
-            <div>
-                <Alert variant={'danger'}>
-                        The 2FA code is already activated on this account
-                </Alert>
-            </div>
+			<Alert variant={'danger'}>
+					The 2FA code is already activated on this account
+			</Alert>
         )
     }
 
     function showAlert2 () {
         if (alert === 2)
         return (
-            <div>
-                <Alert variant={'danger'}>
-                        2FA code invalid
-                </Alert>
-            </div>
+			<Alert variant={'danger'}>
+					2FA code invalid
+			</Alert>
         )
     }
 
@@ -71,13 +67,13 @@ export const ChangeTwoFA = () => {
         if (printQR) {
             return (
                 <div>
-                    <Image src="http://localhost:8080/2fa/generate/"/>
-                    <Form className="" onSubmit={SubmitCode} >
-                    <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
-                        <Button variant="success" type="submit">
-                            activate
-                        </Button>
+                    <Form onSubmit={SubmitCode} >
                         {showAlert2()}
+                    	<Image src="http://localhost:8080/2fa/generate/" alt='QRCode 2fa'/>
+						<Form.Group className="mb-3">
+                    		<Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
+						</Form.Group>
+                        <Button variant="primary" type="submit">Activate</Button>
                     </Form>
                 </div>
             )
@@ -86,9 +82,9 @@ export const ChangeTwoFA = () => {
 
     return (
         <div>
-            <h4>Activate 2FA : </h4>
-            <Button onClick={twoFactorAuth} type="submit">activate</Button>
+            <h4>Activate 2FA</h4>
             {showAlert()}
+            <Button onClick={twoFactorAuth} type="submit">activate</Button>
             {PrintQRCode()}
         </div>
     )
