@@ -63,7 +63,6 @@ function UserModal(props: IPropsModal)
 {
 	function SubmitForm(event: any) {
 		event.preventDefault();
-		console.log("user : " + props.user?.nickname + " new status : " + props.newstatus);
 		if (props.user !== undefined)
 		{
 			axios.patch("http://localhost:8080/admin/set", {id: props.user.id, newStatus: props.newstatus}, {withCredentials: true})
@@ -117,10 +116,7 @@ export default function UserView()
 		axios.get('http://localhost:8080/profile/all', {withCredentials: true,})
 		.then(res => {
 			if (isMounted)
-			{
 				setListUser(res.data);
-				console.log(res.data);
-			}
 		})
 		.catch(res => {
 			if (isMounted)
