@@ -15,7 +15,7 @@ import JoinChannelModal from "./JoinChannelModal"
 import {IChannel, Role} from '../../web_pages/UserPart'
 import { DataContext, SiteStatus } from "../../../App"
 
-interface IMyChannel {
+export interface IMyChannel {
         channel_id: number,
         channel_name: string,
         channel_type: 'Private' | 'Public'
