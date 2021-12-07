@@ -9,7 +9,7 @@ import Header from "./web_pages/Header";
 import Ladder from "./web_pages/Ladder";
 import Admin from "./Admin/Admin";
 import axios from 'axios';
-import { useContext, useEffect, useState } from "react";
+import { useContext, useState } from "react";
 import Ban from "./web_pages/Ban";
 import {DataContext, SiteStatus} from "../App"
 
@@ -19,19 +19,22 @@ function Router() {
   const [twofa, setTwofa] = useState<boolean>(false);
   const userData = useContext(DataContext);
 
-  useEffect(() => {
+  function getProfile () {
+    let isMounted = true;
+    console.log(isConnected)
     axios.get('http://localhost:8080/profile/me/',{
         withCredentials:true,
     })
-    .then(res => {
+    .then(res => { if (isMounted)
         setTwofa(res.data.isTwoFactorAuthenticationEnabled);
         if (!twofa)
           setConnection(true)
     })
-    .catch(res => {
+    .catch(res => { if (isMounted)
         setConnection(false)
     })
-  });
+    return (() => {isMounted = false;})
+  }
 
   function Authorized() {
     return (
@@ -65,6 +68,11 @@ function Router() {
   }
 
   function Print() {
+    async function asynchTest() {
+      await getProfile();
+    }
+
+    asynchTest()
     if (isConnected)
       return (<Authorized/>)
     else
