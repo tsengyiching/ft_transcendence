@@ -6,3 +6,8 @@ body
   padding: 0px !important;
 }
 
+.Body
+{ padding: 1rem; }
+
+.Body .row > div
+{ padding-bottom: 1rem; }
