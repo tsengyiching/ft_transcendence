@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from "react";
 import axios from 'axios';
-import {Image, Row, Col} from 'react-bootstrap'
+import {Image, Row, Col, Badge} from 'react-bootstrap'
 
 import {useParams} from "react-router-dom";
+import './Profile.css'
 
 export default function Profile() {
 
@@ -184,45 +185,24 @@ export default function Profile() {
 
     function Validate() {
         return (
-            <div className="row">
-                <div className="col">
-                    <h3>Profile :</h3>
-                    <h4>{name}</h4>
-                    <div className="row">
-                        <div className="col">
-                            <Image src={`${avatar}`} className="w-50" alt="singe" rounded/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col">
-                            Total matches win : {winningMatches()} <br></br>
-                            Total matches lost : {lostMatches()} <br></br><br></br><br></br>
-                            <Row>
-                                <Col lg={2}>
-                                </Col>
-                                <Col lg={8}>
-                                match history : {printMatchsScore()}
-                                </Col>
-                                <Col>
-                                </Col>
-                            </Row>
-                        </div>
-                    </div>
-                </div>
-                <div className="col">
-                    {}
-                    <h4>Friends :</h4>
-                    <Row>
-                        <Col lg={4}>
-                        </Col>
-                        <Col lg={4}>
-                            {printFriendsList()}
-                        </Col>
-                        <Col>
-                        </Col>
-                    </Row>
-                </div>
-            </div>
+			<Row className="Profile">
+				<Col className="Matches" xl={6} lg={12}>
+					<Image src={`${avatar}`} className="ProfileAvatar border shadow-sm" alt="Avatar" roundedCircle/>
+					<div className="p-3 border bg-white shadow-sm">
+						<h3>{name}</h3>
+						<span>Total matches win : <Badge bg="success">{winningMatches()}</Badge></span>
+						<span>Total matches lost : <Badge bg="danger">{lostMatches()}</Badge></span>
+						<hr />
+						{printMatchsScore()}
+					</div>
+				</Col>
+				<Col className="Friends" xl={6} lg={12}>
+					<div className="p-3 border bg-white shadow-sm">
+						<h4>Friends</h4>
+						{printFriendsList()}
+					</div>
+				</Col>
+			</Row>
         )
     }
 

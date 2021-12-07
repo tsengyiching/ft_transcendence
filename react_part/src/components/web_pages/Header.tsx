@@ -55,7 +55,7 @@ function Header () {
 							<LinkContainer to='/'><Nav.Link>Ladder</Nav.Link></LinkContainer>
 						</Nav>
 						<Nav>
-							<NavDropdown className="Profile" id="responsive-nav-dropdown" align="end" title={
+							<NavDropdown className="NavProfile" id="responsive-nav-dropdown" align="end" title={
 								<span>
 									{nick}
 									<Image className="Avatar" src={`${user_avatar}`} alt='avatar' roundedCircle/>
