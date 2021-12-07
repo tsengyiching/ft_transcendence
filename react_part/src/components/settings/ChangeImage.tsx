@@ -1,4 +1,4 @@
-import { Button, Alert } from 'react-bootstrap'
+import { Button, Alert, Form } from 'react-bootstrap'
 import { useState } from 'react'
 
 import axios from 'axios';
@@ -36,30 +36,29 @@ export const ChangeImage = () => {
     function showAlert () {
         if (alert === 1)
         return (
-            <div>
-                <Alert variant={'danger'}>
-                    Image not acceptable
-                </Alert>
-            </div>
+			<Alert variant={'danger'}>
+				Image not acceptable
+			</Alert>
         )
     }
 
     return (
-        <div>
-            <h4>Change profile picture : </h4>
-            <label className="btn btn-default">
-                <input type="file" onChange={handleImageChange} />
-            </label>
-            <Button
-                className="btn btn-success"
-                disabled={!selectedFile}
-                onClick={uploadFile}
-                style={{width: "15%", marginLeft: "30%"}}
-            >
-                Upload
-            </Button>
-            <br></br>Only jpg, jpeg, png and gif files are allowed, and maximum upload file size 1 mb.
-            {showAlert()}
-        </div>
+		<Form>
+			<h4>Change profile picture</h4>
+			{showAlert()}
+			<Form.Group className="mb-3">
+				{/* <label >
+					<input className="btn btn-default" type="file" onChange={handleImageChange} />
+				</label> */}
+				<Form.Label>We do not resize the image send us square image for an optimal result. <br />We only accept: png, jpg, jpeg. </Form.Label>
+    <			Form.Control type="file" onChange={handleImageChange} />
+			</Form.Group>
+
+			<Button variant='primary'
+				disabled={!selectedFile}
+				onClick={uploadFile}>
+				Upload
+			</Button>
+		</Form>
     )
 }
