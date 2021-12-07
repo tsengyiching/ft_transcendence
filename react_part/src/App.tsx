@@ -8,7 +8,7 @@ import GameStartModal from './components/GameStartModal'
 
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
-import "bootswatch/dist/sketchy/bootstrap.min.css";
+import "bootswatch/dist/lux/bootstrap.min.css";
 // import './bootswatch.scss';
 
 enum OnlineStatus {

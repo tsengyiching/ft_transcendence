@@ -129,39 +129,6 @@ export class PongGateway {
     this.pongService.setKeyValue(true, client.id, payload);
   }
 
-  // @SubscribeMessage('sub')
-  // subscribe(client: Socket, payload: number) {
-  //   console.log(client.id, payload);
-  //   if (
-  //     users
-  //       .map((e) => {
-  //         return e.paddle;
-  //       })
-  //       .indexOf(payload) >= 0
-  //   )
-  //     return;
-  //   const index = users
-  //     .map((e) => {
-  //       return e.name;
-  //     })
-  //     .indexOf(client.id);
-  //   if (users[index].paddle != 0) return;
-  //   users[index].paddle = payload;
-  //   const other = payload === 1 ? 2 : 1;
-
-  //   if (
-  //     users
-  //       .map((e) => {
-  //         return e.paddle;
-  //       })
-  //       .indexOf(other) >= 0
-  //   ) {
-  //     playing = true;
-  //     this.server.emit('go', '');
-  //   }
-  //   console.log(playing);
-  // }
-
   @SubscribeMessage('newGame')
   async gameOn(client: any) {
     try {
@@ -205,8 +172,20 @@ export class PongGateway {
         this.server
           .to(roomName)
           .volatile.emit('infos', this.pongService.gameInfos(gameId));
+        // if (this.pongService.goal(gameId)) {
+        //   if (this.pongService.isEndGame(gameId)) {
+        //     this.pongService.setGameRunning(gameId, false);
+        //   } else {
+        //     this.pongService.setGoal(gameId, false);
+        //   }
+        // }
         if (!this.pongService.isGameRunning(gameId)) {
           console.log(`Game ${gameId} stopped`);
+          this.server
+            .to(roomName)
+            .emit('GameFinals', this.pongService.sendFinalModal(gameId));
+          this.pongService.deleteGame(gameId);
+          // TODO ajouter a la db
           clearInterval(IntervalID);
         }
       }, 1000 / FRAMERATE);

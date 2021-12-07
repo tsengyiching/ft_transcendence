@@ -37,7 +37,7 @@ export type Player = {
   score: number;
   up: boolean;
   down: boolean;
-  ready:boolean;
+  ready: boolean;
 };
 
 export type Match = {
@@ -52,5 +52,6 @@ export type Match = {
   pOne: Player;
   pTwo: Player;
   run: boolean;
+//   goal:boolean;
   // viewer id ??
 };

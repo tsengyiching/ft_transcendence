@@ -5,6 +5,8 @@ import GameCanvas from './GameCanvas'
 import BonusHandler from "./Handlers/BonusHandler";
 import SocketEvent from "./SocketEvent";
 import SocketInfos from "./SocketInfos";
+import PongInfoModal from "./PongInfoModal";
+
 
 const Pong:React.VFC<{h:number, w:number}> = (props) => {
 	const set = useStore.setState;
@@ -89,8 +91,9 @@ const Pong:React.VFC<{h:number, w:number}> = (props) => {
 								
 return (
 		<div>
-			 <SocketEvent />
-              <SocketInfos />
+			<PongInfoModal />
+			<SocketEvent />
+            <SocketInfos />
 			<ScoreBar />
 			<GameCanvas />
 			<BonusHandler />

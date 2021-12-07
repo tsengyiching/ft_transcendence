@@ -30,7 +30,6 @@ type Infos = {
 
 
 	useEffect(() => {
-
         socket.on('infos', (d) => {
 			setinfos(d);
 		});	
@@ -38,10 +37,7 @@ type Infos = {
 		if (scoreL !== infos.scoreL || scoreR !== infos.scoreR)
 			setScore(infos.scoreL, infos.scoreR);
 		})
-		return (<div>
-			<p>{infos.pOneY} et {infos.pTwoY} et {infos.ballX}</p>
-			</div>
-	 );
+		return (null);
  }
 
 export default SocketInfos
