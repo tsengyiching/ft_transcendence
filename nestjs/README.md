@@ -51,5 +51,4 @@ In this file, you'll find the list of api created in the back-end.
 ## /admin/
 | Method | Root | Parameters | Return    |
 |:----:|:-----:|-------|:-----------|
-|GET|list|Query<br />?status=owner/moderator/user/banned|an array <br />`[{"id":123, "nickname":yuyu, "avatar":xxx, "siteStatus":Owner}]`
 |PATCH|Body <br />`{"id": 1, "newStatus": "Moderator/User/Banned"}`|an object <br />`{"id": 1, "nickname": "Tim", "avatar": "xxx", "userStatus": "Offline", "siteStatus": "Moderator",}`

@@ -82,12 +82,9 @@ export class UserController {
     @CurrentUser() user: User,
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    const updatedUser = await this.userService.changeUserName(
-      user.id,
-      changeUserNameDto,
-    );
+    await this.userService.changeUserName(user.id, changeUserNameDto);
     this.userGateway.server.to('user-' + user.id).emit('reload-profile');
-    return updatedUser;
+    return this.userService.getOneById(user.id);
   }
 
   @Post('upload')
