@@ -2,7 +2,6 @@ import { Form, Button, Image, Alert } from 'react-bootstrap'
 import { useState } from 'react'
 
 import axios from 'axios';
-import { decodedTextSpanIntersectsWith } from 'typescript';
 
 export const ChangeNickName = ({}) => {
     const [nickname, setNickname] = useState("");
@@ -32,24 +31,21 @@ export const ChangeNickName = ({}) => {
     function showAlert () {
         if (alert == 1)
         return (
-            <div>
-                <Alert variant={'danger'}>
-                        The inserted nickname is invalid
-                </Alert>
-            </div>
+			<Alert variant={'danger'}>
+					The inserted nickname is invalid
+			</Alert>
         )
     }
 
     return (
-        <div>
-            <h4>Change nickname : </h4>
-            <Form className="" onSubmit={SubmitNickname} >
-            <Form.Control type="text" value={nickname} name="nickname" placeholder="Enter your new nickname" onChange={changeNickName} />
-                <Button variant="success" type="submit">
-                    submit
-                </Button>
-            </Form>
-            {showAlert()}
-        </div>
-    )
+		<Form onSubmit={SubmitNickname} >
+			<h4>Change nickname</h4>
+			{showAlert()}
+			<Form.Group className="mb-3">
+				<Form.Control type="text" value={nickname} name="nickname" placeholder="Enter your new nickname" onChange={changeNickName} />
+			</Form.Group>
+
+			<Button variant="primary" type="submit">Submit</Button>
+		</Form>
+    );
 }
