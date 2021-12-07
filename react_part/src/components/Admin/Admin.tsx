@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { Row, Col, Nav, } from "react-bootstrap";
-import { DataContext } from "../../App";
 import UserView from "./UserView";
 import ChannelView from "./ChannelView";
 
@@ -18,7 +17,7 @@ function Admin()
 		<Col lg={3}>
 			<Nav
 			defaultActiveKey="user"
-			onSelect={(selectedKey) => {setViewValue(selectedKey == "user" ? View.USER : View.CHANNEl)}}
+			onSelect={(selectedKey) => {setViewValue(selectedKey === "user" ? View.USER : View.CHANNEl)}}
 			style={{background: "#3498DB"}}
 			className="flex-column">
 				<Nav.Link eventKey="user">User</Nav.Link>
@@ -26,7 +25,7 @@ function Admin()
 			</Nav>
 		</Col>
 		<Col style={{backgroundColor: "#D7DBDD"}}>
-		{viewValue == View.USER
+		{viewValue === View.USER
 		?	<UserView/>
 		:	<ChannelView/>
 		}

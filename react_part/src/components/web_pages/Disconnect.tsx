@@ -11,7 +11,6 @@ interface STATE {
 const Disconnect = (props:STATE) => {
 
     let history = useHistory();
-    const setConnection = props.setConnection;
 
     useEffect(() => {
         let isMounted = true;

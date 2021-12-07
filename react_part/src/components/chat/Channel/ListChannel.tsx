@@ -59,7 +59,7 @@ function ListChannel(props: IUseStateChannel) {
                         socket.off("channels-user-in");
                         socket.off("channels-user-out");
                 });
-        }, [MyChannels, OthersChannels, socket]);
+        }, [MyChannels, OthersChannels, socket, props]);
 
         function ButtonMyChannel(Channel: IMyChannel) {
                 let channel_id = Channel.channel_id;

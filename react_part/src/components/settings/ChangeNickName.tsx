@@ -1,10 +1,9 @@
-import { Form, Button, Image, Alert } from 'react-bootstrap'
+import { Form, Button, Alert } from 'react-bootstrap'
 import { useState } from 'react'
 
 import axios from 'axios';
-import { decodedTextSpanIntersectsWith } from 'typescript';
 
-export const ChangeNickName = ({}) => {
+export const ChangeNickName = () => {
     const [nickname, setNickname] = useState("");
     const [alert, setAlert] = useState(0);
 
@@ -18,7 +17,6 @@ export const ChangeNickName = ({}) => {
         })
         .catch(res => {
             setAlert(1)
-            console.log("Erreur")
         })
     }
 
@@ -30,7 +28,7 @@ export const ChangeNickName = ({}) => {
     function changeNickName(e: React.ChangeEvent<HTMLInputElement>) { setNickname(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert == 1)
+        if (alert === 1)
         return (
             <div>
                 <Alert variant={'danger'}>

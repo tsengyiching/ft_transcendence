@@ -29,7 +29,7 @@ function UserButton(props: {userData: Data, setSiteStatus: any, setSiteUser: any
 			<Col>{props.userData.nickname}</Col>
 			<Col>{props.userData.siteStatus}</Col>
 			<Col>
-			{ 	props.userData.siteStatus != SiteStatus.OWNER &&
+			{ 	props.userData.siteStatus !== SiteStatus.OWNER &&
 				<div>
 				<Form>
 				<Form.Select aria-label="Change Status Site"
@@ -43,7 +43,7 @@ function UserButton(props: {userData: Data, setSiteStatus: any, setSiteUser: any
 				</Form>
 				<Button
 				onClick={() => {
-					if(newSiteStatus != undefined)
+					if(newSiteStatus !== undefined)
 					{
 						props.setSiteStatus(newSiteStatus);
 						props.setSiteUser(props.userData);
@@ -85,7 +85,7 @@ function UserModal(props: IPropsModal)
 	      >
 		<Modal.Header closeButton>
 		  <Modal.Title id="contained-modal-title-vcenter">
-		{ props.user != undefined &&
+		{ props.user !== undefined &&
 		    `Are you sure you want to pass ${props.user.nickname} to ${props.newstatus} status ?`}
 		  </Modal.Title>
 		</Modal.Header>
@@ -131,7 +131,7 @@ export default function UserView()
 			isMounted = false;
 			socket.off('reload-users');
 		});
-	}, [ReloadUserList])
+	}, [ReloadUserList, socket])
 
 	return (
 		<div style={{overflow: 'auto', backgroundColor: 'grey', height: '70em', fontSize: '2em'}}>
