@@ -1,9 +1,9 @@
-import { Form, Button, Image, Alert } from 'react-bootstrap'
+import { Button, Alert } from 'react-bootstrap'
 import { useState } from 'react'
 
 import axios from 'axios';
 
-export const ChangeImage = ({}) => {
+export const ChangeImage = () => {
     const [alert, setAlert] = useState(0);
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
 
@@ -34,7 +34,7 @@ export const ChangeImage = ({}) => {
     };
 
     function showAlert () {
-        if (alert == 1)
+        if (alert === 1)
         return (
             <div>
                 <Alert variant={'danger'}>
@@ -58,6 +58,7 @@ export const ChangeImage = ({}) => {
             >
                 Upload
             </Button>
+            <br></br>Only jpg, jpeg, png and gif files are allowed, and maximum upload file size 1 mb.
             {showAlert()}
         </div>
     )

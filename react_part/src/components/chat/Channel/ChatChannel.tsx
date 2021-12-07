@@ -25,7 +25,7 @@ function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 	}, [props.ListMessage])
 
 	const scrollToBottom = () => {
-		if (messagesEndRef.current !== null && messagesEndRef.current.id == 'bottomchatmessage')
+		if (messagesEndRef.current !== null && messagesEndRef.current.id === 'bottomchatmessage')
 	  		messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: 'end', inline: 'nearest' })
 	}
 
@@ -105,7 +105,7 @@ export function ChatChannel(channelSelected: IChannel)
 		socket.on("reload-block", () => { SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
-	}, [ReloadBlockedUserlist]);
+	}, [ReloadBlockedUserlist, socket]);
 
 	// load to the channel then get list user and message of the channel
 	useEffect(() => {
@@ -129,7 +129,7 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.off('channel-users');
 			socket.off('channel-message-list');
 			})
-	}, [channelSelected])
+	}, [channelSelected, BlockedUsers, socket])
 
 	// change list message if list blocked users change
 	useEffect(() => {
@@ -140,7 +140,7 @@ export function ChatChannel(channelSelected: IChannel)
 				newlist.push(message);
 		}
 		SetListShownMessage(newlist);
-	}, [BlockedUsers])
+	}, [BlockedUsers, ListAllMessage])
 
 	//add a new message to the chat if user is not blocked
 	useEffect(() => {
@@ -155,7 +155,7 @@ export function ChatChannel(channelSelected: IChannel)
 		})
 		return (() => {socket.off('channel-new-message');});
 
-	}, [ListShownMessage, BlockedUsers])
+	}, [ListShownMessage, BlockedUsers, ListAllMessage, socket])
 
 	return (
 	<Row className="TitleChannel">
@@ -174,7 +174,7 @@ export function ChatChannel(channelSelected: IChannel)
 
 export function ChatChannelDisabled()
 {
-	const socket = useContext(SocketContext);
+	//const socket = useContext(SocketContext);
 
 	return (
 	<Row className="TitleChannel">

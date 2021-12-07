@@ -1,5 +1,3 @@
-import {Image, Row, Col} from 'react-bootstrap'
-
 export default function Ladder() {
     return (
         <div>

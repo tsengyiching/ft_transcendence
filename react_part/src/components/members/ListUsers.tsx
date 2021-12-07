@@ -6,7 +6,7 @@ import axios from 'axios'
 import { socket } from "../../context/socket";
 import { SwitchContext } from "../web_pages/UserPart";
 import status from './Status'
-import {DataContext, SiteStatus} from "../../App"
+import {SiteStatus} from "../../App"
 import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
 import './members.css'
 import "./ListUsers.css"
@@ -85,7 +85,7 @@ export default function ListUsers()
 	//const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
-	const userData = useContext(DataContext);
+	//const userData = useContext(DataContext);
 	let history = useHistory();
 	const SwitchToPrivate = useContext(SwitchContext);
 

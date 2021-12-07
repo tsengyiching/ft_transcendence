@@ -1,5 +1,5 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
+import { Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import React, {useState, useContext, useEffect} from 'react'
 import CreateChannelButton from '../chat/Channel/create_channel';
 import ListChannel from "../chat/Channel/ListChannel";

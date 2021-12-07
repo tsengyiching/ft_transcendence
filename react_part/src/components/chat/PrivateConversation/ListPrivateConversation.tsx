@@ -38,7 +38,7 @@ export default function ListPrivateConversation(props: {setUserConversationSelec
 	useEffect(() => {
 		socket.on("private-list", (list: IConversation[]) => {setPrivateConversation(list); console.log(list)});
 		return (() => {socket.off('private-list')})
-	}, [PrivateConversation])
+	}, [PrivateConversation, socket])
 
 	return (
 	<Row className="ScrollingListPrivate">

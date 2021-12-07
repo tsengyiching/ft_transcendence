@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import "./Header.css"
 
 import axios from 'axios';
@@ -9,7 +9,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import {LinkContainer} from 'react-router-bootstrap'
-import { DataContext, Data, SiteStatus } from '../../App';
+import { DataContext, SiteStatus } from '../../App';
 
 function Header () {
     const [isConnected, setConnexion] = useState(true);
@@ -73,7 +73,7 @@ function Header () {
 			<Nav.Item>
         			<NavDropdown title={<Image src={`${user_avatar}`} style={{width:"60px", height:"60px", objectFit:'cover', objectPosition:'center'}} alt="pp" roundedCircle fluid/>}  align="end" id="basic-nav-dropdown">
 					<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
-					{(userData.siteStatus == SiteStatus.OWNER || userData.siteStatus == SiteStatus.MODERATOR)
+					{(userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR)
 					&& <LinkContainer to='/admin'><NavDropdown.Item>Admin View</NavDropdown.Item></LinkContainer>}
 					<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
 						<NavDropdown.Divider />

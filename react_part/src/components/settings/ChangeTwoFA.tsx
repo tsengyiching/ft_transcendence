@@ -3,7 +3,7 @@ import { useState } from 'react'
 
 import axios from 'axios';
 
-export const ChangeTwoFA = ({}) => {
+export const ChangeTwoFA = () => {
 
     const [printQR, setPrintQR] = useState(0)
     const [code, setCode] = useState("")
@@ -46,7 +46,7 @@ export const ChangeTwoFA = ({}) => {
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert == 1)
+        if (alert === 1)
         return (
             <div>
                 <Alert variant={'danger'}>
@@ -57,7 +57,7 @@ export const ChangeTwoFA = ({}) => {
     }
 
     function showAlert2 () {
-        if (alert == 2)
+        if (alert === 2)
         return (
             <div>
                 <Alert variant={'danger'}>

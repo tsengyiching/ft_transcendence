@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import {Toast, ToastContainer, Button } from 'react-bootstrap'
+import {Toast, ToastContainer } from 'react-bootstrap'
 import { socket } from '../context/socket';
 import {useBetween} from 'use-between'
 
@@ -52,7 +52,7 @@ function Notifications() {
 			SetNotifications([...NotificationList]);
 		});
 		return (() => {socket.off('alert')})
-	}, [NotificationList]);
+	}, [NotificationList, SetNotifications]);
 
     return (
  	<div style={{zIndex:2}}>
