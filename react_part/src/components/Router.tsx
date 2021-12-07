@@ -35,15 +35,17 @@ function Router() {
     return (
       <BrowserRouter>
         <Header/>
-        <Switch>
-          <Route exact path="/home" component={Home} />
-          <Route exact path="/profile/:clientId" component={Profile} />
-          <Route exact path="/settings" component={Settings} />
-          <Route exact path="/disconnect" component={Disconnect} />
-          <Route exact path="/ban" component={Ban} />
-          <Route exact path="/ladder" component={Ladder}/>
-          <Redirect to="/home"/>
-        </Switch>
+		<div className="Body">
+			<Switch>
+			<Route exact path="/home" component={Home} />
+			<Route exact path="/profile/:clientId" component={Profile} />
+			<Route exact path="/settings" component={Settings} />
+			<Route exact path="/disconnect" component={Disconnect} />
+			<Route exact path="/ban" component={Ban} />
+			<Route exact path="/ladder" component={Ladder}/>
+			<Redirect to="/home"/>
+			</Switch>
+		</div>
       </BrowserRouter>
     )
   }

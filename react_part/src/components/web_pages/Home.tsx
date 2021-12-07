@@ -8,7 +8,7 @@ import Notifications from '../Notifications'
 function Home() {
 
     return (
-        <div className="Body">
+        <div>
             <Notifications/>
 			<Row className="gx-3">
 				<Col xl={6} lg={12}>
