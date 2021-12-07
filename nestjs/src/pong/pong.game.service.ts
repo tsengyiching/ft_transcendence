@@ -14,13 +14,12 @@ import {
   XR,
   XL,
   Y,
-  LEFTMAXANGLE,
-  LEFTLITTLEANGLE,
-  RIGHTMAXANGLE,
-  RIGHTLITTLEANGLE,
+  MAXANGLE,
+  LITTLEANGLE,
+  BALLSPEED,
   H,
   W,
-  FRAMERATE,
+  FRICTIONANGLE,
 } from './pong.env';
 import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 import { throwIfEmpty } from 'rxjs';
@@ -53,7 +52,7 @@ export class PongService {
         radius: 15,
         vx: Math.random() > 0.5 ? 1 : -1,
         vy: 0,
-        speed: 2,
+        speed: BALLSPEED,
         acceleration: 1,
       },
       paddleL: {
@@ -202,6 +201,7 @@ export class PongService {
     ball: Ball,
     paddleL: Paddle,
     paddleR: Paddle,
+    mouv: number[],
   ): Pos {
     const rect: Pos = { x: ball.pos.x, y: ball.pos.y };
     let dist = 0;
@@ -227,8 +227,9 @@ export class PongService {
         const relativeY = 1 - (rect.y - paddleL.pos.y) / (paddleL.h * 0.5);
         const angleRebound =
           Math.abs(relativeY) === 1
-            ? -relativeY * LEFTMAXANGLE
-            : -relativeY * LEFTLITTLEANGLE;
+            ? -relativeY * MAXANGLE + mouv[0] * FRICTIONANGLE
+            : -relativeY * LITTLEANGLE + mouv[0] * FRICTIONANGLE;
+        //angleRebound = angleRebound + paddleL.up * -FRICTIONANGLE +paddleL.down * FRICTIONANGLE;
         return { x: Math.cos(angleRebound), y: Math.sin(angleRebound) }; ////////
       } else return { x: 0, y: 0 };
     } else if (ball.pos.x + ball.radius + ball.speed >= paddleR.pos.x) {
@@ -251,8 +252,8 @@ export class PongService {
         const relativeY = 1 - (rect.y - paddleR.pos.y) / (paddleR.h * 0.5);
         const angleRebound =
           Math.abs(relativeY) === 1
-            ? -relativeY * LEFTMAXANGLE
-            : -relativeY * LEFTLITTLEANGLE;
+            ? -relativeY * MAXANGLE + mouv[1] * FRICTIONANGLE
+            : -relativeY * LITTLEANGLE + mouv[1] * FRICTIONANGLE;
         return { x: -Math.cos(angleRebound), y: Math.sin(angleRebound) }; ////////
       } else return { x: 0, y: 0 };
     }
@@ -274,26 +275,26 @@ export class PongService {
     } else return 0;
   }
 
-  private afterGoalUpdate(matchId: number, scored: boolean) {
-    this.matches.map((match) => {
-      if (match.id === matchId) {
-        match.ball = {
-          pos: { x: W * 0.5, y: H * 0.5 },
-          radius: 15,
-          vx: Math.random() > 0.5 ? 1 : -1,
-          vy: 0,
-          speed: 2,
-          acceleration: 1,
-        };
-        if (scored === true) {
-          // player L
-          match.scoreL++;
-        } else if (!scored) match.scoreR++;
-        match.lastp = false;
-        match.lasty = false;
-      }
-    });
-  }
+  //   private afterGoalUpdate(matchId: number, scored: boolean) {
+  //     this.matches.map((match) => {
+  //       if (match.id === matchId) {
+  //         match.ball = {
+  //           pos: { x: W * 0.5, y: H * 0.5 },
+  //           radius: 15,
+  //           vx: Math.random() > 0.5 ? 1 : -1,
+  //           vy: 0,
+  //           speed: 10,
+  //           acceleration: 1,
+  //         };
+  //         if (scored === true) {
+  //           // player L
+  //           match.scoreL++;
+  //         } else if (!scored) match.scoreR++;
+  //         match.lastp = false;
+  //         match.lasty = false;
+  //       }
+  //     });
+  //   }
 
   private afterGoalUpdateref(match: Match, scored: boolean) {
     match.ball = {
@@ -301,7 +302,7 @@ export class PongService {
       radius: 15,
       vx: Math.random() > 0.5 ? 1 : -1,
       vy: 0,
-      speed: 2,
+      speed: BALLSPEED,
       acceleration: 1,
     };
     if (scored === true) {
@@ -314,26 +315,27 @@ export class PongService {
 
   UpdateGame(gameId: number) {
     this.matches.forEach((match) => {
+      const mouv: number[] = [0, 0];
+
+      mouv[0] =
+        match.pOne.down && !match.pOne.up
+          ? 1
+          : match.pOne.up && !match.pOne.down
+          ? -1
+          : 0;
+      mouv[1] =
+        match.pTwo.down && !match.pTwo.up
+          ? 1
+          : match.pTwo.up && !match.pTwo.down
+          ? -1
+          : 0;
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,
           match.paddleL,
           match.paddleR,
+          mouv,
         );
-        const mouv: number[] = [0, 0];
-
-        mouv[0] =
-          match.pOne.down && !match.pOne.up
-            ? 1
-            : match.pOne.up && !match.pOne.down
-            ? -1
-            : 0;
-        mouv[1] =
-          match.pTwo.down && !match.pTwo.up
-            ? 1
-            : match.pTwo.up && !match.pTwo.down
-            ? -1
-            : 0;
         if (touch.x || touch.y) {
           if (match.lastp === false) {
             match.ball.vx = touch.x;
@@ -366,6 +368,7 @@ export class PongService {
           match.ball.vx * match.ball.speed * match.ball.acceleration;
         match.ball.pos.y +=
           match.ball.vy * match.ball.speed * match.ball.acceleration;
+        match.ball.speed += 0.001;
         if (mouv[0]) {
           match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
           if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
@@ -408,77 +411,6 @@ export class PongService {
     });
     return ret;
   }
-  // @Interval(1000 / FRAMERATE)
-  // updateGames() {
-  //   console.log('HELLO');
-  //   this.matches.forEach((match) => {
-  //     if (match.run) {
-  //       console.log('RUNNING');
-  //       const touch = this.ballCollisionToPaddle(
-  //         match.ball,
-  //         match.paddleL,
-  //         match.paddleR,
-  //       );
-  //       const mouv: number[] = [0, 0];
 
-  //       mouv[0] =
-  //         match.pOne.down && !match.pOne.up
-  //           ? 1
-  //           : match.pOne.up && !match.pOne.down
-  //           ? -1
-  //           : 0;
-  //       mouv[1] =
-  //         match.pTwo.down && !match.pTwo.up
-  //           ? 1
-  //           : match.pTwo.up && !match.pTwo.down
-  //           ? -1
-  //           : 0;
-  //       if (touch.x || touch.y) {
-  //         if (match.lastp === false) {
-  //           match.ball.vx = touch.x;
-  //           match.ball.vy = touch.y;
-  //           match.lastp = true;
-  //           if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
-  //         }
-  //       } else {
-  //         match.lastp = false;
-  //         const toWall = this.ballCollisiontoWall(match.ball, {
-  //           tl: { x: 0, y: 0 },
-  //           tr: { x: W, y: 0 },
-  //           bl: { x: 0, y: H },
-  //           br: { x: W, y: H },
-  //         });
-  //         if (toWall === XR || toWall === XL) {
-  //           return this.afterGoalUpdateref(match, !!(toWall === XL));
-  //         } else if (toWall === Y && !match.lasty) {
-  //           match.lasty = true;
-  //           match.ball.vy *= -1;
-  //         }
-  //         if (toWall !== Y) {
-  //           match.lasty = false;
-  //         }
-  //       }
-  //       if (match.ball.acceleration > 1) {
-  //         match.ball.acceleration -= 0.005;
-  //       }
-  //       match.ball.pos.x +=
-  //         match.ball.vx * match.ball.speed * match.ball.acceleration;
-  //       match.ball.pos.y +=
-  //         match.ball.vy * match.ball.speed * match.ball.acceleration;
-  //       if (mouv[0]) {
-  //         match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
-  //         if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
-  //         if (match.paddleL.pos.y + match.paddleL.h > H)
-  //           match.paddleL.pos.y = H - match.paddleL.h;
-  //       }
-  //       if (mouv[1]) {
-  //         match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
-  //         if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
-  //         if (match.paddleR.pos.y + match.paddleR.h > H)
-  //           match.paddleR.pos.y = H - match.paddleR.h;
-  //       }
-  //     }
-  //   });
-  // }
   // https://gamedev.stackexchange.com/questions/174240/server-game-loop
 }
