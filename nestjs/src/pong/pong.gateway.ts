@@ -82,9 +82,9 @@ export class PongGateway {
       if (userArray) {
         console.log(userArray);
         const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ??
+        this.pongService.createNewMatch(GameId, userArray, this.userService);
         userArray.forEach((e) => {
           this.server.to(e.toString()).emit('inMatchMaking', false);
-          this.pongService.createNewMatch(GameId, userArray, this.userService);
           this.server.to(e.toString()).emit('inGame', GameId);
           // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
         });
@@ -101,7 +101,6 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
 
       console.log('New Player LEAVE', user.id.toString());
-      //client.emit('inMatchMaking', false);
       this.server.to(user.id.toString()).emit('inMatchMaking', false);
       this.pongUsersService.removePlayer(user.id);
     } catch (error) {
@@ -129,15 +128,6 @@ export class PongGateway {
     this.pongService.setKeyValue(true, client.id, payload);
   }
 
-  @SubscribeMessage('newGame')
-  async gameOn(client: any) {
-    try {
-      const user: User = await this.authService.getUserFromSocket(client);
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
   @SubscribeMessage('ready')
   async readyForGame(client: Socket, payload: number) {
     try {
@@ -163,34 +153,75 @@ export class PongGateway {
   }
   // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
   //
+  // startGame(gameId: number) {
+  //   this.pongService.setGameRunning(gameId, true);
+  //   const roomName = gameId.toString() + '-Game';
+  //   if (gameId >= 0) {
+  //     const IntervalID = setInterval(() => {
+  //       this.pongService.UpdateGame(gameId);
+  //       this.server
+  //         .to(roomName)
+  //         .volatile.emit('infos', this.pongService.gameInfos(gameId));
+  //       // if (this.pongService.goal(gameId)) {
+  //       //   if (this.pongService.isEndGame(gameId)) {
+  //       //     this.pongService.setGameRunning(gameId, false);
+  //       //   } else {
+  //       //     this.pongService.setGoal(gameId, false);
+  //       //     clearInterval(IntervalID);
+  //       //     startGame(gameId);
+  //       //   }
+  //       // }
+  //       if (!this.pongService.isGameRunning(gameId)) {
+  //         console.log(`Game ${gameId} stopped`);
+  //         this.server
+  //           .to(roomName)
+  //           .emit('GameFinals', this.pongService.sendFinalModal(gameId));
+  //         this.pongService.deleteGame(gameId);
+  //         // TODO ajouter a la db
+  //         clearInterval(IntervalID);
+  //       }
+  //     }, 1000 / FRAMERATE);
+  //   }
+  // }
+
+  // loop from https://timetocode.tumblr.com/post/71512510386/an-accurate-node-js-game-loop-inbetween-settimeout-and
   startGame(gameId: number) {
+    const refreshTime: number = 1000 / FRAMERATE;
+    let lastRefresh = Date.now();
     this.pongService.setGameRunning(gameId, true);
     const roomName = gameId.toString() + '-Game';
     if (gameId >= 0) {
-      const IntervalID = setInterval(() => {
-        this.pongService.UpdateGame(gameId);
-        this.server
-          .to(roomName)
-          .volatile.emit('infos', this.pongService.gameInfos(gameId));
-        // if (this.pongService.goal(gameId)) {
-        //   if (this.pongService.isEndGame(gameId)) {
-        //     this.pongService.setGameRunning(gameId, false);
-        //   } else {
-        //     this.pongService.setGoal(gameId, false);
-        //     clearInterval(IntervalID);
-        //     startGame(gameId);
-        //   }
-        // }
+      const GameLoop = () => {
+        const now = Date.now();
+        if (lastRefresh + refreshTime <= now) {
+          lastRefresh = now;
+          this.pongService.UpdateGame(gameId);
+          this.server
+            .to(roomName)
+            .volatile.emit('infos', this.pongService.gameInfos(gameId));
+        }
+        if (this.pongService.goal(gameId)) {
+          if (this.pongService.isEndGame(gameId)) {
+            this.pongService.setGameRunning(gameId, false);
+          } else {
+            this.pongService.setGoal(gameId, false);
+          }
+        }
         if (!this.pongService.isGameRunning(gameId)) {
           console.log(`Game ${gameId} stopped`);
           this.server
             .to(roomName)
             .emit('GameFinals', this.pongService.sendFinalModal(gameId));
           this.pongService.deleteGame(gameId);
-          // TODO ajouter a la db
-          clearInterval(IntervalID);
+          return;
         }
-      }, 1000 / FRAMERATE);
+        if (Date.now() - lastRefresh < refreshTime - 16) {
+          setTimeout(GameLoop);
+        } else {
+          setImmediate(GameLoop);
+        }
+      };
+      GameLoop();
     }
   }
 }
