@@ -70,9 +70,9 @@ export class PongService {
     return ret;
   }
 
-  //   goal(gameId: number) {
-  //     return this.matches.find((match) => match.id === gameId).goal;
-  //   }
+  goal(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).goal;
+  }
 
   isEndGame(gameId: number) {
     const currentGame = this.matches.find((match) => match.id === gameId);
@@ -125,7 +125,7 @@ export class PongService {
       pOne: { ...p1 },
       pTwo: { ...p2 },
       run: false,
-      //   goal: false,
+      goal: false,
     };
     return newMatch;
   }
@@ -137,6 +137,7 @@ export class PongService {
   ): Promise<Player> {
     try {
       const user: User = await userService.getOneById(id);
+      console.log(paddle, ' ', user.nickname);
       const newPlayer: Player = {
         name: user.nickname,
         id: id,
@@ -198,13 +199,13 @@ export class PongService {
     });
   }
 
-  //   setGoal(gameId: number, isGoal: boolean) {
-  //     this.matches.forEach((match) => {
-  //       if (match.id === gameId) {
-  //         match.goal = isGoal;
-  //       }
-  //     });
-  //   }
+  setGoal(gameId: number, isGoal: boolean) {
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        match.goal = isGoal;
+      }
+    });
+  }
   /*
   
 ███╗░░░███╗░█████╗░████████╗░█████╗░██╗░░██╗  ██╗░░██╗░█████╗░███╗░░██╗██████╗░██╗░░░░░███████╗██████╗░░██████╗
@@ -226,9 +227,11 @@ export class PongService {
     usersIdArr: number[],
     userService: UserService,
   ) {
-    const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
-    const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
-    this.matches.push(this.setNewMatch(id, pOne, pTwo));
+    if (this.matches.find((match) => match.id === id) === undefined) {
+      const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
+      const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
+      this.matches.push(this.setNewMatch(id, pOne, pTwo));
+    }
   }
 
   sendPlayersInfos(gameId) {
@@ -402,13 +405,13 @@ export class PongService {
       speed: BALLSPEED,
       acceleration: 1,
     };
-    if (scored === true) {
-      // player L
-      match.scoreL++;
-    } else if (!scored) match.scoreR++;
+    if (scored) {
+      // player R
+      match.scoreR++;
+    } else if (!scored) match.scoreL++;
     match.lastp = false;
     match.lasty = false;
-    // match.goal = true;
+    match.goal = true;
   }
 
   UpdateGame(gameId: number) {
@@ -427,10 +430,11 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
-      if (match.scoreL === MAXSCORE || match.scoreR === MAXSCORE) {
-        match.run = false;
-        return;
-      }
+      // console.log(`L ${match.scoreL} ---- R ${match.scoreR}`);
+      // if (match.scoreL === MAXSCORE || match.scoreR === MAXSCORE) {
+      //   match.run = false;
+      //   return;
+      // }
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,

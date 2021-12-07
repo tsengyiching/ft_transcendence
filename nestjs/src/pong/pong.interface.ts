@@ -52,6 +52,6 @@ export type Match = {
   pOne: Player;
   pTwo: Player;
   run: boolean;
-//   goal:boolean;
+  goal: boolean;
   // viewer id ??
 };
