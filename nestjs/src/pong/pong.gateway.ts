@@ -177,6 +177,8 @@ export class PongGateway {
         //     this.pongService.setGameRunning(gameId, false);
         //   } else {
         //     this.pongService.setGoal(gameId, false);
+        //     clearInterval(IntervalID);
+        //     startGame(gameId);
         //   }
         // }
         if (!this.pongService.isGameRunning(gameId)) {
