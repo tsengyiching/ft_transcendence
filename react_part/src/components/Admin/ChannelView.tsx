@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
-import {Col, Row} from 'react-bootstrap'
-import { SocketContext } from '../../context/socket';
+import {Col, Row, Form} from 'react-bootstrap'
+import { socket, SocketContext } from '../../context/socket';
 import {IMyChannel, IOtherChannel} from '../chat/Channel/ListChannel'
+import {IMessage, IUser} from '../chat/ChatInterface'
 
 interface IChannel
 {
@@ -9,19 +10,7 @@ interface IChannel
 	channel_name: string,
 }
 
-function joinChannels(MyChannels: IMyChannel[], OtherChannels: IOtherChannel[])
-{
-	let NewList : IChannel[] = [];
-
-	MyChannels.map((channel) => {
-		NewList.push({channel_id: channel.channel_id, channel_name: channel.channel_name});
-	})
-	OtherChannels.map((channel) => {
-		NewList.push()
-	})
-}
-
-function ListChannel(setChannelSelected: any)
+function ListChannel(props: {setChannelSelected: Function})
 {
 	let socket = useContext(SocketContext);
 	const [ListChannel, setListChannel] = useState<IChannel[]>([]);
@@ -34,49 +23,82 @@ function ListChannel(setChannelSelected: any)
 
 	useEffect(() => {
 		socket.on('channels-user-in', (data: IMyChannel[]) => {
-			console.log(data);
+			//console.log("in channels-user-in");
+			//console.log(data);
 			setMyChannels(data.map((Mychannel) => {
 				let newChannel: IChannel = {channel_id: Mychannel.channel_id, channel_name: Mychannel.channel_name};
 				return(newChannel);
 			}));
-			console.log("My Channels : ");
-			console.log(MyChannels);
-			setListChannel(MyChannels.concat(OtherChannels));
-			console.log("List Channel : ");
-			console.log(MyChannels.concat(OtherChannels));
+			//console.log(MyChannels.concat(OtherChannels));
+			//setListChannel(MyChannels.concat(OtherChannels));
 		});
 		socket.on('channels-user-out', (data: IOtherChannel[]) => {
-			setOtherChannels(data);
-			console.log(OtherChannels);
+			//console.log("in channels-user-out");
+			//console.log(data);
+			setOtherChannels(data.map((Otherchannel) => {
+				let newChannel: IChannel = {channel_id: Otherchannel.channel_id, channel_name: Otherchannel.channel_name};
+				return(newChannel);
+			}));
+			//console.log(MyChannels.concat(OtherChannels));
 		});
+		setListChannel(MyChannels.concat(OtherChannels));
 
 		return(() => {
 			socket.off('channels-user-in');
 			socket.off('channels-user-out');
 		})
-	}, [socket, ])
+	}, [socket, MyChannels, OtherChannels,])
 
 	return (
 		<div>
-			List Channel
+			<Form>
+			<Form.Select aria-label="Change Status Site"
+				onChange={(e: any) => {
+					props.setChannelSelected(ListChannel.find(element => {return(element.channel_id === Number(e.target.value))}))
+				}}
+				>
+				<option value={undefined}> Select Channel </option>
+				{ListChannel.map((Channel) => {return(
+					<option key={`optionListChannel-${Channel.channel_id}`} value={Channel.channel_id}> {Channel.channel_name} </option>
+				)})}
+			</Form.Select>
+			</Form>
 		</div>
 	)
 }
 
 function Messages(props: {ChannelSelected: IChannel | undefined})
 {
+	const [ListMessage, setListMessage] = useState<IMessage[]>([]);
+
+	useEffect(() => {
+		socket.on('channel-message-list', (data: IMessage[]) => {setListMessage(data)});
+
+		return(() => {socket.off('channel-message-list');})
+	}, [ListMessage])
+
 	return (
 		<div>
 			Messages
+			{ListMessage.map((message: IMessage) => <div key={`message-channelview-${message.message_id}`}> {message.message_content} </div>)}
 		</div>
 	)
 }
 
 function ListUsers(props: {ChannelSelected: IChannel | undefined})
 {
+	const [ListUser, setListUser] = useState<IUser[]>([]);
+
+	useEffect(() => {
+		socket.on('channel-users', (data: IUser[]) => {setListUser(data);});
+
+		return(() => {socket.off('channel-users');});
+	}, [])
+
 	return (
 		<div>
 			List Users
+			{ListUser.map((user: IUser) =>{return(<div key={`user-ChannelView-${user.user_id}`}> {user.user_nickname} </div>)})}
 		</div>
 	)
 }
@@ -85,9 +107,21 @@ export default function ChannelView()
 {
 	const [ChannelSelected, setChannelSelected] = useState<IChannel | undefined>(undefined);
 
+	useEffect(() => {
+		const CurrentChannel = ChannelSelected;
+		if (ChannelSelected !== undefined)
+			socket.emit('channel-load', ChannelSelected.channel_id);
+		return(() => {
+			if (CurrentChannel !== undefined)
+				socket.emit('channel-unload', CurrentChannel.channel_id);});
+	}, [ChannelSelected])
+
 	return (
 		<div>
-			<Row> <ListChannel setChannelSelected={setChannelSelected}/> </Row>
+			<Row>
+				Channel Selected :
+				<ListChannel setChannelSelected={setChannelSelected}/>
+			</Row>
 			<Row>
 				<Col lg={8}>
 					<Messages ChannelSelected={ChannelSelected} />
