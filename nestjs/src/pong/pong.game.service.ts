@@ -20,9 +20,11 @@ import {
   H,
   W,
   FRICTIONANGLE,
+  MAXSCORE,
 } from './pong.env';
 import { Interval, SchedulerRegistry } from '@nestjs/schedule';
 import { throwIfEmpty } from 'rxjs';
+import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -32,6 +34,16 @@ function sleep(ms) {
 export class PongService {
   // constructor(private schedulerRegistry: SchedulerRegistry){}
   private matches: Match[] = [];
+
+  /*
+░██████╗░███████╗████████╗████████╗███████╗██████╗░░██████╗
+██╔════╝░██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
+██║░░██╗░█████╗░░░░░██║░░░░░░██║░░░█████╗░░██████╔╝╚█████╗░
+██║░░╚██╗██╔══╝░░░░░██║░░░░░░██║░░░██╔══╝░░██╔══██╗░╚═══██╗
+╚██████╔╝███████╗░░░██║░░░░░░██║░░░███████╗██║░░██║██████╔╝
+░╚═════╝░╚══════╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝╚═════╝░
+*/
+
   getMatchById(id: number) {
     return this.matches.find((e) => {
       e.id === id;
@@ -43,6 +55,39 @@ export class PongService {
       (e) => e.pOne.id === playerId || e.pTwo.id === playerId,
     ).id;
   }
+
+  playersReadyCheck(gameId): boolean {
+    const currentGame = this.matches.find((e) => e.id === gameId);
+    if (currentGame.pOne.ready && currentGame.pTwo.ready) return true;
+    return false;
+  }
+
+  isGameRunning(gameId: number): boolean {
+    let ret = false;
+    this.matches.forEach((match) => {
+      if (match.id === gameId) ret = match.run;
+    });
+    return ret;
+  }
+
+  //   goal(gameId: number) {
+  //     return this.matches.find((match) => match.id === gameId).goal;
+  //   }
+
+  isEndGame(gameId: number) {
+    const currentGame = this.matches.find((match) => match.id === gameId);
+    if (currentGame.scoreL === MAXSCORE || currentGame.scoreR === MAXSCORE)
+      return true;
+    return false;
+  }
+  /*
+░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
+██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
+╚█████╗░█████╗░░░░░██║░░░░░░██║░░░█████╗░░██████╔╝╚█████╗░
+░╚═══██╗██╔══╝░░░░░██║░░░░░░██║░░░██╔══╝░░██╔══██╗░╚═══██╗
+██████╔╝███████╗░░░██║░░░░░░██║░░░███████╗██║░░██║██████╔╝
+╚═════╝░╚══════╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝╚═════╝░
+*/
 
   private setNewMatch(id: number, p1: Player, p2: Player): Match {
     const newMatch: Match = {
@@ -80,6 +125,7 @@ export class PongService {
       pOne: { ...p1 },
       pTwo: { ...p2 },
       run: false,
+      //   goal: false,
     };
     return newMatch;
   }
@@ -108,6 +154,66 @@ export class PongService {
     }
   }
 
+  setKeyValue(up: boolean, socketId: string, value: boolean) {
+    this.matches.forEach((match) => {
+      if (match.pOne.client.id === socketId) {
+        if (up) match.pOne.up = value;
+        else match.pOne.down = value;
+      }
+      if (match.pTwo.client.id === socketId) {
+        if (up) match.pTwo.up = value;
+        else match.pTwo.down = value;
+      }
+    });
+  }
+
+  playersSetReady(
+    gameId: number,
+    playerId: number,
+    client: Socket,
+  ): { GameId: number; Player: number } {
+    let player = 0;
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        if (playerId === match.pOne.id) {
+          match.pOne.client = client;
+          match.pOne.ready = true;
+          player = 1;
+        }
+        if (playerId === match.pTwo.id) {
+          match.pTwo.client = client;
+          match.pTwo.ready = true;
+          player = 2;
+        }
+      }
+    });
+    return { GameId: gameId, Player: player };
+  }
+
+  setGameRunning(gameId: number, running: boolean) {
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        match.run = running;
+      }
+    });
+  }
+
+  //   setGoal(gameId: number, isGoal: boolean) {
+  //     this.matches.forEach((match) => {
+  //       if (match.id === gameId) {
+  //         match.goal = isGoal;
+  //       }
+  //     });
+  //   }
+  /*
+  
+███╗░░░███╗░█████╗░████████╗░█████╗░██╗░░██╗  ██╗░░██╗░█████╗░███╗░░██╗██████╗░██╗░░░░░███████╗██████╗░░██████╗
+████╗░████║██╔══██╗╚══██╔══╝██╔══██╗██║░░██║  ██║░░██║██╔══██╗████╗░██║██╔══██╗██║░░░░░██╔════╝██╔══██╗██╔════╝
+██╔████╔██║███████║░░░██║░░░██║░░╚═╝███████║  ███████║███████║██╔██╗██║██║░░██║██║░░░░░█████╗░░██████╔╝╚█████╗░
+██║╚██╔╝██║██╔══██║░░░██║░░░██║░░██╗██╔══██║  ██╔══██║██╔══██║██║╚████║██║░░██║██║░░░░░██╔══╝░░██╔══██╗░╚═══██╗
+██║░╚═╝░██║██║░░██║░░░██║░░░╚█████╔╝██║░░██║  ██║░░██║██║░░██║██║░╚███║██████╔╝███████╗███████╗██║░░██║██████╔╝
+╚═╝░░░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░░╚════╝░╚═╝░░╚═╝  ╚═╝░░╚═╝╚═╝░░╚═╝╚═╝░░╚══╝╚═════╝░╚══════╝╚══════╝╚═╝░░╚═╝╚═════╝░
+*/
   /**
    *
    * @param id Match id
@@ -135,51 +241,9 @@ export class PongService {
     };
   }
 
-  playersSetReady(
-    gameId: number,
-    playerId: number,
-    client: Socket,
-  ): { GameId: number; Player: number } {
-    let player = 0;
-    this.matches.forEach((match) => {
-      if (match.id === gameId) {
-        if (playerId === match.pOne.id) {
-          match.pOne.client = client;
-          match.pOne.ready = true;
-          player = 1;
-        }
-        if (playerId === match.pTwo.id) {
-          match.pTwo.client = client;
-          match.pTwo.ready = true;
-          player = 2;
-        }
-      }
-    });
-    return { GameId: gameId, Player: player };
-  }
-
-  playersReadyCheck(gameId): boolean {
-    const currentGame = this.matches.find((e) => e.id === gameId);
-    if (currentGame.pOne.ready && currentGame.pTwo.ready) return true;
-    return false;
-  }
-
   /**
    * GAME INFOS
    */
-
-  setKeyValue(up: boolean, socketId: string, value: boolean) {
-    this.matches.forEach((match) => {
-      if (match.pOne.client.id === socketId) {
-        if (up) match.pOne.up = value;
-        else match.pOne.down = value;
-      }
-      if (match.pTwo.client.id === socketId) {
-        if (up) match.pTwo.up = value;
-        else match.pTwo.down = value;
-      }
-    });
-  }
 
   gameInfos(matchId: number) {
     const currentGame = this.matches.find((e) => e.id === matchId);
@@ -193,8 +257,53 @@ export class PongService {
     };
   }
 
+  sendFinalModal(matchId: number) {
+    // envoyer egalement a la DB
+    const currentGame: Match = this.matches.find((e) => e.id === matchId);
+    let ret: any;
+    if (!currentGame.pTwo.ready || !currentGame.pOne.ready) {
+      ret = {
+        type: 'forfait',
+        loser: !currentGame.pOne.ready
+          ? currentGame.pOne.name
+          : currentGame.pTwo.name,
+      };
+    } else {
+      currentGame.pOne.score = currentGame.scoreL;
+      currentGame.pTwo.score = currentGame.scoreR;
+      const winner =
+        currentGame.scoreL > currentGame.scoreR
+          ? currentGame.pOne
+          : currentGame.pTwo;
+      const loser =
+        currentGame.scoreL > currentGame.scoreR
+          ? currentGame.pTwo
+          : currentGame.pOne;
+
+      ret = {
+        type: 'win',
+        winner: winner.name,
+        winnerScore: winner.score,
+        loser: loser.name,
+        loserScore: loser.score,
+      };
+    }
+    return ret;
+  }
+
+  deleteGame(matchId: number) {
+    this.matches = this.matches.filter((match) => {
+      return match.id !== matchId;
+    });
+  }
   /**
-   * GAME CALCULATIONS BIG BRAIN
+   * 
+███╗░░░███╗░█████╗░████████╗██╗░░██╗░██████╗
+████╗░████║██╔══██╗╚══██╔══╝██║░░██║██╔════╝
+██╔████╔██║███████║░░░██║░░░███████║╚█████╗░
+██║╚██╔╝██║██╔══██║░░░██║░░░██╔══██║░╚═══██╗
+██║░╚═╝░██║██║░░██║░░░██║░░░██║░░██║██████╔╝
+╚═╝░░░░░╚═╝╚═╝░░╚═╝░░░╚═╝░░░╚═╝░░╚═╝╚═════╝░
    */
 
   private ballCollisionToPaddle(
@@ -229,7 +338,6 @@ export class PongService {
           Math.abs(relativeY) === 1
             ? -relativeY * MAXANGLE + mouv[0] * FRICTIONANGLE
             : -relativeY * LITTLEANGLE + mouv[0] * FRICTIONANGLE;
-        //angleRebound = angleRebound + paddleL.up * -FRICTIONANGLE +paddleL.down * FRICTIONANGLE;
         return { x: Math.cos(angleRebound), y: Math.sin(angleRebound) }; ////////
       } else return { x: 0, y: 0 };
     } else if (ball.pos.x + ball.radius + ball.speed >= paddleR.pos.x) {
@@ -275,26 +383,15 @@ export class PongService {
     } else return 0;
   }
 
-  //   private afterGoalUpdate(matchId: number, scored: boolean) {
-  //     this.matches.map((match) => {
-  //       if (match.id === matchId) {
-  //         match.ball = {
-  //           pos: { x: W * 0.5, y: H * 0.5 },
-  //           radius: 15,
-  //           vx: Math.random() > 0.5 ? 1 : -1,
-  //           vy: 0,
-  //           speed: 10,
-  //           acceleration: 1,
-  //         };
-  //         if (scored === true) {
-  //           // player L
-  //           match.scoreL++;
-  //         } else if (!scored) match.scoreR++;
-  //         match.lastp = false;
-  //         match.lasty = false;
-  //       }
-  //     });
-  //   }
+  /*
+
+░██████╗░░█████╗░███╗░░░███╗███████╗██╗░░░░░░█████╗░░█████╗░██████╗░
+██╔════╝░██╔══██╗████╗░████║██╔════╝██║░░░░░██╔══██╗██╔══██╗██╔══██╗
+██║░░██╗░███████║██╔████╔██║█████╗░░██║░░░░░██║░░██║██║░░██║██████╔╝
+██║░░╚██╗██╔══██║██║╚██╔╝██║██╔══╝░░██║░░░░░██║░░██║██║░░██║██╔═══╝░
+╚██████╔╝██║░░██║██║░╚═╝░██║███████╗███████╗╚█████╔╝╚█████╔╝██║░░░░░
+░╚═════╝░╚═╝░░╚═╝╚═╝░░░░░╚═╝╚══════╝╚══════╝░╚════╝░░╚════╝░╚═╝░░░░░
+  */
 
   private afterGoalUpdateref(match: Match, scored: boolean) {
     match.ball = {
@@ -311,6 +408,7 @@ export class PongService {
     } else if (!scored) match.scoreR++;
     match.lastp = false;
     match.lasty = false;
+    // match.goal = true;
   }
 
   UpdateGame(gameId: number) {
@@ -329,6 +427,10 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
+      if (match.scoreL === MAXSCORE || match.scoreR === MAXSCORE) {
+        match.run = false;
+        return;
+      }
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,
@@ -352,7 +454,8 @@ export class PongService {
             br: { x: W, y: H },
           });
           if (toWall === XR || toWall === XL) {
-            return this.afterGoalUpdateref(match, !!(toWall === XL));
+            this.afterGoalUpdateref(match, !!(toWall === XL));
+            return;
           } else if (toWall === Y && !match.lasty) {
             match.lasty = true;
             match.ball.vy *= -1;
@@ -385,29 +488,18 @@ export class PongService {
     });
   }
 
-  setGameRunning(gameId: number, running: boolean) {
-    this.matches.forEach((match) => {
-      if (match.id === gameId) {
-        match.run = running;
-      }
-    });
-  }
-
-  isGameRunning(gameId: number): boolean {
-    let ret = false;
-    this.matches.forEach((match) => {
-      if (match.id === gameId) ret = match.run;
-    });
-    return ret;
-  }
-
   userDiconnectFromGame(userId: number) {
     let ret = 0;
     this.matches.forEach((match) => {
-      if (match.pOne.id === userId || match.pTwo.id === userId)
+      if (match.pOne.id === userId) {
         match.run = false;
-      // TODO ajouter si user regarde la partie ?
-      ret = match.id;
+        match.pOne.ready = false;
+        ret = match.id;
+      } else if (match.pTwo.id === userId) {
+        match.run = false;
+        match.pTwo.ready = false;
+        ret = match.id;
+      }
     });
     return ret;
   }

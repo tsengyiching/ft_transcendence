@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
 @Injectable()
 export class PongUsersService {
   private inMatchMaking: number[] = [];
