@@ -1,6 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
-import {Col, Row, Form} from 'react-bootstrap'
+import {Col, Row, Form, Button} from 'react-bootstrap'
+import { ContextMenuTrigger, ContextMenu, MenuItem } from 'react-contextmenu';
 import { socket, SocketContext } from '../../context/socket';
+import { ListChannelMessage } from '../chat/Channel/ChatChannel';
 import {IMyChannel, IOtherChannel} from '../chat/Channel/ListChannel'
 import {IMessage, IUser} from '../chat/ChatInterface'
 
@@ -22,26 +24,19 @@ function ListChannel(props: {setChannelSelected: Function})
 	}, [socket])
 
 	useEffect(() => {
+		setListChannel(MyChannels.concat(OtherChannels));
 		socket.on('channels-user-in', (data: IMyChannel[]) => {
-			//console.log("in channels-user-in");
-			//console.log(data);
 			setMyChannels(data.map((Mychannel) => {
 				let newChannel: IChannel = {channel_id: Mychannel.channel_id, channel_name: Mychannel.channel_name};
 				return(newChannel);
 			}));
-			//console.log(MyChannels.concat(OtherChannels));
-			//setListChannel(MyChannels.concat(OtherChannels));
 		});
 		socket.on('channels-user-out', (data: IOtherChannel[]) => {
-			//console.log("in channels-user-out");
-			//console.log(data);
 			setOtherChannels(data.map((Otherchannel) => {
 				let newChannel: IChannel = {channel_id: Otherchannel.channel_id, channel_name: Otherchannel.channel_name};
 				return(newChannel);
 			}));
-			//console.log(MyChannels.concat(OtherChannels));
 		});
-		setListChannel(MyChannels.concat(OtherChannels));
 
 		return(() => {
 			socket.off('channels-user-in');
@@ -75,12 +70,54 @@ function Messages(props: {ChannelSelected: IChannel | undefined})
 		socket.on('channel-message-list', (data: IMessage[]) => {setListMessage(data)});
 
 		return(() => {socket.off('channel-message-list');})
+	}, [])
+
+	useEffect(() => {
+		socket.on('channel-new-message', (new_message: IMessage) => {
+			const buffer = [...ListMessage];
+			buffer.push(new_message);
+			setListMessage(buffer);
+		})
+		return(() => {socket.off('channel-new-message');})
 	}, [ListMessage])
 
 	return (
 		<div>
 			Messages
-			{ListMessage.map((message: IMessage) => <div key={`message-channelview-${message.message_id}`}> {message.message_content} </div>)}
+			<ListChannelMessage ListMessage={ListMessage}/>
+		</div>
+	)
+}
+
+function UserButton(props: {user: IUser, channel: IChannel})
+{
+	return(
+		<div>
+		<ContextMenuTrigger id={`ContextMenuAdminViewUser_${props.user.user_id}`}>
+			<Button key={`user-ChannelView-${props.user.user_id}`}> {props.user.user_nickname} </Button>
+		</ContextMenuTrigger>
+		{props.user.role !== 'Owner' &&
+			<ContextMenu id={`ContextMenuAdminViewUser_${props.user.user_id}`}>
+			{
+				props.user.role === 'User' ?
+				<MenuItem onClick={() => {socket.emit("channel-admin",
+					{channelId: props.channel.channel_id,
+					participantId: props.user.user_id,
+					action: 'Set'})}}>
+					Promote to Admin
+				</MenuItem>
+				: props.user.role === 'Admin' ?
+				<MenuItem onClick={() => {socket.emit("channel-admin",
+					{channelId: props.channel.channel_id,
+					participantId: props.user.user_id,
+					action: 'Unset'})}}>
+					Demote to User
+				</MenuItem>
+				:
+				<div></div>
+			}
+			</ContextMenu>
+			}
 		</div>
 	)
 }
@@ -88,7 +125,9 @@ function Messages(props: {ChannelSelected: IChannel | undefined})
 function ListUsers(props: {ChannelSelected: IChannel | undefined})
 {
 	const [ListUser, setListUser] = useState<IUser[]>([]);
-
+	let CurrentChannel : IChannel;
+	if (props.ChannelSelected !== undefined)
+		CurrentChannel = props.ChannelSelected;
 	useEffect(() => {
 		socket.on('channel-users', (data: IUser[]) => {setListUser(data);});
 
@@ -96,10 +135,16 @@ function ListUsers(props: {ChannelSelected: IChannel | undefined})
 	}, [])
 
 	return (
-		<div>
+		<Row>
 			List Users
-			{ListUser.map((user: IUser) =>{return(<div key={`user-ChannelView-${user.user_id}`}> {user.user_nickname} </div>)})}
-		</div>
+			{props.ChannelSelected !== undefined &&
+				ListUser.map((user: IUser) =>{return(
+				<UserButton
+				key={`UserAdminView${user.user_id}`}
+				user={user}
+				channel={CurrentChannel}/>
+			)})}
+		</Row>
 	)
 }
 

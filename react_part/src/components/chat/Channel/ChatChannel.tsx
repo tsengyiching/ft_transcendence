@@ -13,7 +13,7 @@ import ParametersIcon from '../../pictures/parameters-icon.png'
 import axios from 'axios'
 import { IBlockedUser } from '../../members/ListBlockedUsers'
 
-function ListChannelMessage(props: {ListMessage: IMessage[]}) {
+export function ListChannelMessage(props: {ListMessage: IMessage[]}) {
 
 	const messagesEndRef = useRef<null | HTMLDivElement>(null)
 	const userData = useContext(DataContext);
