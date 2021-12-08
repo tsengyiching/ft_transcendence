@@ -1,6 +1,7 @@
 .ProfileAvatar
 {
-	width: 25%;
+	width: 10em;
+	height: 10em;
 
 	position: relative;
     top: 15%;
@@ -21,6 +22,5 @@
 	{ left: 15%;}
 
 	.Friends
-	{ padding-top: 12% !important; }
+	{ padding-top: 10rem !important; }
 }
-

@@ -4,5 +4,12 @@ body
 .Body
 { padding: 1rem; }
 
-.Body .row > div
+.Body > .row > div
 { padding-bottom: 1rem; }
+
+.Avatar
+{
+	width: 3rem;
+	height: 3rem;
+	object-fit: cover;
+}
