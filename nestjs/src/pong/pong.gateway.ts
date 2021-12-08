@@ -13,6 +13,7 @@ import { UserService } from 'src/user/service/user.service';
 import { PongService } from './pong.game.service';
 import { PongUsersService } from './pong.users.service';
 import { FRAMERATE } from './pong.env';
+import { GameService } from 'src/game/service/game.service';
 // https://www.generacodice.com/en/articolo/713202/how-can-i-find-the-response-time-latency-of-a-client-in-nodejs-with-sockets-socket-
 
 function sleep(ms) {
@@ -33,6 +34,7 @@ export class PongGateway {
     private authService: AuthService,
     private userService: UserService,
     private pongUsersService: PongUsersService,
+    private gameService: GameService,
   ) {}
   @WebSocketServer() server: Socket;
 
@@ -86,10 +88,8 @@ export class PongGateway {
         userArray.forEach((e) => {
           this.server.to(e.toString()).emit('inMatchMaking', false);
           this.server.to(e.toString()).emit('inGame', GameId);
-          // TODO envoyer a la database les id des joueurs en jeu (quand ils ont accepté de commencer la partie)
         });
       }
-      ////////////////////////////////////////////////// TODO
     } catch (error) {
       console.log(error);
     }
@@ -134,11 +134,15 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
       const infos = this.pongService.playersSetReady(payload, user.id, client);
       client.join(infos.GameId.toString() + '-Game');
-      const waitForReady = setInterval(() => {
+      const waitForReady = setInterval(async () => {
         if (this.pongService.playersReadyCheck(payload)) {
           clearInterval(waitForReady);
           if (infos.Player === 1) {
-            console.log('matchINTHE GO');
+            const ret = await this.gameService.createGame(
+              this.pongService.getPlayers(infos.GameId),
+              1,
+            );
+            this.pongService.setDatabaseId(infos.GameId, ret.id);
             this.server
               .to(infos.GameId.toString() + '-Game')
               .emit('startPong', this.pongService.sendPlayersInfos(payload));
@@ -212,6 +216,10 @@ export class PongGateway {
           this.server
             .to(roomName)
             .emit('GameFinals', this.pongService.sendFinalModal(gameId));
+          this.gameService.insertGameResult(
+            this.pongService.getDatabaseId(gameId),
+            this.pongService.getResults(gameId),
+          );
           this.pongService.deleteGame(gameId);
           return;
         }

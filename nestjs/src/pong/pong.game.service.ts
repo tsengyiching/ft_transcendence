@@ -80,6 +80,25 @@ export class PongService {
       return true;
     return false;
   }
+
+  getPlayers(gameId: number) {
+    const currentGame = this.matches.find((match) => match.id === gameId);
+    return {
+      leftUserId: currentGame.pOne.id,
+      rightUserId: currentGame.pTwo.id,
+    };
+  }
+
+  getResults(gameId: number) {
+    const currentGame = this.matches.find((match) => match.id === gameId);
+    return {
+      leftUserScore: currentGame.scoreL,
+      rightUserScore: currentGame.scoreR,
+    };
+  }
+  getDatabaseId(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).dbId;
+  }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
 ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
@@ -126,6 +145,7 @@ export class PongService {
       pTwo: { ...p2 },
       run: false,
       goal: false,
+      dbId: 0,
     };
     return newMatch;
   }
@@ -137,7 +157,6 @@ export class PongService {
   ): Promise<Player> {
     try {
       const user: User = await userService.getOneById(id);
-      console.log(paddle, ' ', user.nickname);
       const newPlayer: Player = {
         name: user.nickname,
         id: id,
@@ -203,6 +222,14 @@ export class PongService {
     this.matches.forEach((match) => {
       if (match.id === gameId) {
         match.goal = isGoal;
+      }
+    });
+  }
+
+  setDatabaseId(gameId: number, dbId: number) {
+    this.matches.forEach((match) => {
+      if (match.id === gameId) {
+        match.dbId = dbId;
       }
     });
   }
