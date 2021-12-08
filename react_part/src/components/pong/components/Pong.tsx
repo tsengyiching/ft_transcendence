@@ -8,7 +8,7 @@ import SocketInfos from "./SocketInfos";
 import PongInfoModal from "./PongInfoModal";
 
 
-const Pong:React.VFC<{h:number, w:number}> = (props) => {
+const Pong:React.FC<{h:number, w:number}> = (props) => {
 	const set = useStore.setState;
 	const score = useStore(s => s.scoreBar);
 	useEffect(() => {
