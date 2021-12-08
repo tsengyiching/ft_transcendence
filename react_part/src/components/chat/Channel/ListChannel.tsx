@@ -112,9 +112,6 @@ function ListChannel(props: IUseStateChannel) {
                                 <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
                                 : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
                                 {channel_name}
-                                { (userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR) &&
-                                        <Image src={QuitCross} className="LogoChannel" roundedCircle alt="quit"
-                                        onClick={(event)=>{isDestroying = true; console.log("click")}}/>}
                         </Button>
                         <JoinChannelModal
                         show={ShowJoinModal === channel_id}
