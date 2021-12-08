@@ -5,8 +5,8 @@ import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 import Twofa from "./Twofa";
-import Header from "./Header";
 import axios from 'axios';
+import Header from './Header';
 import { useEffect, useState } from "react";
 import Ban from "./Ban";
 

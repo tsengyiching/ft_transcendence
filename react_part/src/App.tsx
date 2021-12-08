@@ -39,7 +39,7 @@ const emptyuser: Data = {id: 0, nickname: "", avatar: "", createDate: new Date(1
 userStatus: OnlineStatus.AVAILABLE, siteStatus: SiteStatus.USER, email: "", isTwoFactorAuthenticationEnabled: false};
 export const DataContext = React.createContext(emptyuser);
 
-function App() {
+function App():React.ReactElement {
   
   const [userData, SetuserData] = useState<Data>(emptyuser);
 
