@@ -102,14 +102,13 @@ export function ChatChannel(channelSelected: IChannel)
 			console.log("error on getting data blocked users");
 		})
 
-		socket.on("reload-block", () => { SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
+		socket.on("reload-block", () => {SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
 	}, [ReloadBlockedUserlist, socket]);
 
 	// load to the channel then get list user and message of the channel
 	useEffect(() => {
-		//console.log(`channel-load : ${channelSelected.channel_id}`);
 		socket.emit('channel-load', channelSelected.channel_id);
 	        socket.on('channel-users', (data: IUser[]) => { SetListUsers(data); });
 	        socket.on('channel-message-list', (data: IMessage[]) => {
@@ -129,7 +128,8 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.off('channel-users');
 			socket.off('channel-message-list');
 			})
-	}, [channelSelected, BlockedUsers, socket, ListUsers])
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [socket])
 
 	// change list message if list blocked users change
 	useEffect(() => {

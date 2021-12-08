@@ -10,10 +10,8 @@ import MSNImage from "../../pictures/people.jpeg"
 import NormalImage from "../../pictures/volume-on.png"
 import MuteImage from "../../pictures/volume-off.jpeg"
 import BlockImage from "../../pictures/redx.png"
-import QuitCross from "../../pictures/quit-icon.png"
 import JoinChannelModal from "./JoinChannelModal"
 import {IChannel, Role} from '../../web_pages/UserPart'
-import { DataContext, SiteStatus } from "../../../App"
 
 export interface IMyChannel {
         channel_id: number,
@@ -39,7 +37,6 @@ function ListChannel(props: IUseStateChannel) {
         const [MyChannels, SetMyChannels] = useState<IMyChannel[]>([]);
         const [OthersChannels, SetOthersChannels] = useState<IOtherChannel[]>([]);
         const [ShowJoinModal, setShowJoinModal] = useState(0);
-        const userData = useContext(DataContext);
 
         useEffect( () => {
                 socket.emit("ask-reload-channel");

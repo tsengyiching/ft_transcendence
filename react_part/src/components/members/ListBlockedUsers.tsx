@@ -35,9 +35,9 @@ export default function ListBlockedUsers()
 		</ContextMenu>
 		)
 	}
-	
+
 	function BlockedUser(BlockedUser: IBlockedUser)
-	{	
+	{
 			return (
 				<div key={`BlockedUser_${BlockedUser.user_id}`}>
 				<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
@@ -54,7 +54,7 @@ export default function ListBlockedUsers()
 				</div>
 				</ContextMenuTrigger>
 				<ContextMenuBlockedUser user_id={BlockedUser.user_id}/>
-	
+
 				</div>
 			)
 			//console.log(`BlockedUser : ${BlockedUser}`)
