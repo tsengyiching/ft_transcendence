@@ -10,6 +10,7 @@ import { RelationshipModule } from './relationship/relationship.module';
 import { ChatModule } from './chat/chat.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { AdminModule } from './admin/admin.module';
+import { PongModule } from './pong/pong.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { AdminModule } from './admin/admin.module';
     ChatModule,
     ScheduleModule.forRoot(),
     AdminModule,
+    PongModule,
   ],
   controllers: [AppController],
   providers: [AppService],

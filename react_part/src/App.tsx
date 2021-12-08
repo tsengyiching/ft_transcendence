@@ -3,8 +3,13 @@ import Router from './components/Router';
 import Header from './components/Header';
 import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
+import {GameSocketContext, gameSocket} from './context/gameSocket';
+import GameStartModal from './components/GameStartModal'
+
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
+import "bootswatch/dist/lux/bootstrap.min.css";
+// import './bootswatch.scss';
 
 enum OnlineStatus {
 	AVAILABLE = 'Available',
@@ -34,7 +39,7 @@ const emptyuser: Data = {id: 0, nickname: "", avatar: "", createDate: new Date(1
 userStatus: OnlineStatus.AVAILABLE, siteStatus: SiteStatus.USER, email: "", isTwoFactorAuthenticationEnabled: false};
 export const DataContext = React.createContext(emptyuser);
 
-function App() {
+function App():React.ReactElement {
   
   const [userData, SetuserData] = useState<Data>(emptyuser);
 
@@ -51,11 +56,15 @@ function App() {
 
   return (
     <DataContext.Provider value={userData}>
-    <SocketContext.Provider value={socket}>
-      <Container fluid className="App">
-        <Router/>
-      </Container>
-    </SocketContext.Provider>
+    	<SocketContext.Provider value={socket}>
+      <GameSocketContext.Provider value={gameSocket}>
+			<GameStartModal />
+    		<Container fluid className="App">
+    		    <Router/>
+    		</Container>
+        </GameSocketContext.Provider>
+
+    	</SocketContext.Provider>
     </DataContext.Provider>
   );
 }

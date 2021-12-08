@@ -100,7 +100,12 @@ export class UserController {
     const index = req.file.originalname.indexOf('.', 0);
     if (index !== -1) {
       const filetype = req.file.originalname.slice(index + 1);
-      if (filetype !== 'jpeg' && filetype !== 'png' && filetype !== 'gif') {
+      if (
+        filetype !== 'jpeg' &&
+        filetype !== 'jpg' &&
+        filetype !== 'png' &&
+        filetype !== 'gif'
+      ) {
         throw new HttpException(
           `The file type ${req.file.originalname} is not acceptable.`,
           HttpStatus.NOT_ACCEPTABLE,

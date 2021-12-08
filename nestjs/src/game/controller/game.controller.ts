@@ -82,34 +82,4 @@ export class GameController {
   ): Promise<UserGameRecords> {
     return this.gameService.getUserCurrentGameId(id);
   }
-
-  /*
-   ** createNormalGame returns the new game
-   */
-  @Post('normal')
-  createNormalGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
-    return this.gameService.createGame(createGameDto, 1);
-  }
-
-  /*
-   ** createBonusGame returns the new game
-   */
-  @Post('bonus')
-  createBonusGame(@Body() createGameDto: CreateGameDto): Promise<Game> {
-    return this.gameService.createGame(createGameDto, 2);
-  }
-
-  /*
-   ** insertGameResult inserts game result with scores and a winner
-   ** sets game status off
-   ** returns game
-   ** parameter game id and see insertGameResultDto to insert scores
-   */
-  @Patch(':id')
-  insertGameResult(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() insertGameResultDto: InsertGameResultDto,
-  ): Promise<Game> {
-    return this.gameService.insertGameResult(id, insertGameResultDto);
-  }
 }

@@ -5,8 +5,8 @@ import Settings from './Settings';
 import Connexion from './Connexion';
 import Disconnect from './Disconnect';
 import Twofa from "./Twofa";
-import Header from "./Header";
 import axios from 'axios';
+import Header from './Header';
 import { useEffect, useState } from "react";
 import Ban from "./Ban";
 
@@ -33,7 +33,7 @@ function Router() {
   function Authorized() {
     return (
       <BrowserRouter>
-        <Header/>
+        <Header />
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
