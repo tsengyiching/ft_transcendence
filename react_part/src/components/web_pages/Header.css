@@ -10,15 +10,5 @@
 .Header .NavProfile
 { margin-left: 2rem; }
 
-.Header .NavProfile > a
+.Header .Profile > a
 { padding: 0px; }
-
-.Header .Avatar
-{
-	width: 3rem;
-	height: 3rem;
-}
-
-.content-wrap {
-	justify-content: space-between;
-}
