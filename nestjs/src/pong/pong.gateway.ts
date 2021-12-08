@@ -14,6 +14,7 @@ import { PongService } from './pong.game.service';
 import { PongUsersService } from './pong.users.service';
 import { FRAMERATE } from './pong.env';
 import { GameService } from 'src/game/service/game.service';
+import { GameMode } from 'src/game/model/game.entity';
 // https://www.generacodice.com/en/articolo/713202/how-can-i-find-the-response-time-latency-of-a-client-in-nodejs-with-sockets-socket-
 
 function sleep(ms) {
@@ -140,7 +141,7 @@ export class PongGateway {
           if (infos.Player === 1) {
             const ret = await this.gameService.createGame(
               this.pongService.getPlayers(infos.GameId),
-              1,
+              GameMode.NORMAL,
             );
             this.pongService.setDatabaseId(infos.GameId, ret.id);
             this.server
