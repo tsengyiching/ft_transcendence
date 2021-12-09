@@ -100,14 +100,14 @@ function UserButton(props: {user: IUser, channel: IChannel})
 			<ContextMenu id={`ContextMenuAdminViewUser_${props.user.user_id}`}>
 			{
 				props.user.role === 'User' ?
-				<MenuItem onClick={() => {socket.emit("channel-admin",
+				<MenuItem onClick={() => {socket.emit("channel-admin-site-moderator",
 					{channelId: props.channel.channel_id,
 					participantId: props.user.user_id,
 					action: 'Set'})}}>
 					Promote to Admin
 				</MenuItem>
 				: props.user.role === 'Admin' ?
-				<MenuItem onClick={() => {socket.emit("channel-admin",
+				<MenuItem onClick={() => {socket.emit("channel-admin-site-moderator",
 					{channelId: props.channel.channel_id,
 					participantId: props.user.user_id,
 					action: 'Unset'})}}>
