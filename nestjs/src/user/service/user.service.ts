@@ -166,7 +166,10 @@ export class UserService {
     if (oldDatafile) {
       await this.databaseFilesRepository.remove(oldDatafile);
     }
-    const avatar = await this.uploadDatabaseFile(id, imageBuffer, filename);
+    const findExtension = filename.lastIndexOf('.');
+    const originFileName = filename.slice(0, findExtension);
+    const newFilename = filename.replace(originFileName, user.nickname);
+    const avatar = await this.uploadDatabaseFile(id, imageBuffer, newFilename);
     user.avatar = `http://localhost:8080/profile/avatarfile/${avatar.id}`;
     return this.userRepository.save(user);
   }
