@@ -6,6 +6,7 @@ pressed[40] = false;
 function useKeyPressCB(key:string, action:Function) {	
 	useEffect(() => {
 		const onKeyDown = (e:KeyboardEvent) => {
+			e.preventDefault();
 			if (e.key === key) {
 				if (!pressed[e.keyCode])
 					action(true);
