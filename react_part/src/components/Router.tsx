@@ -12,6 +12,9 @@ import axios from 'axios';
 import { useContext, useState } from "react";
 import Ban from "./web_pages/Ban";
 import {DataContext, SiteStatus} from "../App"
+import {GameSocketContext, gameSocket} from '../context/gameSocket';
+
+import GameStartModal from './GameStartModal'
 
 function Router() {
 
@@ -39,6 +42,9 @@ function Router() {
   function Authorized() {
     return (
       <BrowserRouter>
+        <GameSocketContext.Provider value={gameSocket}>
+        <GameStartModal />
+
         <Header />
         <Switch>
           <Route exact path="/home" component={Home} />
@@ -51,6 +57,8 @@ function Router() {
           <Route exact path="/admin" component={Admin}/>}
           <Redirect to="/home"/>
         </Switch>
+        </GameSocketContext.Provider>
+
       </BrowserRouter>
     )
   }

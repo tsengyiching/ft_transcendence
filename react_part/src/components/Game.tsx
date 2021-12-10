@@ -22,20 +22,28 @@ const Game:React.FC = () => {
 	const gameStatus = useStore(s => s.gameStatus);
 	const setGameStatus = useStore(s => s.setGameStatus);
     const socket:Socket = useContext(GameSocketContext);
-	const imgeL = useStore(s => s.playerL.avatar);
-	const imgeR = useStore(s => s.playerR.avatar)
-    
+
     useEffect(() => {
+        let isMounted = true;
         if (gameStatus !== 2) {
         socket.on('inMatchMaking', (e) => {
+            if (isMounted) {
             console.log(e);
             setToggleMatchMaking(e);
+            }
         });
         }   
         socket.on('startPong', (e:GameInfos) => {
+            if (isMounted) {
 			setGameStatus(2);
             useStore.setState((s) => ({...s, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
+            }
         } );
+        return (() => {
+            socket.off('startPong');
+            socket.off('inMatchMaking');
+            isMounted = false;
+        })
     })
     
     const handleClickON = () => socket.emit('matchmakingON');

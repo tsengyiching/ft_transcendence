@@ -37,9 +37,7 @@ export class AuthService {
 
   async getUserFromSocket(socket: Socket): Promise<User> {
     const cookie = socket.handshake.headers.cookie;
-
     if (!cookie) throw new WsException('Unauthorized');
-
     const user: User = await this.getUserFromAuthenticationToken(
       parse(cookie).jwt,
     );

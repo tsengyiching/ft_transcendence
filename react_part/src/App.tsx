@@ -2,8 +2,6 @@ import './App.css';
 import Router from './components/Router';
 import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
-import {GameSocketContext, gameSocket} from './context/gameSocket';
-import GameStartModal from './components/GameStartModal'
 
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
@@ -56,13 +54,9 @@ function App():React.ReactElement {
   return (
     <DataContext.Provider value={userData}>
     	<SocketContext.Provider value={socket}>
-      <GameSocketContext.Provider value={gameSocket}>
-			<GameStartModal />
     		<Container fluid className="App">
     		    <Router/>
     		</Container>
-        </GameSocketContext.Provider>
-
     	</SocketContext.Provider>
     </DataContext.Provider>
   );
