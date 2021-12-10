@@ -91,37 +91,36 @@ export class UserController {
   @UseInterceptors(FileInterceptor('file'))
   async addAvatar(
     @CurrentUser() user: User,
-    @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<string> {
-    if (req.file.size > 1024 * 1024) {
+    if (file.size > 1024 * 1024) {
       throw new PayloadTooLargeException();
     }
-    if (req.file.mimetype.indexOf('image') === -1) {
+    if (file.mimetype.indexOf('image') === -1) {
       throw new HttpException(
-        `The mimetype ${req.file.mimetype} is not acceptable.`,
+        `The file mimetype ${file.mimetype} is not acceptable.`,
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
-    const index = req.file.originalname.indexOf('.', 0);
+    const index = file.mimetype.indexOf('/', 0);
     if (index !== -1) {
-      const extension = req.file.originalname.slice(index + 1);
+      const type = file.mimetype.slice(index + 1);
       const acceptExtension = ['jpeg', 'jpg', 'png', 'gif'];
-      if (!acceptExtension.includes(extension)) {
+      if (!acceptExtension.includes(type)) {
         throw new HttpException(
-          `The file extension ${extension} is not acceptable.`,
+          `The file mimetype ${type} is not acceptable.`,
           HttpStatus.NOT_ACCEPTABLE,
         );
       }
     } else {
       throw new HttpException(
-        `There's no file extension.`,
+        `The file mimetype has a problem.`,
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
     this.userGateway.server.to('user-' + user.id).emit('reload-profile');
-    return `Image ${req.file.originalname} uploaded successfully !`;
+    return `Image ${file.originalname} uploaded successfully !`;
   }
 
   @Get('avatarfile/:id')

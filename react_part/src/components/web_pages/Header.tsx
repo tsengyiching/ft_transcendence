@@ -42,7 +42,7 @@ function Header () {
     if (isConnected)
     { // https://cdn-icons.flaticon.com/png/128/3322/premium/3322434.png?token=exp=1636118252~hmac=d6b9c64cb59fc8fcdd055bbebc86fbb8
 		return (
-		<Navbar collapseOnSelect bg="light" style={{fontSize:'20px'}}>
+		<Navbar collapseOnSelect bg='light' variant='light' style={{fontSize:'20px'}}>
 			<Container fluid>
     			<LinkContainer to='/home'>
 			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>

@@ -83,7 +83,7 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 
 	useEffect(() => {
 		socket.emit('private-load', {userId: props.privateSelected.user_id});
-		socket.on('private-message-list', (list: IMessage[]) => {setListMessage(list); console.log(list)});
+		socket.on('private-message-list', (list: IMessage[]) => {setListMessage(list);});
 		socket.on('private-info', (user: IUser) => {setOtherUser(user);});
 		return (() => {
 			socket.emit('private-unload', {channelId: OtherUser.channel_id});
@@ -98,6 +98,7 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 			buffer.push(new_message);
 			setListMessage(buffer);
 		})
+		return(() => {socket.off('private-new-message');});
 	}, [listMessage, socket])
 
 	return (
@@ -121,7 +122,7 @@ export function ChatPrivateDisabled()
 	return (
 		<div>
 			<div className="OtherUser">
-					Other User
+					Chat
 			</div>
 			<div className="ChatPrivate">
 				<ListConversationMessage ListMessage={[]}/>

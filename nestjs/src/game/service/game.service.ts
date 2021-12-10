@@ -126,10 +126,10 @@ export class GameService {
     return game[0];
   }
 
-  async createGame(dto: CreateGameDto, mode: number) {
+  async createGame(dto: CreateGameDto, mode: GameMode) {
     await this.checkUsersIdAndAvailability(dto.leftUserId, dto.rightUserId);
-    const newGame = await this.gameRepository.create();
-    newGame.mode = mode === 1 ? GameMode.NORMAL : GameMode.BONUS;
+    const newGame = this.gameRepository.create();
+    newGame.mode = mode;
     await this.gameRepository.save(newGame);
     await this.addUsersToGame(newGame.id, dto);
     return newGame;
@@ -181,13 +181,13 @@ export class GameService {
    ** addUsersToGame add two players to userGameRecords entity
    */
   async addUsersToGame(gameId: number, dto: CreateGameDto): Promise<void> {
-    const leftUser = await this.userGameRecords.create();
+    const leftUser = this.userGameRecords.create();
     leftUser.gameId = gameId;
     leftUser.userId = dto.leftUserId;
     leftUser.score = 0;
     await this.userGameRecords.save(leftUser);
 
-    const rightUser = await this.userGameRecords.create();
+    const rightUser = this.userGameRecords.create();
     rightUser.gameId = gameId;
     rightUser.userId = dto.rightUserId;
     rightUser.score = 0;
@@ -205,12 +205,16 @@ export class GameService {
     if (userOne === userTwo) {
       throw new HttpException('Same player ids !', HttpStatus.BAD_REQUEST);
     }
-    await this.userService.getUserProfileById(userOne);
-    await this.userService.getUserProfileById(userTwo);
-    if (
-      (await this.getUserCurrentGame(userOne)) ||
-      (await this.getUserCurrentGame(userTwo))
-    ) {
+    /* check users exist */
+    await Promise.all([
+      this.userService.getUserProfileById(userOne),
+      this.userService.getUserProfileById(userTwo),
+    ]);
+    const [userOneCurrentGame, userTwoCurrentGame] = await Promise.all([
+      this.getUserCurrentGame(userOne),
+      this.getUserCurrentGame(userTwo),
+    ]);
+    if (userOneCurrentGame || userTwoCurrentGame) {
       throw new HttpException(
         'One of the users is playing, cannot start a new game right now !',
         HttpStatus.BAD_REQUEST,

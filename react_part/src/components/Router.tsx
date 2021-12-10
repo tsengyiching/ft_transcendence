@@ -39,7 +39,7 @@ function Router() {
   function Authorized() {
     return (
       <BrowserRouter>
-        <Header/>
+        <Header />
         <Switch>
           <Route exact path="/home" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />

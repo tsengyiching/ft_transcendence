@@ -4,7 +4,9 @@
 }
 
 .PictureUser {
-	height: 3.5em;
+  object-fit: cover; /* Do not scale the image */
+  object-position: center; /* Center the image within the element */
+  height: 3.5em;
 	width: 3.5em;
 	margin: 0.2em;
 	margin-right: 2em;

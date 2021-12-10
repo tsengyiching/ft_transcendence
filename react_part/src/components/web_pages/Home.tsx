@@ -1,4 +1,4 @@
-import { Row, Col } from 'react-bootstrap'
+import { Row, Col, Container } from 'react-bootstrap'
 import InterfaceUser from './UserPart'
 import Game from '../Game'
 import "./Home.css"
@@ -8,18 +8,18 @@ import Notifications from '../Notifications'
 function Home() {
 
     return (
-        <div>
+        <Container className='no-padding' fluid>
                 <Notifications/>
                 <Row>
-
-                    <Col lg={7} md={6} xs={5} className="LeftColHome">
+                    <Col lg={8} className="LeftColHome m-1 p-1">
 				    	<Game />
                     </Col>
-                    <Col lg={5} md={4} sm={3} className="RightColHome">
+                    <Col className="RightColHome m-1">
                         <InterfaceUser/>
 					</Col>
                 </Row>
-        </div>
+		</Container>
+
     )
 }
 
