@@ -12,3 +12,6 @@
 
 .Header .Profile > a
 { padding: 0px; }
+
+.Header .Avatar
+{ margin: 0px .5em; }
