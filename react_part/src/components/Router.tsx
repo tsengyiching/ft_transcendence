@@ -1,47 +1,64 @@
 import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
-import Home from './Home';
-import Profile from './Profile';
-import Settings from './Settings';
-import Connexion from './Connexion';
-import Disconnect from './Disconnect';
+import Home from './web_pages/Home';
+import Profile from './web_pages/Profile';
+import Settings from './settings/Settings';
+import Connexion from './web_pages/Connexion';
+import Disconnect from './web_pages/Disconnect';
 import Twofa from "./Twofa";
+import Header from "./web_pages/Header";
+import Ladder from "./web_pages/Ladder";
+import Admin from "./Admin/Admin";
 import axios from 'axios';
-import Header from './Header';
-import { useEffect, useState } from "react";
-import Ban from "./Ban";
+import { useContext, useState } from "react";
+import Ban from "./web_pages/Ban";
+import {DataContext, SiteStatus} from "../App"
+import {GameSocketContext, gameSocket} from '../context/gameSocket';
+
+import GameStartModal from './GameStartModal'
 
 function Router() {
 
   const [isConnected, setConnection] = useState<boolean>(false);
   const [twofa, setTwofa] = useState<boolean>(false);
+  const userData = useContext(DataContext);
 
-  useEffect(() => {
+  function getProfile () {
+    let isMounted = true;
+    console.log(isConnected)
     axios.get('http://localhost:8080/profile/me/',{
         withCredentials:true,
     })
-    .then(res => {
+    .then(res => { if (isMounted)
         setTwofa(res.data.isTwoFactorAuthenticationEnabled);
         if (!twofa)
           setConnection(true)
     })
-    .catch(res => {
+    .catch(res => { if (isMounted)
         setConnection(false)
     })
-  });
-
+    return (() => {isMounted = false;})
+  }
 
   function Authorized() {
     return (
       <BrowserRouter>
+        <GameSocketContext.Provider value={gameSocket}>
+        <GameStartModal />
+
         <Header />
         <Switch>
-          <Route exact path="/" component={Home} />
+          <Route exact path="/home" component={Home} />
           <Route exact path="/profile/:clientId" component={Profile} />
           <Route exact path="/settings" component={Settings} />
-          <Route exact path="/auth/disconnect" component={Disconnect} />
+          <Route exact path="/disconnect" component={Disconnect} />
           <Route exact path="/ban" component={Ban} />
-          <Route component={Home} />
+          <Route exact path="/ladder" component={Ladder}/>
+          {(userData.siteStatus === SiteStatus.MODERATOR || userData.siteStatus === SiteStatus.OWNER) &&
+          <Route exact path="/admin" component={Admin}/>}
+          <Redirect to="/home"/>
         </Switch>
+        </GameSocketContext.Provider>
+
       </BrowserRouter>
     )
   }
@@ -52,13 +69,18 @@ function Router() {
         <Switch>
           <Route exact path="/connexion" component={Connexion} />
           <Route path="/2fa" component={() => <Twofa setConnection={setConnection}/>}/>
-          <Route component={Connexion} />
+          <Redirect to="/connexion"/>
         </Switch>
       </BrowserRouter>
     )
   }
 
   function Print() {
+    async function asynchTest() {
+      await getProfile();
+    }
+
+    asynchTest()
     if (isConnected)
       return (<Authorized/>)
     else

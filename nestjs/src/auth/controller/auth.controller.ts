@@ -46,8 +46,8 @@ export class AuthController {
    */
   @Get('login')
   @UseGuards(FortyTwoGuard)
-  async login() {
-    // Redirect to authentication pipeline
+  login() {
+    /* Redirect to authentication pipeline */
   }
 
   /**
@@ -57,7 +57,7 @@ export class AuthController {
    */
   @Get('42/callback')
   @UseGuards(FortyTwoGuard)
-  async fortyTwoCallback(
+  fortyTwoCallback(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
@@ -75,7 +75,7 @@ export class AuthController {
    * @param res Response object corresponding to the server response.
    */
   @Get('disconnect')
-  async disconnect(@Res({ passthrough: true }) res: Response) {
+  disconnect(@Res({ passthrough: true }) res: Response) {
     res.clearCookie('jwt');
     res.clearCookie('jwt-two-factor');
   }

@@ -2,12 +2,12 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import { Row, Col, Image, } from 'react-bootstrap'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './ChatInterface.css'
-import {IChannel, IUserConversation, messageType, Role} from '../InterfaceUser'
+import {IChannel, IUserConversation, messageType, Role} from '../web_pages/UserPart'
 import {Data} from '../../App'
 import {ChatChannel, ChatChannelDisabled} from './Channel/ChatChannel'
 import {ChatPrivate, ChatPrivateDisabled} from './PrivateConversation/ChatPrivate'
 
-/* 
+/*
 ****CHAT****
 */
 
@@ -84,7 +84,7 @@ export function Message(props: {message: IMessage, userData: Data})
 export default function InterfaceChat(props: {channelSelected: IChannel | undefined, privateSelected: IUserConversation | undefined, messageType: messageType}) {
     return (
     <div>
-            {props.messageType === 'Channel' 
+            {props.messageType === 'Channel'
 	    ?
 		props.channelSelected !== undefined ?
 			<ChatChannel {...props.channelSelected} />

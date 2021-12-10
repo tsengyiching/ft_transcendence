@@ -1,9 +1,7 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import React, { useEffect, useState } from "react";
+import { useEffect, } from "react";
 import { useHistory } from "react-router-dom";
 import axios from 'axios';
-
-import { Button } from 'react-bootstrap'
 
 function PageConnexion() {
 
@@ -17,7 +15,7 @@ function PageConnexion() {
             history.push("/");
         })
         .catch(res => {
-                history.push("/connexion");
+            history.push("/connexion");
         })
     })
 }

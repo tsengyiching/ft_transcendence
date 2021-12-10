@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import "./Header.css"
 
 import axios from 'axios';
@@ -9,8 +9,7 @@ import Nav from 'react-bootstrap/Nav';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import {LinkContainer} from 'react-router-bootstrap'
-import { DataContext, Data } from '../App';
-
+import { DataContext, SiteStatus } from '../../App';
 
 function Header () {
     const [isConnected, setConnexion] = useState(true);
@@ -45,7 +44,7 @@ function Header () {
 		return (
 		<Navbar collapseOnSelect bg='light' variant='light' style={{fontSize:'20px'}}>
 			<Container fluid>
-    			<LinkContainer to='/'>
+    			<LinkContainer to='/home'>
 			<Navbar.Brand style={{paddingLeft:"50px", fontSize:'30px'}}>
 				<Image src={process.env.PUBLIC_URL + '/ping-pong.png'} style={{position:'relative', marginBottom:'6px', marginRight:'10px'}} width="40" height="40" alt="" />
 					Pong
@@ -54,7 +53,7 @@ function Header () {
 			<Navbar.Toggle aria-controls="basic-navbar-nav" />
 			<Nav>
 			<Nav.Item>
-				<LinkContainer to='/'>
+				<LinkContainer to='/ladder'>
    		 			<Nav.Link>Ladder</Nav.Link>
 				</LinkContainer>
   			</Nav.Item>
@@ -73,10 +72,12 @@ function Header () {
       			<Nav style={{paddingRight:"5px"}}>
 			<Nav.Item>
         			<NavDropdown title={<Image src={`${user_avatar}`} style={{width:"60px", height:"60px", objectFit:'cover', objectPosition:'center'}} alt="pp" roundedCircle fluid/>}  align="end" id="basic-nav-dropdown">
-						<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
-          				<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
+					<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
+					{(userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR)
+					&& <LinkContainer to='/admin'><NavDropdown.Item>Admin View</NavDropdown.Item></LinkContainer>}
+					<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
 						<NavDropdown.Divider />
-        				<LinkContainer to='/auth/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
+        				<LinkContainer to='/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
         			</NavDropdown>
 					</Nav.Item>
       			</Nav>

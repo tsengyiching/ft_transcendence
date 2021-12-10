@@ -1,9 +1,9 @@
 
 import { useEffect, useContext, useState, useRef } from 'react'
-import {Row, Col, Form, Button} from 'react-bootstrap'
+import {Form, Button} from 'react-bootstrap'
 import { SocketContext } from '../../../context/socket'
 import { DataContext, Data } from '../../../App'
-import { IUserConversation } from '../../InterfaceUser'
+import { IUserConversation } from '../../web_pages/UserPart'
 import {IMessage, Message} from '../ChatInterface'
 import './ChatPrivate.css'
 
@@ -24,16 +24,16 @@ function ListConversationMessage(props: {ListMessage: IMessage[]}) {
 		//console.log(props.ListMessage);
 		scrollToBottom();
 	}, [props.ListMessage])
-	
+
 	const scrollToBottom = () => {
-		if (messagesEndRef.current !== null && messagesEndRef.current.id == 'bottomchatmessage')
+		if (messagesEndRef.current !== null && messagesEndRef.current.id === 'bottomchatmessage')
 	  		messagesEndRef.current.scrollIntoView({ behavior: "smooth", block: 'end', inline: 'nearest' })
 	}
 
     return (
         <div className="overflow-auto" style={{height: '38em', border:'1px solid black',}}>
 		{props.ListMessage.map((message) => <Message
-			key={`message_${message.message_channelId}_${message.message_id}`} 
+			key={`message_${message.message_channelId}_${message.message_id}`}
 			message={message}
 			userData={userData}/>)}
 		<div id="bottomchatmessage" ref={messagesEndRef} />
@@ -67,7 +67,7 @@ function FormMessageConversation(props: {OtherUser: IUser, userData: Data, socke
 	return (
 		<Form className="FormSendMessage justify-content-center" style={{padding:"0px", paddingTop:"0.8em"}}>
 			<Form.Control type="text" value={messageForm} placeholder="Message" onChange={ChangeMsg}/>
-			{ 
+			{
 				<Button type="submit" onClick={handleSubmit}> Send </Button>
 			}
 		</Form>
@@ -83,14 +83,14 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 
 	useEffect(() => {
 		socket.emit('private-load', {userId: props.privateSelected.user_id});
-		socket.on('private-message-list', (list: IMessage[]) => {setListMessage(list); console.log(list)});
+		socket.on('private-message-list', (list: IMessage[]) => {setListMessage(list);});
 		socket.on('private-info', (user: IUser) => {setOtherUser(user);});
 		return (() => {
 			socket.emit('private-unload', {channelId: OtherUser.channel_id});
 			socket.off('private-message-list');
 			socket.off('private-info');
 		});
-	}, [socket, props.privateSelected])
+	}, [socket, props.privateSelected, OtherUser.channel_id])
 
 	useEffect(() => {
 		socket.on('private-new-message', (new_message: IMessage) => {
@@ -98,7 +98,8 @@ export function ChatPrivate(props : {privateSelected: IUserConversation})
 			buffer.push(new_message);
 			setListMessage(buffer);
 		})
-	}, [listMessage])
+		return(() => {socket.off('private-new-message');});
+	}, [listMessage, socket])
 
 	return (
 		<div>
@@ -121,7 +122,7 @@ export function ChatPrivateDisabled()
 	return (
 		<div>
 			<div className="OtherUser">
-					Other User
+					Chat
 			</div>
 			<div className="ChatPrivate">
 				<ListConversationMessage ListMessage={[]}/>

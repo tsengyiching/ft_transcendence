@@ -88,7 +88,7 @@ export class TwoFactorAuthController {
     @Body() twoFactorAuthCode: TwoFactorAuthCodeDto,
     @Res({ passthrough: true }) res: Response,
   ): Promise<JwtPayload> {
-    const user = await this.userService.getOneById(userPayload.id);
+    const user = await this.userService.getUserWithTwoFactor(userPayload.id);
     if (user.isTwoFactorAuthenticationEnabled === false) {
       throw new HttpException(
         `User ${user.id} has not turned on two factor authentication yet.`,

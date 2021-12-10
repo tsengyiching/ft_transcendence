@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext,  } from "react"
+import { useState, useEffect } from "react"
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -7,7 +7,7 @@ import './members.css'
 import ApprovedButton from '../pictures/check.svg'
 import DeclineButton from '../pictures/cross.svg'
 import {ValidationFriend} from "./ContextMenuFunctions"
-import {DataContext, SiteStatus} from '../../App'
+import { SiteStatus } from '../../App'
 import status from "./Status";
 
 interface IFriendRequest {
@@ -24,7 +24,7 @@ export default function ListFriendRequests()
 	const [FriendRequests, SetFriendRequests] = useState<IFriendRequest[]>([]);
 	//const [ReloadFriendRequestlist, SetReloadFriendRequestlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
 	const [Reload, setReload] = useState(0);
-	const DataUser = useContext(DataContext);
+	//const DataUser = useContext(DataContext);
 	const ReloadComponent = () => setReload(Reload + 1);
 
 	//load list friend requests

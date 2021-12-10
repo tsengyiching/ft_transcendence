@@ -1,6 +1,6 @@
 import ParametersIcon from '../../pictures/parameters-icon.png'
-import { Row, Col, Image, Modal, Form, Button, CloseButton} from 'react-bootstrap'
-import {IChannel, } from '../../InterfaceUser'
+import { Row, Col, Image, Modal, Form, Button} from 'react-bootstrap'
+import {IChannel, } from '../../web_pages/UserPart'
 import { useEffect, useState } from 'react'
 import { socket } from '../../../context/socket';
 
@@ -26,7 +26,7 @@ export default function ParametersChannel(channelselected: IChannel)
 		{channelselected.role === "Owner" ?
 		<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}} />
 		: <Image className="iconParameters" roundedCircle src={ParametersIcon}/>}
-		<ModalParameters 
+		<ModalParameters
 		show={modalShow}
 		onHide={() => setModalShow(false)}
 		backdrop="static"
@@ -70,7 +70,7 @@ function ModalParameters(props: Props)
 		if (action !== "Remove")
 			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: password});
 		else
-			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: null});
+			socket.emit("channel-change-password", {channelId: props.channel.channel_id, action: action, password: ""});
 		onHide();
 	      }
 

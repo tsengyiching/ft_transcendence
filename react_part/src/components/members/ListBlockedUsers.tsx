@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext,  } from "react"
+import { useState, useEffect } from "react"
 import { socket } from "../../context/socket";
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
@@ -7,7 +7,7 @@ import './members.css'
 import status from './Status'
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Unblock} from './ContextMenuFunctions'
-import {DataContext, SiteStatus} from "../../App"
+import {SiteStatus} from "../../App"
 import { useHistory } from "react-router";
 
 export interface IBlockedUser {
@@ -35,9 +35,9 @@ export default function ListBlockedUsers()
 		</ContextMenu>
 		)
 	}
-	
+
 	function BlockedUser(BlockedUser: IBlockedUser)
-	{	
+	{
 			return (
 				<div key={`BlockedUser_${BlockedUser.user_id}`}>
 				<ContextMenuTrigger id={`ContextMenuBlockedUser_${BlockedUser.user_id}`}>
@@ -54,7 +54,7 @@ export default function ListBlockedUsers()
 				</div>
 				</ContextMenuTrigger>
 				<ContextMenuBlockedUser user_id={BlockedUser.user_id}/>
-	
+
 				</div>
 			)
 			//console.log(`BlockedUser : ${BlockedUser}`)
@@ -65,7 +65,7 @@ export default function ListBlockedUsers()
 	//const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
-	const userData = useContext(DataContext);
+	//const userData = useContext(DataContext);
 	let history = useHistory();
 
 	//get list blocked at the mount of the component + start listening socket

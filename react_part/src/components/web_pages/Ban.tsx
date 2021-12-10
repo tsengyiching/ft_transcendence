@@ -1,6 +1,6 @@
 import './Ban.css'
 import {Image} from 'react-bootstrap'
-import BannedSymbol from './pictures/banned-symbole.png'
+import BannedSymbol from '../pictures/banned-symbole.png'
 
 export default function Ban()
 {

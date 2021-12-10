@@ -1,14 +1,16 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
-import { Form, Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
+import { Button, Row, Col, ButtonGroup, ToggleButton } from 'react-bootstrap'
 import React, {useState, useContext, useEffect} from 'react'
-import CreateChannelButton from './chat/Channel/create_channel';
-import ListChannel from "./chat/Channel/ListChannel";
-import ListPrivateConversation from "./chat/PrivateConversation/ListPrivateConversation"
-import {SocketContext} from '../context/socket'
-import InterfaceMembers from './members/members';
-import LeaveChannelButton from './chat/Channel/LeaveChannelModal'
-import './InterfaceUser.css'
-import InterfaceChat from './chat/ChatInterface';
+import axios from 'axios';
+import CreateChannelButton from '../chat/Channel/create_channel';
+import ListChannel from "../chat/Channel/ListChannel";
+import ListPrivateConversation from "../chat/PrivateConversation/ListPrivateConversation"
+import {SocketContext} from '../../context/socket'
+import InterfaceMembers from '../members/members';
+import LeaveChannelButton from '../chat/Channel/LeaveChannelModal'
+import './UserPart.css'
+import InterfaceChat from '../chat/ChatInterface';
+import {IBlockedUser} from '../members/ListBlockedUsers'
 
 export type Role = 'Owner' | 'Admin' | 'User';
 
@@ -39,6 +41,8 @@ function InterfaceUser() {
     const [interfaceRadioValue, setinterfaceRadioValue] = useState<string>('Channel');
     const [channelSelected, setChannelSelected] = useState<IChannel | undefined>();
     const [UserConversationSelected, setUserConversationSelected] = useState<IUserConversation | undefined>();
+	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([])
+	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<number>(0);
     const socket = useContext(SocketContext);
 
     const channelradios = [
@@ -48,7 +52,28 @@ function InterfaceUser() {
 
     useEffect(() => {
         socket.on('channel-need-reload', () => socket.emit('ask-reload-channel'));
+        return(() => {socket.off('channel-need-reload');})
     }, [socket])
+
+	//get list blocked at the mount of the component + start listening socket
+	useEffect(() => {
+		console.log("1 useEffect")
+		let isMounted = true;
+		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+		.then(res => { if(isMounted)
+			SetBlockedUsers(res.data);
+            if (interfaceRadioValue === 'MP' && UserConversationSelected !== undefined &&
+                BlockedUsers.find((user) => UserConversationSelected.user_id === user.user_id) !== undefined)
+                setUserConversationSelected(undefined);
+		})
+		.catch(res => { if (isMounted)
+			console.log("error on getting data blocked users");
+		})
+
+		socket.on("reload-block", () => {console.log("in the socket"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
+
+		return (() => { socket.off("reload-block"); isMounted = false; });
+	}, [ReloadBlockedUserlist, socket]);
 
     function SwitchPrivateConversation(userId: number)
     {
@@ -77,14 +102,14 @@ function InterfaceUser() {
                 </ToggleButton>
             ))}
         </ButtonGroup>
-        
+
         <Col lg={10}>
-            {interfaceRadioValue ==='Channel' ? 
-            <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/> 
-            : <ListPrivateConversation setUserConversationSelected={setUserConversationSelected}/>}
+            {interfaceRadioValue ==='Channel' ?
+            <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/>
+            : <ListPrivateConversation setUserConversationSelected={setUserConversationSelected} BlockedUsers={BlockedUsers}/>}
         </Col>
         <Col>
-            {interfaceRadioValue ==='Channel' ? 
+            {interfaceRadioValue ==='Channel' ?
                 <div>
                     <CreateChannelButton socketid={socket}/>
                     { channelSelected !== undefined ?

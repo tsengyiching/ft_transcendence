@@ -1,10 +1,10 @@
 import { Button , Image} from "react-bootstrap"
-import './Connection.css';
+import '../Connection.css';
 
 function Connexion () {
 
     function onConnexion() {
-        window.location.href = 'http://localhost:8080/auth/login/'; 
+        window.location.href = 'http://localhost:8080/auth/login/';
     }
 
     return (

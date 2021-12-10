@@ -26,12 +26,16 @@ import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Express, Response, Request } from 'express';
 import { Readable } from 'stream';
+import { UserGateway } from '../user.gateway';
 
 @UseGuards(JwtAuthGuard)
 @UseGuards(JwtTwoFactorGuard)
 @Controller('profile')
 export class UserController {
-  constructor(private userService: UserService) {}
+  constructor(
+    private userService: UserService,
+    private userGateway: UserGateway,
+  ) {}
 
   /**
    * getCurrentUser
@@ -74,46 +78,49 @@ export class UserController {
    * changeUserName
    */
   @Patch('name')
-  changeUserName(
+  async changeUserName(
     @CurrentUser() user: User,
     @Body() changeUserNameDto: ChangeUserNameDto,
   ): Promise<User> {
-    return this.userService.changeUserName(user.id, changeUserNameDto);
+    await this.userService.changeUserName(user.id, changeUserNameDto);
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
+    return this.userService.getOneById(user.id);
   }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   async addAvatar(
     @CurrentUser() user: User,
-    @Req() req: Request,
     @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (req.file.size > 1024 * 1024) {
+  ): Promise<string> {
+    if (file.size > 1024 * 1024) {
       throw new PayloadTooLargeException();
     }
-    if (req.file.mimetype.indexOf('image') === -1) {
+    if (file.mimetype.indexOf('image') === -1) {
       throw new HttpException(
-        `The mimetype ${req.file.mimetype} is not acceptable.`,
+        `The file mimetype ${file.mimetype} is not acceptable.`,
         HttpStatus.NOT_ACCEPTABLE,
       );
     }
-    const index = req.file.originalname.indexOf('.', 0);
+    const index = file.mimetype.indexOf('/', 0);
     if (index !== -1) {
-      const filetype = req.file.originalname.slice(index + 1);
-      if (
-        filetype !== 'jpeg' &&
-        filetype !== 'jpg' &&
-        filetype !== 'png' &&
-        filetype !== 'gif'
-      ) {
+      const type = file.mimetype.slice(index + 1);
+      const acceptExtension = ['jpeg', 'jpg', 'png', 'gif'];
+      if (!acceptExtension.includes(type)) {
         throw new HttpException(
-          `The file type ${req.file.originalname} is not acceptable.`,
+          `The file mimetype ${type} is not acceptable.`,
           HttpStatus.NOT_ACCEPTABLE,
         );
       }
+    } else {
+      throw new HttpException(
+        `The file mimetype has a problem.`,
+        HttpStatus.NOT_ACCEPTABLE,
+      );
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
-    return `Image ${req.file.originalname} uploaded successfully !`;
+    this.userGateway.server.to('user-' + user.id).emit('reload-profile');
+    return `Image ${file.originalname} uploaded successfully !`;
   }
 
   @Get('avatarfile/:id')
