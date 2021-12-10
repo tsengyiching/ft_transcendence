@@ -17,9 +17,16 @@ const GameStartModal:React.FC = () => {
 	}
 
 	useEffect(() => {
+		let isMounted = true;
+		if (isMounted) {
 		socket.on('inGame', (e) => { //   LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
 			setGameId(e);
 			setGameState(1);
+		})
+		}
+		return (() => {
+			isMounted = false;
+			socket.off('inGame');
 		})
 	})
 	return (
