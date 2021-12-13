@@ -40,6 +40,19 @@ export type Player = {
   ready: boolean;
 };
 
+type SideBonus = {
+  show: boolean;
+  y: number;
+  type: number;
+  start: number;
+};
+
+export type Bonus = {
+  left: SideBonus;
+  right: SideBonus;
+  blackHoles: Pos[] | undefined;
+};
+
 export type Match = {
   id: number;
   ball: Ball;
@@ -54,5 +67,6 @@ export type Match = {
   run: boolean;
   goal: boolean;
   dbId: number;
+  bonus: Bonus | undefined;
   // viewer id ??
 };
