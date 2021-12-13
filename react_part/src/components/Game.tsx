@@ -48,6 +48,7 @@ const Game:React.FC = () => {
     
     const handleClickON = () => socket.emit('matchmakingON');
     const handleClickOFF = () => socket.emit('matchmakingOFF');
+	const handleClickONBonus = () => socket.emit('BonusmatchmakingON');
 
     function showButtons():JSX.Element {
         return (
@@ -56,7 +57,7 @@ const Game:React.FC = () => {
                     <Button variant="outline-warning" onClick={handleClickON}>Join a normal game</Button>
                 </div>
                 <div className="col">
-                    <Button variant="outline-warning">Join a bonus game</Button>
+                    <Button variant="outline-warning" onClick={handleClickONBonus}>Join a bonus game</Button>
                 </div>
 				<Image src={process.env.PUBLIC_URL + '/pongbackground.jpg'} style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}}fluid />
         </div>
