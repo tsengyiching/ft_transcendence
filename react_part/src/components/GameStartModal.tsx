@@ -12,7 +12,10 @@ const GameStartModal:React.FC = () => {
 	const setGameState = useStore(s => s.setGameStatus);
 	const gameState = useStore(s => s.gameStatus);
 	const enter = () => {
-		socket.emit('ready', gameId);
+		if (gameState === 1)
+			socket.emit('ready', gameId);
+		if (gameState === 3)
+			socket.emit('readyBonus', gameId)
 		setGameState(0);
 	}
 
@@ -22,16 +25,21 @@ const GameStartModal:React.FC = () => {
 		socket.on('inGame', (e) => { //   LA OU ON PEUT FOUTRE LE WARNING SI DANS LES OPTIONS
 			setGameId(e);
 			setGameState(1);
-		})
+		});
+		socket.on('inGameBonus', (e) => {
+			setGameId(e);
+			setGameState(3);
+		});
 		}
 		return (() => {
 			isMounted = false;
 			socket.off('inGame');
+			socket.off('inGameBonus')
 		})
 	})
 	return (
 	  <Modal
-	  	show={gameState === 1} 
+	  	show={gameState === 1 || gameState === 3} 
 		size="lg"
 		aria-labelledby="contained-modal-title-vcenter"
 		centered

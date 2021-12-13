@@ -6,6 +6,7 @@ import {
   ObjectToCollide,
   Match,
   Pos,
+  Bonus,
 } from './pong.interface';
 import { Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
@@ -22,13 +23,6 @@ import {
   FRICTIONANGLE,
   MAXSCORE,
 } from './pong.env';
-import { Interval, SchedulerRegistry } from '@nestjs/schedule';
-import { throwIfEmpty } from 'rxjs';
-import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 @Injectable()
 export class PongService {
@@ -108,7 +102,12 @@ export class PongService {
 ╚═════╝░╚══════╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝╚═════╝░
 */
 
-  private setNewMatch(id: number, p1: Player, p2: Player): Match {
+  private setNewMatch(
+    id: number,
+    p1: Player,
+    p2: Player,
+    bonus: boolean,
+  ): Match {
     const newMatch: Match = {
       id: id,
       ball: {
@@ -146,6 +145,23 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
+      bonus: !bonus
+        ? undefined
+        : {
+            left: {
+              show: false,
+              y: 0,
+              type: 0,
+              start: 0,
+            },
+            right: {
+              show: false,
+              y: 0,
+              type: 0,
+              start: 0,
+            },
+            blackHoles: undefined,
+          },
     };
     return newMatch;
   }
@@ -247,21 +263,27 @@ export class PongService {
    * @param id Match id
    * @param userIdArr ids of the 2 players
    * @param userService YOU KNOW
-   * @returns id of the Match ??(voir avec Felix) // TODO
+   * @param bonus true if bonus is enabled
+   * @returns nothing
    */
   async createNewMatch(
     id: number,
     usersIdArr: number[],
     userService: UserService,
+    bonus: boolean,
   ) {
     if (this.matches.find((match) => match.id === id) === undefined) {
       const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
       const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
-      this.matches.push(this.setNewMatch(id, pOne, pTwo));
+      this.matches.push(this.setNewMatch(id, pOne, pTwo, bonus));
     }
   }
-
-  sendPlayersInfos(gameId) {
+  /**
+   *
+   * @param gameId Match id
+   * @returns an object with players informations to send to the front
+   */
+  sendPlayersInfos(gameId: number) {
     const currentGame = this.matches.find((e) => e.id === gameId);
     return {
       pLName: currentGame.pOne.name,
@@ -272,7 +294,8 @@ export class PongService {
   }
 
   /**
-   * GAME INFOS
+   * @param gameId Match id
+   * @returns an object with game informations
    */
 
   gameInfos(matchId: number) {
@@ -287,6 +310,37 @@ export class PongService {
     };
   }
 
+  /**
+   * @param gameId Match id
+   * @returns an object with game informations
+   */
+
+  gameInfosBonus(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      //   showL: currentGame.bonus.left.show,
+      //   showR: currentGame.bonus.right.show,
+      //   yL: currentGame.bonus.left.y,
+      //   yR: currentGame.bonus.right.y,
+      //   typeL: currentGame.bonus.left.type,
+      //   typeR: currentGame.bonus.right.type,
+      //   startL: !!currentGame.bonus.left.start,
+      //   startR: !!currentGame.bonus.right.start,
+      //   blackHoles: currentGame.bonus.blackHoles,
+
+      pOneY: currentGame.paddleL.pos.y,
+      pTwoY: currentGame.paddleR.pos.y,
+      ballX: currentGame.ball.pos.x,
+      ballY: currentGame.ball.pos.y,
+      scoreL: currentGame.scoreL,
+      scoreR: currentGame.scoreR,
+    };
+  }
+  /**
+   * @param gameId Match id
+   * @returns an object with the results of the game
+   */
   sendFinalModal(matchId: number) {
     // envoyer egalement a la DB
     const currentGame: Match = this.matches.find((e) => e.id === matchId);
@@ -519,6 +573,78 @@ export class PongService {
     });
   }
 
+  UpdateGameBonus(gameId: number) {
+    this.matches.forEach((match) => {
+      const mouv: number[] = [0, 0];
+
+      mouv[0] =
+        match.pOne.down && !match.pOne.up
+          ? 1
+          : match.pOne.up && !match.pOne.down
+          ? -1
+          : 0;
+      mouv[1] =
+        match.pTwo.down && !match.pTwo.up
+          ? 1
+          : match.pTwo.up && !match.pTwo.down
+          ? -1
+          : 0;
+      if (match.id === gameId && match.run) {
+        const touch = this.ballCollisionToPaddle(
+          match.ball,
+          match.paddleL,
+          match.paddleR,
+          mouv,
+        );
+        if (touch.x || touch.y) {
+          if (match.lastp === false) {
+            match.ball.vx = touch.x;
+            match.ball.vy = touch.y;
+            match.lastp = true;
+            if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+          }
+        } else {
+          match.lastp = false;
+          const toWall = this.ballCollisiontoWall(match.ball, {
+            tl: { x: 0, y: 0 },
+            tr: { x: W, y: 0 },
+            bl: { x: 0, y: H },
+            br: { x: W, y: H },
+          });
+          if (toWall === XR || toWall === XL) {
+            this.afterGoalUpdateref(match, !!(toWall === XL));
+            return;
+          } else if (toWall === Y && !match.lasty) {
+            match.lasty = true;
+            match.ball.vy *= -1;
+          }
+          if (toWall !== Y) {
+            match.lasty = false;
+          }
+        }
+        if (match.ball.acceleration > 1) {
+          match.ball.acceleration -= 0.005;
+        }
+        match.ball.pos.x +=
+          match.ball.vx * match.ball.speed * match.ball.acceleration;
+        match.ball.pos.y +=
+          match.ball.vy * match.ball.speed * match.ball.acceleration;
+        match.ball.speed += 0.001;
+        if (mouv[0]) {
+          match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+          if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+          if (match.paddleL.pos.y + match.paddleL.h > H)
+            match.paddleL.pos.y = H - match.paddleL.h;
+        }
+        if (mouv[1]) {
+          match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+          if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+          if (match.paddleR.pos.y + match.paddleR.h > H)
+            match.paddleR.pos.y = H - match.paddleR.h;
+        }
+      }
+    });
+  }
   userDiconnectFromGame(userId: number) {
     let ret = 0;
     this.matches.forEach((match) => {
