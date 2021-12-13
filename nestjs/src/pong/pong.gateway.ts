@@ -47,7 +47,7 @@ export class PongGateway {
       const resp = this.pongUsersService.isInMatchmaking(user.id);
       client.emit('inMatchMaking', resp);
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
 
@@ -63,7 +63,7 @@ export class PongGateway {
         this.pongUsersService.removePlayer(user.id);
       }
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
   /**

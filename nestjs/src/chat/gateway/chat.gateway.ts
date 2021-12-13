@@ -20,6 +20,8 @@ import { LoadDirectDto } from '../dto/load-direct.dto';
 import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from 'src/auth/guard/ws.guard';
 
 @WebSocketGateway({
   cors: {
@@ -45,10 +47,9 @@ export class ChatGateway
    * Call after socket creation
    * @param server
    */
-  afterInit(server: any) {
-    // console.log('Socket is live');
+  async afterInit(server: any) {
     try {
-      this.userService.resetUserStatus();
+      await this.userService.resetUserStatus();
     } catch (error) {
       console.log(error);
     }
@@ -76,7 +77,7 @@ export class ChatGateway
       client.emit('channels-user-in', channels_in);
       client.emit('channels-user-out', channels_out);
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
 
@@ -95,7 +96,7 @@ export class ChatGateway
       });
       console.log('Remove active user');
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
 
@@ -103,6 +104,7 @@ export class ChatGateway
    * Create channel
    * @param CreateChannelDto : channel name and password
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-create')
   async createChannel(client: Socket, body: CreateChannelDto) {
     try {
@@ -119,6 +121,7 @@ export class ChatGateway
    * join channel
    * @param JoinChannelDto : channelId and password
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-join')
   async joinChannel(client: Socket, body: JoinChannelDto) {
     try {
@@ -144,6 +147,7 @@ export class ChatGateway
    * leave channel
    * @param : channel id
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, { channelId }) {
     try {
@@ -187,6 +191,7 @@ export class ChatGateway
    * change user status
    * @param ChangeStatusDto : channel id, user id, saction duration and status
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-status-change')
   async changeChannelUserStatus(client: Socket, body: ChangeStatusDto) {
     try {
@@ -207,6 +212,7 @@ export class ChatGateway
    * set administrator
    * @param SetChannelAdminDto : channel id, participant id, action
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-admin')
   async setChannelAdmin(client: Socket, body: SetChannelAdminDto) {
     try {
@@ -228,6 +234,7 @@ export class ChatGateway
    * change Password
    * @param SetChannelPasswordDto : channel id, action, password
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-change-password')
   async changeChannelPassword(client: Socket, body: SetChannelPasswordDto) {
     try {
@@ -244,6 +251,7 @@ export class ChatGateway
    * destroy Channel
    * @param : channel id
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-destroy')
   async destroyChannel(client: Socket, { channelId }) {
     try {
@@ -262,6 +270,7 @@ export class ChatGateway
    * set administrator by SiteModerator
    * @param SetChannelAdminDto : channel id, participant id and action
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-admin-site-moderator')
   async setChannelAdminbySite(client: Socket, body: SetChannelAdminDto) {
     try {
@@ -284,6 +293,7 @@ export class ChatGateway
   /**
    * Ask to Reload the Channels list
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('ask-reload-channel')
   async reloadChannel(client: Socket) {
     try {
@@ -303,6 +313,7 @@ export class ChatGateway
    * Load channel data (message) and register to the room event
    * @param : channel id
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-load')
   async loadChannel(client: Socket, channelId: number) {
     try {
@@ -333,6 +344,7 @@ export class ChatGateway
    * Unload Channel data
    * @param : channel id
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-unload')
   async unloadChannel(client: Socket, channelId: number) {
     client.leave('channel-' + channelId);
@@ -342,6 +354,7 @@ export class ChatGateway
    * channel send messages
    * @param CreateMessageDto : channel id and message
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('channel-message')
   async newChannelMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
@@ -378,6 +391,7 @@ export class ChatGateway
   /**
    * Ask to (Re)load the direct Channels list
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('private-ask-reload')
   async loadPrivate(client: Socket) {
     try {
@@ -393,6 +407,7 @@ export class ChatGateway
    * Load channel data (message) and register to the room event
    * @param LoadDirectDto : user id and channel id
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('private-load')
   async loadDirect(client: Socket, body: LoadDirectDto) {
     try {
@@ -432,6 +447,7 @@ export class ChatGateway
    * Unload Channel data
    * @param data
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('private-unload')
   async unloadDirect(client: Socket, channelId: number) {
     client.leave('private-' + channelId);
@@ -441,6 +457,7 @@ export class ChatGateway
    * channel send messages
    * @param data
    */
+  @UseGuards(WsGuard)
   @SubscribeMessage('private-message')
   async newDirectMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
