@@ -54,9 +54,8 @@ export class PongGateway {
         this.pongUsersService.userConnect(user.id);
         const resp = this.pongUsersService.isInMatchmaking(user.id);
         client.emit('inMatchMaking', resp);
-      } catch (error) {
-        console.log(error);
-      }
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
