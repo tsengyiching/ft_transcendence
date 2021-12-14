@@ -57,20 +57,20 @@ function InterfaceUser() {
 
 	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
-		console.log("1 useEffect")
 		let isMounted = true;
 		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
 		.then(res => { if(isMounted)
 			SetBlockedUsers(res.data);
+            const Blocked : IBlockedUser[]= res.data;
             if (interfaceRadioValue === 'MP' && UserConversationSelected !== undefined &&
-                BlockedUsers.find((user) => UserConversationSelected.user_id === user.user_id) !== undefined)
+                Blocked.find((user) => UserConversationSelected.user_id === user.user_id) !== undefined)
                 setUserConversationSelected(undefined);
 		})
 		.catch(res => { if (isMounted)
 			console.log("error on getting data blocked users");
 		})
 
-		socket.on("reload-block", () => {console.log("in the socket"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
+		socket.on("reload-block", () => {console.log("in the socket of UserPart"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
 	}, [ReloadBlockedUserlist, socket]);

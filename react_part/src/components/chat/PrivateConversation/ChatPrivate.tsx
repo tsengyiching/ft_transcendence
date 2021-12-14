@@ -6,6 +6,7 @@ import { DataContext, Data } from '../../../App'
 import { IUserConversation } from '../../web_pages/UserPart'
 import {IMessage, Message} from '../ChatInterface'
 import './ChatPrivate.css'
+import { setTimeout } from 'timers'
 
 interface IUser {
 	channel_id: number,

@@ -34,10 +34,8 @@ export default function ListPrivateConversation(props: {
 	let socket = useContext(SocketContext);
 	const [PrivateConversation, setPrivateConversation] = useState<IConversation[]>([]);
 	const [AllPrivateConversation, setAllPrivateConversation] = useState<IConversation[]>([]);
-/* 	const [BlockedUsers, SetBlockedUsers] = useState<IBlockedUser[]>([])
-	const [ReloadBlockedUserlist, SetReloadBlockedUserlist] = useState<number>(0); */
 
-/* 	//get list blocked at the mount of the component + start listening socket
+/*  	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
 		console.log("1 useEffect")
 		let isMounted = true;
@@ -48,24 +46,26 @@ export default function ListPrivateConversation(props: {
 		.catch(res => { if (isMounted)
 			console.log("error on getting data blocked users");
 		})
-
+		setTimeout(console.log, 100, BlockedUsers)
 		socket.on("reload-block", () => {console.log("in the socket"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
 	}, [ReloadBlockedUserlist, socket]); */
 
 	useEffect(() => {
-		//console.log("2 useEffect")
-		socket.on("private-list", (list: IConversation[]) => { setAllPrivateConversation(list);});
-		return (() => {socket.off("private-list");});
+		socket.emit("private-ask-reload");
 	}, [])
 
 	useEffect(() => {
-		//console.log("3 useEffect")
+		socket.on("private-list", (list: IConversation[]) => { setAllPrivateConversation(list);});
+		return (() => {socket.off("private-list");});
+	}, [AllPrivateConversation])
+
+	useEffect(() => {
 		const newlist : IConversation[] = [];
 		for (const conversation of AllPrivateConversation)
 		{
-			if (props.BlockedUsers.find((user) => user.user_id === conversation.user_id) === undefined)
+			if (props.BlockedUsers.find((blockedUser) => blockedUser.user_id === conversation.user_id) === undefined)
 			{
 				newlist.push(conversation);
 			}
