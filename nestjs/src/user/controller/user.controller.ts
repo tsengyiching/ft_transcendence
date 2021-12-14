@@ -9,7 +9,6 @@ import {
   Patch,
   PayloadTooLargeException,
   Post,
-  Req,
   Res,
   StreamableFile,
   UploadedFile,
@@ -24,7 +23,7 @@ import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
 import { ChangeUserNameDto } from '../model/change-username.dto';
 import { JwtTwoFactorGuard } from 'src/auth/guard/jwt-two-factor.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Express, Response, Request } from 'express';
+import { Express, Response } from 'express';
 import { Readable } from 'stream';
 import { UserGateway } from '../user.gateway';
 

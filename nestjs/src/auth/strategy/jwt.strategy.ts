@@ -1,6 +1,6 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { UserService } from 'src/user/service/user.service';
 import { Request } from 'express';
@@ -34,7 +34,12 @@ export class JwtAuthStrategy extends PassportStrategy(Strategy) {
 
   async validate(payload: JwtPayload): Promise<JwtPayload> {
     const bannedIds = await this.userService.getBannedUserIds();
-    if (!bannedIds.includes(payload.id)) {
+    if (bannedIds.includes(payload.id)) {
+      throw new HttpException(
+        `User is banned by the site.`,
+        HttpStatus.FORBIDDEN,
+      );
+    } else {
       return {
         id: payload.id,
         username: payload.username,

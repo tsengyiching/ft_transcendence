@@ -20,6 +20,8 @@ import { LoadDirectDto } from '../dto/load-direct.dto';
 import { SetChannelAdminDto } from '../dto/set-channel-admin.dto';
 import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from 'src/auth/guard/ws.guard';
 
 @WebSocketGateway({
   cors: {
@@ -28,6 +30,7 @@ import { ChangeStatusDto } from '../dto/change-status.dto';
     credentials: true,
   },
 })
+@UseGuards(WsGuard)
 export class ChatGateway
   implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit
 {
@@ -45,10 +48,9 @@ export class ChatGateway
    * Call after socket creation
    * @param server
    */
-  afterInit(server: any) {
-    // console.log('Socket is live');
+  async afterInit(server: any) {
     try {
-      this.userService.resetUserStatus();
+      await this.userService.resetUserStatus();
     } catch (error) {
       console.log(error);
     }
@@ -76,7 +78,7 @@ export class ChatGateway
       client.emit('channels-user-in', channels_in);
       client.emit('channels-user-out', channels_out);
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
 
@@ -95,7 +97,7 @@ export class ChatGateway
       });
       console.log('Remove active user');
     } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      console.log(error);
     }
   }
 
@@ -223,11 +225,11 @@ export class ChatGateway
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
-
   /**
    * change Password
    * @param SetChannelPasswordDto : channel id, action, password
    */
+
   @SubscribeMessage('channel-change-password')
   async changeChannelPassword(client: Socket, body: SetChannelPasswordDto) {
     try {
