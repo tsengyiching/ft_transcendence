@@ -83,12 +83,10 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 
 	useEffect(() => {
 		socket.emit('ask-reload-channel');
-		console.log("into useEffect ask-reload-channel");
 	}, [socket, reloadChannelList])
 
 	useEffect(() => {
 		setListChannel(MyChannels.concat(OtherChannels));
-		console.log("into useEffect channels-user");
 		socket.on('channels-user-in', (data: IMyChannel[]) => {
 			setMyChannels(data.map((Mychannel) => {
 				let newChannel: IChannel = {channel_id: Mychannel.channel_id, channel_name: Mychannel.channel_name};
