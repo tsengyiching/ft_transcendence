@@ -83,7 +83,14 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 
 	useEffect(() => {
 		socket.emit('ask-reload-channel');
-	}, [socket, reloadChannelList])
+		socket.on('channel-need-reload', () => setReloadChannelList(reloadChannelList + 1));
+		return(() => {socket.off('channel-need-reload')});
+	}, [reloadChannelList])
+
+	useEffect(() => {
+
+	}, [socket])
+
 
 	useEffect(() => {
 		setListChannel(MyChannels.concat(OtherChannels));
