@@ -161,6 +161,7 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
+      bonusUP: false,
       bonus: !bonus
         ? undefined
         : {
@@ -350,7 +351,6 @@ export class PongService {
   gameInfosBonusY(matchId: number) {
     // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
-    // if currentGame.bonus.
     return {
       yL: currentGame.bonus.left.y,
       yR: currentGame.bonus.right.y,

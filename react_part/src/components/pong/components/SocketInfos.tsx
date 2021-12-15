@@ -11,21 +11,6 @@ type Infos = {
 	ballY: number;
 }
 
-type InfosBonus = {
-	yL: number,
-	yR: number,
-	typeL: number,
-	typeR: number,
-	//   startL: boolean,
-	//   startR: boolean,
-	//   blackHoles: number[],
-	pOneY: number;
-	pTwoY: number;
-	ballX: number;
-	ballY: number;
-	scoreL:number;
-	scoreR:number;
-}
  const SocketInfos:React.VFC<{}> = () => {
 	const socket:Socket = useContext(GameSocketContext);
 	const setPosition = useStore( s => s.setNewPos);
