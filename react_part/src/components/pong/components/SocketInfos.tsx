@@ -9,25 +9,8 @@ type Infos = {
 	pTwoY: number;
 	ballX: number;
 	ballY: number;
-	scoreL:number;
-	scoreR:number;
 }
 
-type InfosBonus = {
-	yL: number,
-	yR: number,
-	typeL: number,
-	typeR: number,
-	//   startL: boolean,
-	//   startR: boolean,
-	//   blackHoles: number[],
-	pOneY: number;
-	pTwoY: number;
-	ballX: number;
-	ballY: number;
-	scoreL:number;
-	scoreR:number;
-}
  const SocketInfos:React.VFC<{}> = () => {
 	const socket:Socket = useContext(GameSocketContext);
 	const setPosition = useStore( s => s.setNewPos);
@@ -40,8 +23,6 @@ type InfosBonus = {
 		pTwoY: 0,
 		ballX: 0,
 		ballY: 0,
-		scoreL:0,
-		scoreR:0,
 	});
 
 
@@ -49,14 +30,15 @@ type InfosBonus = {
         socket.on('infos', (d) => {
 			setinfos(d);
 		})
-	});
-	socket.on('infosBonus', (d) => {
-		setinfos(d);
-		setBonus(d.yL, d.yR, d.typeL, d.typeR);
+		socket.on('sendScore', (d) => {
+			setScore(d.ScoreL, d.ScoreR);
+		})
+		return (() => {
+			socket.off('infos');
+			socket.off('sendScore');
+		})
 	});
 	setPosition(infos);
-	if (scoreL !== infos.scoreL || scoreR !== infos.scoreR)
-		setScore(infos.scoreL, infos.scoreR);
 		return (null);
  }
 

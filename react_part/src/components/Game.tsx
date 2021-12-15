@@ -39,9 +39,16 @@ const Game:React.FC = () => {
             useStore.setState((s) => ({...s, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
             }
         } );
+		socket.on('startPongBonus', (e:GameInfos) => {
+            if (isMounted) {
+			setGameStatus(2);
+            useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
+            }
+        } );
         return (() => {
             socket.off('startPong');
             socket.off('inMatchMaking');
+			socket.off('startPongBonus');
             isMounted = false;
         })
     })

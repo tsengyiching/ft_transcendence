@@ -33,13 +33,21 @@ function drawPaddle(ctx:CanvasRenderingContext2D, paddle:Paddle) : void  {
 	ctx?.closePath();
  }
 
+ function drawBonus(ctx:CanvasRenderingContext2D, x: number, y :number) : void {
+	ctx.beginPath();
+	ctx.fillStyle = "red";
+	ctx.arc(x, y, 15, 0, Math.PI * 2);
+	ctx.fill();
+	ctx.closePath();
+}
 
 const GameCanvasBackground:React.VFC<{}> = () => {
 	const h = useStore(s => s.h);
 	const w = useStore(s => s.w);
 	const PaddleL = useStore(s => s.paddleL);
 	const PaddleR = useStore(s => s.paddleR);
-
+	const BonusLeft = useStore(s => s.BonusLeft);
+	const BonusRight = useStore(s => s.BonusRight);
 	const ball = useStore(s => s.ball);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -63,6 +71,8 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 			drawMiddle(ctx!, {w, h});
 			drawPaddle(ctx!, PaddleL);
 			drawPaddle(ctx!, PaddleR);
+			if (BonusLeft.y >= 0) drawBonus(ctx!, BonusLeft.x, BonusLeft.y);
+			if (BonusRight.y >= 0) drawBonus(ctx!, BonusRight.x, BonusRight.y);
 
 			drawBall(ctx!, ball);
 		   requestId = requestAnimationFrame(render);
