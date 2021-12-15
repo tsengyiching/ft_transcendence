@@ -19,6 +19,8 @@ interface IPropsModal {
 	backdrop: string,
 	channelSelected: IChannel | undefined,
 	setChannelSelected: Function,
+	reloadChannelList: number,
+	setReloadChannelList: Function,
 }
 
 function ModalDestroyChannel(props: IPropsModal)
@@ -34,6 +36,7 @@ function ModalDestroyChannel(props: IPropsModal)
 		}
 		props.setChannelSelected(undefined);
 		onHide();
+		setTimeout(props.setReloadChannelList, 200, [props.reloadChannelList + 1])
 	}
 
 	function onHide(){
@@ -76,10 +79,18 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 
 	const [ShowModal, setShowModal] = useState(false);
 	const onHide = () => {setShowModal(false);}
+	const [reloadChannelList, setReloadChannelList] = useState<number>(0);
 
 	useEffect(() => {
 		socket.emit('ask-reload-channel');
+		socket.on('channel-need-reload', () => setReloadChannelList(reloadChannelList + 1));
+		return(() => {socket.off('channel-need-reload')});
+	}, [reloadChannelList])
+
+	useEffect(() => {
+
 	}, [socket])
+
 
 	useEffect(() => {
 		setListChannel(MyChannels.concat(OtherChannels));
@@ -100,7 +111,7 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 			socket.off('channels-user-in');
 			socket.off('channels-user-out');
 		})
-	}, [socket, MyChannels, OtherChannels,])
+	}, [socket, MyChannels, OtherChannels, ])
 
 	return (
 		<Row>
@@ -129,6 +140,8 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 			backdrop="static"
 			channelSelected={props.channelSelected}
 			setChannelSelected={props.setChannelSelected}
+			reloadChannelList={reloadChannelList}
+			setReloadChannelList={setReloadChannelList}
 			/>
 		</Row>
 	)

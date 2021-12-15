@@ -1,7 +1,7 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import { Form, Col, Row, Button, Image, Modal} from "react-bootstrap";
-import { Data, } from "../../App";
+import { Data, DataContext, } from "../../App";
 import { SocketContext } from "../../context/socket";
 
 enum SiteStatus {
@@ -18,7 +18,7 @@ interface IPropsModal {
 	user: Data | undefined,
 }
 
-function UserButton(props: {thisUser: Data, setSiteUser: any, setViewModal: any})
+function UserButton(props: {thisUser: Data, myData: Data, setSiteUser: any, setViewModal: any})
 {
 	return(
 		<Row style={{backgroundColor: 'blueviolet', borderStyle: 'solid', borderWidth: '0.01em'}}>
@@ -27,6 +27,7 @@ function UserButton(props: {thisUser: Data, setSiteUser: any, setViewModal: any}
 			<Col>{props.thisUser.siteStatus}</Col>
 			<Col>
 			{ 	props.thisUser.siteStatus !== SiteStatus.OWNER &&
+				props.thisUser.id !== props.myData.id &&
 				<Button
 				onClick={() => {
 						props.setSiteUser(props.thisUser);
@@ -107,7 +108,9 @@ export default function UserView()
 	const [listUser, setListUser] = useState<Data[]>([]);
 	const [siteUser, setSiteUser] = useState<undefined | Data>(undefined);
 	const [ReloadUserList, setReloadUserList] = useState<number>(0);
+	let myData = useContext(DataContext);
 	const socket = useContext(SocketContext);
+
 
 	const [ViewModal, SetViewModal] = useState(false);
 	const onHide = () => SetViewModal(false);
@@ -135,6 +138,7 @@ export default function UserView()
 			{ listUser.map((user) =>
 			(<UserButton
 				thisUser={user}
+				myData={myData}
 				setSiteUser={setSiteUser}
 				setViewModal={SetViewModal}
 				key={`user-view-${user.id}`}

@@ -129,7 +129,7 @@ export function ChatChannel(channelSelected: IChannel)
 			socket.off('channel-message-list');
 			})
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [socket])
+	}, [socket, channelSelected])
 
 	// change list message if list blocked users change
 	useEffect(() => {

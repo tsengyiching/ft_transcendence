@@ -194,9 +194,9 @@ export class ChatGateway
     try {
       const user = await this.authService.getUserFromSocket(client);
       await this.chatService.changeChannelUserStatus(user, body);
-      const channels_in = this.chatService.getUserChannels(user.id);
+      const channels_in = this.chatService.getUserChannels(body.userId);
       this.server
-        .to('user-' + user.id)
+        .to('user-' + body.userId)
         .emit('channels-user-in', await channels_in);
       const users = await this.chatService.getChannelUsers(body.channelId);
       this.server.to('channel-' + body.channelId).emit('channel-users', users);
