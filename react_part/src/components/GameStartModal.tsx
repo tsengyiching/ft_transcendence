@@ -12,8 +12,9 @@ const GameStartModal:React.FC = () => {
 	const enter = () => {
 		if (gameState === 1)
 			socket.emit('ready', gameId);
-		if (gameState === 3)
+		if (gameState === 3) {
 			socket.emit('readyBonus', gameId)
+		}
 		setGameState(0);
 	}
 

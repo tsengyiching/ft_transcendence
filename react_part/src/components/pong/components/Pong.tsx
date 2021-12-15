@@ -6,11 +6,12 @@ import BonusHandler from "./Handlers/BonusHandler";
 import SocketEvent from "./SocketEvent";
 import SocketInfos from "./SocketInfos";
 import PongInfoModal from "./PongInfoModal";
+import SocketInfosBonus from "./SocketInfosBonus";
 
 
 const Pong:React.FC<{h:number, w:number}> = (props) => {
 	const set = useStore.setState;
-	const score = useStore(s => s.scoreBar);
+	const bonus = useStore(s => s.bonus);
 	useEffect(() => {
 		set(s => ({...s,
 			paddleL: {
@@ -98,10 +99,10 @@ return (
 		<div>
 			<PongInfoModal />
 			<SocketEvent />
-            <SocketInfos />
-			<ScoreBar />
 			<GameCanvas />
-			<BonusHandler />
+            <SocketInfos />
+			{bonus  ? <SocketInfosBonus /> : null}
+			<ScoreBar />
 		</div>
 );}
 

@@ -183,6 +183,10 @@ export class PongGateway {
             .volatile.emit('infos', this.pongService.gameInfos(gameId));
         }
         if (this.pongService.goal(gameId)) {
+          this.server
+            .to(roomName)
+            .emit('sendScore', this.pongService.sendScore(gameId));
+
           if (this.pongService.isEndGame(gameId)) {
             this.pongService.setGameRunning(gameId, false);
           } else {
@@ -265,7 +269,10 @@ export class PongGateway {
             this.pongService.setDatabaseId(infos.GameId, ret.id);
             this.server
               .to(infos.GameId.toString() + '-Game')
-              .emit('startPong', this.pongService.sendPlayersInfos(payload));
+              .emit(
+                'startPongBonus',
+                this.pongService.sendPlayersInfos(payload),
+              );
             this.startGameBonus(infos.GameId);
           }
           // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
@@ -293,6 +300,9 @@ export class PongGateway {
             .volatile.emit('infos', this.pongService.gameInfos(gameId));
         }
         if (this.pongService.goal(gameId)) {
+          this.server
+            .to(roomName)
+            .emit('sendScore', this.pongService.sendScore(gameId));
           if (this.pongService.isEndGame(gameId)) {
             this.pongService.setGameRunning(gameId, false);
           } else {

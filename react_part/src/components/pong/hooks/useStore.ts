@@ -38,8 +38,6 @@ type Infos = {
 	pTwoY: number;
 	ballX: number;
 	ballY: number;
-	scoreL: number;
-	scoreR: number;
 }
 
 type Store = {
@@ -50,6 +48,7 @@ type Store = {
 	w: number;
 	h: number;
 	scoreBar: Score;
+	bonus: boolean;
 	setBonus: (yL:number, yR:number, idL:number, idR: number) => void;
 	addBlackHole: (next:number[]) => void;
 	blackHole: number[] | undefined;
@@ -115,16 +114,17 @@ const useStore = create<Store>((set) => {
 			bonusRight: {x:0, y:0, w:0, h:0},
 			fontSize: 48
 		},
+		bonus: false,
 		BonusLeft: {
 			up : false,
 			x: 0,
-			y: 0,
+			y: -1,
 			id: 0,
 		},
 		BonusRight:{
 			up : false,
 			x: 0,
-			y: 0,
+			y: -1,
 			id: 0,
 		},
 		blackHole: undefined,
