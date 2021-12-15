@@ -11,14 +11,14 @@ export default function InterfaceMembers()
 {
     const [radioMembersValue, setMembersRadioValue] = useState('1');
     const membersradios = [
-        {name: 'Friends', value: '1', variant: 'outline-primary'},
-        {name: 'Users', value: '2', variant: 'outline-secondary'},
-	{name: 'Blocked', value: '3', variant: 'outline-danger'},
-	{name: 'Friend Requests', value: '4', variant: 'outline-warning'}
+		{name: 'Friends', value: '1', variant: 'outline-primary'},
+		{name: 'Users', value: '2', variant: 'outline-secondary'},
+		{name: 'Blocked', value: '3', variant: 'outline-danger'},
+		{name: 'Friend Requests', value: '4', variant: 'outline-warning'}
     ]
     return (
 		<div>
-		    <ButtonGroup className="mb-2">
+		    <ButtonGroup vertical>
 			{membersradios.map((radio, idx) => (
 			    <ToggleButton
 			    id={`membersRadio-${idx}`}
