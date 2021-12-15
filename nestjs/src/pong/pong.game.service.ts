@@ -94,6 +94,10 @@ export class PongService {
   getDatabaseId(gameId: number) {
     return this.matches.find((match) => match.id === gameId).dbId;
   }
+
+  isBonusUP(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).bonusUP;
+  }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
 ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
@@ -146,6 +150,7 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
+      bonusUP: false,
       bonus: !bonus
         ? undefined
         : {
@@ -292,6 +297,13 @@ export class PongService {
     };
   }
 
+  sendScore(matchId: number) {
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      scoreL: currentGame.scoreL,
+      scoreR: currentGame.scoreR,
+    };
+  }
   /**
    * @param gameId Match id
    * @returns an object with game informations
@@ -304,8 +316,6 @@ export class PongService {
       pTwoY: currentGame.paddleR.pos.y,
       ballX: currentGame.ball.pos.x,
       ballY: currentGame.ball.pos.y,
-      scoreL: currentGame.scoreL,
-      scoreR: currentGame.scoreR,
     };
   }
 
@@ -317,7 +327,6 @@ export class PongService {
   gameInfosBonus(matchId: number) {
     // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
-    // if currentGame.bonus.
     return {
       yL: currentGame.bonus.left.y,
       yR: currentGame.bonus.right.y,
@@ -326,13 +335,6 @@ export class PongService {
       //   startL: !!currentGame.bonus.left.start,
       //   startR: !!currentGame.bonus.right.start,
       //   blackHoles: currentGame.bonus.blackHoles,
-
-      pOneY: currentGame.paddleL.pos.y,
-      pTwoY: currentGame.paddleR.pos.y,
-      ballX: currentGame.ball.pos.x,
-      ballY: currentGame.ball.pos.y,
-      scoreL: currentGame.scoreL,
-      scoreR: currentGame.scoreR,
     };
   }
   /**
