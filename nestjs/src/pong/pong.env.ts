@@ -11,3 +11,4 @@ export const H = 800 * 0.9;
 export const W = 1000;
 export const FRAMERATE = 30;
 export const MAXSCORE = 7;
+export const TIMEBONUS = 2000; // ms
