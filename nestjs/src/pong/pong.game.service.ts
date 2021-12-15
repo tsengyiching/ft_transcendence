@@ -7,6 +7,7 @@ import {
   Match,
   Pos,
   Bonus,
+  SideBonus,
 } from './pong.interface';
 import { Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
@@ -149,14 +150,12 @@ export class PongService {
         ? undefined
         : {
             left: {
-              show: false,
-              y: 0,
+              y: -1,
               type: 0,
               start: 0,
             },
             right: {
-              show: false,
-              y: 0,
+              y: -1,
               type: 0,
               start: 0,
             },
@@ -318,13 +317,12 @@ export class PongService {
   gameInfosBonus(matchId: number) {
     // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
+    // if currentGame.bonus.
     return {
-      //   showL: currentGame.bonus.left.show,
-      //   showR: currentGame.bonus.right.show,
-      //   yL: currentGame.bonus.left.y,
-      //   yR: currentGame.bonus.right.y,
-      //   typeL: currentGame.bonus.left.type,
-      //   typeR: currentGame.bonus.right.type,
+      yL: currentGame.bonus.left.y,
+      yR: currentGame.bonus.right.y,
+      typeL: currentGame.bonus.left.type,
+      typeR: currentGame.bonus.right.type,
       //   startL: !!currentGame.bonus.left.start,
       //   startR: !!currentGame.bonus.right.start,
       //   blackHoles: currentGame.bonus.blackHoles,
@@ -573,6 +571,53 @@ export class PongService {
     });
   }
 
+  private updateSideBonus(
+    side: SideBonus,
+    mouv: number,
+    paddle: Paddle,
+  ): number[] | undefined {
+    if (side.y >= 0) {
+      if (mouv) {
+        side.y += mouv * 10;
+        if (side.y < 0) side.y += H;
+        if (side.y > H) side.y -= H;
+      }
+      //   if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+      //     side.y = -1;
+      //     const type = Math.floor(Math.random() * 3);
+      //     side.type = type === 3 ? type : type + 1;
+      //     return undefined;
+      //   }
+    } else if (side.type !== 0 && side.start === 0) {
+      // // verifier si bouton middle trigger pour lancer le bonus
+      // // OUI >>>
+      // // // lancer start = timestamp et lancer le bonus
+    } else if (side.start !== 0) {
+      // // update ce qu'il faut pendant le temps (verifier date - start)
+      // // tout remettre a zero
+    } else {
+      const trigger = Math.random();
+      if (trigger > 0.1) {
+        side.y = Math.random() * H;
+      }
+    }
+    return undefined;
+  }
+
+  private updateBonus(match: Match, mouv: number[]) {
+    const blackHoleL = this.updateSideBonus(
+      match.bonus.left,
+      mouv[1],
+      match.paddleL,
+    );
+    const blackHoleR = this.updateSideBonus(
+      match.bonus.right,
+      mouv[0],
+      match.paddleR,
+    );
+    if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);
+    if (blackHoleR !== undefined) match.bonus.blackHoles.push(...blackHoleR);
+  }
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
       const mouv: number[] = [0, 0];
@@ -589,6 +634,8 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
+
+      this.updateBonus(match, mouv);
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,

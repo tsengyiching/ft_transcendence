@@ -30,6 +30,8 @@ const GameCanvasBonus:React.VFC<{}> = () => {
 	const w = useStore(s => s.w);
 	const radius = useStore(s => s.radius);
 	const BonusLeft = useStore(s => s.BonusLeft);
+	const BonusRight = useStore(s => s.BonusRight);
+
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// preserve information that we need between rerender
 	const contextRef = useRef<CanvasRenderingContext2D | null>(null);
@@ -48,8 +50,10 @@ const GameCanvasBonus:React.VFC<{}> = () => {
 		}
 			const render = () => {
 				ctx?.clearRect(0,0,w, h);
-				if (BonusLeft.up)
+				if (BonusLeft.y >= 0)
 					drawBonus(ctx!, BonusLeft, radius);
+				if (BonusRight.y >= 0)
+					drawBonus(ctx!, BonusRight, radius);
 			   requestId = requestAnimationFrame(render);
 			   };
 			   

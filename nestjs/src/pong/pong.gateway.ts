@@ -303,7 +303,7 @@ export class PongGateway {
           this.pongService.UpdateGameBonus(gameId);
           this.server
             .to(roomName)
-            .volatile.emit('infos', this.pongService.gameInfosBonus(gameId));
+            .volatile.emit('infos', this.pongService.gameInfos(gameId));
         }
         if (this.pongService.goal(gameId)) {
           if (this.pongService.isEndGame(gameId)) {

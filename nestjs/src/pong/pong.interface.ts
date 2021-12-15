@@ -40,8 +40,7 @@ export type Player = {
   ready: boolean;
 };
 
-type SideBonus = {
-  show: boolean;
+export type SideBonus = {
   y: number;
   type: number;
   start: number;
@@ -50,7 +49,7 @@ type SideBonus = {
 export type Bonus = {
   left: SideBonus;
   right: SideBonus;
-  blackHoles: Pos[] | undefined;
+  blackHoles: number[] | undefined;
 };
 
 export type Match = {
