@@ -28,7 +28,6 @@ type Score = {
 }
 
 type Bonus = {
-	up: boolean;
 	x: number;
 	y: number;
 	id: number;
@@ -51,7 +50,11 @@ type Store = {
 	w: number;
 	h: number;
 	scoreBar: Score;
+	setBonus: (yL:number, yR:number, idL:number, idR: number) => void;
+	addBlackHole: (next:number[]) => void;
+	blackHole: number[] | undefined;
 	BonusLeft: Bonus;
+	BonusRight: Bonus;
 	radius: number; // ?
 	setScore: (L:number, R:number) => void;
 	right:number;
@@ -118,12 +121,24 @@ const useStore = create<Store>((set) => {
 			y: 0,
 			id: 0,
 		},
+		BonusRight:{
+			up : false,
+			x: 0,
+			y: 0,
+			id: 0,
+		},
+		blackHole: undefined,
+		setBonus: (yL, yR, idL, idR) => set((s) => ({
+			BonusLeft: {...s.BonusLeft, y:yL, id:idL},
+			BonusRight: {...s.BonusRight, y: yR, id:idR}
+		})),
+		addBlackHole: (next)=> set(() => ({blackHole:next})),
 		radius:2,
 		setScore: (L, R) => set(() => ({ left:L, right:R})),
 		left:0,
 		right:0,
 		gameStatus:0,
-		setGameStatus: (status) => set((s:Store) => ({gameStatus:status})),
+		setGameStatus: (status) => set(() => ({gameStatus:status})),
 		playerL :{ name: '', avatar: ''},
 		playerR :{ name: '', avatar: ''},
 	}

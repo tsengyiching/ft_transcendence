@@ -3,8 +3,6 @@ import { GameSocketContext } from "../context/gameSocket";
 import {Modal, Button} from 'react-bootstrap';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
-import { useHistory } from "react-router";
-import { LinkContainer } from "react-router-bootstrap";
 
 const GameStartModal:React.FC = () => {
     const socket:Socket = useContext(GameSocketContext);

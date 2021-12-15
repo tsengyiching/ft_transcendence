@@ -54,12 +54,12 @@ const Pong:React.FC<{h:number, w:number}> = (props) => {
 					h:props.h * 0.075 },
 				nameLeft:	{
 					x:props.w * 0.08,
-					y:props.h *0.0125,
+					y:props.h * 0.0125,
 					w:props.w * 0.3,
 					h:props.h * 0.075 },
 				bonusLeft:	{
 					x:props.w * 0.38,
-					y:props.h *0.0125,
+					y:props.h * 0.0125,
 					w:props.h * 0.075, 
 					h:props.h * 0.075 },
 				score:		{
@@ -82,10 +82,15 @@ const Pong:React.FC<{h:number, w:number}> = (props) => {
 					y:props.h * 0.0125, 
 					w:props.h * 0.075, 
 					h:props.h * 0.075 },
-					BonusLeft:{
-						...s.BonusLeft,
-						x:props.w * 0.02	},
-				fontSize: 48 * props.h / 1000, },	
+				fontSize: 48 * props.h / 1000, },
+				BonusLeft:{
+					...s.BonusLeft,
+					x:props.w * 0.02
+				},	
+				BonusRight:{
+					...s.BonusRight,
+					x:props.w * 0.98,
+				}
 			}));
 		}, [props.h, props.w]);
 								
