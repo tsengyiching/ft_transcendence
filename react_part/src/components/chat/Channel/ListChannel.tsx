@@ -50,6 +50,9 @@ function ListChannel(props: IUseStateChannel) {
                         if (NewSelectedChannel !== undefined && props.channelSelected !== undefined
                                 && (NewSelectedChannel.role !== props.channelSelected.role || NewSelectedChannel.channel_type))
                                 props.setChannelSelected({...NewSelectedChannel});
+                        //set ChannelSelected to undefined if ChannelSelected doesn't exist anymore
+                        if (props.channelSelected !== undefined && data.find((channel) => channel.channel_id === props.channelSelected?.channel_id) === undefined)
+                                props.setChannelSelected(undefined);
                 });
                 socket.on("channels-user-out", (data: IOtherChannel[]) => SetOthersChannels(data));
                 return (() => {
