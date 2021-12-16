@@ -12,3 +12,9 @@ export const W = 1000;
 export const FRAMERATE = 30;
 export const MAXSCORE = 7;
 export const TIMEBONUS = 2000; // ms
+
+//// bonus type
+export const NONE = 0;
+export const BONUSY = 1;
+export const BONUSTYPE = 2;
+export const BONUSBH = 3;
