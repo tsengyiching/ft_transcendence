@@ -15,6 +15,9 @@ import { PongUsersService } from './pong.users.service';
 import { FRAMERATE } from './pong.env';
 import { GameService } from 'src/game/service/game.service';
 import { GameMode } from 'src/game/model/game.entity';
+import { parse } from 'cookie';
+import { UseGuards } from '@nestjs/common';
+import { WsGuard } from 'src/auth/guard/ws.guard';
 // https://www.generacodice.com/en/articolo/713202/how-can-i-find-the-response-time-latency-of-a-client-in-nodejs-with-sockets-socket-
 
 function sleep(ms) {
@@ -29,6 +32,7 @@ function sleep(ms) {
     credentials: true,
   },
 })
+@UseGuards(WsGuard)
 export class PongGateway {
   constructor(
     private pongService: PongService,
@@ -40,30 +44,36 @@ export class PongGateway {
   @WebSocketServer() server: Socket;
 
   async handleConnection(client: Socket) {
-    try {
-      const user: User = await this.authService.getUserFromSocket(client);
-      client.join(user.id.toString());
-      this.pongUsersService.userConnect(user.id);
-      const resp = this.pongUsersService.isInMatchmaking(user.id);
-      client.emit('inMatchMaking', resp);
-    } catch (error) {
-      console.log(error);
+    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    if (jwtCookie !== undefined) {
+      try {
+        const user: User = await this.authService.getUserFromSocket(client);
+        client.join(user.id.toString());
+        this.pongUsersService.userConnect(user.id);
+        const resp = this.pongUsersService.isInMatchmaking(user.id);
+        client.emit('inMatchMaking', resp);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
   async handleDisconnect(client: Socket) {
-    try {
-      const user: User = await this.authService.getUserFromSocket(client);
-      client.leave(user.id.toString());
-      const currentGame = this.pongService.userDiconnectFromGame(user.id);
-      if (currentGame) client.leave(currentGame.toString() + '-Game');
-      await sleep(2000);
-      const left = this.pongUsersService.userDisconnect(user.id);
-      if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
-        this.pongUsersService.removePlayer(user.id);
+    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    if (jwtCookie !== undefined) {
+      try {
+        const user: User = await this.authService.getUserFromSocket(client);
+        client.leave(user.id.toString());
+        const currentGame = this.pongService.userDiconnectFromGame(user.id);
+        if (currentGame) client.leave(currentGame.toString() + '-Game');
+        await sleep(2000);
+        const left = this.pongUsersService.userDisconnect(user.id);
+        if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
+          this.pongUsersService.removePlayer(user.id);
+        }
+      } catch (error) {
+        console.log(error);
       }
-    } catch (error) {
-      console.log(error);
     }
   }
   /**

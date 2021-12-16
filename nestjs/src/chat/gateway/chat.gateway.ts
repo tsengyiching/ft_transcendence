@@ -22,6 +22,7 @@ import { SetChannelPasswordDto } from '../dto/set-channel-password.dto';
 import { ChangeStatusDto } from '../dto/change-status.dto';
 import { UseGuards } from '@nestjs/common';
 import { WsGuard } from 'src/auth/guard/ws.guard';
+import { parse } from 'cookie';
 
 @WebSocketGateway({
   cors: {
@@ -62,23 +63,26 @@ export class ChatGateway
    * @param args
    */
   async handleConnection(client: Socket) {
-    try {
-      const user: User = await this.authService.getUserFromSocket(client);
-      await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
-      client.join('user-' + user.id);
-      this.server.emit('reload-status', {
-        user_id: user.id,
-        status: OnlineStatus.AVAILABLE,
-      });
-      console.log('New User Join');
-      const [channels_in, channels_out] = await Promise.all([
-        this.chatService.getUserChannels(user.id),
-        this.chatService.getUserNotParticipateChannels(user.id),
-      ]);
-      client.emit('channels-user-in', channels_in);
-      client.emit('channels-user-out', channels_out);
-    } catch (error) {
-      console.log(error);
+    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    if (jwtCookie !== undefined) {
+      try {
+        const user: User = await this.authService.getUserFromSocket(client);
+        await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+        client.join('user-' + user.id);
+        this.server.emit('reload-status', {
+          user_id: user.id,
+          status: OnlineStatus.AVAILABLE,
+        });
+        console.log('New User Join');
+        const [channels_in, channels_out] = await Promise.all([
+          this.chatService.getUserChannels(user.id),
+          this.chatService.getUserNotParticipateChannels(user.id),
+        ]);
+        client.emit('channels-user-in', channels_in);
+        client.emit('channels-user-out', channels_out);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -87,17 +91,20 @@ export class ChatGateway
    * @param client
    */
   async handleDisconnect(client: Socket) {
-    try {
-      const user: User = await this.authService.getUserFromSocket(client);
-      await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
-      client.leave('user-' + user.id);
-      this.server.emit('reload-status', {
-        user_id: user.id,
-        status: OnlineStatus.OFFLINE,
-      });
-      console.log('Remove active user');
-    } catch (error) {
-      console.log(error);
+    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    if (jwtCookie !== undefined) {
+      try {
+        const user: User = await this.authService.getUserFromSocket(client);
+        await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+        client.leave('user-' + user.id);
+        this.server.emit('reload-status', {
+          user_id: user.id,
+          status: OnlineStatus.OFFLINE,
+        });
+        console.log('Remove active user');
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -108,7 +115,9 @@ export class ChatGateway
   @SubscribeMessage('channel-create')
   async createChannel(client: Socket, body: CreateChannelDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       await this.chatService.createChannel(user.id, body);
       console.log('Channel created successfully !');
       this.server.emit('channel-need-reload');
@@ -124,7 +133,9 @@ export class ChatGateway
   @SubscribeMessage('channel-join')
   async joinChannel(client: Socket, body: JoinChannelDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       await this.chatService.joinChannel(user.id, body);
       console.log('User joined channel successfully !');
 
@@ -149,7 +160,9 @@ export class ChatGateway
   @SubscribeMessage('channel-leave')
   async leaveChannel(client: Socket, { channelId }) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       const channel = await this.chatService.leaveChannel(user.id, channelId);
       if (channel === -1) {
         this.server.emit('channel-need-reload');
@@ -192,8 +205,10 @@ export class ChatGateway
   @SubscribeMessage('channel-status-change')
   async changeChannelUserStatus(client: Socket, body: ChangeStatusDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.changeChannelUserStatus(user, body);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      await this.chatService.changeChannelUserStatus(user.id, body);
       const channels_in = this.chatService.getUserChannels(body.userId);
       this.server
         .to('user-' + body.userId)
@@ -212,8 +227,10 @@ export class ChatGateway
   @SubscribeMessage('channel-admin')
   async setChannelAdmin(client: Socket, body: SetChannelAdminDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
-      await this.chatService.setChannelAdmin(user, body);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      await this.chatService.setChannelAdmin(user.id, body);
       console.log('Channel admin has been set/unset successfully !');
       const channels_in = await this.chatService.getUserChannels(user.id);
       this.server
@@ -233,7 +250,9 @@ export class ChatGateway
   @SubscribeMessage('channel-change-password')
   async changeChannelPassword(client: Socket, body: SetChannelPasswordDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       await this.chatService.changeChannelPassword(user.id, body);
       console.log('Channel password has been changed successfully !');
       this.server.emit('channel-need-reload');
@@ -249,7 +268,10 @@ export class ChatGateway
   @SubscribeMessage('channel-destroy')
   async destroyChannel(client: Socket, { channelId }) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      const user = await this.userService.getOneById(userPayload.id);
       const channel = await this.chatService.destroyChannel(user, channelId);
       if (channel) {
         console.log(`${channel.name} has been destroyed successfully !`);
@@ -267,7 +289,10 @@ export class ChatGateway
   @SubscribeMessage('channel-admin-site-moderator')
   async setChannelAdminbySite(client: Socket, body: SetChannelAdminDto) {
     try {
-      const user = await this.authService.getUserFromSocket(client);
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      const user = await this.userService.getOneById(userPayload.id);
       await this.chatService.setChannelAdminbySiteModerator(user, body);
       console.log(
         'Site Moderator: Channel admin has been set/unset successfully !',
@@ -289,7 +314,9 @@ export class ChatGateway
   @SubscribeMessage('ask-reload-channel')
   async reloadChannel(client: Socket) {
     try {
-      const user: User = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       const [channels_in, channels_out] = await Promise.all([
         this.chatService.getUserChannels(user.id),
         this.chatService.getUserNotParticipateChannels(user.id),
@@ -313,8 +340,11 @@ export class ChatGateway
       }
       /* Check channel exists */
       await this.chatService.getChannelById(channelId);
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       const [user, msgs, users] = await Promise.all([
-        this.authService.getUserFromSocket(client),
+        this.userService.getOneById(userPayload.id),
         this.messageService.getChannelMessages(channelId),
         this.chatService.getChannelUsers(channelId),
       ]);
@@ -347,7 +377,10 @@ export class ChatGateway
   @SubscribeMessage('channel-message')
   async newChannelMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
-      const user: User = await this.authService.getUserFromSocket(client);
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      const user: User = await this.userService.getOneById(userPayload.id);
       /* Save message in db */
       const message = await this.messageService.createChannelMessage(
         user.id,
@@ -383,7 +416,9 @@ export class ChatGateway
   @SubscribeMessage('private-ask-reload')
   async loadPrivate(client: Socket) {
     try {
-      const user: User = await this.authService.getUserFromSocket(client);
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       const direct = this.chatService.getDirectChannelList(user.id);
       client.emit('private-list', await direct);
     } catch (error) {
@@ -399,29 +434,29 @@ export class ChatGateway
   async loadDirect(client: Socket, body: LoadDirectDto) {
     try {
       let channelId = body.channelId;
-      const user1 = await this.authService.getUserFromSocket(client);
-
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
       if (typeof channelId !== 'undefined') {
-        const channelParticipant =
-          await this.chatService.getOneChannelParticipant(user1.id, channelId);
-        if (!channelParticipant)
-          throw new WsException('You are not in conversation with this user !');
+        const [channel, channelParticipant] = await Promise.all([
+          this.chatService.getChannelById(body.channelId),
+          this.chatService.getOneChannelParticipant(userPayload.id, channelId),
+        ]);
+        this.chatService.isChannelParticipant(channelParticipant, channel);
       } else if (typeof body.userId !== 'undefined') {
-        const user2 = await this.userService.getOneById(body.userId);
-        if (!user2)
-          throw new WsException(`This user id ${body.userId} does not exist !`);
-
+        const [user1, user2] = await Promise.all([
+          this.userService.getUserProfileById(userPayload.id),
+          this.userService.getUserProfileById(body.userId),
+        ]);
         channelId = await this.chatService.createDirectChannel(user1, user2);
         const direct = await this.chatService.getDirectChannelList(user1.id);
         client.emit('private-list', direct);
       } else throw new WsException('Invalid socket request.');
-
       client.join('private-' + channelId);
-      const messages = await this.messageService.getChannelMessages(channelId);
-      const channelInfo = await this.chatService.getDirectInfo(
-        user1.id,
-        channelId,
-      );
+      const [messages, channelInfo] = await Promise.all([
+        this.messageService.getChannelMessages(channelId),
+        this.chatService.getDirectInfo(userPayload.id, channelId),
+      ]);
       client.emit('private-info', channelInfo);
       client.emit('private-message-list', messages);
       console.log('Conversation loaded successfully !');
@@ -446,7 +481,10 @@ export class ChatGateway
   @SubscribeMessage('private-message')
   async newDirectMessage(client: Socket, messageDto: CreateMessageDto) {
     try {
-      const user: User = await this.authService.getUserFromSocket(client);
+      const userPayload = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      const user: User = await this.userService.getOneById(userPayload.id);
       /* Save message in db */
       const message = await this.messageService.createChannelMessage(
         user.id,
@@ -463,7 +501,7 @@ export class ChatGateway
         message_content: message.message,
       };
 
-      /*Send message to all people connected in channel*/
+      /* Send message to all people connected in channel */
       this.server
         .to('private-' + message.channelId)
         .emit('private-new-message', sendMessage);

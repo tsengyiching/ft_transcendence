@@ -26,21 +26,21 @@ export class AuthService {
     };
   }
 
-  getUserFromAuthenticationToken(token: string): Promise<User> {
-    const payload: JwtPayload = this.jwtService.verify(token, {
+  getPayloadFromAuthenticationToken(cookie: string): JwtPayload {
+    const jwtToken = parse(cookie).jwt;
+    // jwt two factor
+    const payload: JwtPayload = this.jwtService.verify(jwtToken, {
       secret: process.env.JWT_SECRET,
     });
-    if (payload.id) {
-      return this.userService.getOneById(payload.id);
-    }
+    //console.log('payload', payload);
+    return payload;
   }
 
-  async getUserFromSocket(socket: Socket): Promise<User> {
-    const cookie = socket.handshake.headers.cookie;
-    if (!cookie) throw new WsException('Unauthorized');
-    const user: User = await this.getUserFromAuthenticationToken(
-      parse(cookie).jwt,
-    );
+  async getUserFromSocket(client: Socket): Promise<User> {
+    const cookie = client.handshake.headers.cookie;
+    //'console.log('cookie', cookie);
+    const payload = this.getPayloadFromAuthenticationToken(cookie);
+    const user = await this.userService.getOneById(payload.id);
     if (!user) throw new WsException('Invalid credentials.');
     return user;
   }
