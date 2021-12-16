@@ -44,12 +44,13 @@ export type SideBonus = {
   y: number;
   type: number;
   start: number;
+  bonusUp: number;
 };
 
 export type Bonus = {
   left: SideBonus;
   right: SideBonus;
-  blackHoles: number[] | undefined;
+  blackHoles: string;
 };
 
 export type Match = {
@@ -66,7 +67,6 @@ export type Match = {
   run: boolean;
   goal: boolean;
   dbId: number;
-  bonusUP: boolean;
   bonus: Bonus | undefined;
   // viewer id ??
 };

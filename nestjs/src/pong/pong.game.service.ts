@@ -23,6 +23,10 @@ import {
   W,
   FRICTIONANGLE,
   MAXSCORE,
+  NONE,
+  BONUSY,
+  BONUSTYPE,
+  BONUSBH,
 } from './pong.env';
 
 @Injectable()
@@ -95,8 +99,13 @@ export class PongService {
     return this.matches.find((match) => match.id === gameId).dbId;
   }
 
-  isBonusUP(gameId: number) {
-    return this.matches.find((match) => match.id === gameId).bonusUP;
+  isBonusUPL(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).bonus.left.bonusUp;
+  }
+
+  isBonusUPR(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).bonus.right
+      .bonusUp;
   }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
@@ -150,7 +159,6 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
-      bonusUP: false,
       bonus: !bonus
         ? undefined
         : {
@@ -158,13 +166,15 @@ export class PongService {
               y: -1,
               type: 0,
               start: 0,
+              bonusUp: NONE,
             },
             right: {
               y: -1,
               type: 0,
               start: 0,
+              bonusUp: NONE,
             },
-            blackHoles: undefined,
+            blackHoles: '00000000',
           },
     };
     return newMatch;
@@ -324,18 +334,53 @@ export class PongService {
    * @returns an object with game informations
    */
 
-  gameInfosBonus(matchId: number) {
+  gameInfosBonusY(matchId: number) {
     // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
     return {
       yL: currentGame.bonus.left.y,
       yR: currentGame.bonus.right.y,
+    };
+  }
+
+  gameInfosBonusType(matchId: number) {
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
       typeL: currentGame.bonus.left.type,
       typeR: currentGame.bonus.right.type,
-      //   startL: !!currentGame.bonus.left.start,
-      //   startR: !!currentGame.bonus.right.start,
-      //   blackHoles: currentGame.bonus.blackHoles,
     };
+  }
+
+  gameInfosBonusLaunch(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      startL:
+        currentGame.bonus.left.start !== 0 ? 0 : currentGame.bonus.left.type,
+      startR:
+        currentGame.bonus.right.start !== 0 ? 0 : currentGame.bonus.right.type,
+    };
+  }
+
+  /*
+        ++++++++++=++++++++++
+    +             =             +
+    +   0000000000=1111111111   +
+    +             =             +
+    +   2222222222=3333333333   +
+    +             =             +
+    +   4444444444=5555555555   +
+    +             =             +
+    +   6666666666=7777777777   +
+    +             =             +
+        ++++++++++=++++++++++
+    this is the pong arena and different places on the arena where blackhole can pop
+    numbers are the index on the string that define the blackholes places
+  */
+  gameInfosBonusBH(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return currentGame.bonus.blackHoles;
   }
   /**
    * @param gameId Match id
@@ -577,20 +622,22 @@ export class PongService {
     side: SideBonus,
     mouv: number,
     paddle: Paddle,
-  ): number[] | undefined {
+  ): string | undefined {
     if (side.y >= 0) {
       if (mouv) {
         side.y += mouv * 10;
         if (side.y < 0) side.y += H;
         if (side.y > H) side.y -= H;
       }
-      //   if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
-      //     side.y = -1;
-      //     const type = Math.floor(Math.random() * 3);
-      //     side.type = type === 3 ? type : type + 1;
-      //     return undefined;
-      //   }
+      if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+        side.y = -1;
+        const type = Math.floor(Math.random() * 3);
+        side.type = type === 3 ? type : type + 1;
+        side.bonusUp = BONUSTYPE;
+        return undefined;
+      }
     } else if (side.type !== 0 && side.start === 0) {
+      side.bonusUp = NONE;
       // // verifier si bouton middle trigger pour lancer le bonus
       // // OUI >>>
       // // // lancer start = timestamp et lancer le bonus
@@ -601,24 +648,21 @@ export class PongService {
       const trigger = Math.random();
       if (trigger > 0.1) {
         side.y = Math.random() * H;
+        side.bonusUp = BONUSY;
       }
     }
     return undefined;
   }
 
   private updateBonus(match: Match, mouv: number[]) {
-    const blackHoleL = this.updateSideBonus(
-      match.bonus.left,
-      mouv[1],
-      match.paddleL,
-    );
-    const blackHoleR = this.updateSideBonus(
+    const retL = this.updateSideBonus(match.bonus.left, mouv[1], match.paddleL);
+    const retR = this.updateSideBonus(
       match.bonus.right,
       mouv[0],
       match.paddleR,
     );
-    if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);
-    if (blackHoleR !== undefined) match.bonus.blackHoles.push(...blackHoleR);
+    // if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);
+    // if (blackHoleR !== undefined) match.bonus.blackHoles.push(...blackHoleR);
   }
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {

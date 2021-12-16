@@ -13,7 +13,9 @@ body {
 
 #wrapper { position:static;
 }
-
+#canvas {
+    position:sticky;
+}
 #background-layer{ z-index:1;
     background-image: url('https://image.freepik.com/free-vector/pastel-watercolor-painted-background_23-2148959638.jpg');
     background-size: cover;
