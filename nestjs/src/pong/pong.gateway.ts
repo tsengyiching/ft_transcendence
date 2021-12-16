@@ -303,6 +303,7 @@ export class PongGateway {
     this.pongService.setGameRunning(gameId, true);
     const roomName = gameId.toString() + '-Game';
     if (gameId >= 0) {
+      this.server.to(roomName).emit('sendScore', { scoreL: 0, scoreR: 0 });
       const GameLoop = () => {
         const now = Date.now();
         if (lastRefresh + refreshTime <= now) {
@@ -312,6 +313,7 @@ export class PongGateway {
             .to(roomName)
             .volatile.emit('infos', this.pongService.gameInfos(gameId));
         }
+        this.checkBonusToEmit(gameId, roomName);
         if (this.pongService.goal(gameId)) {
           this.server
             .to(roomName)
@@ -341,6 +343,33 @@ export class PongGateway {
         }
       };
       GameLoop();
+    }
+  }
+
+  checkBonusToEmit(gameId: number, roomName: string) {
+    const leftCkeck = this.pongService.isBonusUPL(gameId);
+    const rightCheck = this.pongService.isBonusUPR(gameId);
+
+    if (leftCkeck === 1 || rightCheck === 1) {
+      this.server
+        .to(roomName)
+        .volatile.emit('bonusY', this.pongService.gameInfosBonusY(gameId));
+      console.log('BONUS YYYY');
+    }
+    if (leftCkeck === 2 || rightCheck === 2) {
+      this.server
+        .to(roomName)
+        .emit('bonusType', this.pongService.gameInfosBonusType(gameId));
+    }
+    if (leftCkeck === 3 || rightCheck === 3) {
+      this.server
+        .to(roomName)
+        .emit('bonusLaunch', this.pongService.gameInfosBonusLaunch(gameId));
+    }
+    if (leftCkeck === 4 || rightCheck === 4) {
+      this.server
+        .to(roomName)
+        .emit('bonusBH', this.pongService.gameInfosBonusBH(gameId));
     }
   }
 }

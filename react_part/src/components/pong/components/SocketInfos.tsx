@@ -17,7 +17,6 @@ type Infos = {
 	const scoreL = useStore(s => s.left);
 	const scoreR = useStore(s => s.right);
 	const setScore = useStore(s => s.setScore);
-	const setBonus = useStore(s => s.setBonus);
 	const [infos, setinfos] = useState<Infos>({
 		pOneY: 0,
 		pTwoY: 0,
@@ -29,16 +28,18 @@ type Infos = {
 	useEffect(() => {
         socket.on('infos', (d) => {
 			setinfos(d);
+			setPosition(infos);
 		})
 		socket.on('sendScore', (d) => {
-			setScore(d.ScoreL, d.ScoreR);
+			setScore(d.scoreL, d.scoreR);
+			console.log(`SCORED ${scoreL} - ${scoreR}`)
 		})
 		return (() => {
 			socket.off('infos');
 			socket.off('sendScore');
 		})
 	});
-	setPosition(infos);
+	
 		return (null);
  }
 
