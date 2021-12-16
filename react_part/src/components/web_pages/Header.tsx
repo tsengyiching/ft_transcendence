@@ -10,13 +10,14 @@ import NavDropdown from 'react-bootstrap/NavDropdown';
 import Container from 'react-bootstrap/Container';
 import {LinkContainer} from 'react-router-bootstrap';
 import logoPong from '../pictures/ping-pong.png';
+import { DataContext, SiteStatus } from '../../App';
 
 function Header () {
     const [isConnected, setConnexion] = useState(true);
     const [user_avatar, setAvatar] = useState("")
     const [id, setId] = useState(0);
     const [nick, setNick] = useState<string>('');
-    // const userData = useContext(DataContext);
+    const userData = useContext(DataContext);
 
     useEffect(() => {
 		let isMounted = true;
@@ -53,6 +54,7 @@ function Header () {
 					<Navbar.Collapse id="responsive-navbar-nav">
 						<Nav className="me-auto">
 							<LinkContainer to='/'><Nav.Link>Ladder</Nav.Link></LinkContainer>
+							<Nav.Link>{userData.siteStatus} of the website</Nav.Link>
 						</Nav>
 						<Nav>
 							<NavDropdown className="NavProfile" id="responsive-nav-dropdown" align="end" title={
@@ -61,6 +63,8 @@ function Header () {
 									<Image className="Avatar" src={`${user_avatar}`} alt='avatar' roundedCircle/>
 								</span>
 								}>
+									{(userData.siteStatus === SiteStatus.OWNER || userData.siteStatus === SiteStatus.MODERATOR)
+									&& <LinkContainer to='/admin'><NavDropdown.Item>Admin View</NavDropdown.Item></LinkContainer>}
 									<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
 									<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
 									<NavDropdown.Divider />
