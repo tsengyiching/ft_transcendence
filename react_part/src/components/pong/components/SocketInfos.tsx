@@ -17,7 +17,6 @@ type Infos = {
 	const scoreL = useStore(s => s.left);
 	const scoreR = useStore(s => s.right);
 	const setScore = useStore(s => s.setScore);
-	const setBonus = useStore(s => s.setBonus);
 	const [infos, setinfos] = useState<Infos>({
 		pOneY: 0,
 		pTwoY: 0,

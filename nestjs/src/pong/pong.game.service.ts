@@ -161,7 +161,6 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
-      bonusUP: false,
       bonus: !bonus
         ? undefined
         : {
