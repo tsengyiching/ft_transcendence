@@ -44,7 +44,9 @@ export class PongGateway {
   @WebSocketServer() server: Socket;
 
   async handleConnection(client: Socket) {
-    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    let jwtCookie: string;
+    if (client.handshake.headers.cookie)
+      jwtCookie = parse(client.handshake.headers.cookie).jwt;
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
@@ -59,7 +61,9 @@ export class PongGateway {
   }
 
   async handleDisconnect(client: Socket) {
-    const jwtCookie = parse(client.handshake.headers.cookie).jwt;
+    let jwtCookie: string;
+    if (client.handshake.headers.cookie)
+      jwtCookie = parse(client.handshake.headers.cookie).jwt;
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
