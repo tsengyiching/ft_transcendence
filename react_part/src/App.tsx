@@ -1,6 +1,6 @@
 import './App.css';
+import "bootswatch/dist/lux/bootstrap.min.css"
 import Router from './components/Router';
-import { Container } from 'react-bootstrap';
 import {SocketContext, socket} from './context/socket'
 
 import axios from 'axios'
@@ -53,11 +53,11 @@ function App():React.ReactElement {
 
   return (
     <DataContext.Provider value={userData}>
-    	<SocketContext.Provider value={socket}>
-    		<Container fluid className="App">
-    		    <Router/>
-    		</Container>
-    	</SocketContext.Provider>
+    <SocketContext.Provider value={socket}>
+      <div className="App">
+        <Router/>
+      </div>
+    </SocketContext.Provider>
     </DataContext.Provider>
   );
 }

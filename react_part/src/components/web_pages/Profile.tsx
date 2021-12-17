@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
+import '../members/Status';
 import axios from 'axios';
-import {Image, Row, Col} from 'react-bootstrap'
+import {Image, Row, Col, Badge, ListGroup} from 'react-bootstrap'
 
 import {useParams} from "react-router-dom";
+import './Profile.css'
+import status from "../members/Status";
 
 export default function Profile() {
 
@@ -134,21 +137,28 @@ export default function Profile() {
     }
 
     function printFriendsList () {
+		if (friends.length == 0)
+			return (
+				<h5>He has no friend but he has curly ! 😀🍫</h5>
+			);
+			console.log(friends);
         return (
-            <div>
-                {friends.map(({user_id, user_nickname, user_avatar, status}) => {
+            <ListGroup variant="flush">
+                {friends.map(({user_id, user_nickname, user_avatar, user_siteStatus}) => {
                     return (
-                        <div key={user_id}>
-                            <a href={'/profile/'+user_id}>
-                                <Image src={`${user_avatar}`} style={{width:"150px", height:"100px"}} alt="pp" rounded fluid/>
-                            </a>
-                            {user_nickname}
-                            {status}
-                        </div>
-                    )
+						<ListGroup.Item>
+							<a href={'/profile/'+user_id}>
+								<Row>
+									<Col><Image src={`${user_avatar}`} className="Avatar" alt="Friend Avatar"/></Col>
+										<Col>{status(user_siteStatus)}</Col> {/* because is triangle */}
+									<Col>{user_nickname}</Col>
+								</Row>
+							</a>
+						</ListGroup.Item>
+                    );
                 })
                 }
-            </div>
+            </ListGroup>
         )
     }
 
@@ -157,24 +167,21 @@ export default function Profile() {
             <div>
                 {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
                     return ( 
-                        <div key={`${gameId}-matchsScore`}>
-                            <h4> 
-                                <Row>
-                                    <Col lg={4}>
-                                        <Image src={`${getPicture(idMain)}`} width="100" alt="pp" rounded/>
-                                    </Col>
-                                    <Col>
-                                        {` ${name} ` }
-                                        {` ${userScore} - ${opponentScore} `}
-                                        {` ${getName(opponentId)} `}
-                                    </Col>
-                                    <Col lg={4}>
-                                        <a href={'/profile/'+opponentId}>
-                                            <Image src={`${getPicture(opponentId)}`} width="100" alt="pp" rounded/>
-                                        </a>
-                                    </Col>
-                                </Row>
-                            </h4>
+                        <div key={`${gameId}-matchsScore`}> 
+                            <Row>
+                                <Col xs='auto'>
+                                    <Image className="Avatar" src={`${getPicture(idMain)}`} alt="Avartar"/>
+                                </Col>
+                                <Col xs={10} style={{textAlign: 'center'}}>
+									<div>{` ${userScore} - ${opponentScore} `}</div>
+									<div>{` ${name} ` } Vs {` ${getName(opponentId)} `}</div>      
+                                </Col>
+                                <Col xs='auto'>
+                                    <a href={'/profile/'+opponentId}>
+                                        <Image className="Avatar" src={`${getPicture(opponentId)}`} alt="Avatar"/>
+                                    </a>
+                                </Col>
+                            </Row>
                         </div>
                     )
                 })}
@@ -184,45 +191,25 @@ export default function Profile() {
 
     function Validate() {
         return (
-            <div className="row">
-                <div className="col">
-                    <h3>Profile :</h3>
-                    <h4>{name}</h4>
-                    <div className="row">
-                        <div className="col">
-                            <Image src={`${avatar}`} className="w-50" alt="singe" rounded/>
-                        </div>
-                    </div>
-                    <div className="row">
-                        <div className="col">
-                            Total matches win : {winningMatches()} <br></br>
-                            Total matches lost : {lostMatches()} <br></br><br></br><br></br>
-                            <Row>
-                                <Col lg={2}>
-                                </Col>
-                                <Col lg={8}>
-                                match history : {printMatchsScore()}
-                                </Col>
-                                <Col>
-                                </Col>
-                            </Row>
-                        </div>
-                    </div>
-                </div>
-                <div className="col">
-                    {}
-                    <h4>Friends :</h4>
-                    <Row>
-                        <Col lg={4}>
-                        </Col>
-                        <Col lg={4}>
-                            {printFriendsList()}
-                        </Col>
-                        <Col>
-                        </Col>
-                    </Row>
-                </div>
-            </div>
+			<Row className="Profile">
+				<Col className="Matches" xl={6} lg={12}>
+					<Image src={`${avatar}`} className="ProfileAvatar border shadow-sm" alt="Avatar" roundedCircle/>
+					<div className="p-3 border bg-white shadow-sm">
+						<h3>{name}</h3>
+						<span>Total matches win : <Badge bg="success">{winningMatches()}</Badge></span>
+						<span>Total matches lost : <Badge bg="danger">{lostMatches()}</Badge></span>
+						<hr />
+						{printMatchsScore()}
+					</div>
+				</Col>
+				<Col className="Friends" xl={6} lg={12}>
+					<div className="p-3 border bg-white shadow-sm">
+						<h4>Friends</h4>
+						<hr />
+						{printFriendsList()}
+					</div>
+				</Col>
+			</Row>
         )
     }
 
