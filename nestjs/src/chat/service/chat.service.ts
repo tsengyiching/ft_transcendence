@@ -236,7 +236,6 @@ export class ChatService {
     userId: number,
     body: SetChannelPasswordDto,
   ): Promise<Channel> {
-    console.log('change', body);
     this.setChannelPasswordDtoValidation(body);
     const [channel, user] = await Promise.all([
       this.getChannelById(body.channelId),
