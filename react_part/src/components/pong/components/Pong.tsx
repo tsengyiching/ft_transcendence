@@ -86,14 +86,23 @@ const Pong:React.FC<{h:number, w:number}> = (props) => {
 				fontSize: 48 * props.h / 1000, },
 				BonusLeft:{
 					...s.BonusLeft,
-					x:props.w * 0.02
+					y: -1,
+					x:props.w * 0.02,
+					id: 0,
 				},	
 				BonusRight:{
 					...s.BonusRight,
 					x:props.w * 0.98,
-				}
+					y: -1,
+					id: 0,
+				},
+				playerL :{ name: '', avatar: ''},
+				playerR :{ name: '', avatar: ''},
+				left: 0,
+				right: 0,
 			}));
 		}, [props.h, props.w]);
+
 								
 return (
 		<div>
