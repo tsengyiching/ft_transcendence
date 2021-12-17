@@ -2,11 +2,14 @@ import {useRef, useEffect} from "react"
 import useStore from "../../hooks/useStore";
 import "./../GameCanvas.css"
 import {Ball, Paddle} from './../../types/ObjectTypes'
+import { forEachTrailingCommentRange } from "typescript";
 
 interface CanvasProps {
 	w: number;
 	h: number;
 }
+const placesY = [ 144, 288, 432, 516, 144, 288, 432, 516 ];
+const placesX = [ 0, 100, 200, 300, 400, 550, 650, 750, 850];
 
 function drawMiddle(ctx:CanvasRenderingContext2D, props:CanvasProps) : void {
 	ctx.beginPath();
@@ -45,7 +48,28 @@ function drawPaddle(ctx:CanvasRenderingContext2D, paddle:Paddle) : void  {
 	ctx.fill();
 	ctx.closePath();
 }
-
+function drawBH(ctx:CanvasRenderingContext2D, bh:string) : void {
+	for (let i = 0; i < 8; i++) {
+		if (bh[i] !== '0'){
+			const y = placesY[i];
+			const x = placesX[Number(bh[i])]
+			ctx.beginPath();
+			ctx.fillStyle = 'black';
+			ctx.arc(250, 350, 10, 0, Math.PI * 2, true);
+			ctx.fill();
+			ctx.closePath();
+			ctx.globalAlpha = 0.3;
+			// Draw semi transparent circles
+			for (var j = 0; j < 7; j++) {
+			  ctx.beginPath();
+			  ctx.arc(x, y, 7 + 7 * j, 0, Math.PI * 2, true);
+			  ctx.fill();
+			}
+			ctx.closePath();
+		}
+	}
+	
+}
 const GameCanvasBackground:React.VFC<{}> = () => {
 	const h = useStore(s => s.h);
 	const w = useStore(s => s.w);
@@ -54,6 +78,7 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 	const BonusLeft = useStore(s => s.BonusLeft);
 	const BonusRight = useStore(s => s.BonusRight);
 	const ball = useStore(s => s.ball);
+	const bh = useStore(s => s.blackHole);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// preserve information that we need between rerender
@@ -78,8 +103,9 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 			drawPaddle(ctx!, PaddleR);
 			if (BonusLeft.y >= 0) drawBonus(ctx!, BonusLeft.x , BonusLeft.y);
 			if (BonusRight.y >= 0) drawBonus(ctx!, BonusRight.x , BonusRight.y);
-
+			if (bh) drawBH(ctx!, bh);
 			drawBall(ctx!, ball);
+
 		   requestId = requestAnimationFrame(render);
 		   };
 		   
