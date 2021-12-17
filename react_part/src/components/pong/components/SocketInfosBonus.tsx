@@ -35,6 +35,7 @@ type InfosBonus = {
 			setBonusType(d.startL, d.startR);
 		});
 		socket.on('bonusBH', (d: string) => {
+			console.log(d);
 			setBonusBH(d);
 		});
 		return (() => {

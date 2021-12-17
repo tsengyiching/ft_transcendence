@@ -616,11 +616,12 @@ export class PongService {
     const placeLeft = (Math.floor(Math.random() * 3.99) + 1).toString();
     const placeRight = (Math.floor(Math.random() * 3.99) + 1).toString();
     const voidLeft = Math.floor(Math.random() * 4.99);
-    const voidRight = Math.floor(Math.random() * 4.99) + 4;
+    const voidRight = Math.floor(Math.random() * 4.99) + 3;
     const replace = blackhole.split('');
     replace[voidLeft] = placeLeft;
     replace[voidRight] = placeRight;
     blackhole = replace.join('');
+    return blackhole;
   }
 
   private updateSideBonus(
@@ -664,10 +665,10 @@ export class PongService {
       side.bonusUp = NONE;
       if (side.type === 3) {
         // DO BH
-        this.createBlackHoles(bh);
         side.bonusUp = BONUSBH;
         side.start = 0;
         side.type = 0;
+        return this.createBlackHoles(bh);
       } else if (side.type === 2) {
         // do paddle speedup
         paddle.speed = 30;
@@ -676,6 +677,7 @@ export class PongService {
           paddle.speed = 10;
           side.start = 0;
           side.type = 0;
+          return undefined;
         }
       } else if (side.type === 1) {
         // do ball speedup
@@ -701,10 +703,11 @@ export class PongService {
         }
       }
     }
+    return undefined;
   }
 
   private updateBonus(match: Match, mouv: number[]) {
-    this.updateSideBonus(
+    const left = this.updateSideBonus(
       match.bonus.blackHoles,
       match.bonus.left,
       mouv[1],
@@ -712,7 +715,7 @@ export class PongService {
       match.ball,
       match.pOne.space,
     );
-    this.updateSideBonus(
+    const right = this.updateSideBonus(
       match.bonus.blackHoles,
       match.bonus.right,
       mouv[0],
@@ -720,6 +723,8 @@ export class PongService {
       match.ball,
       match.pTwo.space,
     );
+    if (left) match.bonus.blackHoles = left;
+    if (right) match.bonus.blackHoles = right;
   }
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
