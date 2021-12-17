@@ -17,4 +17,5 @@ export const TIMEBONUS = 2000; // ms
 export const NONE = 0;
 export const BONUSY = 1;
 export const BONUSTYPE = 2;
-export const BONUSBH = 3;
+export const BONUSLAUNCH = 3;
+export const BONUSBH = 4;

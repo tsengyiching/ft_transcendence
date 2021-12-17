@@ -37,6 +37,7 @@ export type Player = {
   score: number;
   up: boolean;
   down: boolean;
+  space: boolean;
   ready: boolean;
 };
 

@@ -27,6 +27,7 @@ import {
   BONUSY,
   BONUSTYPE,
   BONUSBH,
+  BONUSLAUNCH,
 } from './pong.env';
 
 @Injectable()
@@ -197,6 +198,7 @@ export class PongService {
         up: false,
         down: false,
         ready: false,
+        space: false,
       };
       return newPlayer;
     } catch (error) {
@@ -217,6 +219,16 @@ export class PongService {
     });
   }
 
+  setSpace(socketId: string, value: boolean) {
+    this.matches.forEach((match) => {
+      if (match.pOne.client.id === socketId) {
+        match.pOne.space = value;
+      }
+      if (match.pTwo.client.id === socketId) {
+        match.pTwo.space = value;
+      }
+    });
+  }
   playersSetReady(
     gameId: number,
     playerId: number,
@@ -556,11 +568,6 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
-      // console.log(`L ${match.scoreL} ---- R ${match.scoreR}`);
-      // if (match.scoreL === MAXSCORE || match.scoreR === MAXSCORE) {
-      //   match.run = false;
-      //   return;
-      // }
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,
@@ -622,6 +629,7 @@ export class PongService {
     side: SideBonus,
     mouv: number,
     paddle: Paddle,
+    space: boolean,
   ): string | undefined {
     if (side.y >= 0) {
       if (mouv) {
@@ -638,10 +646,17 @@ export class PongService {
       }
     } else if (side.type !== 0 && side.start === 0) {
       side.bonusUp = NONE;
+      if (space) {
+        side.start = Date.now();
+        side.bonusUp = BONUSLAUNCH;
+      }
       // // verifier si bouton middle trigger pour lancer le bonus
       // // OUI >>>
       // // // lancer start = timestamp et lancer le bonus
     } else if (side.start !== 0) {
+      side.bonusUp = NONE;
+      side.start = 0; // TODO
+      side.type = 0; // TODO
       // // update ce qu'il faut pendant le temps (verifier date - start)
       // // tout remettre a zero
     } else {
@@ -655,11 +670,17 @@ export class PongService {
   }
 
   private updateBonus(match: Match, mouv: number[]) {
-    const retL = this.updateSideBonus(match.bonus.left, mouv[1], match.paddleL);
+    const retL = this.updateSideBonus(
+      match.bonus.left,
+      mouv[1],
+      match.paddleL,
+      match.pOne.space,
+    );
     const retR = this.updateSideBonus(
       match.bonus.right,
       mouv[0],
       match.paddleR,
+      match.pTwo.space,
     );
     // if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);
     // if (blackHoleR !== undefined) match.bonus.blackHoles.push(...blackHoleR);

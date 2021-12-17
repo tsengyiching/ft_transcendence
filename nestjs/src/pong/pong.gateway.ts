@@ -151,6 +151,11 @@ export class PongGateway {
     this.pongService.setKeyValue(true, client.id, payload);
   }
 
+  @SubscribeMessage('space')
+  onSpace(client: Socket, payload: boolean) {
+    this.pongService.setSpace(client.id, payload);
+  }
+
   @SubscribeMessage('ready')
   async readyForGame(client: Socket, payload: number) {
     try {
