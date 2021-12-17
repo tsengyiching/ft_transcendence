@@ -376,22 +376,6 @@ export class PongService {
         currentGame.bonus.right.start !== 0 ? 0 : currentGame.bonus.right.type,
     };
   }
-
-  /*
-        ++++++++++=++++++++++
-    +             =             +
-    +   0000000000=1111111111   +
-    +             =             +
-    +   2222222222=3333333333   +
-    +             =             +
-    +   4444444444=5555555555   +
-    +             =             +
-    +   6666666666=7777777777   +
-    +             =             +
-        ++++++++++=++++++++++
-    this is the pong arena and different places on the arena where blackhole can pop
-    numbers are the index on the string that define the blackholes places
-  */
   gameInfosBonusBH(matchId: number) {
     // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
@@ -628,13 +612,26 @@ export class PongService {
     });
   }
 
+  private createBlackHoles(blackhole: string) {
+    const placeLeft = (Math.floor(Math.random() * 3.99) + 1).toString();
+    const placeRight = (Math.floor(Math.random() * 3.99) + 1).toString();
+    const voidLeft = Math.floor(Math.random() * 4.99);
+    const voidRight = Math.floor(Math.random() * 4.99) + 4;
+    const replace = blackhole.split('');
+    replace[voidLeft] = placeLeft;
+    replace[voidRight] = placeRight;
+    blackhole = replace.join('');
+  }
+
   private updateSideBonus(
+    bh: string,
     side: SideBonus,
     mouv: number,
     paddle: Paddle,
     ball: Ball,
     space: boolean,
   ): string | undefined {
+    if (side.bonusUp === BONUSBH) side.bonusUp = NONE;
     if (side.y >= 0) {
       if (mouv) {
         side.y += mouv * 10;
@@ -667,6 +664,8 @@ export class PongService {
       side.bonusUp = NONE;
       if (side.type === 3) {
         // DO BH
+        this.createBlackHoles(bh);
+        side.bonusUp = BONUSBH;
         side.start = 0;
         side.type = 0;
       } else if (side.type === 2) {
@@ -702,26 +701,25 @@ export class PongService {
         }
       }
     }
-    return undefined;
   }
 
   private updateBonus(match: Match, mouv: number[]) {
-    const retL = this.updateSideBonus(
+    this.updateSideBonus(
+      match.bonus.blackHoles,
       match.bonus.left,
       mouv[1],
       match.paddleL,
       match.ball,
       match.pOne.space,
     );
-    const retR = this.updateSideBonus(
+    this.updateSideBonus(
+      match.bonus.blackHoles,
       match.bonus.right,
       mouv[0],
       match.paddleR,
       match.ball,
       match.pTwo.space,
     );
-    // if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);
-    // if (blackHoleR !== undefined) match.bonus.blackHoles.push(...blackHoleR);
   }
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
