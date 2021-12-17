@@ -341,9 +341,11 @@ export class PongGateway {
       this.server
         .to(roomName)
         .volatile.emit('bonusY', this.pongService.gameInfosBonusY(gameId));
-      console.log('BONUS YYYY');
     }
     if (leftCkeck === 2 || rightCheck === 2) {
+      this.server
+        .to(roomName)
+        .emit('bonusY', this.pongService.gameInfosBonusY(gameId));
       this.server
         .to(roomName)
         .emit('bonusType', this.pongService.gameInfosBonusType(gameId));

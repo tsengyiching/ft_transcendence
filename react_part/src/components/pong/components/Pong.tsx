@@ -99,10 +99,10 @@ return (
 		<div>
 			<PongInfoModal />
 			<SocketEvent />
-			<GameCanvas />
             <SocketInfos />
 			{bonus  ? <SocketInfosBonus /> : null}
 			<ScoreBar />
+			<GameCanvas />
 		</div>
 );}
 
