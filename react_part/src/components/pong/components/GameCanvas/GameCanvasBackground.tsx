@@ -35,7 +35,12 @@ function drawPaddle(ctx:CanvasRenderingContext2D, paddle:Paddle) : void  {
 
  function drawBonus(ctx:CanvasRenderingContext2D, x: number, y :number) : void {
 	ctx.beginPath();
-	ctx.fillStyle = "red";
+	let gradient = ctx.createRadialGradient(x, y, 0, x, y, 15);
+	gradient.addColorStop(0, "rgba(224,255,255, 0)");
+	gradient.addColorStop(0.75, "#E0FFFF")
+	gradient.addColorStop(1, "white");
+	ctx.beginPath();
+	ctx.fillStyle = gradient;
 	ctx.arc(x, y, 15, 0, Math.PI * 2);
 	ctx.fill();
 	ctx.closePath();
@@ -71,8 +76,8 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 			drawMiddle(ctx!, {w, h});
 			drawPaddle(ctx!, PaddleL);
 			drawPaddle(ctx!, PaddleR);
-			if (BonusLeft.y >= 0) drawBonus(ctx!, BonusLeft.x, BonusLeft.y);
-			if (BonusRight.y >= 0) drawBonus(ctx!, BonusRight.x, BonusRight.y);
+			if (BonusLeft.y >= 0) drawBonus(ctx!, BonusLeft.x , BonusLeft.y);
+			if (BonusRight.y >= 0) drawBonus(ctx!, BonusRight.x , BonusRight.y);
 
 			drawBall(ctx!, ball);
 		   requestId = requestAnimationFrame(render);
