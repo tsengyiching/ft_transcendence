@@ -166,12 +166,14 @@ export class PongService {
         : {
             left: {
               y: -1,
+              yStart: 0,
               type: 0,
               start: 0,
               bonusUp: NONE,
             },
             right: {
               y: -1,
+              yStart: 0,
               type: 0,
               start: 0,
               bonusUp: NONE,
@@ -630,6 +632,7 @@ export class PongService {
     side: SideBonus,
     mouv: number,
     paddle: Paddle,
+    ball: Ball,
     space: boolean,
   ): string | undefined {
     if (side.y >= 0) {
@@ -639,11 +642,17 @@ export class PongService {
         if (side.y > H) side.y -= H;
       }
       if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+        side.yStart = 0;
         side.y = -1;
         const type = Math.floor(Math.random() * 3);
         side.type = type === 3 ? type : type + 1;
         side.bonusUp = BONUSTYPE;
         return undefined;
+      }
+      if (Date.now() - side.yStart > 4000) {
+        side.yStart = 0;
+        side.y = -1;
+        side.bonusUp = NONE;
       }
     } else if (side.type !== 0 && side.start === 0) {
       side.bonusUp = NONE;
@@ -656,8 +665,29 @@ export class PongService {
       // // // lancer start = timestamp et lancer le bonus
     } else if (side.start !== 0) {
       side.bonusUp = NONE;
-      side.start = 0; // TODO
-      side.type = 0; // TODO
+      if (side.type === 3) {
+        // DO BH
+        side.start = 0;
+        side.type = 0;
+      } else if (side.type === 2) {
+        // do paddle speedup
+        paddle.speed = 30;
+        if (Date.now() - side.start > 3000) {
+          // undo speedup
+          paddle.speed = 10;
+          side.start = 0;
+          side.type = 0;
+        }
+      } else if (side.type === 1) {
+        // do ball speedup
+        ball.speed = 100;
+        if (Date.now() - side.start > 500) {
+          //undo speedup
+          ball.speed = BALLSPEED;
+          side.start = 0;
+          side.type = 0;
+        }
+      }
       // // update ce qu'il faut pendant le temps (verifier date - start)
       // // tout remettre a zero
     } else {
@@ -666,7 +696,10 @@ export class PongService {
         side.y = Math.random() * H;
         if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
           side.y = -1;
-        } else side.bonusUp = BONUSY;
+        } else {
+          side.bonusUp = BONUSY;
+          side.yStart = Date.now();
+        }
       }
     }
     return undefined;
@@ -677,12 +710,14 @@ export class PongService {
       match.bonus.left,
       mouv[1],
       match.paddleL,
+      match.ball,
       match.pOne.space,
     );
     const retR = this.updateSideBonus(
       match.bonus.right,
       mouv[0],
       match.paddleR,
+      match.ball,
       match.pTwo.space,
     );
     // if (blackHoleL !== undefined) match.bonus.blackHoles.push(...blackHoleL);

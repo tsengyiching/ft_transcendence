@@ -43,6 +43,7 @@ export type Player = {
 
 export type SideBonus = {
   y: number;
+  yStart: number;
   type: number;
   start: number;
   bonusUp: number;
