@@ -16,14 +16,17 @@ type InfosBonus = {
 }
  const SocketInfosBonus:React.VFC<{}> = () => {
 	const socket:Socket = useContext(GameSocketContext);
+	const yL = useStore(s => s.BonusLeft.y);
+	const yR = useStore(s => s.BonusRight.y);
+
 	const setBonusY = useStore(s => s.setBonusY);
 	const setBonusType = useStore(s => s.setBonusType);
 	const setBonusBH = useStore(s => s.addBlackHole);
 
 	useEffect(() => {
 		socket.on('bonusY', (d) => {
-			setBonusY(d.yL, d.yR);
-			console.log(d.yL, d.yR);
+			if (d.yL !== yL || d.yR !== yR )
+				setBonusY(d.yL, d.yR);
 		});
 		socket.on('bonusType', (d) => {
 			setBonusType(d.typeL, d.typeR);
@@ -39,7 +42,6 @@ type InfosBonus = {
 			socket.off('bonusType');
 			socket.off('bonusLaunch');
 			socket.off('bonusBH');
-
 		})
 	})
 	return (null);
