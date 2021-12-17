@@ -29,6 +29,7 @@ import {
   BONUSBH,
   BONUSLAUNCH,
 } from './pong.env';
+import { checkServerIdentity } from 'tls';
 
 @Injectable()
 export class PongService {
@@ -661,9 +662,11 @@ export class PongService {
       // // tout remettre a zero
     } else {
       const trigger = Math.random();
-      if (trigger > 0.1) {
+      if (trigger > 0.99) {
         side.y = Math.random() * H;
-        side.bonusUp = BONUSY;
+        if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+          side.y = -1;
+        } else side.bonusUp = BONUSY;
       }
     }
     return undefined;
