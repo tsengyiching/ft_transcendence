@@ -68,7 +68,7 @@ function Header () {
 									<LinkContainer to={'/profile/'+id}><NavDropdown.Item>Profile</NavDropdown.Item></LinkContainer>
 									<LinkContainer to='/settings'><NavDropdown.Item >Settings</NavDropdown.Item></LinkContainer>
 									<NavDropdown.Divider />
-									<LinkContainer to='/auth/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
+									<LinkContainer to='/disconnect'><NavDropdown.Item>Logout</NavDropdown.Item></LinkContainer>
 							</NavDropdown>
 						</Nav>
 					</Navbar.Collapse>
