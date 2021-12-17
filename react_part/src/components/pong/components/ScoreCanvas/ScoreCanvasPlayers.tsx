@@ -8,10 +8,12 @@ function draw(ctx:CanvasRenderingContext2D, p:Score, playerL:Player, playerR:Pla
 	// player Left
 	// // avatar
 	const leftavatar = playerL.avatar;
+	ctx.beginPath();
 	let avatarL = new Image();
 	avatarL.src = leftavatar;
 	const sizeL = avatarL.width < avatarL.height ? avatarL.width : avatarL.height;
 	avatarL.onload = function () {ctx.drawImage(avatarL, (avatarL.width - sizeL) * 0.5, (avatarL.height - sizeL) * 0.5, sizeL, sizeL, p.imgLeft.x, p.imgLeft.y, p.imgLeft.w, p.imgLeft.h);}
+	ctx.closePath();
 	// // name
 	ctx.beginPath()
 	ctx.fillStyle = "#374B43"
@@ -22,10 +24,14 @@ function draw(ctx:CanvasRenderingContext2D, p:Score, playerL:Player, playerR:Pla
 	// player Right
 	// // avatar
 	const rightavatar = playerR.avatar;
+	ctx.beginPath();
+
 	let avatarR = new Image();
 	avatarR.src = rightavatar;
 	const sizeR = avatarR.width < avatarR.height ? avatarR.width : avatarR.height;
 	avatarR.onload = function () {ctx.drawImage(avatarR, (avatarR.width - sizeR) * 0.5, (avatarR.height - sizeR) * 0.5, sizeR, sizeR,p.imgRight.x, p.imgRight.y, p.imgRight.w, p.imgRight.h)};
+	ctx.closePath();
+
 	// // name
 	ctx.beginPath()
 	ctx.font = `${p.fontSize}px Roboto`;
