@@ -55,6 +55,7 @@ export class TwoFactorAuthController {
   async turnOnTwoFactorAuthentication(
     @CurrentUser() user: User,
     @Body() { twoFactorAuthenticationCode }: TwoFactorAuthCodeDto,
+    @Res({ passthrough: true }) res: Response,
   ): Promise<{ userId: number; twoFactorEnabled: boolean }> {
     if (await this.userService.isUserTwoFactorAuthEnabled(user.id)) {
       throw new HttpException(
@@ -71,6 +72,8 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     await this.userService.turnOnTwoFactorAuthentication(user.id);
+    const { accessToken } = this.authService.login(user, true);
+    res.cookie('jwt-two-factor', accessToken);
     return {
       userId: user.id,
       twoFactorEnabled: true,

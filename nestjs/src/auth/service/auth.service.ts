@@ -26,21 +26,28 @@ export class AuthService {
     };
   }
 
-  getUserFromAuthenticationToken(token: string): Promise<User> {
-    const payload: JwtPayload = this.jwtService.verify(token, {
+  getPayloadFromAuthenticationToken(cookie: string): JwtPayload {
+    const twofa = 'jwt-two-factor=';
+    const twofaNiddle = cookie.indexOf(twofa);
+    const jwtToken = parse(cookie).jwt;
+    let twofaToken: string;
+    const payload: JwtPayload = this.jwtService.verify(jwtToken, {
       secret: process.env.JWT_SECRET,
     });
-    if (payload.id) {
-      return this.userService.getOneById(payload.id);
-    }
+    if (twofaNiddle !== -1) {
+      twofaToken = cookie.slice(twofaNiddle + twofa.length);
+      const payloadTwofa = this.jwtService.verify(twofaToken, {
+        secret: process.env.JWT_SECRET,
+      });
+      return payloadTwofa;
+    } else return payload;
   }
 
-  async getUserFromSocket(socket: Socket): Promise<User> {
-    const cookie = socket.handshake.headers.cookie;
-    if (!cookie) throw new WsException('Unauthorized');
-    const user: User = await this.getUserFromAuthenticationToken(
-      parse(cookie).jwt,
-    );
+  async getUserFromSocket(client: Socket): Promise<User> {
+    const cookie = client.handshake.headers.cookie;
+    const payload = this.getPayloadFromAuthenticationToken(cookie);
+    if (!payload) throw new WsException('Unauthorized');
+    const user = await this.userService.getOneById(payload.id);
     if (!user) throw new WsException('Invalid credentials.');
     return user;
   }

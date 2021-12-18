@@ -13,15 +13,18 @@ export class WsGuard implements CanActivate {
     const bannedIds = await this.userService.getBannedUserIds();
     const bearerToken: string = context.switchToHttp().getRequest().handshake
       .headers.cookie;
-    const niddle = bearerToken.indexOf('jwt=');
-    const jwt = bearerToken.slice(niddle + 4);
     try {
-      const user = await this.authService.getUserFromAuthenticationToken(jwt);
-      if (user && !bannedIds.includes(user.id)) {
+      const payload =
+        this.authService.getPayloadFromAuthenticationToken(bearerToken);
+      if (!payload) return false;
+      const user = await this.userService.getOneById(payload.id);
+      if (
+        user &&
+        !bannedIds.includes(user.id) &&
+        user.isTwoFactorAuthenticationEnabled === payload.twoFA
+      )
         return true;
-      } else {
-        return false;
-      }
+      else return false;
     } catch (err) {
       return false;
     }

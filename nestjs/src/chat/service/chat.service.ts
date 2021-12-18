@@ -145,13 +145,13 @@ export class ChatService {
    * @param : userId and ChangeStatusDto(channelId, userId, sanctionDuration, status)
    */
   async changeChannelUserStatus(
-    operatedUser: User,
+    operatorId: number,
     body: ChangeStatusDto,
   ): Promise<ChannelParticipant> {
     this.changeStatusDtoValidation(body);
     const [channel, operator, user] = await Promise.all([
       this.getChannelById(body.channelId),
-      this.getOneChannelParticipant(operatedUser.id, body.channelId),
+      this.getOneChannelParticipant(operatorId, body.channelId),
       this.getOneChannelParticipant(body.userId, body.channelId),
     ]);
 
@@ -188,13 +188,13 @@ export class ChatService {
    * @param : SetChannelAdminDto (channel id, participant id, action)
    */
   async setChannelAdmin(
-    operatedUser: User,
+    operatorId: number,
     body: SetChannelAdminDto,
   ): Promise<ChannelParticipant> {
     this.setChannelAdminDtoValidation(body);
     const [channel, operator, user] = await Promise.all([
       this.getChannelById(body.channelId),
-      this.getOneChannelParticipant(operatedUser.id, body.channelId),
+      this.getOneChannelParticipant(operatorId, body.channelId),
       this.getOneChannelParticipant(body.participantId, body.channelId),
     ]);
     this.checkGroupChannelTypeAndParticipants(channel, operator, user);
@@ -208,13 +208,13 @@ export class ChatService {
    * @param : SetChannelAdminDto (channel id, participant id, action)
    */
   async setChannelAdminbySiteModerator(
-    operatedUser: User,
+    operator: User,
     body: SetChannelAdminDto,
   ): Promise<ChannelParticipant> {
     this.setChannelAdminDtoValidation(body);
     if (
-      operatedUser.siteStatus === SiteStatus.OWNER ||
-      operatedUser.siteStatus === SiteStatus.MODERATOR
+      operator.siteStatus === SiteStatus.OWNER ||
+      operator.siteStatus === SiteStatus.MODERATOR
     ) {
       const [channel, user] = await Promise.all([
         this.getChannelById(body.channelId),
@@ -236,7 +236,6 @@ export class ChatService {
     userId: number,
     body: SetChannelPasswordDto,
   ): Promise<Channel> {
-    console.log('change', body);
     this.setChannelPasswordDtoValidation(body);
     const [channel, user] = await Promise.all([
       this.getChannelById(body.channelId),
