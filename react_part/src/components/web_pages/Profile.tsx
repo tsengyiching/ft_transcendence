@@ -21,7 +21,7 @@ export default function Profile() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://localhost:8080/profile/' + clientId,{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/' + clientId,{
             withCredentials:true,
         })
         .then(res => {
@@ -37,7 +37,7 @@ export default function Profile() {
             }
         })
 
-        axios.get('http://localhost:8080/relationship/'+clientId+'/list?status=friend',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/'+clientId+'/list?status=friend',{
             withCredentials:true,
         })
         .then(res => {
@@ -51,7 +51,7 @@ export default function Profile() {
             }
         })
 
-        axios.get('http://localhost:8080/game/'+clientId+'/records',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/game/'+clientId+'/records',{
             withCredentials:true,
         })
         .then(res => {
@@ -65,7 +65,7 @@ export default function Profile() {
             }
         })
 
-        axios.get('http://localhost:8080/profile/all',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/all',{
             withCredentials:true,
         })
         .then(res => {

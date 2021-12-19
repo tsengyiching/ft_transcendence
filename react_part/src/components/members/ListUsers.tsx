@@ -91,7 +91,7 @@ export default function ListUsers()
 
 	useEffect(() => {
 		let isMounted = true;
-		axios.get("http://localhost:8080/relationship/me/allusers", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/allusers', {withCredentials: true,})
 		.then(res => { if (isMounted)
 			SetUsers(res.data);
 		})

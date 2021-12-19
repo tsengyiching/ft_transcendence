@@ -9,7 +9,8 @@ import { User } from 'src/user/model/user.entity';
 
 const clientID = process.env.OAUTH_42_APP_ID;
 const clientSecret = process.env.OAUTH_42_APP_SECRET;
-const callbackURL = 'http://localhost:8080/auth/42/callback';
+const callbackURL =
+  'http://' + process.env.DOMAIN_BACKEND + '/auth/42/callback';
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two') {

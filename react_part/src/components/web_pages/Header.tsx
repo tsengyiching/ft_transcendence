@@ -22,7 +22,7 @@ function Header () {
     useEffect(() => {
 		let isMounted = true;
 
-        axios.get('http://localhost:8080/profile/me/',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me/',{
             withCredentials:true,
         })
         .then(res => {
@@ -87,7 +87,7 @@ function Header () {
 			</Navbar.Brand>
 			<Navbar.Collapse className="justify-content-end" >
 			<Nav style={{paddingRight:'10px'}}>
-    		<Nav.Link href="http://localhost:8080/auth/login/">Log in</Nav.Link>
+    		<Nav.Link href={'http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/auth/login/'}>Log in</Nav.Link>
 			</Nav>
 			</Navbar.Collapse>
 

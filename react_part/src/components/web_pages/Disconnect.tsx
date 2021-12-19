@@ -14,7 +14,7 @@ const Disconnect = (props:STATE) => {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://localhost:8080/auth/disconnect',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/auth/disconnect',{
             withCredentials:true,
         })
         .then(res => {

@@ -8,7 +8,7 @@ export const ChangeNickName = () => {
     const [alert, setAlert] = useState(0);
 
     function modifyNickname () {
-        axios.patch('http://localhost:8080/profile/name/',{nickname: nickname},
+        axios.patch('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/name/',{nickname: nickname},
         {withCredentials:true,
         })
         .then(res => {

@@ -49,12 +49,12 @@ function UserModal(props: IPropsModal)
 		event.preventDefault();
 		if (props.user !== undefined && NewSiteStatus !== "")
 		{
-			axios.patch("http://localhost:8080/admin/set", {id: props.user.id, newStatus: NewSiteStatus}, {withCredentials: true})
+			axios.patch('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/admin/set', {id: props.user.id, newStatus: NewSiteStatus}, {withCredentials: true})
 			.then((res) => onHide())
 			.catch(res => console.log("error change site status : " + res.data));
 		}
 	}
-
+ 
 	function onHide(){
 		setNewSiteStatus("");
 		props.onHide();
@@ -117,7 +117,7 @@ export default function UserView()
 
 	useEffect(() => {
 		let isMounted = true;
-		axios.get('http://localhost:8080/profile/all', {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/all', {withCredentials: true,})
 		.then(res => {
 			if (isMounted)
 				setListUser(res.data);

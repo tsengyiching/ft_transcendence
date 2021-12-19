@@ -94,7 +94,7 @@ export function ChatChannel(channelSelected: IChannel)
 	//get list blocked at the mount of the component + start listening socket
 	useEffect(() => {
 		let isMounted = true;
-		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=block', {withCredentials: true,})
 		.then(res => { if(isMounted)
 			SetBlockedUsers(res.data);
 		})

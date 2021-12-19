@@ -5,7 +5,7 @@ class Api {
 
     static init() {
         this.axiosInstance = axios.create({
-            baseURL: 'http://localhost:8080'
+            baseURL: 'http://' + process.env.REACT_APP_DOMAIN_BACKEND
         })
     }
 

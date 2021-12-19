@@ -20,7 +20,7 @@ export const ChangeImage = () => {
             return ;
         const formData = new FormData();
         formData.append("file", selectedFile, selectedFile.name);
-        axios.post('http://localhost:8080/profile/upload',
+        axios.post('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/upload',
             formData,
             {withCredentials: true})
         .then(res => {

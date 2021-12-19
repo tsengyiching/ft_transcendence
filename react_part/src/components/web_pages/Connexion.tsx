@@ -6,7 +6,7 @@ import "./connexion.css"
 function Connexion () {
 
     function onConnexion() {
-        window.location.href = 'http://localhost:8080/auth/login/';
+        window.location.href = 'http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/auth/login/';
     }
 
     return (
