@@ -18,7 +18,8 @@ function Admin()
 			<Nav
 			defaultActiveKey="user"
 			onSelect={(selectedKey) => {setViewValue(selectedKey === "user" ? View.USER : View.CHANNEl)}}
-			style={{background: "#3498DB"}}
+			variant='pills'
+			//style={{background: "#29699E", color: "black"}}
 			className="flex-column"
 			>
 				<Nav.Link eventKey="user">User</Nav.Link>

@@ -4,6 +4,7 @@ import { Form, Col, Row, Button, Image, Modal} from "react-bootstrap";
 import { Data, DataContext, } from "../../App";
 import { SocketContext } from "../../context/socket";
 
+
 enum SiteStatus {
 	OWNER = 'Owner',
 	MODERATOR = 'Moderator',
@@ -22,21 +23,33 @@ interface IPropsModal {
 
 function UserButton(props: {thisUser: Data, myData: Data, setSiteUser: any, setViewModal: any})
 {
+
+
 	return(
-		<Row style={{backgroundColor: 'blueviolet', borderStyle: 'solid', borderWidth: '0.01em'}}>
+		<Row style={{backgroundColor: 'grey', borderStyle: 'solid', borderWidth: '0.01em'}}>
 			<Col ><Image src={props.thisUser.avatar} fluid style={{height: '3em'}}></Image></Col>
 			<Col>{props.thisUser.nickname}</Col>
 			<Col>{props.thisUser.siteStatus}</Col>
 			<Col>
 			{ 	props.thisUser.siteStatus !== SiteStatus.OWNER &&
 				props.thisUser.id !== props.myData.id &&
-				<Button
+				<div>
+				<style type="text/css">
+					{`
+					.btn-black {
+					background-color: black;
+					color: white;
+					}
+					`}
+				</style>
+				<Button variant="black" size="lg"
 				onClick={() => {
-						props.setSiteUser(props.thisUser);
-						props.setViewModal(true);
+					props.setSiteUser(props.thisUser);
+					props.setViewModal(true);
 				}}>
 					Change Status
 				</Button>
+				</div>
 			}
 			</Col>
 		</Row>
@@ -136,7 +149,7 @@ export default function UserView()
 	}, [ReloadUserList, socket])
 
 	return (
-		<div style={{overflow: 'auto', backgroundColor: 'grey', height: '70em', fontSize: '2em'}}>
+		<div style={{overflow: 'auto', backgroundColor: '#D7DBDD', height: '70em', fontSize: '2em'}}>
 			{ listUser.map((user) =>
 			(<UserButton
 				thisUser={user}
