@@ -23,7 +23,7 @@ const Twofa = (props:STATE) => {
         .then(res => {
             setAlert(0)
             setConnection(true);
-            history.push("/home")
+            window.location.reload();
         })
         .catch(res => {
             setAlert(1)
@@ -35,13 +35,13 @@ const Twofa = (props:STATE) => {
 
     function showAlert () {
         if (alert === 1)
-        return (
-            <div>
-                <Alert variant={'danger'}>
-                    2FA code invalid
-                </Alert>
-            </div>
-        )
+            return (
+                <div>
+                    <Alert variant={'danger'}>
+                        2FA code invalid
+                    </Alert>
+                </div>
+            )
     }
 
     return (
