@@ -88,7 +88,7 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 		socket.emit('ask-reload-channel');
 		socket.on('channel-need-reload', () => setReloadChannelList(reloadChannelList + 1));
 		return(() => {socket.off('channel-need-reload')});
-	}, [reloadChannelList])
+	}, [reloadChannelList, socket])
 
 	useEffect(() => {
 
@@ -153,6 +153,11 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 function Messages(props: {channelSelected: IChannel | undefined})
 {
 	const [ListMessage, setListMessage] = useState<IMessage[]>([]);
+
+	useEffect(() => {
+		if (props.channelSelected == undefined)
+			setListMessage([]);
+	}, [props.channelSelected])
 
 	useEffect(() => {
 		socket.on('channel-message-list', (data: IMessage[]) => {setListMessage(data)});
