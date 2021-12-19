@@ -89,7 +89,7 @@ export default function Ladder() {
             for(let i = 0; listWinner[i]; i++) {
                 if (listWinner[i][1] === j ) {
                     comp++
-                    var user = {image:getPicture([i+1][0]), position:comp, name:getName(listWinner[i][0]), score:listWinner[i][1]};
+                    var user = {image:getPicture([i+1][0]), position:comp, name:getName(listWinner[i][0]), score:listWinner[i][1], id:listWinner[i][0]};
                     data.push(user)
                 }
             }
@@ -101,27 +101,31 @@ export default function Ladder() {
         var data = fillData()
         return (
             <div>
-                {data.map(({image, position, name, score}) => {
+                {data.map(({image, position, name, score, id}) => {
                     return (
-                        <div className="row">
-                            <div className="col">
-                                <div className="row">
-                                    <Image src={`${image}`} width="40" height="40" alt="pp" rounded/>
+                        <div key={`${id}`}>
+                            <div className="row">
+                                <div className="col">
+                                    <div className="row">
+                                        <a href={'/profile/'+id}>
+                                            <Image src={`${image}`} width="40" height="40" alt="pp" rounded/>
+                                        </a>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col">
-                                <div className="row">
-                                    {position}
+                                <div className="col">
+                                    <div className="row">
+                                        {position}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col">
-                                <div className="row">
-                                    {name}
+                                <div className="col">
+                                    <div className="row">
+                                        {name}
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="col">
-                                <div className="row">
-                                    {score}
+                                <div className="col">
+                                    <div className="row">
+                                        {score}
+                                    </div>
                                 </div>
                             </div>
                         </div>
