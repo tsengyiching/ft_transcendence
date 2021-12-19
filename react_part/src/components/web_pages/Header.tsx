@@ -53,7 +53,7 @@ function Header () {
 					<Navbar.Toggle aria-controls="responsive-navbar-nav" />
 					<Navbar.Collapse id="responsive-navbar-nav">
 						<Nav className="me-auto">
-							<LinkContainer to='/'><Nav.Link>Ladder</Nav.Link></LinkContainer>
+							<LinkContainer to='/ladder'><Nav.Link>Ladder</Nav.Link></LinkContainer>
 							<Nav.Link>{userData.siteStatus} of the website</Nav.Link>
 						</Nav>
 						<Nav>
