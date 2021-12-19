@@ -30,6 +30,7 @@ import {
   BONUSLAUNCH,
 } from './pong.env';
 import { checkServerIdentity } from 'tls';
+import { threadId } from 'worker_threads';
 
 @Injectable()
 export class PongService {
@@ -178,7 +179,10 @@ export class PongService {
               start: 0,
               bonusUp: NONE,
             },
+            leftBH: undefined,
+            rightBH: undefined,
             blackHoles: '00000000',
+            lastBH: 0,
           },
     };
     return newMatch;
@@ -612,16 +616,86 @@ export class PongService {
     });
   }
 
+  private placesY = [144, 288, 432, 516, 144, 288, 432, 516];
+  private placesX = [0, 100, 200, 300, 400, 550, 650, 750, 850];
+
+  addBlackHolesPos(match: Match, side: boolean) {
+    let posL: Pos[] = [];
+    let posR: Pos[] = [];
+    for (let i = 0; i < 4; i++) {
+      if (match.bonus.blackHoles[i] != '0') {
+        posL = [
+          ...posL,
+          {
+            x: this.placesX[parseInt(match.bonus.blackHoles[i])],
+            y: this.placesY[i],
+          },
+        ];
+      }
+    }
+    for (let i = 4; i < 8; i++) {
+      if (match.bonus.blackHoles[i] != '0') {
+        posR = [
+          ...posR,
+          {
+            x: this.placesX[parseInt(match.bonus.blackHoles[i])],
+            y: this.placesY[i],
+          },
+        ];
+      }
+    }
+    match.bonus.leftBH = posL;
+    match.bonus.rightBH = posR;
+  }
   private createBlackHoles(blackhole: string) {
-    const placeLeft = (Math.floor(Math.random() * 3.99) + 1).toString();
-    const placeRight = (Math.floor(Math.random() * 3.99) + 5).toString();
-    const voidLeft = Math.floor(Math.random() * 4.99);
-    const voidRight = Math.floor(Math.random() * 4.99) + 3;
+    const placeLeft = Math.floor(Math.random() * 3.99) + 1;
+    const placeRight = Math.floor(Math.random() * 3.99) + 5;
+    const voidLeft = Math.floor(Math.random() * 3.99);
+    const voidRight = Math.floor(Math.random() * 3.99) + 4;
+
     const replace = blackhole.split('');
-    replace[voidLeft] = placeLeft;
-    replace[voidRight] = placeRight;
+    replace[voidLeft] = placeLeft.toString();
+    replace[voidRight] = placeRight.toString();
     blackhole = replace.join('');
     return blackhole;
+  }
+
+  private updateBallBonus(match: Match) {
+    if (match.bonus.lastBH !== 0) return;
+    if (match.ball.pos.x < 500) {
+      if (!match.bonus.leftBH) return;
+      match.bonus.leftBH.forEach((pos) => {
+        const dist = Math.sqrt(
+          Math.pow(pos.x - match.ball.pos.x, 2) +
+            Math.pow(pos.y - match.ball.pos.y, 2),
+        );
+        if (dist < 30 && dist !== 0) {
+          match.ball.pos =
+            match.bonus.rightBH[
+              Math.floor(Math.random() * (match.bonus.rightBH.length - 0.01))
+            ];
+          match.bonus.lastBH = 1;
+          return;
+        }
+      });
+    } else {
+      if (!match.bonus.rightBH) return;
+      match.bonus.rightBH.forEach((pos) => {
+        const dist = Math.sqrt(
+          Math.pow(pos.x - match.ball.pos.x, 2) +
+            Math.pow(pos.y - match.ball.pos.y, 2),
+        );
+        if (dist < 30 && dist !== 0) {
+          match.ball.pos =
+            match.bonus.leftBH[
+              Math.floor(Math.random() * (match.bonus.leftBH.length - 0.01))
+            ];
+          match.bonus.lastBH = 1;
+
+          return;
+        }
+      });
+    }
   }
 
   private updateSideBonus(
@@ -642,25 +716,17 @@ export class PongService {
       if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
         side.yStart = 0;
         side.y = -1;
-        const type = Math.floor(Math.random() * 3);
-        side.type = type === 3 ? type : type + 1;
+        const type = Math.floor(Math.random() * 2.99);
+        side.type = type + 1;
         side.bonusUp = BONUSTYPE;
         return undefined;
       }
-      // if (Date.now() - side.yStart > 4000) {
-      //   side.yStart = 0;
-      //   side.y = -1;
-      //   side.bonusUp = NONE;
-      // }
     } else if (side.type !== 0 && side.start === 0) {
       side.bonusUp = NONE;
       if (space) {
         side.start = Date.now();
         side.bonusUp = BONUSLAUNCH;
       }
-      // // verifier si bouton middle trigger pour lancer le bonus
-      // // OUI >>>
-      // // // lancer start = timestamp et lancer le bonus
     } else if (side.start !== 0) {
       side.bonusUp = NONE;
       if (side.type === 3) {
@@ -723,13 +789,22 @@ export class PongService {
       match.ball,
       match.pTwo.space,
     );
-    if (left) match.bonus.blackHoles = left;
-    if (right) match.bonus.blackHoles = right;
+    if (left) {
+      match.bonus.blackHoles = left;
+      this.addBlackHolesPos(match, false);
+    }
+    if (right) {
+      match.bonus.blackHoles = right;
+      this.addBlackHolesPos(match, true);
+    }
   }
+
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
       const mouv: number[] = [0, 0];
-
+      if (match.bonus.lastBH !== 0)
+        match.bonus.lastBH =
+          match.bonus.lastBH > 6 ? 0 : match.bonus.lastBH + 1;
       mouv[0] =
         match.pOne.down && !match.pOne.up
           ? 1
@@ -742,7 +817,7 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
-
+      this.updateBallBonus(match);
       this.updateBonus(match, mouv);
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(

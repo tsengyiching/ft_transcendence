@@ -53,6 +53,9 @@ export type Bonus = {
   left: SideBonus;
   right: SideBonus;
   blackHoles: string;
+  leftBH: Pos[] | undefined;
+  rightBH: Pos[] | undefined;
+  lastBH: number;
 };
 
 export type Match = {
