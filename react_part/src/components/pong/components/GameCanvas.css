@@ -13,12 +13,15 @@ body {
 
 #wrapper { position:static;
 }
-canvas { position: sticky; 
+#stage { position: sticky; 
 }
-#bonus-layer{ z-index:5; }
-#ball-layer{ z-index:4;}
-#paddle-left-layer{ z-index:3;}
-#paddle-right-layer{ z-index:2;}
+
+#stage canvas{
+    top:0;
+	left:0;
+	position:absolute;
+}
+#bonus-layer{ z-index:2; }
 #background-layer{ z-index:1;
     background-image: url('https://image.freepik.com/free-vector/pastel-watercolor-painted-background_23-2148959638.jpg');
     background-size: cover;

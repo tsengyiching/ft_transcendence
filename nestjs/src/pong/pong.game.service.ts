@@ -647,11 +647,11 @@ export class PongService {
         side.bonusUp = BONUSTYPE;
         return undefined;
       }
-      if (Date.now() - side.yStart > 4000) {
-        side.yStart = 0;
-        side.y = -1;
-        side.bonusUp = NONE;
-      }
+      // if (Date.now() - side.yStart > 4000) {
+      //   side.yStart = 0;
+      //   side.y = -1;
+      //   side.bonusUp = NONE;
+      // }
     } else if (side.type !== 0 && side.start === 0) {
       side.bonusUp = NONE;
       if (space) {

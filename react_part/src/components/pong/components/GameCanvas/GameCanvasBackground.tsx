@@ -8,8 +8,6 @@ interface CanvasProps {
 	w: number;
 	h: number;
 }
-const placesY = [ 144, 288, 432, 516, 144, 288, 432, 516 ];
-const placesX = [ 0, 100, 200, 300, 400, 550, 650, 750, 850];
 
 function drawMiddle(ctx:CanvasRenderingContext2D, props:CanvasProps) : void {
 	ctx.beginPath();
@@ -36,42 +34,12 @@ function drawPaddle(ctx:CanvasRenderingContext2D, paddle:Paddle) : void  {
 	ctx?.closePath();
  }
 
- function drawBonus(ctx:CanvasRenderingContext2D, x: number, y :number) : void {
-	ctx.beginPath();
-	let gradient = ctx.createRadialGradient(x, y, 0, x, y, 15);
-	gradient.addColorStop(0, "rgba(224,255,255, 0)");
-	gradient.addColorStop(0.75, "#E0FFFF")
-	gradient.addColorStop(1, "white");
-	ctx.beginPath();
-	ctx.fillStyle = gradient;
-	ctx.arc(x, y, 15, 0, Math.PI * 2);
-	ctx.fill();
-	ctx.closePath();
-}
-function drawBH(ctx:CanvasRenderingContext2D, bh:string) : void {
-	for (let i = 0; i < 8; i++) {
-		if (bh[i] !== '0'){
-			const y = placesY[i];
-			const x = placesX[parseInt(bh[i])]
-			ctx.beginPath();
-			ctx.fillStyle = 'black';
-			ctx.arc(x, y, 30, 0, Math.PI * 2, true);
-			ctx.fill();
-			ctx.closePath();
-			ctx.closePath();
-		}
-	}
-	
-}
 const GameCanvasBackground:React.VFC<{}> = () => {
 	const h = useStore(s => s.h);
 	const w = useStore(s => s.w);
 	const PaddleL = useStore(s => s.paddleL);
 	const PaddleR = useStore(s => s.paddleR);
-	const BonusLeft = useStore(s => s.BonusLeft);
-	const BonusRight = useStore(s => s.BonusRight);
 	const ball = useStore(s => s.ball);
-	const bh = useStore(s => s.blackHole);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// preserve information that we need between rerender
@@ -94,9 +62,6 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 			drawMiddle(ctx!, {w, h});
 			drawPaddle(ctx!, PaddleL);
 			drawPaddle(ctx!, PaddleR);
-			if (BonusLeft.y >= 0) drawBonus(ctx!, BonusLeft.x , BonusLeft.y);
-			if (BonusRight.y >= 0) drawBonus(ctx!, BonusRight.x , BonusRight.y);
-			if (bh) drawBH(ctx!, bh);
 			drawBall(ctx!, ball);
 
 		   requestId = requestAnimationFrame(render);
