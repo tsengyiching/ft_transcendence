@@ -3,7 +3,8 @@ import useStore from "../../hooks/useStore";
 import "./../GameCanvas.css"
 import {Ball, Paddle} from './../../types/ObjectTypes'
 import { forEachTrailingCommentRange } from "typescript";
-
+const H:number = 720;
+const W:number = 1000;
 interface CanvasProps {
 	w: number;
 	h: number;
@@ -49,17 +50,17 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 	useEffect(() => {
 
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
-		canvas!.width = w;
-		canvas!.height = h;
-		canvas!.style.width = w +'px';
-		canvas!.style.height= h +'px';
+		canvas!.width = W;
+		canvas!.height = H;
+		 canvas!.style.width = w*0.5 +'px';
+		 canvas!.style.height= h*0.5 +'px';
 		const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");
 		if (ctx) {
 			contextRef.current = ctx;
 		}
 		const render = () => {
-			ctx?.clearRect(0,0,w, h);
-			drawMiddle(ctx!, {w, h});
+			ctx?.clearRect(0,0,W, H);
+			drawMiddle(ctx!, {w:W, h:H});
 			drawPaddle(ctx!, PaddleL);
 			drawPaddle(ctx!, PaddleR);
 			drawBall(ctx!, ball);

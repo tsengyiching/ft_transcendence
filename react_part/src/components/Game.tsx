@@ -83,7 +83,7 @@ const Game:React.FC = () => {
 
 	return (
         <Container className='no-padding' fluid>
-			{gameStatus === 2 ? <Pong h={800} w={1000}/> : toggleMatchMaking ? waitingForGame() : showButtons()}
+			{gameStatus === 2 ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);
 }
