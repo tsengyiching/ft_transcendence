@@ -96,10 +96,6 @@ const Pong:React.FC<{h:number, w:number}> = (props) => {
 					y: -1,
 					id: 0,
 				},
-				playerL :{ name: '', avatar: ''},
-				playerR :{ name: '', avatar: ''},
-				left: 0,
-				right: 0,
 			}));
 		}, [props.h, props.w]);
 
