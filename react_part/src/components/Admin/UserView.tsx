@@ -94,7 +94,7 @@ function UserModal(props: IPropsModal)
 		<Modal.Body>
 			<Form>
 			<Form.Select aria-label="Change Status Site"
-				onChange={(e: any) => {console.log(`new status : ${e.target.value}`); setNewSiteStatus(e.target.value)}}
+				onChange={(e: any) => {setNewSiteStatus(e.target.value)}}
 				>
 				<option value={""}> Change Status Site </option>
 				{props.user.siteStatus !== SiteStatus.MODERATOR && <option value={SiteStatus.MODERATOR}>Set to Moderator </option>}
