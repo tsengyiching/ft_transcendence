@@ -134,7 +134,7 @@ function ListChannel(props: {channelSelected: IChannel | undefined, setChannelSe
 			</Col>
 			<Col>
 				{props.channelSelected !== undefined &&
-					<Image src={Cross} style={{height:"2em", margin: "0.5em"}} alt="redcross" onClick={() => setShowModal(true)}/>
+					<Image src={Cross} style={{height:"2em", margin: "0.3em"}} alt="redcross" onClick={() => setShowModal(true)}/>
 				}
 			</Col>
 			<ModalDestroyChannel
@@ -187,8 +187,11 @@ function UserButton(props: {user: IUser, channel: IChannel})
 	return(
 		<div>
 		<ContextMenuTrigger id={`ContextMenuAdminViewUser_${props.user.user_id}`}>
-			<Button key={`user-ChannelView-${props.user.user_id}`}> {props.user.user_nickname} </Button>
+			<Button variant="primary" key={`user-ChannelView-${props.user.user_id}`} style={{margin: "0.5em"}}>
+				{props.user.user_nickname}
+			</Button>
 		</ContextMenuTrigger>
+
 		{props.user.role !== 'Owner' &&
 			<ContextMenu id={`ContextMenuAdminViewUser_${props.user.user_id}`}>
 			{
