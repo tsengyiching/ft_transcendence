@@ -614,7 +614,7 @@ export class PongService {
 
   private createBlackHoles(blackhole: string) {
     const placeLeft = (Math.floor(Math.random() * 3.99) + 1).toString();
-    const placeRight = (Math.floor(Math.random() * 3.99) + 1).toString();
+    const placeRight = (Math.floor(Math.random() * 3.99) + 5).toString();
     const voidLeft = Math.floor(Math.random() * 4.99);
     const voidRight = Math.floor(Math.random() * 4.99) + 3;
     const replace = blackhole.split('');

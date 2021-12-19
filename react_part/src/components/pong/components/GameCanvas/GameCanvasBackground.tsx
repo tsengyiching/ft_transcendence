@@ -52,19 +52,12 @@ function drawBH(ctx:CanvasRenderingContext2D, bh:string) : void {
 	for (let i = 0; i < 8; i++) {
 		if (bh[i] !== '0'){
 			const y = placesY[i];
-			const x = placesX[Number(bh[i])]
+			const x = placesX[parseInt(bh[i])]
 			ctx.beginPath();
 			ctx.fillStyle = 'black';
-			ctx.arc(250, 350, 10, 0, Math.PI * 2, true);
+			ctx.arc(x, y, 30, 0, Math.PI * 2, true);
 			ctx.fill();
 			ctx.closePath();
-			ctx.globalAlpha = 0.3;
-			// Draw semi transparent circles
-			for (var j = 0; j < 7; j++) {
-			  ctx.beginPath();
-			  ctx.arc(x, y, 7 + 7 * j, 0, Math.PI * 2, true);
-			  ctx.fill();
-			}
 			ctx.closePath();
 		}
 	}
