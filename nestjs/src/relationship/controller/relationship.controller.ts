@@ -67,6 +67,11 @@ export class RelationshipController {
     return this.relationshipService.getSpecificRelationList(id, status);
   }
 
+  @Get('me/blocked')
+  getBlockingIds(@CurrentUser() user: User): Promise<number[]> {
+    return this.relationshipService.getBlockingIds(user.id);
+  }
+
   /*
    ** getMySpecificRelationList takes query relation_status to request corresponding list,
    ** returns an array with user friends' id, nickname, avatar and status
