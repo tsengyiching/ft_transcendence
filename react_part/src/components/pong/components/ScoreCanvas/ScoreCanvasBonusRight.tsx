@@ -10,10 +10,10 @@ import "./../ScoreCanvas.css";
 		const imglink = id === 1 ? process.env.PUBLIC_URL + '5g.png' : id === 2 ? process.env.PUBLIC_URL + 'speed.png': process.env.PUBLIC_URL + 'black-hole.png';
 		// // bonus
 		let bonus = new Image();
-		bonus.src = imglink;
 		bonus.onload = function () {
-			 ctx.drawImage(bonus, p.bonusRight.x, p.bonusRight.y, p.bonusRight.w, p.bonusRight.h);
+            ctx.drawImage(bonus, p.bonusRight.x, p.bonusRight.y, p.bonusRight.w, p.bonusRight.h);
 		}
+        bonus.src = imglink;
 	}
 	
 	
