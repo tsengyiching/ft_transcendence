@@ -1,7 +1,6 @@
-import { type } from 'os'
-import { FunctionTypeNode } from 'typescript'
+
 import create from 'zustand'
-import {Paddle, Ball, Pos} from './../types/ObjectTypes'
+import {Paddle, Ball} from './../types/ObjectTypes'
 const H = 800;
 const W = 1000;
 type Player = {

@@ -52,8 +52,8 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
 		canvas!.width = W;
 		canvas!.height = H;
-		 canvas!.style.width = w*0.5 +'px';
-		 canvas!.style.height= h*0.5 +'px';
+		 canvas!.style.width = w +'px';
+		 canvas!.style.height= h +'px';
 		const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");
 		if (ctx) {
 			contextRef.current = ctx;

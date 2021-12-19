@@ -9,10 +9,10 @@ function draw(ctx:CanvasRenderingContext2D, p:Score, id: number)  {
 		return;
 	const imglink = id === 1 ? process.env.PUBLIC_URL + '5g.png' : id === 2 ? process.env.PUBLIC_URL + 'speed.png': process.env.PUBLIC_URL + 'black-hole.png';	// // bonus
 	let bonus = new Image();
-	bonus.src = imglink;
 	bonus.onload = function () {
-	 	ctx.drawImage(bonus, p.bonusLeft.x, p.bonusLeft.y, p.bonusLeft.w, p.bonusLeft.h);
+        ctx.drawImage(bonus, p.bonusLeft.x, p.bonusLeft.y, p.bonusLeft.w, p.bonusLeft.h);
 	}
+    bonus.src = imglink;
 }
 
 
@@ -25,8 +25,8 @@ const ScoreCanvasBonusLeft:React.VFC<{}> = () => {
 	//let requestId:number;
 	useEffect(() => {
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
-		canvas!.width = props.w;
-		canvas!.height = props.h;
+		canvas!.width = 1000;
+		canvas!.height = 80;
 		canvas!.style.width = props.w +'px';
 		canvas!.style.height= props.h +'px';
 		const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");

@@ -22,8 +22,8 @@ const ScoreCanvasScore:React.VFC<{}> = () => {
 	const scoreR = useStore(s => s.right);
 	useEffect(() => {
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
-		canvas!.width = props.w;
-		canvas!.height = props.h;
+        canvas!.width = 1000;
+		canvas!.height = 80;
 		canvas!.style.width = props.w +'px';
 		canvas!.style.height= props.h +'px';
 		const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");
