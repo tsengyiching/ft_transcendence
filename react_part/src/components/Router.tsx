@@ -57,7 +57,6 @@ function Unauthorized(props: {setConnection: Function}) {
   )
 }
 
-
 function Router() {
 
   const [isConnected, setConnection] = useState<number>(0);

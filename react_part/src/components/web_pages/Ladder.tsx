@@ -1,6 +1,10 @@
 import axios from 'axios';
 import { useState, useEffect } from "react";
+<<<<<<< HEAD
 import {Image, Table} from 'react-bootstrap'
+=======
+import {Image} from 'react-bootstrap'
+>>>>>>> fix router fab + add ladder
 
 export default function Ladder() {
     const [games, setGames] = useState([]);
@@ -8,7 +12,11 @@ export default function Ladder() {
 
     useEffect(() => {
         let isMounted = true;
+<<<<<<< HEAD
         axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/game/all',{
+=======
+        axios.get('http://localhost:8080/game/all',{
+>>>>>>> fix router fab + add ladder
             withCredentials:true,
         })
         .then(res => { if (isMounted) {
@@ -20,7 +28,11 @@ export default function Ladder() {
             }
         })
 
+<<<<<<< HEAD
         axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/all',{
+=======
+        axios.get('http://localhost:8080/profile/all',{
+>>>>>>> fix router fab + add ladder
             withCredentials:true,
         })
         .then(res => {
@@ -32,7 +44,11 @@ export default function Ladder() {
 
         })
         return () => { isMounted = false };
+<<<<<<< HEAD
     }, [])
+=======
+    })
+>>>>>>> fix router fab + add ladder
 
     function getPicture (iduser:number):string {
         let url:string = "";
