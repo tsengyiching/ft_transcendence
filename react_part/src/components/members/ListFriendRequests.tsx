@@ -31,7 +31,7 @@ export default function ListFriendRequests()
 	useEffect(() => {
 		//console.log("Friend Request reloaded!")
 		let isMounted = true;
-		axios.get("http://localhost:8080/relationship/me/list?status=notconfirmed", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=notconfirmed', {withCredentials: true,})
 		.then(res => { if (isMounted)
 			SetFriendRequests(res.data);
 		})

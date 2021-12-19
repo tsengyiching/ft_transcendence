@@ -10,7 +10,7 @@ export const ChangeTwoFA = () => {
     const [alert, setAlert] = useState(0);
 
     function turnOn() {
-        axios.post('http://localhost:8080/2fa/turn-on/',{twoFactorAuthenticationCode: code},
+        axios.post('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/turn-on/',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
         })
         .then(res => {
@@ -25,7 +25,7 @@ export const ChangeTwoFA = () => {
     function twoFactorAuth() {
         if (printQR !== 1) {
             axios.defaults.withCredentials = true;
-            axios.get('http://localhost:8080/2fa/generate/', {
+            axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/generate/', {
                 withCredentials:true,
             })
             .then(res => {
@@ -69,7 +69,7 @@ export const ChangeTwoFA = () => {
                 <div>
                     <Form onSubmit={SubmitCode} >
                         {showAlert2()}
-                    	<Image src="http://localhost:8080/2fa/generate/" alt='QRCode 2fa'/>
+                    	<Image src={'http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/generate/'} alt='QRCode 2fa'/>
 						<Form.Group className="mb-3">
                     		<Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
 						</Form.Group>

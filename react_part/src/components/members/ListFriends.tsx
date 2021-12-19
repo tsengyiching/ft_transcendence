@@ -98,7 +98,7 @@ export default function ListFriends()
 	useEffect(() => {
 		//console.log("in the first useEffect");
 		let isMounted = true;
-		axios.get("http://localhost:8080/relationship/me/list?status=friend", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=friend', {withCredentials: true,})
 		.then(res => { if (isMounted)
 			SetFriends(res.data);
 		})

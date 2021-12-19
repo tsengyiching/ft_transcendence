@@ -64,9 +64,9 @@ export class AuthController {
     const { accessToken } = this.authService.login(req.user);
     res.cookie('jwt', accessToken);
     if (req.user.isTwoFactorAuthenticationEnabled) {
-      res.redirect('http://localhost:3000/2fa');
+      res.redirect('http://' + process.env.DOMAIN_FRONTEND + '/2fa');
     } else {
-      res.redirect('http://localhost:3000/');
+      res.redirect('http://' + process.env.DOMAIN_FRONTEND + '/');
     }
   }
 

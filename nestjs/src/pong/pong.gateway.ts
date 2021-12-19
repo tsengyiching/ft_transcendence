@@ -27,7 +27,7 @@ function sleep(ms) {
 @WebSocketGateway({
   namespace: 'pong',
   cors: {
-    origin: 'http://localhost:3000/*',
+    origin: 'http://' + process.env.DOMAIN_FRONTEND + '/*',
     methods: ['GET', 'POST'],
     credentials: true,
   },

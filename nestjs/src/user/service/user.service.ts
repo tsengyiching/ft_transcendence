@@ -170,7 +170,7 @@ export class UserService {
     const originFileName = filename.slice(0, findExtension);
     const newFilename = filename.replace(originFileName, user.nickname);
     const avatar = await this.uploadDatabaseFile(id, imageBuffer, newFilename);
-    user.avatar = `http://localhost:8080/profile/avatarfile/${avatar.id}`;
+    user.avatar = `http://${process.env.DOMAIN_BACKEND}/profile/avatarfile/${avatar.id}`;
     return this.userRepository.save(user);
   }
 

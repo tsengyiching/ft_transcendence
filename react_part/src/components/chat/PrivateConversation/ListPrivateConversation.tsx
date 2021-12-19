@@ -39,7 +39,7 @@ export default function ListPrivateConversation(props: {
 	useEffect(() => {
 		console.log("1 useEffect")
 		let isMounted = true;
-		axios.get("http://localhost:8080/relationship/me/list?status=block", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=block', {withCredentials: true,})
 		.then(res => { if(isMounted)
 			SetBlockedUsers(res.data);
 		})

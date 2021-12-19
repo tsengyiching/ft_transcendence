@@ -25,7 +25,7 @@ function Router() {
   function getProfile () {
     let isMounted = true;
     console.log(isConnected)
-    axios.get('http://localhost:8080/profile/me/',{
+    axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me/',{
         withCredentials:true,
     })
     .then(res => { if (isMounted)
