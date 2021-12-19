@@ -102,7 +102,6 @@ export default function ListFriends()
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on("reload-users", () => {
-			console.log("reload in ListFriends")
 			setReload(Reload + 1);
 		})
 		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
