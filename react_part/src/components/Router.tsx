@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Switch, Redirect } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect, useHistory } from "react-router-dom";
 import Home from './web_pages/Home';
 import Profile from './web_pages/Profile';
 import Settings from './settings/Settings';
@@ -13,7 +13,6 @@ import { useCallback, useContext, useEffect, useState } from "react";
 import Ban from "./web_pages/Ban";
 import {DataContext, SiteStatus} from "../App"
 import {GameSocketContext, gameSocket} from '../context/gameSocket';
-
 import GameStartModal from './GameStartModal'
 
 function Authorized() {
@@ -32,12 +31,13 @@ function Authorized() {
         <Route exact path="/settings" component={Settings} />
         <Route exact path="/disconnect" component={Disconnect} />
         <Route exact path="/ladder" component={Ladder}/>
-        {(userData.siteStatus === SiteStatus.MODERATOR || userData.siteStatus === SiteStatus.OWNER) &&
-        <Route exact path="/admin" component={Admin}/>}
+        {(userData.siteStatus === SiteStatus.MODERATOR || userData.siteStatus === SiteStatus.OWNER) ?
+        <Route exact path="/admin" component={Admin}/>
+        :<Route exact path="/admin" component={Home}/>}
         <Redirect to="/home"/>
       </Switch>
       </div>
-      
+
       </GameSocketContext.Provider>
 
     </BrowserRouter>
@@ -87,7 +87,7 @@ function Router() {
             setConnection(1);
         }
     })
-    .catch(res => { 
+    .catch(res => {
         setConnection(2)
     })
   }, [twofa])

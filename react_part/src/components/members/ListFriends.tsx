@@ -80,23 +80,17 @@ export default function ListFriends()
 
 				</div>
 			)
-			//console.log(`Friend : ${Friend}`)
 		}
 
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	//const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
-	//const userData = useContext(DataContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
-	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
-
 	//get list of friends at the mount of the component + start listening socket
 	useEffect(() => {
-		//console.log("in the first useEffect");
 		let isMounted = true;
 		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=friend', {withCredentials: true,})
 		.then(res => { if (isMounted)
@@ -116,7 +110,6 @@ export default function ListFriends()
 
 	//actualize the status
 	useEffect(() => {
-		//console.log("in actualize status");
 		if (ReloadStatus.user_id !== 0)
 		{
 			const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)

@@ -35,23 +35,6 @@ export default function ListPrivateConversation(props: {
 	const [PrivateConversation, setPrivateConversation] = useState<IConversation[]>([]);
 	const [AllPrivateConversation, setAllPrivateConversation] = useState<IConversation[]>([]);
 
-/*  	//get list blocked at the mount of the component + start listening socket
-	useEffect(() => {
-		console.log("1 useEffect")
-		let isMounted = true;
-		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=block', {withCredentials: true,})
-		.then(res => { if(isMounted)
-			SetBlockedUsers(res.data);
-		})
-		.catch(res => { if (isMounted)
-			console.log("error on getting data blocked users");
-		})
-		setTimeout(console.log, 100, BlockedUsers)
-		socket.on("reload-block", () => {console.log("in the socket"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
-
-		return (() => { socket.off("reload-block"); isMounted = false; });
-	}, [ReloadBlockedUserlist, socket]); */
-
 	useEffect(() => {
 		socket.emit("private-ask-reload");
 	}, [])
