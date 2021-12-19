@@ -68,6 +68,7 @@ export class PongGateway {
         const user: User = await this.authService.getUserFromSocket(client);
         client.leave(user.id.toString());
         const currentGame = this.pongService.userDiconnectFromGame(user.id);
+        this.pongService.setDisconnected(user.id, false);
         if (currentGame) client.leave(currentGame.toString() + '-Game');
         await sleep(2000);
         const left = this.pongUsersService.userDisconnect(user.id);
@@ -91,7 +92,12 @@ export class PongGateway {
   async enterMatchMakingRoom(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-
+      if (user.userStatus === OnlineStatus.PALYING) {
+        client.emit(`alert`, {
+          alert: { type: `danger`, message: 'You are already in a game' },
+        });
+        return;
+      }
       console.log('New Player Joins', user.id.toString());
       //client.emit('inMatchMaking', true);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
@@ -113,7 +119,7 @@ export class PongGateway {
         });
       }
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -177,9 +183,21 @@ export class PongGateway {
           }
           // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
         }
+        if (this.pongService.playersDisconnectCheck(infos.GameId)) {
+          clearInterval(waitForReady);
+          client.leave(infos.GameId.toString() + '-Game');
+          client.emit(`alert`, {
+            alert: {
+              type: `warning`,
+              message:
+                'your opponent is running away, you must go back to matchmaking',
+            },
+          });
+        }
+        console.log('check');
       }, 100);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -292,11 +310,22 @@ export class PongGateway {
               );
             this.startGameBonus(infos.GameId);
           }
-          // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
+        }
+        if (this.pongService.playersDisconnectCheck(infos.GameId)) {
+          clearInterval(waitForReady);
+
+          client.leave(infos.GameId.toString() + '-Game');
+          client.emit(`alert`, {
+            alert: {
+              type: `warning`,
+              message:
+                'your opponent is running away, you must go back to matchmaking',
+            },
+          });
         }
       }, 100);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 

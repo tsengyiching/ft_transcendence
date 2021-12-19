@@ -39,6 +39,7 @@ export type Player = {
   down: boolean;
   space: boolean;
   ready: boolean;
+  connected: boolean;
 };
 
 export type SideBonus = {
