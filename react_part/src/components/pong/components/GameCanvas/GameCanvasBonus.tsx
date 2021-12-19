@@ -1,5 +1,5 @@
-import  {useRef, useEffect, useState} from "react"
-import useStore,{Score} from "../../hooks/useStore";
+import  {useRef, useEffect,} from "react"
+import useStore from "../../hooks/useStore";
 import "./../GameCanvas.css"
 
 const H:number = 720;

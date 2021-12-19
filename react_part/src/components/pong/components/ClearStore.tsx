@@ -1,4 +1,3 @@
-import  {useRef, useEffect, useState} from "react"
 import useStore from "../hooks/useStore";
 const H = 800;
 const W = 1000;

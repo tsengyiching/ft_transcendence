@@ -1,4 +1,4 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import { useEffect } from 'react';
 
 const pressed:boolean[] = [];
 pressed[38] = false;

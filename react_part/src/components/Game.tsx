@@ -2,13 +2,10 @@ import React, {useEffect, useState, useContext} from 'react';
 import {Button, Image, Spinner} from 'react-bootstrap'
 import './Game.css'
 import Container from 'react-bootstrap/Container';
-import {GameSocketContext, gameSocket} from './../context/gameSocket';
+import {GameSocketContext} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
 import Pong from './pong/components/Pong';
-const NONE = 0;
-const START = 1;
-const IG = 2;
 
 type GameInfos = {
     pLName: string;

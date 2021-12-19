@@ -640,7 +640,7 @@ export class PongService {
   private placesY = [144, 288, 432, 516, 144, 288, 432, 516];
   private placesX = [0, 100, 200, 300, 400, 550, 650, 750, 850];
 
-  addBlackHolesPos(match: Match, side: boolean) {
+  addBlackHolesPos(match: Match) {
     let posL: Pos[] = [];
     let posR: Pos[] = [];
     for (let i = 0; i < 4; i++) {
@@ -812,11 +812,11 @@ export class PongService {
     );
     if (left) {
       match.bonus.blackHoles = left;
-      this.addBlackHolesPos(match, false);
+      this.addBlackHolesPos(match);
     }
     if (right) {
       match.bonus.blackHoles = right;
-      this.addBlackHolesPos(match, true);
+      this.addBlackHolesPos(match);
     }
   }
 

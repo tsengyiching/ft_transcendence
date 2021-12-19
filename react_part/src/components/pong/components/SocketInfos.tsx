@@ -1,9 +1,8 @@
 import { useEffect , useState, useContext} from "react";
-import axios from 'axios';
-import io, {Socket} from 'socket.io-client';
+import {Socket} from 'socket.io-client';
 import { GameSocketContext } from "../../../context/gameSocket";
 import useStore from './../hooks/useStore'
-import {Pos} from "./../types/ObjectTypes"
+
 type Infos = {
 	pOneY: number;
 	pTwoY: number;

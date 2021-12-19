@@ -1,4 +1,4 @@
-import {useRef, useEffect, useState} from "react"
+import {useRef, useEffect} from "react"
 import useStore,{Score} from "../../hooks/useStore";
 import "./../ScoreCanvas.css";
 

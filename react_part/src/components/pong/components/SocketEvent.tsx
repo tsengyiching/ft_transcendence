@@ -1,6 +1,5 @@
-import { useEffect , useState, useContext} from "react";
-import axios from 'axios';
-import io, {Socket} from 'socket.io-client';
+import {  useContext} from "react";
+import  {Socket} from 'socket.io-client';
 import useKeyPressCB from "../hooks/UseKeyPressCB";
 import { GameSocketContext } from "../../../context/gameSocket";
 

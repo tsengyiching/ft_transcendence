@@ -54,8 +54,11 @@ export class PongGateway {
         this.pongUsersService.userConnect(user.id);
         const resp = this.pongUsersService.isInMatchmaking(user.id);
         client.emit('inMatchMaking', resp);
-    } catch (error) {
-      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+      } catch (error) {
+        client.emit(`alert`, {
+          alert: { type: `danger`, message: error.error },
+        });
+      }
     }
   }
 
@@ -76,10 +79,11 @@ export class PongGateway {
           this.pongUsersService.removePlayer(user.id);
         }
         if (this.pongUsersService.isInMatchmakingBonus(user.id) && !left) {
-            this.pongUsersService.removePlayerBonus(user.id);
+          this.pongUsersService.removePlayerBonus(user.id);
         }
-    } catch (error) {
-      console.log(error);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
@@ -194,7 +198,6 @@ export class PongGateway {
             },
           });
         }
-        console.log('check');
       }, 100);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
