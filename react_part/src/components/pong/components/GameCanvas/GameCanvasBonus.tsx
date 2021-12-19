@@ -2,7 +2,8 @@ import  {useRef, useEffect, useState} from "react"
 import useStore,{Score} from "../../hooks/useStore";
 import "./../GameCanvas.css"
 
-
+const H:number = 720;
+const W:number = 1000;
 const placesY = [ 144, 288, 432, 516, 144, 288, 432, 516 ];
 const placesX = [ 0, 100, 200, 300, 400, 550, 650, 750, 850];
 function drawBonus(ctx:CanvasRenderingContext2D, x: number, y :number) : void {
@@ -50,8 +51,8 @@ function drawBH(ctx:CanvasRenderingContext2D, bh:string) : void {
 		//let requestId:number;
 		useEffect(() => {
 			const canvas:(HTMLCanvasElement | null) = canvasRef.current;
-			canvas!.width = w;
-			canvas!.height = h;
+			canvas!.width = W;
+			canvas!.height = H;
 			canvas!.style.width = w +'px';
 			canvas!.style.height= h +'px';
 			const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");
