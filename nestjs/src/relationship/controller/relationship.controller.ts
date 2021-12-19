@@ -172,7 +172,7 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.to('user-' + user.id).emit('reload-block');
-    this.chatGateway.server.to('user-' + user.id).emit('reload-blockedby');
+    this.chatGateway.server.to('user-' + relationshipDto.addresseeUserId).emit('reload-blockedby');
     this.chatGateway.server
       .to('user-' + relationshipDto.addresseeUserId)
       .emit('reload-blockedby');
@@ -197,7 +197,7 @@ export class RelationshipController {
       relationshipDto,
     );
     this.chatGateway.server.to('user-' + user.id).emit('reload-block');
-    this.chatGateway.server.to('user-' + user.id).emit('reload-blockedby');
+    this.chatGateway.server.to('user-' + relationshipDto.addresseeUserId).emit('reload-blockedby');
     this.chatGateway.server
       .to('user-' + relationshipDto.addresseeUserId)
       .emit('reload-blockedby');
