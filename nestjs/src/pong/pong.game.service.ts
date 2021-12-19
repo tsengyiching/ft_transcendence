@@ -64,6 +64,12 @@ export class PongService {
     return false;
   }
 
+  playersDisconnectCheck(gameId): boolean {
+    const currentGame = this.matches.find((e) => e.id === gameId);
+    if (!currentGame.pOne.connected || !currentGame.pTwo.connected) return true;
+    return false;
+  }
+
   isGameRunning(gameId: number): boolean {
     let ret = false;
     this.matches.forEach((match) => {
@@ -206,6 +212,7 @@ export class PongService {
         down: false,
         ready: false,
         space: false,
+        connected: true,
       };
       return newPlayer;
     } catch (error) {
@@ -233,6 +240,17 @@ export class PongService {
       }
       if (match.pTwo.client.id === socketId) {
         match.pTwo.space = value;
+      }
+    });
+  }
+
+  setDisconnected(userId: number, value: boolean) {
+    this.matches.forEach((match) => {
+      if (match.pOne.id === userId) {
+        match.pOne.connected = value;
+      }
+      if (match.pTwo.id === userId) {
+        match.pTwo.connected = value;
       }
     });
   }
@@ -400,6 +418,9 @@ export class PongService {
           ? currentGame.pOne.name
           : currentGame.pTwo.name,
       };
+      currentGame.pOne.ready
+        ? (currentGame.scoreL = 42)
+        : (currentGame.scoreR = 42);
     } else {
       currentGame.pOne.score = currentGame.scoreL;
       currentGame.pTwo.score = currentGame.scoreR;
