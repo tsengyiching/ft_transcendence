@@ -198,6 +198,18 @@ export class GameService {
   /*                                 checkers                                 */
   /****************************************************************************/
 
+  async checkOneUserAvailability(userId: number): Promise<void> {
+    const game = await this.userGameRecords.find({
+      where: { userId: userId, game: { status: GameStatus.ONGOING } },
+      relations: ['game'],
+    });
+    if (game[0])
+      throw new HttpException(
+        `You are already in a game !`,
+        HttpStatus.BAD_REQUEST,
+      );
+  }
+
   async checkUsersIdAndAvailability(
     userOne: number,
     userTwo: number,

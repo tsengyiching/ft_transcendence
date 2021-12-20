@@ -4,6 +4,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { SSL_OP_EPHEMERAL_RSA } from 'constants';
 import { Socket } from 'socket.io';
@@ -96,13 +97,9 @@ export class PongGateway {
   async enterMatchMakingRoom(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-	  console.log(user);
-      if (user.userStatus === OnlineStatus.PALYING) {
-        client.emit(`alert`, {
-          alert: { type: `danger`, message: 'You are already in a game' },
-        });
-        return;
-      }
+      if (user.userStatus === OnlineStatus.PALYING)
+        throw new WsException(`You are already in a game !`);
+      await this.gameService.checkOneUserAvailability(user.id);
       console.log('New Player Joins', user.id.toString());
       //client.emit('inMatchMaking', true);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
@@ -266,7 +263,8 @@ export class PongGateway {
   async enterMatchMakingRoomBonus(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-
+      if (user.userStatus === OnlineStatus.PALYING)
+        throw new WsException(`You are already in a game !`);
       console.log(`${user.id} ${user.nickname} joined Bonus Match Making.`);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayerBonus(user.id);
