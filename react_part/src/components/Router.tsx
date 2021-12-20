@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Switch, Redirect, useHistory } from "react-router-dom";
+import { BrowserRouter, Route, Switch, Redirect, } from "react-router-dom";
 import Home from './web_pages/Home';
 import Profile from './web_pages/Profile';
 import Settings from './settings/Settings';
@@ -20,7 +20,7 @@ function Authorized() {
   const userData = useContext(DataContext);
 
   return (
-    <BrowserRouter>
+    <BrowserRouter key={"Autorized_router"}>
       <GameSocketContext.Provider value={gameSocket}>
       <GameStartModal />
       <Header />
@@ -46,7 +46,7 @@ function Authorized() {
 
 function Unauthorized(props: {setConnection: Function}) {
   return (
-    <BrowserRouter>
+    <BrowserRouter key={"Unauthorized_router"}>
       <Switch>
         <Route exact path="/connexion" component={Connexion} />
         <Route path="/2fa" component={() => <Twofa setConnection={props.setConnection}/>}/>
@@ -101,9 +101,9 @@ function Router() {
     return(
       <div>
         {
-          isConnected == 0 ?
+          isConnected === 0 ?
           <div></div> :
-          isConnected == 1 ?
+          isConnected === 1 ?
           <Authorized/> :
           isConnected == 2 ?
           <Unauthorized setConnection={setConnection}/> :
