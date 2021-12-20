@@ -2,13 +2,10 @@ import React, {useEffect, useState, useContext} from 'react';
 import {Button, Image, Spinner} from 'react-bootstrap'
 import './Game.css'
 import Container from 'react-bootstrap/Container';
-import {GameSocketContext, gameSocket} from './../context/gameSocket';
+import {GameSocketContext} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
 import Pong from './pong/components/Pong';
-const NONE = 0;
-const START = 1;
-const IG = 2;
 
 type GameInfos = {
     pLName: string;
@@ -39,15 +36,23 @@ const Game:React.FC = () => {
             useStore.setState((s) => ({...s, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
             }
         } );
+		socket.on('startPongBonus', (e:GameInfos) => {
+            if (isMounted) {
+			setGameStatus(2);
+            useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
+            }
+        } );
         return (() => {
             socket.off('startPong');
             socket.off('inMatchMaking');
+			socket.off('startPongBonus');
             isMounted = false;
         })
     })
     
     const handleClickON = () => socket.emit('matchmakingON');
     const handleClickOFF = () => socket.emit('matchmakingOFF');
+	const handleClickONBonus = () => socket.emit('BonusmatchmakingON');
 
     function showButtons():JSX.Element {
         return (
@@ -56,7 +61,7 @@ const Game:React.FC = () => {
                     <Button variant="outline-warning" onClick={handleClickON}>Join a normal game</Button>
                 </div>
                 <div className="col">
-                    <Button variant="outline-warning">Join a bonus game</Button>
+                    <Button variant="outline-warning" onClick={handleClickONBonus}>Join a bonus game</Button>
                 </div>
 				<Image src={process.env.PUBLIC_URL + '/pongbackground.jpg'} style={{width:'100%', height:'1000px', objectFit:'cover', objectPosition:'center',}}fluid />
         </div>
@@ -75,7 +80,7 @@ const Game:React.FC = () => {
 
 	return (
         <Container className='no-padding' fluid>
-			{gameStatus === 2 ? <Pong h={800} w={1000}/> : toggleMatchMaking ? waitingForGame() : showButtons()}
+			{gameStatus === 2 ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);
 }

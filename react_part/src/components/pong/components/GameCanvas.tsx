@@ -9,6 +9,7 @@ const GameCanvas:React.VFC<{}> = () => {
 	
 	return (
 		<div id="stage" style={{width:`${w}px`, height: `${h}px`}}>
+			<GameCanvasBonus />
 			<GameCanvasBackground />
 		</div>
 	);}

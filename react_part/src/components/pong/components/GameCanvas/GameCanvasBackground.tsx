@@ -3,6 +3,8 @@ import useStore from "../../hooks/useStore";
 import "./../GameCanvas.css"
 import {Ball, Paddle} from './../../types/ObjectTypes'
 
+const H:number = 720;
+const W:number = 1000;
 interface CanvasProps {
 	w: number;
 	h: number;
@@ -33,43 +35,34 @@ function drawPaddle(ctx:CanvasRenderingContext2D, paddle:Paddle) : void  {
 	ctx?.closePath();
  }
 
-
 const GameCanvasBackground:React.VFC<{}> = () => {
 	const h = useStore(s => s.h);
 	const w = useStore(s => s.w);
 	const PaddleL = useStore(s => s.paddleL);
 	const PaddleR = useStore(s => s.paddleR);
-
 	const ball = useStore(s => s.ball);
 
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	// preserve information that we need between rerender
 	const contextRef = useRef<CanvasRenderingContext2D | null>(null);
-	let requestId:number;
 
 	useEffect(() => {
 
 		const canvas:(HTMLCanvasElement | null) = canvasRef.current;
-		canvas!.width = w;
-		canvas!.height = h;
+		canvas!.width = W;
+		canvas!.height = H;
 		canvas!.style.width = w +'px';
 		canvas!.style.height= h +'px';
 		const ctx:(CanvasRenderingContext2D | null) = canvas!.getContext("2d");
 		if (ctx) {
 			contextRef.current = ctx;
 		}
-		const render = () => {
-			ctx?.clearRect(0,0,w, h);
-			drawMiddle(ctx!, {w, h});
-			drawPaddle(ctx!, PaddleL);
-			drawPaddle(ctx!, PaddleR);
+		ctx?.clearRect(0,0,W, H);
+		drawMiddle(ctx!, {w:W, h:H});
+		drawPaddle(ctx!, PaddleL);
+		drawPaddle(ctx!, PaddleR);
+		drawBall(ctx!, ball);
 
-			drawBall(ctx!, ball);
-		   requestId = requestAnimationFrame(render);
-		   };
-		   
-		   render();
-		return () => { cancelAnimationFrame(requestId);}
 	});
 	return (
 		<canvas id="background-layer" ref={canvasRef} ></canvas>

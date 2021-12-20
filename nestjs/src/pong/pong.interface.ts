@@ -37,7 +37,26 @@ export type Player = {
   score: number;
   up: boolean;
   down: boolean;
+  space: boolean;
   ready: boolean;
+  connected: boolean;
+};
+
+export type SideBonus = {
+  y: number;
+  yStart: number;
+  type: number;
+  start: number;
+  bonusUp: number;
+};
+
+export type Bonus = {
+  left: SideBonus;
+  right: SideBonus;
+  blackHoles: string;
+  leftBH: Pos[] | undefined;
+  rightBH: Pos[] | undefined;
+  lastBH: number;
 };
 
 export type Match = {
@@ -54,5 +73,6 @@ export type Match = {
   run: boolean;
   goal: boolean;
   dbId: number;
+  bonus: Bonus | undefined;
   // viewer id ??
 };

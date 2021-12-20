@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import {Toast, ToastContainer } from 'react-bootstrap'
 import { socket } from '../context/socket';
+import { gameSocket } from '../context/gameSocket';
 import {useBetween} from 'use-between'
 
 type NotificationType = 'success' | 'warning' | 'danger'
@@ -51,7 +52,14 @@ function Notifications() {
 			NotificationList.push(data.alert);
 			SetNotifications([...NotificationList]);
 		});
-		return (() => {socket.off('alert')})
+        gameSocket.on('alert', (data: {alert: INotification}) => {
+			NotificationList.push(data.alert);
+			SetNotifications([...NotificationList]);
+		});
+		return (() => {
+            socket.off('alert');
+            gameSocket.off('alert');
+        })
 	}, [NotificationList, SetNotifications]);
 
     return (

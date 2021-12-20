@@ -1,8 +1,9 @@
-import React, { FunctionComponent, useEffect } from 'react';
+import { useEffect } from 'react';
 
 const pressed:boolean[] = [];
 pressed[38] = false;
 pressed[40] = false;
+pressed[62] = false;
 function useKeyPressCB(key:string, action:Function) {	
 	useEffect(() => {
 		const onKeyDown = (e:KeyboardEvent) => {

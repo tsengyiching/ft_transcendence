@@ -3,10 +3,12 @@ import { Button, Modal, Form, } from "react-bootstrap";
 import {SocketContext} from "../../../context/socket"
 import {IOtherChannel} from "./ListChannel"
 
+type backdrop_type = boolean | "static" | undefined
+
 interface Props {
   show: boolean,
   onHide: () => void,
-  backdrop: string,
+  backdrop: backdrop_type,
   channel: IOtherChannel,
 }
 

@@ -30,6 +30,9 @@ const PongInfoModal:React.FC = () => {
 				setShow(true);
 			}
 		})
+		return (() => {
+			socket.off('GameFinals');
+		})
 	})
 
 	const backToSite = () => {

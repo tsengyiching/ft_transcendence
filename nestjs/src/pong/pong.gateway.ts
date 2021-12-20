@@ -55,7 +55,9 @@ export class PongGateway {
         const resp = this.pongUsersService.isInMatchmaking(user.id);
         client.emit('inMatchMaking', resp);
       } catch (error) {
-        console.log(error);
+        client.emit(`alert`, {
+          alert: { type: `danger`, message: error.error },
+        });
       }
     }
   }
@@ -69,17 +71,22 @@ export class PongGateway {
         const user: User = await this.authService.getUserFromSocket(client);
         client.leave(user.id.toString());
         const currentGame = this.pongService.userDiconnectFromGame(user.id);
+        this.pongService.setDisconnected(user.id, false);
         if (currentGame) client.leave(currentGame.toString() + '-Game');
         await sleep(2000);
         const left = this.pongUsersService.userDisconnect(user.id);
         if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
           this.pongUsersService.removePlayer(user.id);
         }
+        if (this.pongUsersService.isInMatchmakingBonus(user.id) && !left) {
+          this.pongUsersService.removePlayerBonus(user.id);
+        }
       } catch (error) {
         console.log(error);
       }
     }
   }
+
   /**
    *
    * @param client Socket de la fenetre qui se connecte au jeu (peut etre plusieur par joueur)
@@ -89,24 +96,34 @@ export class PongGateway {
   async enterMatchMakingRoom(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-
+      if (user.userStatus === OnlineStatus.PALYING) {
+        client.emit(`alert`, {
+          alert: { type: `danger`, message: 'You are already in a game' },
+        });
+        return;
+      }
       console.log('New Player Joins', user.id.toString());
       //client.emit('inMatchMaking', true);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayer(user.id);
-      await sleep(5000);
-      const userArray = this.pongUsersService.makeMatchMaking();
+      await sleep(2000);
+      const userArray = await this.pongUsersService.makeMatchMaking();
       if (userArray) {
         console.log(userArray);
-        const GameId = this.pongUsersService.createGameId(); // TODO mettre dans DB ??
-        this.pongService.createNewMatch(GameId, userArray, this.userService);
+        const GameId = this.pongUsersService.createGameId();
+        this.pongService.createNewMatch(
+          GameId,
+          userArray,
+          this.userService,
+          false,
+        );
         userArray.forEach((e) => {
           this.server.to(e.toString()).emit('inMatchMaking', false);
           this.server.to(e.toString()).emit('inGame', GameId);
         });
       }
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -115,9 +132,10 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
 
-      console.log('New Player LEAVE', user.id.toString());
+      console.log(`${user.id} ${user.nickname} left Match Making.`);
       this.server.to(user.id.toString()).emit('inMatchMaking', false);
       this.pongUsersService.removePlayer(user.id);
+      this.pongUsersService.removePlayerBonus(user.id);
     } catch (error) {
       console.log(error);
     }
@@ -127,8 +145,7 @@ export class PongGateway {
   async isInMatchmaking(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      const resp = this.pongUsersService.isInMatchmaking(user.id);
-      console.log('isINMATCH', resp);
+      const resp = this.pongUsersService.isInAMatchMaking(user.id);
       client.emit('inMatchMaking', resp);
     } catch (error) {
       console.log(error);
@@ -141,6 +158,11 @@ export class PongGateway {
   @SubscribeMessage('up')
   onUp(client: Socket, payload: boolean) {
     this.pongService.setKeyValue(true, client.id, payload);
+  }
+
+  @SubscribeMessage('space')
+  onSpace(client: Socket, payload: boolean) {
+    this.pongService.setSpace(client.id, payload);
   }
 
   @SubscribeMessage('ready')
@@ -165,43 +187,22 @@ export class PongGateway {
           }
           // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
         }
+        if (this.pongService.playersDisconnectCheck(infos.GameId)) {
+          clearInterval(waitForReady);
+          client.leave(infos.GameId.toString() + '-Game');
+          client.emit(`alert`, {
+            alert: {
+              type: `warning`,
+              message:
+                'your opponent is running away, you must go back to matchmaking',
+            },
+          });
+        }
       }, 100);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
-  // TODO https://gamedev.stackexchange.com/questions/57901/how-to-implement-the-server-side-game-loop/105804
-  //
-  // startGame(gameId: number) {
-  //   this.pongService.setGameRunning(gameId, true);
-  //   const roomName = gameId.toString() + '-Game';
-  //   if (gameId >= 0) {
-  //     const IntervalID = setInterval(() => {
-  //       this.pongService.UpdateGame(gameId);
-  //       this.server
-  //         .to(roomName)
-  //         .volatile.emit('infos', this.pongService.gameInfos(gameId));
-  //       // if (this.pongService.goal(gameId)) {
-  //       //   if (this.pongService.isEndGame(gameId)) {
-  //       //     this.pongService.setGameRunning(gameId, false);
-  //       //   } else {
-  //       //     this.pongService.setGoal(gameId, false);
-  //       //     clearInterval(IntervalID);
-  //       //     startGame(gameId);
-  //       //   }
-  //       // }
-  //       if (!this.pongService.isGameRunning(gameId)) {
-  //         console.log(`Game ${gameId} stopped`);
-  //         this.server
-  //           .to(roomName)
-  //           .emit('GameFinals', this.pongService.sendFinalModal(gameId));
-  //         this.pongService.deleteGame(gameId);
-  //         // TODO ajouter a la db
-  //         clearInterval(IntervalID);
-  //       }
-  //     }, 1000 / FRAMERATE);
-  //   }
-  // }
 
   // loop from https://timetocode.tumblr.com/post/71512510386/an-accurate-node-js-game-loop-inbetween-settimeout-and
   startGame(gameId: number) {
@@ -220,6 +221,10 @@ export class PongGateway {
             .volatile.emit('infos', this.pongService.gameInfos(gameId));
         }
         if (this.pongService.goal(gameId)) {
+          this.server
+            .to(roomName)
+            .emit('sendScore', this.pongService.sendScore(gameId));
+
           if (this.pongService.isEndGame(gameId)) {
             this.pongService.setGameRunning(gameId, false);
           } else {
@@ -245,6 +250,164 @@ export class PongGateway {
         }
       };
       GameLoop();
+    }
+  }
+
+  /*
+██████   ██████  ███    ██ ██    ██ ███████ 
+██   ██ ██    ██ ████   ██ ██    ██ ██      
+██████  ██    ██ ██ ██  ██ ██    ██ ███████ 
+██   ██ ██    ██ ██  ██ ██ ██    ██      ██ 
+██████   ██████  ██   ████  ██████  ███████ 
+  */
+
+  @SubscribeMessage('BonusmatchmakingON')
+  async enterMatchMakingRoomBonus(client: Socket) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+
+      console.log(`${user.id} ${user.nickname} joined Bonus Match Making.`);
+      this.server.to(user.id.toString()).emit('inMatchMaking', true);
+      this.pongUsersService.addNewPlayerBonus(user.id);
+      await sleep(2000);
+      const userArray = await this.pongUsersService.makeMatchMakingBonus();
+      if (userArray) {
+        console.log(userArray);
+        const GameId = this.pongUsersService.createGameId();
+        this.pongService.createNewMatch(
+          GameId,
+          userArray,
+          this.userService,
+          true,
+        );
+        userArray.forEach((e) => {
+          this.server.to(e.toString()).emit('inMatchMaking', false);
+          this.server.to(e.toString()).emit('inGameBonus', GameId);
+        });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  @SubscribeMessage('readyBonus')
+  async readyForGameBonus(client: Socket, payload: number) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      const infos = this.pongService.playersSetReady(payload, user.id, client);
+      client.join(infos.GameId.toString() + '-Game');
+      const waitForReady = setInterval(async () => {
+        if (this.pongService.playersReadyCheck(payload)) {
+          clearInterval(waitForReady);
+          if (infos.Player === 1) {
+            const ret = await this.gameService.createGame(
+              this.pongService.getPlayers(infos.GameId),
+              GameMode.BONUS,
+            );
+            this.pongService.setDatabaseId(infos.GameId, ret.id);
+            this.server
+              .to(infos.GameId.toString() + '-Game')
+              .emit(
+                'startPongBonus',
+                this.pongService.sendPlayersInfos(payload),
+              );
+            this.startGameBonus(infos.GameId);
+          }
+        }
+        if (this.pongService.playersDisconnectCheck(infos.GameId)) {
+          clearInterval(waitForReady);
+
+          client.leave(infos.GameId.toString() + '-Game');
+          client.emit(`alert`, {
+            alert: {
+              type: `warning`,
+              message:
+                'your opponent is running away, you must go back to matchmaking',
+            },
+          });
+        }
+      }, 100);
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  // loop from https://timetocode.tumblr.com/post/71512510386/an-accurate-node-js-game-loop-inbetween-settimeout-and
+  startGameBonus(gameId: number) {
+    const refreshTime: number = 1000 / FRAMERATE;
+    let lastRefresh = Date.now();
+    this.pongService.setGameRunning(gameId, true);
+    const roomName = gameId.toString() + '-Game';
+    if (gameId >= 0) {
+      this.server.to(roomName).emit('sendScore', { scoreL: 0, scoreR: 0 });
+      const GameLoop = () => {
+        const now = Date.now();
+        if (lastRefresh + refreshTime <= now) {
+          lastRefresh = now;
+          this.pongService.UpdateGameBonus(gameId);
+          this.server
+            .to(roomName)
+            .volatile.emit('infos', this.pongService.gameInfos(gameId));
+        }
+        this.checkBonusToEmit(gameId, roomName);
+        if (this.pongService.goal(gameId)) {
+          this.server
+            .to(roomName)
+            .emit('sendScore', this.pongService.sendScore(gameId));
+          if (this.pongService.isEndGame(gameId)) {
+            this.pongService.setGameRunning(gameId, false);
+          } else {
+            this.pongService.setGoal(gameId, false);
+          }
+        }
+        if (!this.pongService.isGameRunning(gameId)) {
+          console.log(`Game ${gameId} stopped`);
+          this.server
+            .to(roomName)
+            .emit('GameFinals', this.pongService.sendFinalModal(gameId));
+          this.gameService.insertGameResult(
+            this.pongService.getDatabaseId(gameId),
+            this.pongService.getResults(gameId),
+          );
+          this.pongService.deleteGame(gameId);
+          return;
+        }
+        if (Date.now() - lastRefresh < refreshTime - 16) {
+          setTimeout(GameLoop);
+        } else {
+          setImmediate(GameLoop);
+        }
+      };
+      GameLoop();
+    }
+  }
+
+  checkBonusToEmit(gameId: number, roomName: string) {
+    const leftCkeck = this.pongService.isBonusUPL(gameId);
+    const rightCheck = this.pongService.isBonusUPR(gameId);
+
+    if (leftCkeck === 1 || rightCheck === 1) {
+      this.server
+        .to(roomName)
+        .volatile.emit('bonusY', this.pongService.gameInfosBonusY(gameId));
+    }
+    if (leftCkeck === 2 || rightCheck === 2) {
+      this.server
+        .to(roomName)
+        .emit('bonusY', this.pongService.gameInfosBonusY(gameId));
+      this.server
+        .to(roomName)
+        .emit('bonusType', this.pongService.gameInfosBonusType(gameId));
+    }
+    if (leftCkeck === 3 || rightCheck === 3) {
+      this.server
+        .to(roomName)
+        .emit('bonusLaunch', this.pongService.gameInfosBonusLaunch(gameId));
+    }
+    if (leftCkeck === 4 || rightCheck === 4) {
+      this.server
+        .to(roomName)
+        .emit('bonusBH', this.pongService.gameInfosBonusBH(gameId));
     }
   }
 }

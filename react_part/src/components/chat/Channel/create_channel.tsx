@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { Socket } from "socket.io-client";
 import { Button, Modal, ToggleButton, ToggleButtonGroup, Form,} from "react-bootstrap";
 
+type backdrop_type = boolean | "static" | undefined
+
 interface Props {
   show: boolean,
   onHide: () => void,
-  backdrop: string,
+  backdrop: backdrop_type,
   socket: Socket
 }
 

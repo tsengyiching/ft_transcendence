@@ -9,10 +9,12 @@ import {Modal, Form} from 'react-bootstrap'
 import {IUser} from '../ChatInterface'
 import {Role, SwitchContext} from '../../web_pages/UserPart'
 
+type backdrop_type = boolean | "static" | undefined
+
 interface IPropsModal {
 	show: boolean,
 	onHide: () => void,
-	backdrop: string,
+	backdrop: backdrop_type,
 	sanctionstatus: 'mute' | 'ban',
 	user: IUser | undefined,
 	channelid: number,

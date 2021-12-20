@@ -6,6 +6,8 @@ import {
   ObjectToCollide,
   Match,
   Pos,
+  Bonus,
+  SideBonus,
 } from './pong.interface';
 import { Socket } from 'socket.io';
 import { UserService } from 'src/user/service/user.service';
@@ -21,14 +23,14 @@ import {
   W,
   FRICTIONANGLE,
   MAXSCORE,
+  NONE,
+  BONUSY,
+  BONUSTYPE,
+  BONUSBH,
+  BONUSLAUNCH,
 } from './pong.env';
-import { Interval, SchedulerRegistry } from '@nestjs/schedule';
-import { throwIfEmpty } from 'rxjs';
-import { CurrentUser } from 'src/auth/decorator/currrent.user.decorator';
-
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { checkServerIdentity } from 'tls';
+import { threadId } from 'worker_threads';
 
 @Injectable()
 export class PongService {
@@ -59,6 +61,12 @@ export class PongService {
   playersReadyCheck(gameId): boolean {
     const currentGame = this.matches.find((e) => e.id === gameId);
     if (currentGame.pOne.ready && currentGame.pTwo.ready) return true;
+    return false;
+  }
+
+  playersDisconnectCheck(gameId): boolean {
+    const currentGame = this.matches.find((e) => e.id === gameId);
+    if (!currentGame.pOne.connected || !currentGame.pTwo.connected) return true;
     return false;
   }
 
@@ -99,6 +107,15 @@ export class PongService {
   getDatabaseId(gameId: number) {
     return this.matches.find((match) => match.id === gameId).dbId;
   }
+
+  isBonusUPL(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).bonus.left.bonusUp;
+  }
+
+  isBonusUPR(gameId: number) {
+    return this.matches.find((match) => match.id === gameId).bonus.right
+      .bonusUp;
+  }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
 ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
@@ -108,7 +125,12 @@ export class PongService {
 ╚═════╝░╚══════╝░░░╚═╝░░░░░░╚═╝░░░╚══════╝╚═╝░░╚═╝╚═════╝░
 */
 
-  private setNewMatch(id: number, p1: Player, p2: Player): Match {
+  private setNewMatch(
+    id: number,
+    p1: Player,
+    p2: Player,
+    bonus: boolean,
+  ): Match {
     const newMatch: Match = {
       id: id,
       ball: {
@@ -146,6 +168,28 @@ export class PongService {
       run: false,
       goal: false,
       dbId: 0,
+      bonus: !bonus
+        ? undefined
+        : {
+            left: {
+              y: -1,
+              yStart: 0,
+              type: 0,
+              start: 0,
+              bonusUp: NONE,
+            },
+            right: {
+              y: -1,
+              yStart: 0,
+              type: 0,
+              start: 0,
+              bonusUp: NONE,
+            },
+            leftBH: undefined,
+            rightBH: undefined,
+            blackHoles: '00000000',
+            lastBH: 0,
+          },
     };
     return newMatch;
   }
@@ -167,6 +211,8 @@ export class PongService {
         up: false,
         down: false,
         ready: false,
+        space: false,
+        connected: true,
       };
       return newPlayer;
     } catch (error) {
@@ -187,6 +233,27 @@ export class PongService {
     });
   }
 
+  setSpace(socketId: string, value: boolean) {
+    this.matches.forEach((match) => {
+      if (match.pOne.client.id === socketId) {
+        match.pOne.space = value;
+      }
+      if (match.pTwo.client.id === socketId) {
+        match.pTwo.space = value;
+      }
+    });
+  }
+
+  setDisconnected(userId: number, value: boolean) {
+    this.matches.forEach((match) => {
+      if (match.pOne.id === userId) {
+        match.pOne.connected = value;
+      }
+      if (match.pTwo.id === userId) {
+        match.pTwo.connected = value;
+      }
+    });
+  }
   playersSetReady(
     gameId: number,
     playerId: number,
@@ -247,21 +314,27 @@ export class PongService {
    * @param id Match id
    * @param userIdArr ids of the 2 players
    * @param userService YOU KNOW
-   * @returns id of the Match ??(voir avec Felix) // TODO
+   * @param bonus true if bonus is enabled
+   * @returns nothing
    */
   async createNewMatch(
     id: number,
     usersIdArr: number[],
     userService: UserService,
+    bonus: boolean,
   ) {
     if (this.matches.find((match) => match.id === id) === undefined) {
       const pOne = await this.createPlayerById(usersIdArr[0], userService, 1);
       const pTwo = await this.createPlayerById(usersIdArr[1], userService, 2);
-      this.matches.push(this.setNewMatch(id, pOne, pTwo));
+      this.matches.push(this.setNewMatch(id, pOne, pTwo, bonus));
     }
   }
-
-  sendPlayersInfos(gameId) {
+  /**
+   *
+   * @param gameId Match id
+   * @returns an object with players informations to send to the front
+   */
+  sendPlayersInfos(gameId: number) {
     const currentGame = this.matches.find((e) => e.id === gameId);
     return {
       pLName: currentGame.pOne.name,
@@ -271,8 +344,16 @@ export class PongService {
     };
   }
 
+  sendScore(matchId: number) {
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      scoreL: currentGame.scoreL,
+      scoreR: currentGame.scoreR,
+    };
+  }
   /**
-   * GAME INFOS
+   * @param gameId Match id
+   * @returns an object with game informations
    */
 
   gameInfos(matchId: number) {
@@ -282,11 +363,50 @@ export class PongService {
       pTwoY: currentGame.paddleR.pos.y,
       ballX: currentGame.ball.pos.x,
       ballY: currentGame.ball.pos.y,
-      scoreL: currentGame.scoreL,
-      scoreR: currentGame.scoreR,
     };
   }
 
+  /**
+   * @param gameId Match id
+   * @returns an object with game informations
+   */
+
+  gameInfosBonusY(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      yL: currentGame.bonus.left.y,
+      yR: currentGame.bonus.right.y,
+    };
+  }
+
+  gameInfosBonusType(matchId: number) {
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      typeL: currentGame.bonus.left.type,
+      typeR: currentGame.bonus.right.type,
+    };
+  }
+
+  gameInfosBonusLaunch(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return {
+      startL:
+        currentGame.bonus.left.start !== 0 ? 0 : currentGame.bonus.left.type,
+      startR:
+        currentGame.bonus.right.start !== 0 ? 0 : currentGame.bonus.right.type,
+    };
+  }
+  gameInfosBonusBH(matchId: number) {
+    // TODO
+    const currentGame = this.matches.find((e) => e.id === matchId);
+    return currentGame.bonus.blackHoles;
+  }
+  /**
+   * @param gameId Match id
+   * @returns an object with the results of the game
+   */
   sendFinalModal(matchId: number) {
     // envoyer egalement a la DB
     const currentGame: Match = this.matches.find((e) => e.id === matchId);
@@ -298,6 +418,9 @@ export class PongService {
           ? currentGame.pOne.name
           : currentGame.pTwo.name,
       };
+      currentGame.pOne.ready
+        ? (currentGame.scoreL = 42)
+        : (currentGame.scoreR = 42);
     } else {
       currentGame.pOne.score = currentGame.scoreL;
       currentGame.pTwo.score = currentGame.scoreR;
@@ -457,11 +580,6 @@ export class PongService {
           : match.pTwo.up && !match.pTwo.down
           ? -1
           : 0;
-      // console.log(`L ${match.scoreL} ---- R ${match.scoreR}`);
-      // if (match.scoreL === MAXSCORE || match.scoreR === MAXSCORE) {
-      //   match.run = false;
-      //   return;
-      // }
       if (match.id === gameId && match.run) {
         const touch = this.ballCollisionToPaddle(
           match.ball,
@@ -519,6 +637,265 @@ export class PongService {
     });
   }
 
+  private placesY = [144, 288, 432, 516, 144, 288, 432, 516];
+  private placesX = [0, 100, 200, 300, 400, 550, 650, 750, 850];
+
+  addBlackHolesPos(match: Match) {
+    let posL: Pos[] = [];
+    let posR: Pos[] = [];
+    for (let i = 0; i < 4; i++) {
+      if (match.bonus.blackHoles[i] != '0') {
+        posL = [
+          ...posL,
+          {
+            x: this.placesX[parseInt(match.bonus.blackHoles[i])],
+            y: this.placesY[i],
+          },
+        ];
+      }
+    }
+    for (let i = 4; i < 8; i++) {
+      if (match.bonus.blackHoles[i] != '0') {
+        posR = [
+          ...posR,
+          {
+            x: this.placesX[parseInt(match.bonus.blackHoles[i])],
+            y: this.placesY[i],
+          },
+        ];
+      }
+    }
+    match.bonus.leftBH = posL;
+    match.bonus.rightBH = posR;
+  }
+  private createBlackHoles(blackhole: string) {
+    const placeLeft = Math.floor(Math.random() * 3.99) + 1;
+    const placeRight = Math.floor(Math.random() * 3.99) + 5;
+    const voidLeft = Math.floor(Math.random() * 3.99);
+    const voidRight = Math.floor(Math.random() * 3.99) + 4;
+
+    const replace = blackhole.split('');
+    replace[voidLeft] = placeLeft.toString();
+    replace[voidRight] = placeRight.toString();
+    blackhole = replace.join('');
+    return blackhole;
+  }
+
+  private updateBallBonus(match: Match) {
+    if (match.bonus.lastBH !== 0) return;
+    if (match.ball.pos.x < 500) {
+      if (!match.bonus.leftBH) return;
+      match.bonus.leftBH.forEach((pos) => {
+        const dist = Math.sqrt(
+          Math.pow(pos.x - match.ball.pos.x, 2) +
+            Math.pow(pos.y - match.ball.pos.y, 2),
+        );
+        if (dist < 30 && dist !== 0) {
+          match.ball.pos =
+            match.bonus.rightBH[
+              Math.floor(Math.random() * (match.bonus.rightBH.length - 0.01))
+            ];
+          match.bonus.lastBH = 1;
+          return;
+        }
+      });
+    } else {
+      if (!match.bonus.rightBH) return;
+      match.bonus.rightBH.forEach((pos) => {
+        const dist = Math.sqrt(
+          Math.pow(pos.x - match.ball.pos.x, 2) +
+            Math.pow(pos.y - match.ball.pos.y, 2),
+        );
+        if (dist < 30 && dist !== 0) {
+          match.ball.pos =
+            match.bonus.leftBH[
+              Math.floor(Math.random() * (match.bonus.leftBH.length - 0.01))
+            ];
+          match.bonus.lastBH = 1;
+
+          return;
+        }
+      });
+    }
+  }
+
+  private updateSideBonus(
+    bh: string,
+    side: SideBonus,
+    mouv: number,
+    paddle: Paddle,
+    ball: Ball,
+    space: boolean,
+  ): string | undefined {
+    if (side.bonusUp === BONUSBH) side.bonusUp = NONE;
+    if (side.y >= 0) {
+      if (mouv) {
+        side.y += mouv * 10;
+        if (side.y < 0) side.y += H;
+        if (side.y > H) side.y -= H;
+      }
+      if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+        side.yStart = 0;
+        side.y = -1;
+        const type = Math.floor(Math.random() * 2.99);
+        side.type = type + 1;
+        side.bonusUp = BONUSTYPE;
+        return undefined;
+      }
+    } else if (side.type !== 0 && side.start === 0) {
+      side.bonusUp = NONE;
+      if (space) {
+        side.start = Date.now();
+        side.bonusUp = BONUSLAUNCH;
+      }
+    } else if (side.start !== 0) {
+      side.bonusUp = NONE;
+      if (side.type === 3) {
+        // DO BH
+        side.bonusUp = BONUSBH;
+        side.start = 0;
+        side.type = 0;
+        return this.createBlackHoles(bh);
+      } else if (side.type === 2) {
+        // do paddle speedup
+        paddle.speed = 30;
+        if (Date.now() - side.start > 3000) {
+          // undo speedup
+          paddle.speed = 10;
+          side.start = 0;
+          side.type = 0;
+          return undefined;
+        }
+      } else if (side.type === 1) {
+        // do ball speedup
+        ball.speed = 100;
+        if (Date.now() - side.start > 500) {
+          //undo speedup
+          ball.speed = BALLSPEED;
+          side.start = 0;
+          side.type = 0;
+        }
+      }
+      // // update ce qu'il faut pendant le temps (verifier date - start)
+      // // tout remettre a zero
+    } else {
+      const trigger = Math.random();
+      if (trigger > 0.99) {
+        side.y = Math.random() * H;
+        if (side.y >= paddle.pos.y && side.y <= paddle.pos.y + paddle.h) {
+          side.y = -1;
+        } else {
+          side.bonusUp = BONUSY;
+          side.yStart = Date.now();
+        }
+      }
+    }
+    return undefined;
+  }
+
+  private updateBonus(match: Match, mouv: number[]) {
+    const left = this.updateSideBonus(
+      match.bonus.blackHoles,
+      match.bonus.left,
+      mouv[1],
+      match.paddleL,
+      match.ball,
+      match.pOne.space,
+    );
+    const right = this.updateSideBonus(
+      match.bonus.blackHoles,
+      match.bonus.right,
+      mouv[0],
+      match.paddleR,
+      match.ball,
+      match.pTwo.space,
+    );
+    if (left) {
+      match.bonus.blackHoles = left;
+      this.addBlackHolesPos(match);
+    }
+    if (right) {
+      match.bonus.blackHoles = right;
+      this.addBlackHolesPos(match);
+    }
+  }
+
+  UpdateGameBonus(gameId: number) {
+    this.matches.forEach((match) => {
+      const mouv: number[] = [0, 0];
+      if (match.bonus.lastBH !== 0)
+        match.bonus.lastBH =
+          match.bonus.lastBH > 6 ? 0 : match.bonus.lastBH + 1;
+      mouv[0] =
+        match.pOne.down && !match.pOne.up
+          ? 1
+          : match.pOne.up && !match.pOne.down
+          ? -1
+          : 0;
+      mouv[1] =
+        match.pTwo.down && !match.pTwo.up
+          ? 1
+          : match.pTwo.up && !match.pTwo.down
+          ? -1
+          : 0;
+      this.updateBallBonus(match);
+      this.updateBonus(match, mouv);
+      if (match.id === gameId && match.run) {
+        const touch = this.ballCollisionToPaddle(
+          match.ball,
+          match.paddleL,
+          match.paddleR,
+          mouv,
+        );
+        if (touch.x || touch.y) {
+          if (match.lastp === false) {
+            match.ball.vx = touch.x;
+            match.ball.vy = touch.y;
+            match.lastp = true;
+            if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+          }
+        } else {
+          match.lastp = false;
+          const toWall = this.ballCollisiontoWall(match.ball, {
+            tl: { x: 0, y: 0 },
+            tr: { x: W, y: 0 },
+            bl: { x: 0, y: H },
+            br: { x: W, y: H },
+          });
+          if (toWall === XR || toWall === XL) {
+            this.afterGoalUpdateref(match, !!(toWall === XL));
+            return;
+          } else if (toWall === Y && !match.lasty) {
+            match.lasty = true;
+            match.ball.vy *= -1;
+          }
+          if (toWall !== Y) {
+            match.lasty = false;
+          }
+        }
+        if (match.ball.acceleration > 1) {
+          match.ball.acceleration -= 0.005;
+        }
+        match.ball.pos.x +=
+          match.ball.vx * match.ball.speed * match.ball.acceleration;
+        match.ball.pos.y +=
+          match.ball.vy * match.ball.speed * match.ball.acceleration;
+        match.ball.speed += 0.001;
+        if (mouv[0]) {
+          match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+          if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+          if (match.paddleL.pos.y + match.paddleL.h > H)
+            match.paddleL.pos.y = H - match.paddleL.h;
+        }
+        if (mouv[1]) {
+          match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+          if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+          if (match.paddleR.pos.y + match.paddleR.h > H)
+            match.paddleR.pos.y = H - match.paddleR.h;
+        }
+      }
+    });
+  }
   userDiconnectFromGame(userId: number) {
     let ret = 0;
     this.matches.forEach((match) => {
