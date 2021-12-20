@@ -10,6 +10,8 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
 import { SiteStatus } from "../../App";
 import { useHistory } from "react-router";
+import { Socket } from "socket.io-client";
+import { GameSocketContext } from "../../context/gameSocket";
 
 interface IFriend {
 	user_id: number;
@@ -25,7 +27,7 @@ type StatusType = 'Available' | 'Playing' | 'Offline';
 
 export default function ListFriends()
 {
-	function ContextMenuFriend(props: {Friend: IFriend})
+	function ContextMenuFriend(props: {Friend: IFriend, gameSocket: Socket})
 	{
 		return (
 		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
@@ -59,25 +61,24 @@ export default function ListFriends()
 		)
 	}
 
-	function Friend(Friend: IFriend)
+	function Friend(props: {Friend: IFriend, gameSocket: Socket})
 		{
 			return (
-				<div key={`Friend_${Friend.user_id}`}>
-				<ContextMenuTrigger id={`ContextMenuFriend_${Friend.user_id}`}>
-				<div key={`Friend_${Friend.user_id}`} className="Friend UserButton">
+				<div key={`Friend_${props.Friend.user_id}`}>
+				<ContextMenuTrigger id={`ContextMenuFriend_${props.Friend.user_id}`}>
+				<div key={`Friend_${props.Friend.user_id}`} className="Friend UserButton">
 				<Row>
 					<Col lg={3} className="position-relative">
-						<Image src={Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
-						{status(Friend.user_userStatus)}
+						<Image src={props.Friend.user_avatar} className="PictureUser" alt="picture" rounded fluid/>
+						{status(props.Friend.user_userStatus)}
 					</Col>
 					<Col lg={5}>
-						<div style={{margin:"1em"}}> {Friend.user_nickname} </div>
+						<div style={{margin:"1em"}}> {props.Friend.user_nickname} </div>
 					</Col>
 				</Row>
 				</div>
 				</ContextMenuTrigger>
-				<ContextMenuFriend Friend={Friend}/>
-
+				<ContextMenuFriend Friend={props.Friend} gameSocket={props.gameSocket}/>
 				</div>
 			)
 		}
@@ -86,6 +87,7 @@ export default function ListFriends()
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
+	let gameSocket = useContext(GameSocketContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
@@ -128,7 +130,7 @@ export default function ListFriends()
 
 	return (
 		<div className="ScrollingListMemebers">
-			{Friends.map(Friend)}
+			{Friends.map((friend: IFriend) => <Friend Friend={friend} gameSocket={gameSocket}/>)}
 		</div>
 	)
 }
