@@ -33,12 +33,12 @@ export default function ListFriends()
 		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
 
 			{ props.Friend.user_userStatus === 'Available' &&
-			<MenuItem onClick={() => InvitateToGame(props.Friend.user_id)}>
-				Invitate to game
+			<MenuItem onClick={() => InvitateToGame(props.Friend.user_id, gameSocket)}>
+				Invite to game
 			</MenuItem>}
 
 			{ props.Friend.user_userStatus === 'Playing' &&
-			<MenuItem onClick={() => SpectateGame(props.Friend.user_id)}>
+			<MenuItem onClick={() => SpectateGame(props.Friend.user_id, gameSocket)}>
 				Spectate Game
 			</MenuItem>}
 

@@ -163,6 +163,23 @@ export class PongGateway {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
+
+  @SubscribeMessage('spectate')
+  async spectateGame(client: Socket, payload: number) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      if (user.userStatus === OnlineStatus.PALYING)
+        throw new WsException(`You can't spectate while you're in a game.`);
+      // client emit le fait qu'il regarde une partie
+      const game = this.pongService.getMatchIdByPlayerId(payload);
+      if (!game)
+        throw new WsException(`Can't find the game you want to spectate`);
+      client.join(game.toString() + '-Game');
+      client.emit();
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
   @SubscribeMessage('down')
   onDown(client: Socket, payload: boolean) {
     this.pongService.setKeyValue(false, client.id, payload);
@@ -181,11 +198,13 @@ export class PongGateway {
   async setUserBack(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
-      this.server.emit('reload-status', {
-        user_id: user.id,
-        status: OnlineStatus.AVAILABLE,
-      });
+      if (user.userStatus === OnlineStatus.PALYING) {
+        await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+        this.server.emit('reload-status', {
+          user_id: user.id,
+          status: OnlineStatus.AVAILABLE,
+        });
+      }
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -406,6 +425,7 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
+          this.server.in(roomName).socketsLeave(roomName);
           this.pongService.deleteGame(gameId);
           return;
         }

@@ -1,14 +1,16 @@
 
 import axios from 'axios'
+import { Socket } from "socket.io-client";
 
-export function InvitateToGame(id: number)
+export function InvitateToGame(id: number, gameSocket:Socket)
 {
-	console.log(`I invitate ${id} to play a game`);
+	console.log(`I invite ${id} to play a game`);
 }
 
-export function SpectateGame(id: number)
+export function SpectateGame(id: number, gameSocket:Socket)
 {
 	console.log(`I spectate ${id} game`);
+	gameSocket.emit('spectate', id);
 }
 
 export function Unfriend(id: number)
