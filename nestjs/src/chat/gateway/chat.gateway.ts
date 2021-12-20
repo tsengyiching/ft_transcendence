@@ -453,8 +453,10 @@ export class ChatGateway
           this.userService.getUserProfileById(body.userId),
         ]);
         channelId = await this.chatService.createDirectChannel(user1, user2);
-        const direct = await this.chatService.getDirectChannelList(user1.id);
-        client.emit('private-list', direct);
+        const direct1 = await this.chatService.getDirectChannelList(user1.id);
+        const direct2 = await this.chatService.getDirectChannelList(user2.id);
+        this.server.to('user-' + user1.id).emit('private-list', direct1);
+        this.server.to('user-' + user2.id).emit('private-list', direct2);
       } else throw new WsException('Invalid socket request.');
       client.join('private-' + channelId);
       const [messages, channelInfo] = await Promise.all([
