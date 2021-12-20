@@ -31,7 +31,6 @@ function Authorized() {
         <Route exact path="/profile/:clientId" component={Profile} />
         <Route exact path="/settings" component={Settings} />
         <Route exact path="/disconnect" component={Disconnect} />
-        <Route exact path="/ban" component={Ban} />
         <Route exact path="/ladder" component={Ladder}/>
         {(userData.siteStatus === SiteStatus.MODERATOR || userData.siteStatus === SiteStatus.OWNER) &&
         <Route exact path="/admin" component={Admin}/>}
@@ -57,6 +56,17 @@ function Unauthorized(props: {setConnection: Function}) {
   )
 }
 
+function Banned() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route exact path="/ban" component={Ban} />
+        <Redirect to="/ban"/>
+      </Switch>
+    </BrowserRouter>
+  )
+}
+
 function Router() {
 
   const [isConnected, setConnection] = useState<number>(0);
@@ -68,9 +78,14 @@ function Router() {
         withCredentials:true,
     })
     .then(res => {
+      console.log(res.data)
         setTwofa(res.data.isTwoFactorAuthenticationEnabled);
-        if (!twofa)
-          setConnection(1)
+        if (!twofa) {
+/*           if (res.data.siteStatus === "Banned")
+            setConnection(2)
+          else */
+            setConnection(1);
+        }
     })
     .catch(res => { 
         setConnection(2)
@@ -90,7 +105,9 @@ function Router() {
           <div></div> :
           isConnected == 1 ?
           <Authorized/> :
-          <Unauthorized setConnection={setConnection}/>
+          isConnected == 2 ?
+          <Unauthorized setConnection={setConnection}/> :
+          <Banned/>
         }
     </div>
     )
