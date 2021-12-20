@@ -50,18 +50,8 @@ function Unauthorized(props: {setConnection: Function}) {
       <Switch>
         <Route exact path="/connexion" component={Connexion} />
         <Route path="/2fa" component={() => <Twofa setConnection={props.setConnection}/>}/>
-        <Redirect to="/connexion"/>
-      </Switch>
-    </BrowserRouter>
-  )
-}
-
-function Banned() {
-  return (
-    <BrowserRouter>
-      <Switch>
         <Route exact path="/ban" component={Ban} />
-        <Redirect to="/ban"/>
+        <Redirect to="/connexion"/>
       </Switch>
     </BrowserRouter>
   )
@@ -78,14 +68,10 @@ function Router() {
         withCredentials:true,
     })
     .then(res => {
-      console.log(res.data)
-        setTwofa(res.data.isTwoFactorAuthenticationEnabled);
-        if (!twofa) {
-/*           if (res.data.siteStatus === "Banned")
-            setConnection(2)
-          else */
-            setConnection(1);
-        }
+      setTwofa(res.data.isTwoFactorAuthenticationEnabled);
+      if (!twofa) {
+        setConnection(1);
+      }
     })
     .catch(res => {
         setConnection(2)
@@ -105,9 +91,7 @@ function Router() {
           <div></div> :
           isConnected === 1 ?
           <Authorized/> :
-          isConnected == 2 ?
-          <Unauthorized setConnection={setConnection}/> :
-          <Banned/>
+          <Unauthorized setConnection={setConnection}/>
         }
     </div>
     )

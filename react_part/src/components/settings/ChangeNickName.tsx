@@ -6,6 +6,7 @@ import axios from 'axios';
 export const ChangeNickName = () => {
     const [nickname, setNickname] = useState("");
     const [alert, setAlert] = useState(0);
+    const [msg, setMsg] = useState([])
 
     function modifyNickname () {
         axios.patch('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/name/',{nickname: nickname},
@@ -16,6 +17,7 @@ export const ChangeNickName = () => {
             window.location.reload();
         })
         .catch(res => {
+            setMsg(res.response.data.message)
             setAlert(1)
         })
     }
@@ -28,12 +30,27 @@ export const ChangeNickName = () => {
     function changeNickName(e: React.ChangeEvent<HTMLInputElement>) { setNickname(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert === 1)
-        return (
-			<Alert variant={'danger'}>
-					The inserted nickname is invalid
-			</Alert>
-        )
+        let items = []
+
+        if (alert === 1){
+            if (msg.length <= 2) {
+                for(let i = 0; i < msg.length; i++) {
+                    items.push(<Alert key={i} variant={'danger'}> {msg[i]} </Alert>)
+                }
+                return (
+                    <div>
+                        {items}
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <Alert variant={'danger'}> {msg} </Alert>
+                    </div>
+                )
+            }
+        }
     }
 
     return (

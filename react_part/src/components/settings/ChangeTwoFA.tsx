@@ -8,6 +8,7 @@ export const ChangeTwoFA = () => {
     const [printQR, setPrintQR] = useState(0)
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
+    const [msg, setMsg] = useState([])
 
     function turnOn() {
         axios.post('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/turn-on/',{twoFactorAuthenticationCode: code},
@@ -18,7 +19,8 @@ export const ChangeTwoFA = () => {
             window.location.reload();
         })
         .catch(res => {
-            setAlert(2)
+            setMsg(res.response.data.message)
+            setAlert(1)
         })
     }
 
@@ -33,7 +35,8 @@ export const ChangeTwoFA = () => {
                 setAlert(0)
             })
             .catch(res => {
-                setAlert(1)
+                setMsg(res.response.data.message)
+                setAlert(2)
             })
         }
     }
@@ -45,22 +48,37 @@ export const ChangeTwoFA = () => {
 
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
-    function showAlert () {
-        if (alert === 1)
-        return (
-			<Alert variant={'danger'}>
-					The 2FA code is already activated on this account
-			</Alert>
-        )
+    function showAlert2 () {
+        let items = []
+
+        if (alert === 2){
+            if (msg.length <= 2) {
+                for(let i = 0; i < msg.length; i++) {
+                    items.push(<Alert key={i} variant={'danger'}> {msg[i]} </Alert>)
+                }
+                return (
+                    <div>
+                        {items}
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <Alert variant={'danger'}> {msg} </Alert>
+                    </div>
+                )
+            }
+        }
     }
 
-    function showAlert2 () {
-        if (alert === 2)
-        return (
-			<Alert variant={'danger'}>
-					2FA code invalid
-			</Alert>
-        )
+    function showAlert () {
+        
+        if (alert === 1){
+            <div>
+                <Alert variant={'danger'}> {msg} </Alert>
+            </div>
+        }
     }
 
     function PrintQRCode () {
