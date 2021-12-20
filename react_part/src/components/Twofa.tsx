@@ -1,7 +1,6 @@
 import { Form, Button, Alert } from 'react-bootstrap'
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
-import { useHistory } from "react-router-dom";
 
 interface STATE {
     setConnection:Function;
@@ -9,7 +8,6 @@ interface STATE {
 }
 
 const Twofa = (props:STATE) => {
-    const history = useHistory()
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
     const setConnection = props.setConnection;
@@ -28,7 +26,7 @@ const Twofa = (props:STATE) => {
         .catch(res => {
             setAlert(1)
         })
-    }, [code, setConnection, history]);
+    }, [code, setConnection, ]);
 
 
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}

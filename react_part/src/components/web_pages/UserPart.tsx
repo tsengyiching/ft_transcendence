@@ -76,7 +76,8 @@ function InterfaceUser() {
 		socket.on("reload-block", () => {SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
-	}, [ReloadBlockedUserlist, socket]);
+
+	}, [ReloadBlockedUserlist, socket, interfaceRadioValue, UserConversationSelected]);
 
     function SwitchPrivateConversation(userId: number)
     {

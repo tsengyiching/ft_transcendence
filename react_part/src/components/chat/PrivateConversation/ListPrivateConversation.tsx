@@ -5,7 +5,6 @@ import { SocketContext } from '../../../context/socket'
 import { IUserConversation } from '../../web_pages/UserPart';
 import './ListPrivateConversation.css'
 import {IBlockedUser} from '../../members/ListBlockedUsers'
-import { Block } from '../../members/ContextMenuFunctions';
 
 interface IConversation {
 	channel_id: number,
@@ -33,6 +32,8 @@ export default function ListPrivateConversation(props: {
 	BlockedUsers : IBlockedUser[]})
 {
 	let socket = useContext(SocketContext);
+	let userSelected = props.UserConversationSelected;
+	let setUserSelected = props.setUserConversationSelected;
 	const [PrivateConversation, setPrivateConversation] = useState<IConversation[]>([]);
 	const [AllPrivateConversation, setAllPrivateConversation] = useState<IConversation[]>([]);
 	const [ListBlockedBy, setListBlockedBy] = useState<number[]>([]);
@@ -40,7 +41,7 @@ export default function ListPrivateConversation(props: {
 
 	useEffect(() => {
 		socket.emit("private-ask-reload");
-	}, [])
+	}, [socket])
 
 	useEffect(() => {
 		let isMounted = true;
@@ -51,9 +52,9 @@ export default function ListPrivateConversation(props: {
 			if (isMounted)
 			{
 				setListBlockedBy(res.data);
-				if (res.data.find((user_id: number) => props.UserConversationSelected !== undefined && user_id === props.UserConversationSelected.user_id) !== undefined)
+				if (res.data.find((user_id: number) => userSelected !== undefined && user_id === userSelected.user_id) !== undefined)
 				{
-					props.setUserConversationSelected(undefined);
+					setUserSelected(undefined);
 				}
 			}
 		})
@@ -65,12 +66,12 @@ export default function ListPrivateConversation(props: {
 			socket.off("reload-blockedby");
 			isMounted = false;
 		})
-	}, [ReloadBlockedBy])
+	}, [ReloadBlockedBy, socket, setUserSelected, userSelected])
 
 	useEffect(() => {
 		socket.on("private-list", (list: IConversation[]) => { setAllPrivateConversation(list);});
 		return (() => {socket.off("private-list");});
-	}, [AllPrivateConversation])
+	}, [AllPrivateConversation, socket])
 
 	useEffect(() => {
 		const newlist : IConversation[] = [];

@@ -155,7 +155,7 @@ function Messages(props: {channelSelected: IChannel | undefined})
 	const [ListMessage, setListMessage] = useState<IMessage[]>([]);
 
 	useEffect(() => {
-		if (props.channelSelected == undefined)
+		if (props.channelSelected === undefined)
 			setListMessage([]);
 	}, [props.channelSelected])
 
