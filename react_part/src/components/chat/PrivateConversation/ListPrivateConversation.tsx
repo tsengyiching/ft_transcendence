@@ -68,7 +68,6 @@ export default function ListPrivateConversation(props: {
 		})
 	}, [ReloadBlockedBy, socket, setUserSelected, userSelected])
 
-
 	useEffect(() => {
 		socket.on("private-list", (list: IConversation[]) => { setAllPrivateConversation(list);});
 		return (() => {socket.off("private-list");});
