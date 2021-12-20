@@ -96,6 +96,7 @@ export class PongGateway {
   async enterMatchMakingRoom(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
+	  console.log(user);
       if (user.userStatus === OnlineStatus.PALYING) {
         client.emit(`alert`, {
           alert: { type: `danger`, message: 'You are already in a game' },
