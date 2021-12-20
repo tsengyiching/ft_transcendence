@@ -57,6 +57,17 @@ function Unauthorized(props: {setConnection: Function}) {
   )
 }
 
+function Banned() {
+  return (
+    <BrowserRouter>
+      <Switch>
+        <Route exact path="/ban" component={Ban} />
+        <Redirect to="/ban"/>
+      </Switch>
+    </BrowserRouter>
+  )
+}
+
 function Router() {
 
   const [isConnected, setConnection] = useState<number>(0);
