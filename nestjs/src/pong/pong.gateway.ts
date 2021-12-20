@@ -41,7 +41,19 @@ export class PongGateway {
     private pongUsersService: PongUsersService,
     private gameService: GameService,
   ) {}
+
   @WebSocketServer() server: Socket;
+
+  /**
+   * Call after socket creation
+   */
+  async afterInit() {
+    try {
+      await this.gameService.finishGame();
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   async handleConnection(client: Socket) {
     let jwtCookie: string;
