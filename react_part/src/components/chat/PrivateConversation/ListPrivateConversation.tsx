@@ -76,7 +76,11 @@ export default function ListPrivateConversation(props: {
 		.then(res => {
 			if (isMounted)
 			{
-				setListBlockedBy(res.data)
+				setListBlockedBy(res.data);
+				if (res.data.find((user_id: number) => props.UserConversationSelected !== undefined && user_id === props.UserConversationSelected.user_id) !== undefined)
+				{
+					props.setUserConversationSelected(undefined);
+				}
 			}
 		})
 		.catch(res => {
