@@ -19,14 +19,14 @@ const Game:React.FC = () => {
 	const gameStatus = useStore(s => s.gameStatus);
 	const setGameStatus = useStore(s => s.setGameStatus);
     const socket:Socket = useContext(GameSocketContext);
-
+	
     useEffect(() => {
         let isMounted = true;
+		if (gameStatus === 0 ) socket.emit('isInMatchmaking?'); 
         if (gameStatus !== 2) {
         socket.on('inMatchMaking', (e) => {
             if (isMounted) {
-            console.log(e);
-            setToggleMatchMaking(e);
+            	setToggleMatchMaking(e);
             }
         });
         }   
@@ -48,7 +48,7 @@ const Game:React.FC = () => {
 			socket.off('startPongBonus');
             isMounted = false;
         })
-    })
+    }, [gameStatus, socket, setGameStatus])
     
     const handleClickON = () => socket.emit('matchmakingON');
     const handleClickOFF = () => socket.emit('matchmakingOFF');
