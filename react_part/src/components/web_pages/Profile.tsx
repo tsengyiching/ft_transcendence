@@ -167,7 +167,7 @@ export default function Profile() {
             <div>
                 {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
                     return ( 
-                        <div key={`${gameId}-matchsScore`}> 
+                        <div key={`${gameId}-matchsScore`}>
                             <Row>
                                 <Col xs='auto'>
                                     <Image className="Avatar" src={`${getPicture(idMain)}`} alt="Avartar"/>

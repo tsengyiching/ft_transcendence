@@ -1,4 +1,5 @@
 import { Form, Button, Alert } from 'react-bootstrap'
+import { useHistory } from "react-router-dom";
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 
@@ -10,7 +11,9 @@ interface STATE {
 const Twofa = (props:STATE) => {
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
+    const [msg, setMsg] = useState([])
     const setConnection = props.setConnection;
+    let history = useHistory();
 
     const SubmitCode = useCallback(
         async (event) => {
@@ -20,11 +23,17 @@ const Twofa = (props:STATE) => {
         })
         .then(res => {
             setAlert(0)
-            setConnection(true);
+            setConnection(1);
             window.location.reload();
         })
         .catch(res => {
-            setAlert(1)
+            //console.log(res.response.data.message)
+            if (res.response.status === 403 && res.response.data.message === "User is banned by the site.")
+                    history.push("/ban");
+            else {
+                setMsg(res.response.data.message)
+                setAlert(1)
+            }
         })
     }, [code, setConnection, ]);
 
@@ -32,14 +41,27 @@ const Twofa = (props:STATE) => {
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert === 1)
-            return (
-                <div>
-                    <Alert variant={'danger'}>
-                        2FA code invalid
-                    </Alert>
-                </div>
-            )
+        let items = []
+
+        if (alert === 1){
+            if (msg.length <= 2) {
+                for(let i = 0; i < msg.length; i++) {
+                    items.push(<Alert key={i} variant={'danger'}> {msg[i]} </Alert>)
+                }
+                return (
+                    <div>
+                        {items}
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <Alert variant={'danger'}> {msg} </Alert>
+                    </div>
+                )
+            }
+        }
     }
 
     return (
