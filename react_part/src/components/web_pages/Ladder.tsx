@@ -8,7 +8,7 @@ export default function Ladder() {
 
     useEffect(() => {
         let isMounted = true;
-        axios.get('http://localhost:8080/game/all',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/game/all',{
             withCredentials:true,
         })
         .then(res => { if (isMounted) {
@@ -20,7 +20,7 @@ export default function Ladder() {
             }
         })
 
-        axios.get('http://localhost:8080/profile/all',{
+        axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/all',{
             withCredentials:true,
         })
         .then(res => {
