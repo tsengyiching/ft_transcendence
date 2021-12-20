@@ -3,6 +3,7 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Image, Col, Row} from 'react-bootstrap'
 import {useHistory} from "react-router-dom"
 import axios from 'axios'
+import { gameSocket } from "../../context/gameSocket";
 import { socket } from "../../context/socket";
 import { SwitchContext } from "../web_pages/UserPart";
 import status from './Status'
@@ -98,10 +99,12 @@ export default function ListUsers()
 			console.log("error");
 		})
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		gameSocket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+
 		socket.on('reload-users', () => {
 			setReload(Reload + 1)
 		});
-		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
+		return (() => {socket.off('reload-status'); gameSocket.off('reload-status');socket.off('reload-users'); isMounted = false;});
 		//console.log(Users);
 	}, [Reload]);
 
