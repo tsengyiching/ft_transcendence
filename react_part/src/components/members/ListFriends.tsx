@@ -1,13 +1,13 @@
-import { useState, useEffect, useContext } from "react"
-import {SwitchContext} from '../web_pages/UserPart'
+import { useState, useEffect, useContext } from "react";
+import {SwitchContext} from '../web_pages/UserPart';
 import { socket } from "../../context/socket";
-import {Image, Col, Row} from 'react-bootstrap'
-import axios from 'axios'
-import "./ListFriends.css"
-import './members.css'
-import status from './Status'
+import {Image, Col, Row} from 'react-bootstrap';
+import axios from 'axios';
+import "./ListFriends.css";
+import './members.css';
+import status from './Status';
 import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
-import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions'
+import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions';
 import { SiteStatus } from "../../App";
 import { useHistory } from "react-router";
 import { Socket } from "socket.io-client";
@@ -103,10 +103,13 @@ export default function ListFriends()
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		
+		gameSocket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+
 		socket.on("reload-users", () => {
 			setReload(Reload + 1);
 		})
-		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
+		return (() => {socket.off("reload-users"); gameSocket.off("reload-status"); socket.off("reload-status");  isMounted = false;});
 	}, [Reload])
 
 	//actualize the status

@@ -36,6 +36,7 @@ const PongInfoModal:React.FC = () => {
 	})
 
 	const backToSite = () => {
+		socket.emit('gameOff');
 		setGameState(0);
 		setShow(false);
 	}

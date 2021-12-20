@@ -165,6 +165,19 @@ export class PongGateway {
     this.pongService.setSpace(client.id, payload);
   }
 
+  @SubscribeMessage('gameOff')
+  async setUserBack(client: Socket) {
+    try {
+      const user: User = await this.authService.getUserFromSocket(client);
+      await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+      this.server.emit('reload-status', {
+        user_id: user.id,
+        status: OnlineStatus.AVAILABLE,
+      });
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
   @SubscribeMessage('ready')
   async readyForGame(client: Socket, payload: number) {
     try {
@@ -174,6 +187,11 @@ export class PongGateway {
       const waitForReady = setInterval(async () => {
         if (this.pongService.playersReadyCheck(payload)) {
           clearInterval(waitForReady);
+          await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.PALYING,
+          });
           if (infos.Player === 1) {
             const ret = await this.gameService.createGame(
               this.pongService.getPlayers(infos.GameId),
@@ -301,6 +319,11 @@ export class PongGateway {
       const waitForReady = setInterval(async () => {
         if (this.pongService.playersReadyCheck(payload)) {
           clearInterval(waitForReady);
+          await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.PALYING,
+          });
           if (infos.Player === 1) {
             const ret = await this.gameService.createGame(
               this.pongService.getPlayers(infos.GameId),

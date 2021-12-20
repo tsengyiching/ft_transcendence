@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { socket } from "../../context/socket";
+import { gameSocket } from '../../context/gameSocket';
 import {Image, Col, Row} from 'react-bootstrap'
 import axios from 'axios'
 import "./ListBlockedUsers.css"
@@ -80,9 +81,11 @@ export default function ListBlockedUsers()
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		gameSocket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+
 		socket.on("reload-users", () => { setReload(Reload + 1); });
 
-		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
+		return (() => {socket.off('reload-status'); gameSocket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
 	}, [Reload]);
 
 	//actualize the status
