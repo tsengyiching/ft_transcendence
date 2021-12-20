@@ -50,7 +50,11 @@ export default function ListPrivateConversation(props: {
 		.then(res => {
 			if (isMounted)
 			{
-				setListBlockedBy(res.data)
+				setListBlockedBy(res.data);
+				if (res.data.find((user_id: number) => props.UserConversationSelected !== undefined && user_id === props.UserConversationSelected.user_id) !== undefined)
+				{
+					props.setUserConversationSelected(undefined);
+				}
 			}
 		})
 		.catch(res => {
@@ -79,15 +83,6 @@ export default function ListPrivateConversation(props: {
 			}
 		}
 		setPrivateConversation(newlist);
-/* 		console.log("newlist");
-		console.log(newlist);
-		console.log("conversation selected");
-		console.log(props.UserConversationSelected);
- 		if (newlist.find((conversation: IConversation) =>
-		props.UserConversationSelected !== undefined && conversation.user_id === props.UserConversationSelected.user_id) === undefined)
-		{
-			props.setUserConversationSelected(undefined);
-		} */
 	}, [socket, AllPrivateConversation, props.BlockedUsers, ListBlockedBy])
 
 	return (

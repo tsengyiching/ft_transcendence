@@ -82,10 +82,9 @@ export default function ListUsers()
 	}
 
 	const [Users, SetUsers] = useState<IUser[]>([]);
-	//const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
-	//const userData = useContext(DataContext);
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	let history = useHistory();
 	const SwitchToPrivate = useContext(SwitchContext);
 
@@ -110,13 +109,11 @@ export default function ListUsers()
 	useEffect(() => {
 		if (ReloadStatus.user_id !== 0)
 		{
-			//console.log("in reloadstatus effect");
 			const user = Users.find(element => element.id === ReloadStatus.user_id)
 			if (user !== undefined)
 			{
-			//console.log("change status");
-			user.userStatus = ReloadStatus.status;
-			//SetRefreshVar(!RefreshVar);
+				user.userStatus = ReloadStatus.status;
+				SetRefreshVar(!RefreshVar);
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps
