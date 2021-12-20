@@ -69,31 +69,6 @@ export default function ListPrivateConversation(props: {
 	}, [ReloadBlockedBy, socket, setUserSelected, userSelected])
 
 	useEffect(() => {
-		let isMounted = true;
-
-		socket.on("reload-blockedby", () => {setReloadBlockedBy(ReloadBlockedBy + 1);})
-		axios.get("http://localhost:8080/relationship/me/blocked", {withCredentials: true,})
-		.then(res => {
-			if (isMounted)
-			{
-				setListBlockedBy(res.data);
-				if (res.data.find((user_id: number) => props.UserConversationSelected !== undefined && user_id === props.UserConversationSelected.user_id) !== undefined)
-				{
-					props.setUserConversationSelected(undefined);
-				}
-			}
-		})
-		.catch(res => {
-			if (isMounted)
-				console.log(res)})
-
-		return(() => {
-			socket.off("reload-blockedby");
-			isMounted = false;
-		})
-	}, [ReloadBlockedBy])
-
-	useEffect(() => {
 		socket.on("private-list", (list: IConversation[]) => { setAllPrivateConversation(list);});
 		return (() => {socket.off("private-list");});
 	}, [AllPrivateConversation, socket])
