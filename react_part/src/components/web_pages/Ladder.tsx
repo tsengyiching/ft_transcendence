@@ -90,7 +90,7 @@ export default function Ladder() {
             for(let i = 0; listWinner[i]; i++) {
                 if (listWinner[i][1] === j ) {
                     comp++
-                    var user = {image:getPicture(listWinner[i+1][0]), position:comp, name:getName(listWinner[i][0]), score:listWinner[i][1], id:listWinner[i][0]};
+                    var user = {image:getPicture(listWinner[i][0]), position:comp, name:getName(listWinner[i][0]), score:listWinner[i][1], id:listWinner[i][0]};
                     data.push(user)
                 }
             }
