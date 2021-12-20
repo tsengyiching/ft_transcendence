@@ -504,6 +504,7 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
+          this.server.in(roomName).socketsLeave(roomName);
           this.pongService.deleteGame(gameId);
           return;
         }
