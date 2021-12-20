@@ -17,6 +17,7 @@ type GameInfos = {
 const Game:React.FC = () => {
     const [toggleMatchMaking, setToggleMatchMaking] = useState<boolean>();
 	const gameStatus = useStore(s => s.gameStatus);
+	const [watch, setWatch] = useState<boolean>(false);
 	const setGameStatus = useStore(s => s.setGameStatus);
     const socket:Socket = useContext(GameSocketContext);
 	
@@ -24,12 +25,16 @@ const Game:React.FC = () => {
         let isMounted = true;
 		if (gameStatus === 0 ) socket.emit('isInMatchmaking?'); 
         if (gameStatus !== 2) {
-        socket.on('inMatchMaking', (e) => {
-            if (isMounted) {
-            	setToggleMatchMaking(e);
-            }
-        });
-        }   
+        	socket.on('inMatchMaking', (e) => {
+        	    if (isMounted) {
+        	    	setToggleMatchMaking(e);
+        	    }
+        	});
+			socket.on('spectateOn', (e:boolean) => {
+				setWatch(e);
+			})
+        }
+
         socket.on('startPong', (e:GameInfos) => {
             if (isMounted) {
 			setGameStatus(2);
@@ -43,6 +48,7 @@ const Game:React.FC = () => {
             }
         } );
         return (() => {
+			socket.off('spectate');
             socket.off('startPong');
             socket.off('inMatchMaking');
 			socket.off('startPongBonus');
@@ -80,7 +86,7 @@ const Game:React.FC = () => {
 
 	return (
         <Container className='no-padding' fluid>
-			{gameStatus === 2 ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
+			{gameStatus === 2 || watch ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
 		</Container>
 	);
 }
