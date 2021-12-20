@@ -11,10 +11,12 @@ enum SiteStatus {
 	BANNED = 'Banned',
 }
 
+type backdrop_type = boolean | "static" | undefined
+
 interface IPropsModal {
 	show: boolean,
 	onHide: () => void,
-	backdrop: string,
+	backdrop: backdrop_type,
 	user: Data | undefined,
 }
 

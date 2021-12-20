@@ -54,13 +54,17 @@ const ResizeGame:React.FC<{}> = () => {
                     }));
             }
         }
-    
+  
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
       const isBig = useMediaQuery(
         { minWidth: 1200 }, undefined,  handleMediaQueryChange
       );
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
       const isDesktopOrLaptop = useMediaQuery(
         { minWidth: 780 }, undefined,  handleLittle
       );
+
+	
 
 return null;}
 

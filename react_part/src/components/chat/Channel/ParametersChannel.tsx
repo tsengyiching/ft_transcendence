@@ -4,10 +4,12 @@ import {IChannel, } from '../../web_pages/UserPart'
 import { useEffect, useState } from 'react'
 import { socket } from '../../../context/socket';
 
+type backdrop_type = boolean | "static" | undefined
+
 interface Props {
 	show: boolean,
 	onHide: () => void,
-	backdrop: string,
+	backdrop: backdrop_type,
 	channel: IChannel,
       }
 
