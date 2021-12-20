@@ -95,7 +95,9 @@ export class PongGateway {
           this.pongUsersService.removePlayerBonus(user.id);
         }
       } catch (error) {
-        console.log(error);
+        client.emit(`alert`, {
+          alert: { type: `danger`, message: error.error },
+        });
       }
     }
   }
@@ -147,7 +149,7 @@ export class PongGateway {
       this.pongUsersService.removePlayer(user.id);
       this.pongUsersService.removePlayerBonus(user.id);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 
@@ -158,7 +160,7 @@ export class PongGateway {
       const resp = this.pongUsersService.isInAMatchMaking(user.id);
       client.emit('inMatchMaking', resp);
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
   @SubscribeMessage('down')
@@ -277,13 +279,14 @@ export class PongGateway {
       const user: User = await this.authService.getUserFromSocket(client);
       if (user.userStatus === OnlineStatus.PALYING)
         throw new WsException(`You are already in a game !`);
+      await this.gameService.checkOneUserAvailability(user.id);
+
       console.log(`${user.id} ${user.nickname} joined Bonus Match Making.`);
       this.server.to(user.id.toString()).emit('inMatchMaking', true);
       this.pongUsersService.addNewPlayerBonus(user.id);
       await sleep(2000);
       const userArray = await this.pongUsersService.makeMatchMakingBonus();
       if (userArray) {
-        console.log(userArray);
         const GameId = this.pongUsersService.createGameId();
         this.pongService.createNewMatch(
           GameId,
@@ -297,7 +300,7 @@ export class PongGateway {
         });
       }
     } catch (error) {
-      console.log(error);
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
 

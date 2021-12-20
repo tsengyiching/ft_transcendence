@@ -47,12 +47,21 @@ export class PongUsersService {
     if (len === 2) {
       // enlever les users du tableau et renvoyer une copie du tableau
       ret = this.inMatchMaking;
+      if (ret.length !== 2) {
+        await this.sleep(2000);
+        return this.makeMatchMaking();
+      }
+      ret.forEach(async (value) => {
+        if (!value) {
+          await this.sleep(2000);
+          return this.makeMatchMaking();
+        }
+      });
       this.inMatchMaking = [];
       return ret;
     } else if (len > 2) {
       // enlever les 2 users du tableau
       for (let i = 0; i < 2; i++) {
-        console.log('MATCH', this.inMatchMaking);
         const index = Math.round(Math.random() * this.inMatchMaking.length);
         if (!this.inMatchMaking[index]) {
           if (i == 1) this.addNewPlayer(ret[0]);
@@ -104,6 +113,16 @@ export class PongUsersService {
     if (len === 2) {
       // enlever les users du tableau et renvoyer une copie du tableau
       ret = this.inBonusMM;
+      if (ret.length !== 2) {
+        await this.sleep(2000);
+        return this.makeMatchMakingBonus();
+      }
+      ret.forEach(async (value) => {
+        if (!value) {
+          await this.sleep(2000);
+          return this.makeMatchMakingBonus();
+        }
+      });
       this.inBonusMM = [];
       return ret;
     } else if (len > 2) {
