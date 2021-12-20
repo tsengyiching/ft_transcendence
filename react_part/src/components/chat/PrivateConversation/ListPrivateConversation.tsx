@@ -47,7 +47,7 @@ export default function ListPrivateConversation(props: {
 		let isMounted = true;
 
 		socket.on("reload-blockedby", () => {setReloadBlockedBy(ReloadBlockedBy + 1);})
-		axios.get("http://localhost:8080/relationship/me/blocked", {withCredentials: true,})
+		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/blocked', {withCredentials: true,})
 		.then(res => {
 			if (isMounted)
 			{
