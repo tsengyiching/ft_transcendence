@@ -704,10 +704,8 @@ export class PongService {
             Math.pow(pos.y - match.ball.pos.y, 2),
         );
         if (dist < 30 && dist !== 0) {
-          match.ball.pos =
-            match.bonus.rightBH[
-              Math.floor(Math.random() * (match.bonus.rightBH.length - 0.01))
-            ];
+          const arr = [...match.bonus.rightBH];
+          match.ball.pos = arr[Math.floor(Math.random() * (arr.length - 0.01))];
           match.bonus.lastBH = 1;
           return;
         }
@@ -720,10 +718,8 @@ export class PongService {
             Math.pow(pos.y - match.ball.pos.y, 2),
         );
         if (dist < 30 && dist !== 0) {
-          match.ball.pos =
-            match.bonus.leftBH[
-              Math.floor(Math.random() * (match.bonus.leftBH.length - 0.01))
-            ];
+          const arr = [...match.bonus.leftBH];
+          match.ball.pos = arr[Math.floor(Math.random() * (arr.length - 0.01))];
           match.bonus.lastBH = 1;
 
           return;
@@ -833,6 +829,16 @@ export class PongService {
     }
   }
 
+  private saveLostBall(ball: Ball): Pos {
+    const newY: number = ball.pos.y < 0 ? ball.radius : H - ball.radius;
+    const a: number = -ball.vy;
+    const b: number = ball.vx;
+    const m: Pos = ball.pos;
+    const c: number = a * m.x + b * m.y;
+    const newX: number = (c - b * newY) / a;
+    return { x: newX, y: newY };
+  }
+
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
       const mouv: number[] = [0, 0];
@@ -893,6 +899,10 @@ export class PongService {
           match.ball.vx * match.ball.speed * match.ball.acceleration;
         match.ball.pos.y +=
           match.ball.vy * match.ball.speed * match.ball.acceleration;
+
+        if (match.ball.pos.y < 0 || match.ball.pos.y > H) {
+          match.ball.pos = this.saveLostBall(match.ball);
+        }
         match.ball.speed += 0.001;
         if (mouv[0]) {
           match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
