@@ -3,7 +3,6 @@ import { GameSocketContext } from "../context/gameSocket";
 import {Modal, Button} from 'react-bootstrap';
 import {Socket} from 'socket.io-client';
 
-
 const InviteGameModal:React.FC = () => {
     const socket:Socket = useContext(GameSocketContext);
 	const [opponentId, setOpponentId] = useState<number>();
