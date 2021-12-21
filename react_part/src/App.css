@@ -13,3 +13,5 @@ body
 	height: 3rem;
 	object-fit: cover;
 }
+
+.btn { text-transform: none !important;}
