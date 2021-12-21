@@ -10,8 +10,7 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Block, InvitateToGame, SpectateGame, Unfriend} from './ContextMenuFunctions';
 import { SiteStatus } from "../../App";
 import { useHistory } from "react-router";
-import { Socket } from "socket.io-client";
-import { GameSocketContext } from "../../context/gameSocket";
+import { gameSocket } from "../../context/gameSocket";
 
 interface IFriend {
 	user_id: number;
@@ -27,7 +26,7 @@ type StatusType = 'Available' | 'Playing' | 'Offline';
 
 export default function ListFriends()
 {
-	function ContextMenuFriend(props: {Friend: IFriend, gameSocket: Socket})
+	function ContextMenuFriend(props: {Friend: IFriend})
 	{
 		return (
 		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
@@ -61,7 +60,7 @@ export default function ListFriends()
 		)
 	}
 
-	function Friend(props: {Friend: IFriend, gameSocket: Socket})
+	function Friend(props: {Friend: IFriend})
 		{
 			return (
 				<div key={`Friend_${props.Friend.user_id}`}>
@@ -78,7 +77,7 @@ export default function ListFriends()
 				</Row>
 				</div>
 				</ContextMenuTrigger>
-				<ContextMenuFriend Friend={props.Friend} gameSocket={props.gameSocket}/>
+				<ContextMenuFriend Friend={props.Friend} />
 				</div>
 			)
 		}
@@ -87,7 +86,6 @@ export default function ListFriends()
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
-	let gameSocket = useContext(GameSocketContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
@@ -131,9 +129,9 @@ export default function ListFriends()
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ReloadStatus])
 
-	return (
+    return (
 		<div className="ScrollingListMemebers">
-			{Friends.map((friend: IFriend) => <Friend Friend={friend} gameSocket={gameSocket}/>)}
+			{Friends.map((friend: IFriend) => <Friend Friend={friend} key={`Friend_${friend.user_id}`} />)}
 		</div>
 	)
 }
