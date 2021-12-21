@@ -175,7 +175,21 @@ export class PongGateway {
       if (!game)
         throw new WsException(`Can't find the game you want to spectate`);
       client.join(game.toString() + '-Game');
-      client.emit();
+      client.emit('spectateOn', game);
+      client.emit('startPongBonus', this.pongService.sendPlayersInfos(game));
+      client.emit('bonusType', this.pongService.gameInfosBonusType(game));
+      client.emit('bonusBH', this.pongService.gameInfosBonusBH(game));
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+  @SubscribeMessage('stopSpectating')
+  async stopSpectatingGame(client: Socket, payload: number) {
+    try {
+      if (payload === 0)
+        throw new WsException(`this match is not playing anymore`);
+      client.leave(payload.toString() + '-Game');
+      client.emit('spectateOn', 0);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -205,6 +219,7 @@ export class PongGateway {
           status: OnlineStatus.AVAILABLE,
         });
       }
+      client.emit('spectate', 0);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -214,6 +229,9 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       const infos = this.pongService.playersSetReady(payload, user.id, client);
+      const toLeave = this.pongService.getAllMatchIdButThisOne(infos.GameId);
+      toLeave.forEach((gameId) => client.leave(gameId.toString() + '-Game'));
+      client.emit('spectate', 0);
       client.join(infos.GameId.toString() + '-Game');
       const waitForReady = setInterval(async () => {
         if (this.pongService.playersReadyCheck(payload)) {
@@ -425,6 +443,7 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
+          this.server.in(roomName).emit('spectateOn', 0);
           this.server.in(roomName).socketsLeave(roomName);
           this.pongService.deleteGame(gameId);
           return;
