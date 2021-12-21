@@ -14,6 +14,7 @@ import Ban from "./web_pages/Ban";
 import {DataContext, SiteStatus} from "../App"
 import {GameSocketContext, gameSocket} from '../context/gameSocket';
 import GameStartModal from './GameStartModal'
+import InviteGameModal from "./InviteGameModal";
 
 function Authorized() {
 
@@ -23,6 +24,7 @@ function Authorized() {
     <BrowserRouter key={"Autorized_router"}>
       <GameSocketContext.Provider value={gameSocket}>
       <GameStartModal />
+      <InviteGameModal />
       <Header />
       <div className="Body">
       <Switch>

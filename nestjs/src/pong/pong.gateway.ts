@@ -1,12 +1,9 @@
-import { string } from '@hapi/joi';
-import { IoAdapter } from '@nestjs/platform-socket.io';
 import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { SSL_OP_EPHEMERAL_RSA } from 'constants';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/service/auth.service';
 import { OnlineStatus, User } from 'src/user/model/user.entity';
@@ -194,6 +191,56 @@ export class PongGateway {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
+
+  @SubscribeMessage('tryToInvite')
+  tryToInvite(client: Socket, payload: number) {
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.server
+        .to(payload.toString())
+        .emit('invite', { id: user.id, name: user.username, modal: true });
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  @SubscribeMessage('inviteAnsw')
+  getResponse(client: Socket, payload: { id: number; resp: number }) {
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      if (payload.resp > 0) {
+        this.server.to(payload.id.toString()).emit(`alert`, {
+          alert: {
+            type: `warning`,
+            message:
+              payload.resp === 1
+                ? `${user.username} declined your game proposal, sorry mate !`
+                : `${user.username} says NOPE to you beeyatch !`,
+          },
+        });
+      } else {
+        const userArray = [user.id, payload.id];
+        const GameId = this.pongUsersService.createGameId();
+        this.pongService.createNewMatch(
+          GameId,
+          userArray,
+          this.userService,
+          true,
+        );
+        userArray.forEach((e) => {
+          this.server.to(e.toString()).emit('inMatchMaking', false);
+          this.server.to(e.toString()).emit('inGameBonus', GameId);
+        });
+      }
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
   @SubscribeMessage('down')
   onDown(client: Socket, payload: boolean) {
     this.pongService.setKeyValue(false, client.id, payload);
@@ -364,6 +411,9 @@ export class PongGateway {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
       const infos = this.pongService.playersSetReady(payload, user.id, client);
+      const toLeave = this.pongService.getAllMatchIdButThisOne(infos.GameId);
+      toLeave.forEach((gameId) => client.leave(gameId.toString() + '-Game'));
+      client.emit('spectate', 0);
       client.join(infos.GameId.toString() + '-Game');
       const waitForReady = setInterval(async () => {
         if (this.pongService.playersReadyCheck(payload)) {
