@@ -17,7 +17,7 @@ type GameInfos = {
 const Game:React.FC = () => {
     const [toggleMatchMaking, setToggleMatchMaking] = useState<boolean>();
 	const gameStatus = useStore(s => s.gameStatus);
-	const [watch, setWatch] = useState<boolean>(false);
+	const [watch, setWatch] = useState<number>(0);
 	const setGameStatus = useStore(s => s.setGameStatus);
     const socket:Socket = useContext(GameSocketContext);
 	
@@ -30,11 +30,10 @@ const Game:React.FC = () => {
         	    	setToggleMatchMaking(e);
         	    }
         	});
-			socket.on('spectateOn', (e:boolean) => {
-				setWatch(e);
-			})
         }
-
+        socket.on('spectateOn', (e:number) => {
+            setWatch(e);
+        })
         socket.on('startPong', (e:GameInfos) => {
             if (isMounted) {
 			setGameStatus(2);
@@ -59,6 +58,7 @@ const Game:React.FC = () => {
     const handleClickON = () => socket.emit('matchmakingON');
     const handleClickOFF = () => socket.emit('matchmakingOFF');
 	const handleClickONBonus = () => socket.emit('BonusmatchmakingON');
+    const stopSpectating = () => socket.emit('stopSpectating', watch);
 
     function showButtons():JSX.Element {
         return (
@@ -84,9 +84,16 @@ const Game:React.FC = () => {
 		);
     }
 
+    function leaveSpectateButton():JSX.Element {
+        return (
+            <Button variant="outline-warning" onClick={stopSpectating}>stop spectating</Button>
+        );
+    }
+
 	return (
         <Container className='no-padding' fluid>
-			{gameStatus === 2 || watch ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
+			{gameStatus === 2 || watch !== 0 ? <Pong /> : toggleMatchMaking ? waitingForGame() : showButtons()}
+            {watch !== 0 ? leaveSpectateButton() : null}
 		</Container>
 	);
 }
