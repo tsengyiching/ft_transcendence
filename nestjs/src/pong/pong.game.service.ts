@@ -116,6 +116,14 @@ export class PongService {
     return this.matches.find((match) => match.id === gameId).bonus.right
       .bonusUp;
   }
+
+  getAllMatchIdButThisOne(thisOne: number) {
+    let newArr: number[] = [];
+    this.matches.forEach((value) => {
+      if (value.id !== thisOne) newArr = [...newArr, value.id];
+    });
+    return newArr;
+  }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
 ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
