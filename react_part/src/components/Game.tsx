@@ -23,6 +23,11 @@ const Game:React.FC = () => {
 	
     useEffect(() => {
         let isMounted = true;
+        socket.on('spectateOn', (e:number) => {
+            setWatch(e);
+            if (gameStatus !== 2)
+                setGameStatus(0);
+        })
 		if (gameStatus === 0 ) socket.emit('isInMatchmaking?'); 
         if (gameStatus !== 2) {
         	socket.on('inMatchMaking', (e) => {
@@ -31,9 +36,6 @@ const Game:React.FC = () => {
         	    }
         	});
         }
-        socket.on('spectateOn', (e:number) => {
-            setWatch(e);
-        })
         socket.on('startPong', (e:GameInfos) => {
             if (isMounted) {
 			setGameStatus(2);
@@ -46,11 +48,17 @@ const Game:React.FC = () => {
             useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
             }
         } );
+        socket.on('startWatch', (e:GameInfos) => {
+            if (isMounted) {
+            useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
+            }
+        } );
         return (() => {
-			socket.off('spectate');
+			socket.off('spectateOn');
             socket.off('startPong');
             socket.off('inMatchMaking');
 			socket.off('startPongBonus');
+            socket.off('startWatch');
             isMounted = false;
         })
     }, [gameStatus, socket, setGameStatus])

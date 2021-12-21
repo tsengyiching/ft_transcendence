@@ -2,8 +2,7 @@ import React, {useContext, useEffect, useState} from "react";
 import { GameSocketContext } from "../context/gameSocket";
 import {Modal, Button} from 'react-bootstrap';
 import {Socket} from 'socket.io-client';
-import useStore from './pong/hooks/useStore';
-import clearStore from "./pong/components/ClearStore";
+
 
 const InviteGameModal:React.FC = () => {
     const socket:Socket = useContext(GameSocketContext);

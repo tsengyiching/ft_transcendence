@@ -50,9 +50,11 @@ export class PongService {
   }
 
   getMatchIdByPlayerId(playerId: number) {
-    return this.matches.find(
+    const found = this.matches.find(
       (e) => e.pOne.id === playerId || e.pTwo.id === playerId,
-    ).id;
+    );
+    if (found) return found.id;
+    return 0;
   }
 
   playersReadyCheck(gameId): boolean {
@@ -112,6 +114,12 @@ export class PongService {
   isBonusUPR(gameId: number) {
     return this.matches.find((match) => match.id === gameId).bonus.right
       .bonusUp;
+  }
+
+  isBonusGame(gameId: number) {
+    const match = this.matches.find((match) => match.id === gameId);
+    if (match.bonus === undefined) return false;
+    return true;
   }
 
   getAllMatchIdButThisOne(thisOne: number) {

@@ -8,7 +8,7 @@ import { socket } from "../../context/socket";
 import { SwitchContext } from "../web_pages/UserPart";
 import status from './Status'
 import {SiteStatus} from "../../App"
-import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
+import {Unfriend, Askfriend, Block, InvitateToGame, SpectateGame } from "./ContextMenuFunctions";
 import './members.css'
 import "./ListUsers.css"
 
@@ -39,7 +39,15 @@ export default function ListUsers()
 			<MenuItem onClick={() => history.push(`/profile/${props.User.id}`)}>
 				View Profile
 			</MenuItem>
+            { props.User.userStatus === 'Available' &&
+			<MenuItem onClick={() => InvitateToGame(props.User.id, gameSocket)}>
+				Invite to game
+			</MenuItem>}
 
+			{ props.User.userStatus === 'Playing' &&
+			<MenuItem onClick={() => SpectateGame(props.User.id, gameSocket)}>
+				Spectate Game
+			</MenuItem>}
 			{ props.User.relationship !== 'Friend' &&
 			<MenuItem onClick={() => Askfriend(props.User.id)}>
 				Add Friend
