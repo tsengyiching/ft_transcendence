@@ -11,6 +11,10 @@
 	border: 1px solid black
 }
 
+.TitleChannel h2
+{ display: inline-block; }
+
+
 .FormSendMessage {
 	width: 100%;
 	padding: 1em;
@@ -30,9 +34,10 @@
 }
 
 .iconParameters {
-  width: 80%;
-  height: 55%;
-  margin-top: 20%;
+	float: right;
+	margin: 0.4em;
+	width: 1.5rem;
+	height: 1.5rem;
 }
 
 /* Context menu css */
