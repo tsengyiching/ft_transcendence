@@ -18,24 +18,21 @@ export default function ParametersChannel(channelselected: IChannel)
 	const [modalShow, setModalShow] = useState(false);
 
 	return (
-	<Row>
-	<Col lg={11}>
-		<h2 style={{height:"1.2em"}}>
-		{channelselected.channel_name}
-		</h2>
-	</Col>
-	<Col>
-		{channelselected.role === "Owner" ?
-		<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}} />
-		: <Image className="iconParameters" roundedCircle src={ParametersIcon}/>}
-		<ModalParameters
-		show={modalShow}
-		onHide={() => setModalShow(false)}
-		backdrop="static"
-		channel={channelselected}
-		/>
-	</Col>
-	</Row>)
+		<Row>
+			<Col>
+				<h2>{channelselected.channel_name}</h2>
+				{channelselected.role === "Owner" ?
+				<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}} />
+				: <Image className="iconParameters" roundedCircle src={ParametersIcon}/>}
+				<ModalParameters
+				show={modalShow}
+				onHide={() => setModalShow(false)}
+				backdrop="static"
+				channel={channelselected}
+				/>
+			</Col>
+		</Row>
+	);
 }
 
 function ModalParameters(props: Props)

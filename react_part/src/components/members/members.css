@@ -1,31 +1,22 @@
+.userListMenu { width: 100%; }
 
 .ColMembers {
 	height: 300rem;
 }
 
 .PictureUser {
-  object-fit: cover; /* Do not scale the image */
-  object-position: center; /* Center the image within the element */
-  height: 3.5em;
+	object-fit: cover; /* Do not scale the image */
+	object-position: center; /* Center the image within the element */
+	height: 3.5em;
 	width: 3.5em;
 	margin: 0.2em;
 	margin-right: 2em;
 }
 
 .UserButton {
-	height: 4em;
-  width: 17em;
-  border-radius: 0.5em;
+	border-radius: 0.5em;
 	font-size: large;
-  margin-top: 0.5em;
-}
-
-.ScrollingListMembers {
-	display: list-item;
-	padding: 0.5em;
-	height: 40em;
-	overflow: auto;
-	font-size: medium;
+	margin-top: 0.5em;
 }
 
 /* Context menu css */

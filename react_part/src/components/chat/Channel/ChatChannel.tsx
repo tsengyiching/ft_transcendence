@@ -179,11 +179,8 @@ export function ChatChannelDisabled()
 	return (
 	<Row className="TitleChannel">
 		<Row>
-			<Col lg={11}>
-				<h2 style={{height:"1.2em"}}>
-				</h2>
-			</Col>
 			<Col>
+				<h2> </h2>
 				<Image className="iconParameters" roundedCircle src={ParametersIcon} />
 			</Col>
 		</Row>
