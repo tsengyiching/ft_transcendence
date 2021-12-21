@@ -6,7 +6,6 @@ import {
   ObjectToCollide,
   Match,
   Pos,
-  Bonus,
   SideBonus,
 } from './pong.interface';
 import { Socket } from 'socket.io';
@@ -29,8 +28,6 @@ import {
   BONUSBH,
   BONUSLAUNCH,
 } from './pong.env';
-import { checkServerIdentity } from 'tls';
-import { threadId } from 'worker_threads';
 
 @Injectable()
 export class PongService {
