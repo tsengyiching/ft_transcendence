@@ -158,13 +158,21 @@ export class PongGateway {
       // client emit le fait qu'il regarde une partie
       const game = this.pongService.getMatchIdByPlayerId(payload);
       if (!game)
-        throw new WsException(`Can't find the game you want to spectate`);
+        throw new WsException(
+          `the game you want to spectate is over or does not exists`,
+        );
+      if (!this.pongService.isGameRunning(game))
+        throw new WsException(`This game just finished. Maybe next time.`);
       client.join(game.toString() + '-Game');
       client.emit('spectateOn', game);
-      client.emit('startPongBonus', this.pongService.sendPlayersInfos(game));
-      client.emit('bonusType', this.pongService.gameInfosBonusType(game));
-      client.emit('bonusBH', this.pongService.gameInfosBonusBH(game));
+      client.emit('startWatch', this.pongService.sendPlayersInfos(game));
+      if (this.pongService.isBonusGame(game)) {
+        client.emit('bonusType', this.pongService.gameInfosBonusType(game));
+        client.emit('bonusBH', this.pongService.gameInfosBonusBH(game));
+      }
+      client.emit('sendScore', this.pongService.sendScore(game));
     } catch (error) {
+      console.log(error);
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
@@ -181,11 +189,14 @@ export class PongGateway {
   }
 
   @SubscribeMessage('tryToInvite')
-  tryToInvite(client: Socket, payload: number) {
+  async tryToInvite(client: Socket, payload: number) {
     try {
       const user = this.authService.getPayloadFromAuthenticationToken(
         client.handshake.headers.cookie,
       );
+      const opponent = await this.userService.getOneById(payload);
+      if (opponent.userStatus !== OnlineStatus.AVAILABLE)
+        throw new WsException(`${opponent.nickname} is not available 😱.`);
       this.server
         .to(payload.toString())
         .emit('invite', { id: user.id, name: user.username, modal: true });
@@ -247,6 +258,7 @@ export class PongGateway {
   async setUserBack(client: Socket) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
+      client.emit('spectateOn', 0);
       if (user.userStatus === OnlineStatus.PALYING) {
         await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
         this.server.emit('reload-status', {
@@ -254,7 +266,6 @@ export class PongGateway {
           status: OnlineStatus.AVAILABLE,
         });
       }
-      client.emit('spectate', 0);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -481,8 +492,6 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
-          this.server.in(roomName).emit('spectateOn', 0);
-          this.server.in(roomName).socketsLeave(roomName);
           this.pongService.deleteGame(gameId);
           return;
         }
