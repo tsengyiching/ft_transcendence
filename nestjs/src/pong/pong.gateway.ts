@@ -278,7 +278,6 @@ export class PongGateway {
           status: OnlineStatus.AVAILABLE,
         });
       }
-      client.emit('spectate', 0);
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
@@ -505,8 +504,6 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
-          this.server.in(roomName).emit('spectateOn', 0);
-          this.server.in(roomName).socketsLeave(roomName);
           this.pongService.deleteGame(gameId);
           return;
         }

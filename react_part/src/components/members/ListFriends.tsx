@@ -26,7 +26,7 @@ type StatusType = 'Available' | 'Playing' | 'Offline';
 
 export default function ListFriends()
 {
-	function ContextMenuFriend(props: {Friend: IFriend, gameSocket: Socket})
+	function ContextMenuFriend(props: {Friend: IFriend})
 	{
 		return (
 		<ContextMenu id={`ContextMenuFriend_${props.Friend.user_id}`}>
@@ -86,7 +86,6 @@ export default function ListFriends()
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
-	let gameSocket = useContext(GameSocketContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
