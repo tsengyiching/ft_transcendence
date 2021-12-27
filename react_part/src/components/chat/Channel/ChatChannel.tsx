@@ -180,7 +180,7 @@ export function ChatChannelDisabled()
 	<Row className="TitleChannel">
 		<Row>
 			<Col>
-				<h2> </h2>
+				<span> </span>
 				<Image className="iconParameters" roundedCircle src={ParametersIcon} />
 			</Col>
 		</Row>

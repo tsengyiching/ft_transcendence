@@ -2,17 +2,15 @@
 
 
 .TitleChannel {
-	font-size: large;
 	background-color: #A0B4D1;
 	text-align: center;
 	max-height: 40px;
 	max-width: 100%;
-	margin: 0;
 	border: 1px solid black
 }
 
-.TitleChannel h2
-{ display: inline-block; }
+.TitleChannel span
+{ margin: 0.5em; }
 
 
 .FormSendMessage {

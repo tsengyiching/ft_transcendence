@@ -107,7 +107,7 @@ function InterfaceUser() {
             ))}
         </ButtonGroup>
 
-        <Col lg={10}>
+        <Col lg={12}>
             {interfaceRadioValue ==='Channel' ?
             <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/>
             : <ListPrivateConversation UserConversationSelected={UserConversationSelected} setUserConversationSelected={setUserConversationSelected} BlockedUsers={BlockedUsers}/>}

@@ -20,7 +20,7 @@ function LeaveChannelButton(props: {channel: IChannel, CallBackFunction: () => v
 		onHide(); }
 
 	return (
-	<div>
+	<div style={{display: 'inline'}}>
 		<Button className="ButtonCreate bg-primary" onClick={() => { SetShowModal(true) }}>
 			Leave Channel
 		</Button>
