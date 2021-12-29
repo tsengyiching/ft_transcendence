@@ -169,14 +169,14 @@ export default function Profile() {
                     return ( 
                         <div key={`${gameId}-matchsScore`}>
                             <Row>
-                                <Col xs='auto'>
+                                <Col style={{ maxWidth: '4.5rem'}}>
                                     <Image className="Avatar" src={`${getPicture(idMain)}`} alt="Avartar"/>
                                 </Col>
-                                <Col xs={10} style={{textAlign: 'center'}}>
+                                <Col style={{textAlign: 'center'}}>
 									<div>{` ${userScore} - ${opponentScore} `}</div>
 									<div>{` ${name} ` } Vs {` ${getName(opponentId)} `}</div>      
                                 </Col>
-                                <Col xs='auto'>
+                                <Col style={{ maxWidth: '4.5rem'}}>
                                     <a href={'/profile/'+opponentId}>
                                         <Image className="Avatar" src={`${getPicture(opponentId)}`} alt="Avatar"/>
                                     </a>
