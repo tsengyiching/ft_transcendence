@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { useState, useEffect } from "react";
-import {Image} from 'react-bootstrap'
+import {Image, Table} from 'react-bootstrap'
 
 export default function Ladder() {
     const [games, setGames] = useState([]);
@@ -101,67 +101,39 @@ export default function Ladder() {
     function printLadder () {
         var data = fillData()
         return (
-            <div>
+            <tbody>
                 {data.map(({image, position, name, score, id}) => {
                     return (
-                        <div key={`${id}`}>
-                            <div className="row">
-                                <div className="col">
-                                    <div className="row">
-                                        <a href={'/profile/'+id}>
-                                            <Image src={`${image}`} width="40" height="40" alt="pp" rounded/>
-                                        </a>
-                                    </div>
-                                </div>
-                                <div className="col">
-                                    <div className="row">
-                                        {position}
-                                    </div>
-                                </div>
-                                <div className="col">
-                                    <div className="row">
-                                        {name}
-                                    </div>
-                                </div>
-                                <div className="col">
-                                    <div className="row">
-                                        {score}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+						<tr key={`${id}`}>
+							<td>{position}</td>
+							<td>                      
+								<a href={'/profile/'+id}>
+                                    <Image src={`${image}`} width="40" height="40" alt="Avatar" rounded/>
+                                </a>
+							</td>
+							<td>{name}</td>
+							<td>{score}</td>
+						</tr>
                     )
                 })}
-            </div>
+            </tbody>
         )
     }
 
     return (
-        <div>
-            Ladder :
-            <div className="row">
-                <div className="col">
-                    <div className="row">
-                         Image
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="row">
-                         Position
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="row">
-                        Nom
-                    </div>
-                </div>
-                <div className="col">
-                    <div className="row">
-                        Score
-                    </div>
-                </div>
-            </div>
-            <div>{printLadder()}</div>
-        </div>
+		<div className="p-3 border bg-white shadow-sm">
+			<h2>Ladder</h2>
+			<Table striped bordered hover>
+				<thead>
+					<tr>
+						<th>Position</th>
+						<th>Avatar</th>
+						<th>Name</th>
+						<th>Score</th>
+					</tr>
+				</thead>
+				{printLadder()}
+			</Table>
+		</div>
     )
 }
