@@ -21,7 +21,7 @@ const Disconnect = (props:STATE) => {
             window.location.reload();
         })
         .catch(res => { if (isMounted)
-            history.push("/connexion");
+            history.push("/login");
         })
         return (() => {isMounted = false})
     }, [history]);

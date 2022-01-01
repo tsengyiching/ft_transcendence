@@ -37,6 +37,7 @@ const Twofa = (props:STATE) => {
                 setAlert(1)
             }
         })
+           // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [code, setConnection, ]);
 
 

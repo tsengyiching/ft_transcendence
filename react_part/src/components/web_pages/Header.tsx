@@ -96,5 +96,5 @@ function Header () {
         );
     }
 }
-// /connexion
+// /login
 export default Header;
