@@ -11,6 +11,7 @@ import {
   HttpException,
   HttpStatus,
   Get,
+  Delete,
 } from '@nestjs/common';
 import { User } from 'src/user/model/user.entity';
 import { CurrentUser } from '../decorator/currrent.user.decorator';
@@ -110,5 +111,24 @@ export class TwoFactorAuthController {
     res.cookie('jwt-two-factor', accessToken);
     userPayload.twoFA = true;
     return userPayload;
+  }
+
+  @Delete('turn-off')
+  async turnOffTwoFactorAuthentication(
+    @CurrentUser() userPayload: User,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ userId: number; twoFactorEnabled: boolean }> {
+    if (!(await this.userService.isUserTwoFactorAuthEnabled(userPayload.id))) {
+      throw new HttpException(
+        `User ${userPayload.id} hasn't turned on two factor authentication yet.`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    await this.userService.turnOffTwoFactorAuthentication(userPayload.id);
+    res.clearCookie('jwt-two-factor');
+    return {
+      userId: userPayload.id,
+      twoFactorEnabled: false,
+    };
   }
 }

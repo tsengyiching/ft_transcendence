@@ -219,6 +219,18 @@ export class UserService {
   }
 
   /**
+   * turnOffTwoFactorAuthentication
+   * @param : user id
+   * @returns : update info
+   */
+  async turnOffTwoFactorAuthentication(userId: number): Promise<User> {
+    const user = await this.getOneById(userId);
+    user.isTwoFactorAuthenticationEnabled = false;
+    user.twoFactorAuthenticationSecret = null;
+    return this.userRepository.save(user);
+  }
+
+  /**
    * Change all users status to offline.
    */
   resetUserStatus(): Promise<UpdateResult> {
