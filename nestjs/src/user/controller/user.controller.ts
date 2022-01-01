@@ -92,9 +92,6 @@ export class UserController {
     @CurrentUser() user: User,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<string> {
-    if (file.size > 1024 * 1024) {
-      throw new PayloadTooLargeException();
-    }
     if (file.mimetype.indexOf('image') === -1) {
       throw new HttpException(
         `The file mimetype ${file.mimetype} is not acceptable.`,
@@ -116,6 +113,9 @@ export class UserController {
         `The file mimetype has a problem.`,
         HttpStatus.NOT_ACCEPTABLE,
       );
+    }
+    if (file.size > 1024 * 1024) {
+      throw new PayloadTooLargeException();
     }
     await this.userService.addAvatar(user.id, file.buffer, file.originalname);
     this.userGateway.server.to('user-' + user.id).emit('reload-profile');
