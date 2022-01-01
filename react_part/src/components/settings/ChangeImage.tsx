@@ -31,6 +31,7 @@ export const ChangeImage = () => {
         })
         .catch(res => {
             setAlert(1)
+            setMsg(res.response.data.message);
         });
     };
 

@@ -1,7 +1,6 @@
 import { Form, Button, Image, Alert } from 'react-bootstrap'
 import { useState , useContext} from 'react'
 import {DataContext} from "../../App"
-
 import axios from 'axios';
 
 export const ChangeTwoFA = () => {
@@ -9,9 +8,9 @@ export const ChangeTwoFA = () => {
     const [printQR, setPrintQR] = useState(0)
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
-    const [msg, setMsg] = useState([])
+    const [msg, setMsg] = useState([]);
+    const [errMsg, setError] = useState<string>('');
 
-    console.log(userData);
     function turnOn() {
         axios.post('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/turn-on/',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
@@ -21,7 +20,12 @@ export const ChangeTwoFA = () => {
             window.location.reload();
         })
         .catch(res => {
-            setMsg(res.response.data.message)
+            let mess: string;
+            if (Array.isArray(res.response.data.message)) 
+            mess = res.response.data.message.join(' and ');
+            else
+            mess = res.response.data.message;
+            setError(mess);
             setAlert(1)
         })
     }
@@ -50,13 +54,16 @@ export const ChangeTwoFA = () => {
         })
         .then(res => {
             window.location.reload();
-            console.log(res);
             setAlert(0)
         })
         .catch(res => {
-            console.log(res);
-            setMsg(res.data.message)
-            setAlert(1)
+            let mess: string;
+            if (Array.isArray(res.response.data.message)) 
+                mess = res.response.data.message.join(' and ');
+            else
+                mess = res.response.data.message;
+            setError(mess);
+            setAlert(1);
         })
     }
 
@@ -94,9 +101,10 @@ export const ChangeTwoFA = () => {
     function showAlert () {
         
         if (alert === 1){
+            return (
             <div>
-                <Alert variant={'danger'}> {msg} </Alert>
-            </div>
+                <Alert variant={'danger'}> {errMsg} </Alert>
+            </div>)
         }
     }
 

@@ -30,7 +30,6 @@ const Twofa = (props:STATE) => {
             window.location.reload();
         })
         .catch(res => {
-            //console.log(res.response.data.message)
             if (res.response.status === 403 && res.response.data.message === "User is banned by the site.")
                     history.push("/ban");
             else {
@@ -75,7 +74,7 @@ const Twofa = (props:STATE) => {
             <Form onSubmit={SubmitCode} >
             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
                 <Button variant="success" type="submit">
-                    activate two factor authentication
+                    Submit two factor authentication code
                 </Button>
             </Form>
             {showAlert()}
