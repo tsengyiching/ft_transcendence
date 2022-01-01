@@ -1,5 +1,8 @@
-import { Form, Button, Alert } from 'react-bootstrap'
+import { Form, Button, Alert, Image } from 'react-bootstrap'
 import { useHistory } from "react-router-dom";
+import LogoPong from "./pictures/ping-pong.png";
+import "./web_pages/connexion.css"
+
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
 
@@ -64,15 +67,24 @@ const Twofa = (props:STATE) => {
         }
     }
 
+
     return (
-        <div>
+        <div className="login shadow-sm">
+            <Image className="logo-pong" src={LogoPong} alt="pong logo"/>
+            <h1>Pong</h1>
             <Form onSubmit={SubmitCode} >
             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
                 <Button variant="success" type="submit">
-                    activate
+                    activate two factor authentication
                 </Button>
             </Form>
             {showAlert()}
+            <span className="credits">Codé avec beaucoup de <i style={{color: "pink"}}>♥</i> par <a href="https://profile.intra.42.fr/users/abourbou" title="Arthur Bourbousson">abourbou</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/lolopez" title="Lou Lopez">lolopez</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/fgalaup" title="Félix Galaup">fgalaup</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/yictseng" title="Yiching Tseng">yictseng</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/fbuthod-" title="Fabien Buthod Garcon">fbuthod-</a>.
+    </span>
         </div>
     )
 }
