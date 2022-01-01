@@ -139,7 +139,7 @@ export default function Profile() {
     function printFriendsList () {
 		if (friends.length === 0)
 			return (
-				<h5>He has no friend but he has curly ! 😀🍫</h5>
+				<h5>They have no friend but they have curly ! 😀🍫</h5>
 			);
 			console.log(friends);
         return (
