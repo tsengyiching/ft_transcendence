@@ -1,15 +1,17 @@
 import { Form, Button, Image, Alert } from 'react-bootstrap'
-import { useState } from 'react'
+import { useState , useContext} from 'react'
+import {DataContext} from "../../App"
 
 import axios from 'axios';
 
 export const ChangeTwoFA = () => {
-
+    const userData = useContext(DataContext);
     const [printQR, setPrintQR] = useState(0)
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
     const [msg, setMsg] = useState([])
 
+    console.log(userData);
     function turnOn() {
         axios.post('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/turn-on/',{twoFactorAuthenticationCode: code},
             {withCredentials:true,
@@ -39,6 +41,23 @@ export const ChangeTwoFA = () => {
                 setAlert(2)
             })
         }
+    }
+
+    function turnOff() {
+        axios.defaults.withCredentials = true;
+        axios.delete('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/2fa/turn-off/', {
+            withCredentials:true,
+        })
+        .then(res => {
+            window.location.reload();
+            console.log(res);
+            setAlert(0)
+        })
+        .catch(res => {
+            console.log(res);
+            setMsg(res.data.message)
+            setAlert(1)
+        })
     }
 
     function SubmitCode(event: any) {
@@ -102,7 +121,7 @@ export const ChangeTwoFA = () => {
         <div>
             <h4>Activate 2FA</h4>
             {showAlert()}
-            <Button onClick={twoFactorAuth} type="submit">activate</Button>
+            {userData.isTwoFactorAuthenticationEnabled ? <Button onClick={turnOff} type="submit">desactivate</Button> :<Button onClick={twoFactorAuth} type="submit">activate</Button>}
             {PrintQRCode()}
         </div>
     )
