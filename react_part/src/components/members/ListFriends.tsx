@@ -96,8 +96,13 @@ export default function ListFriends()
 		.then(res => { if (isMounted)
 			SetFriends(res.data);
 		})
-		.catch(res => { if (isMounted)
-			console.log("error");
+		.catch(res => { if (isMounted) {
+            if (res.response.data.message === "User is banned by the site.")
+            {
+                window.location.reload();
+            }
+			console.log(res.response.data);
+        }
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});

@@ -57,13 +57,13 @@ function Unauthorized(props: {setConnection: Function}) {
   )
 }
 
+
 function Router() {
 
   const [isConnected, setConnection] = useState<number>(0);
   const [twofa, setTwofa] = useState<boolean>(false);
 
   const getProfile= useCallback (async () => {
-
    await axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me/',{
         withCredentials:true,
     })
@@ -74,7 +74,12 @@ function Router() {
       }
     })
     .catch(res => {
-        setConnection(2)
+        console.log(res.response.data.message)
+        if (res.response.data.message === "User is banned by the site.") {
+            setConnection(3);
+        }
+        else 
+            setConnection(2)
     })
   }, [twofa])
 
@@ -91,7 +96,9 @@ function Router() {
           <div></div> :
           isConnected === 1 ?
           <Authorized/> :
-          <Unauthorized setConnection={setConnection}/>
+          isConnected === 2 ? 
+          <Unauthorized setConnection={setConnection}/> :
+          <Ban />
         }
     </div>
     )

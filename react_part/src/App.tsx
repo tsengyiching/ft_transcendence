@@ -45,7 +45,6 @@ function App():React.ReactElement {
     axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me', {withCredentials: true})
     .then((res) => {if(isMounted) {SetuserData(res.data)} })
     .catch(res => {if(isMounted) {console.log(`error in context user : ${res.data}`)}})
-
     return (() => {isMounted = false});
   }, [])
 
