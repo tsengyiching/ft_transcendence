@@ -88,7 +88,7 @@ const Game:React.FC = () => {
                       <Popover.Body>
                          <strong>Normal game :</strong><br/>
                           🏓 you must send the ball in the enemy field to score 🏒<br/>
-                          🏓 when you score <strong>seven</strong> times, you won the game 7️🏆<br/>
+                          🏓 when you score <strong>seven</strong> times, you win the game 7️🏆<br/>
                           🏓 If you <strong>quit</strong>, even if it's not your fault, you <strong>lose</strong>. 😰<br/><br/>
                         <strong>Bonus Game :</strong><br/>
                           🏓 sometime a white bubble appears on your or your enemy field. 🧋<br/>
