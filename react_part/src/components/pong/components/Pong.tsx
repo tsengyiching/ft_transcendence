@@ -6,6 +6,7 @@ import SocketInfos from "./SocketInfos";
 import PongInfoModal from "./PongInfoModal";
 import SocketInfosBonus from "./SocketInfosBonus";
 import ResizeGame from './ResizeGame';
+import ScoreBox from './ScoreCanvas/ScoreBox';
 
 
 const Pong:React.FC<{}> = () => {
@@ -18,6 +19,7 @@ return (
 			<SocketEvent />
             <SocketInfos />
 			{bonus  ? <SocketInfosBonus /> : null}
+            <ScoreBox />
 			<ScoreBar />
 			<GameCanvas />
 		</div>
