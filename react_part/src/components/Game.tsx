@@ -91,7 +91,7 @@ const Game:React.FC = () => {
                           🏓 when you score <strong>seven</strong> times, you win the game 7️🏆<br/>
                           🏓 If you <strong>quit</strong>, even if it's not your fault, you <strong>lose</strong>. 😰<br/><br/>
                         <strong>Bonus Game :</strong><br/>
-                          🏓 sometime a white bubble appears on your or your enemy field. 🧋<br/>
+                          🏓 sometime a white bubble appears on your or your enemy's field. 🧋<br/>
                           🏓 you can control your enemy's bubble with ⬆️ and ⬇️, if it's going to leave the screen, do not worry, it will transplane to the other side. 🧙🏼‍♂️<br/>
                           🏓 you must catch your own bubble to get one bonus 🎉<br/>
                           🏓 your bonus is shown just before your name, you must <strong>hit space bar</strong> to use it. 😈<br/>
