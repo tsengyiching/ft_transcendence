@@ -218,19 +218,27 @@ export class PongGateway {
   }
 
   @SubscribeMessage('inviteAnsw')
-  getResponse(client: Socket, payload: { id: number; resp: number }) {
+  async getResponse(client: Socket, payload: { id: number; resp: number }) {
     try {
-      const user = this.authService.getPayloadFromAuthenticationToken(
-        client.handshake.headers.cookie,
-      );
-      if (payload.resp > 0) {
+        const user: User = await this.authService.getUserFromSocket(client);
+
+      if (user.userStatus !== OnlineStatus.AVAILABLE) {
+      this.server.to(payload.id.toString()).emit(`alert`, {
+        alert: {
+          type: `warning`,
+          message:
+              `${user.nickname} has started another game!`
+        },
+      });
+    }
+    else if (payload.resp > 0) {
         this.server.to(payload.id.toString()).emit(`alert`, {
           alert: {
             type: `warning`,
             message:
               payload.resp === 1
-                ? `${user.username} declined your game proposal, sorry mate !`
-                : `${user.username} says NOPE to you beeyatch !`,
+                ? `${user.nickname} declined your game proposal, sorry mate !`
+                : `${user.nickname} says NOPE to you beeyatch !`,
           },
         });
       } else {
