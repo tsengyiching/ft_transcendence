@@ -20,7 +20,7 @@ export default function ParametersChannel(channelselected: IChannel)
 	return (
 		<Row>
 			<Col>
-				<span>{channelselected.channel_name}</span>
+				<h2>{channelselected.channel_name}</h2>
 				{channelselected.role === "Owner" ?
 				<Image className="iconParameters" roundedCircle src={ParametersIcon} onClick={() => {setModalShow(true)}} />
 				: <Image className="iconParameters" roundedCircle src={ParametersIcon}/>}

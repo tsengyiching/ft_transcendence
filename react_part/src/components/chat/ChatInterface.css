@@ -9,8 +9,8 @@
 	border: 1px solid black
 }
 
-.TitleChannel span
-{ margin: 0.5em; }
+.TitleChannel h2
+{ display: inline-block; }
 
 
 .FormSendMessage {
