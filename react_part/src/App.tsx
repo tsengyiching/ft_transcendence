@@ -5,7 +5,6 @@ import {SocketContext, socket} from './context/socket'
 
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
-import "bootswatch/dist/lux/bootstrap.min.css";
 // import './bootswatch.scss';
 
 enum OnlineStatus {
