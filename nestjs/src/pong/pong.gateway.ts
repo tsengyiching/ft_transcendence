@@ -251,6 +251,12 @@ export class PongGateway {
           true,
         );
         userArray.forEach((e) => {
+            if (this.pongUsersService.isInMatchmaking(e)) {
+                this.pongUsersService.removePlayer(e);
+              }
+            if (this.pongUsersService.isInMatchmakingBonus(e)) {
+                this.pongUsersService.removePlayerBonus(e);
+        }
           this.server.to(e.toString()).emit('inMatchMaking', false);
           this.server.to(e.toString()).emit('inGameBonus', GameId);
         });

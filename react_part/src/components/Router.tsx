@@ -53,7 +53,7 @@ function Unauthorized(props: {setConnection: Function}) {
         <Route exact path="/login" component={Connexion} />
         <Route path="/2fa" component={() => <Twofa setConnection={props.setConnection}/>}/>
         <Route exact path="/ban" component={Ban} />
-        <Redirect to="/connexion"/>
+        <Redirect to="/login"/>
       </Switch>
     </BrowserRouter>
   )
