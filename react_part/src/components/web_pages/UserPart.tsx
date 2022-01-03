@@ -59,21 +59,25 @@ function InterfaceUser() {
 	useEffect(() => {
 		let isMounted = true;
 		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=block', {withCredentials: true,})
-		.then(res => { if(isMounted)
-			SetBlockedUsers(res.data);
-            const Blocked : IBlockedUser[]= res.data;
-            if (interfaceRadioValue === 'MP' && UserConversationSelected !== undefined &&
-                Blocked.find((user) => UserConversationSelected.user_id === user.user_id) !== undefined)
-                setUserConversationSelected(undefined);
+		.then(res => {
+           if(isMounted)
+           {
+                SetBlockedUsers(res.data);
+                const Blocked : IBlockedUser[]= res.data;
+                if (interfaceRadioValue === 'MP' && UserConversationSelected !== undefined &&
+                    Blocked.find((user) => UserConversationSelected.user_id === user.user_id) !== undefined)
+                    setUserConversationSelected(undefined);
+            }
 		})
 		.catch(res => { if (isMounted)
 			console.log("error on getting data blocked users");
 		})
 
-		socket.on("reload-block", () => {console.log("in the socket of UserPart"); SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
+		socket.on("reload-block", () => {SetReloadBlockedUserlist(ReloadBlockedUserlist + 1); });
 
 		return (() => { socket.off("reload-block"); isMounted = false; });
-	}, [ReloadBlockedUserlist, socket]);
+
+	}, [ReloadBlockedUserlist, socket, interfaceRadioValue, UserConversationSelected]);
 
     function SwitchPrivateConversation(userId: number)
     {
@@ -103,14 +107,14 @@ function InterfaceUser() {
             ))}
         </ButtonGroup>
 
-        <Col lg={10}>
+        <Col lg={12}>
             {interfaceRadioValue ==='Channel' ?
             <ListChannel channelSelected={channelSelected} setChannelSelected={setChannelSelected}/>
-            : <ListPrivateConversation setUserConversationSelected={setUserConversationSelected} BlockedUsers={BlockedUsers}/>}
+            : <ListPrivateConversation UserConversationSelected={UserConversationSelected} setUserConversationSelected={setUserConversationSelected} BlockedUsers={BlockedUsers}/>}
         </Col>
         <Col>
             {interfaceRadioValue ==='Channel' ?
-                <div>
+                <div style={{ marginBottom: '5px'}}>
                     <CreateChannelButton socketid={socket}/>
                     { channelSelected !== undefined ?
                         <LeaveChannelButton channel={channelSelected} CallBackFunction={ResetChannel} />

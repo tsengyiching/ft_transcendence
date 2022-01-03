@@ -43,6 +43,15 @@ export class GameService {
     return ret;
   }
 
+  async finishGame() {
+    this.gameRepository
+      .createQueryBuilder()
+      .update(Game)
+      .set({ status: GameStatus.FINISH, winner: undefined })
+      .where('status = :status', { status: GameStatus.ONGOING })
+      .execute();
+  }
+
   async getOngoingGames(): Promise<SendOngoingGameDto[]> {
     const games = await this.gameRepository.find({
       where: { status: GameStatus.ONGOING },
@@ -110,7 +119,12 @@ export class GameService {
         userScore: data.score,
         opponentId: oppo[0].userId,
         opponentScore: oppo[0].score,
-        userGameStatus: data.game.winner.id === id ? 'Won' : 'Lost',
+        userGameStatus:
+          data.game.winner === null
+            ? 'Null'
+            : data.game.winner.id === id
+            ? 'Won'
+            : 'Lost',
       };
       return obj;
     });

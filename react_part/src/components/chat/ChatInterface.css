@@ -2,14 +2,16 @@
 
 
 .TitleChannel {
-	font-size: large;
 	background-color: #A0B4D1;
 	text-align: center;
 	max-height: 40px;
 	max-width: 100%;
-	margin: 0;
 	border: 1px solid black
 }
+
+.TitleChannel span
+{ margin: 0.5em; }
+
 
 .FormSendMessage {
 	width: 100%;
@@ -30,9 +32,10 @@
 }
 
 .iconParameters {
-  width: 80%;
-  height: 55%;
-  margin-top: 20%;
+	float: right;
+	margin: 0.4em;
+	width: 1.5rem;
+	height: 1.5rem;
 }
 
 /* Context menu css */

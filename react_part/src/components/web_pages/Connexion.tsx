@@ -14,7 +14,7 @@ function Connexion () {
 			<Image className="logo-pong" src={LogoPong} alt="pong logo"/>
 			<h1>Pong</h1>
 			<Button onClick={onConnexion}>
-				Connexion avec <Image className="logo-42" src={Logo42} alt="42" />
+				Login with <Image className="logo-42" src={Logo42} alt="42" />
 			</Button>
 			<span className="credits">Codé avec beaucoup de <i style={{color: "pink"}}>♥</i> par <a href="https://profile.intra.42.fr/users/abourbou" title="Arthur Bourbousson">abourbou</a>,{' '}
 				<a href="https://profile.intra.42.fr/users/lolopez" title="Lou Lopez">lolopez</a>,{' '}

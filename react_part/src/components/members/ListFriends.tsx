@@ -80,35 +80,33 @@ export default function ListFriends()
 
 				</div>
 			)
-			//console.log(`Friend : ${Friend}`)
 		}
 
 	const [Friends, SetFriends] = useState<IFriend[]>([]);
-	//const [ReloadFriendlist, SetReloadFriendlist] = useState<{user_id1: number, user_id2: number}>({user_id1: 0, user_id2: 0});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
 	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
-	//const userData = useContext(DataContext);
 	let history = useHistory();
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
-	//* TO DO socket for ReloadFriendlist + ReloadStatus in Back
-
 	//get list of friends at the mount of the component + start listening socket
 	useEffect(() => {
-		//console.log("in the first useEffect");
 		let isMounted = true;
 		axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/relationship/me/list?status=friend', {withCredentials: true,})
 		.then(res => { if (isMounted)
 			SetFriends(res.data);
 		})
-		.catch(res => { if (isMounted)
-			console.log("error");
+		.catch(res => { if (isMounted) {
+            if (res.response.data.message === "User is banned by the site.")
+            {
+                window.location.reload();
+            }
+			console.log(res.response.data);
+        }
 		})
 
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
 		socket.on("reload-users", () => {
-			console.log("reload in ListFriends")
 			setReload(Reload + 1);
 		})
 		return (() => {socket.off("reload-users"); socket.off("reload-status"); isMounted = false;});
@@ -116,7 +114,6 @@ export default function ListFriends()
 
 	//actualize the status
 	useEffect(() => {
-		//console.log("in actualize status");
 		if (ReloadStatus.user_id !== 0)
 		{
 			const friend = Friends.find(element => element.user_id === ReloadStatus.user_id)

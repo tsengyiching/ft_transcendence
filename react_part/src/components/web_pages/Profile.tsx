@@ -137,9 +137,9 @@ export default function Profile() {
     }
 
     function printFriendsList () {
-		if (friends.length == 0)
+		if (friends.length === 0)
 			return (
-				<h5>He has no friend but he has curly ! 😀🍫</h5>
+				<h5>They have no friend but they have curly ! 😀🍫</h5>
 			);
 			console.log(friends);
         return (
@@ -167,16 +167,16 @@ export default function Profile() {
             <div>
                 {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
                     return ( 
-                        <div key={`${gameId}-matchsScore`}> 
+                        <div key={`${gameId}-matchsScore`}>
                             <Row>
-                                <Col xs='auto'>
+                                <Col style={{ maxWidth: '4.5rem'}}>
                                     <Image className="Avatar" src={`${getPicture(idMain)}`} alt="Avartar"/>
                                 </Col>
-                                <Col xs={10} style={{textAlign: 'center'}}>
+                                <Col style={{textAlign: 'center'}}>
 									<div>{` ${userScore} - ${opponentScore} `}</div>
 									<div>{` ${name} ` } Vs {` ${getName(opponentId)} `}</div>      
                                 </Col>
-                                <Col xs='auto'>
+                                <Col style={{ maxWidth: '4.5rem'}}>
                                     <a href={'/profile/'+opponentId}>
                                         <Image className="Avatar" src={`${getPicture(opponentId)}`} alt="Avatar"/>
                                     </a>

@@ -1,7 +1,10 @@
-import { Form, Button, Alert } from 'react-bootstrap'
+import { Form, Button, Alert, Image } from 'react-bootstrap'
+import { useHistory } from "react-router-dom";
+import LogoPong from "./pictures/ping-pong.png";
+import "./web_pages/connexion.css"
+
 import React, { useState, useCallback } from 'react'
 import axios from 'axios';
-import { useHistory } from "react-router-dom";
 
 interface STATE {
     setConnection:Function;
@@ -9,10 +12,11 @@ interface STATE {
 }
 
 const Twofa = (props:STATE) => {
-    const history = useHistory()
     const [code, setCode] = useState("")
     const [alert, setAlert] = useState(0);
+    const [msg, setMsg] = useState([])
     const setConnection = props.setConnection;
+    let history = useHistory();
 
     const SubmitCode = useCallback(
         async (event) => {
@@ -22,37 +26,65 @@ const Twofa = (props:STATE) => {
         })
         .then(res => {
             setAlert(0)
-            setConnection(true);
-            history.push("/home")
+            setConnection(1);
+            window.location.reload();
         })
         .catch(res => {
-            setAlert(1)
+            if (res.response.status === 403 && res.response.data.message === "User is banned by the site.")
+                    history.push("/ban");
+            else {
+                setMsg(res.response.data.message)
+                setAlert(1)
+            }
         })
-    }, [code, setConnection, history]);
+           // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [code, setConnection, ]);
 
 
     function ChangeCode(e: React.ChangeEvent<HTMLInputElement>) { setCode(e.currentTarget.value);}
 
     function showAlert () {
-        if (alert === 1)
-        return (
-            <div>
-                <Alert variant={'danger'}>
-                    2FA code invalid
-                </Alert>
-            </div>
-        )
+        let items = []
+
+        if (alert === 1){
+            if (msg.length <= 2) {
+                for(let i = 0; i < msg.length; i++) {
+                    items.push(<Alert key={i} variant={'danger'}> {msg[i]} </Alert>)
+                }
+                return (
+                    <div>
+                        {items}
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <Alert variant={'danger'}> {msg} </Alert>
+                    </div>
+                )
+            }
+        }
     }
 
+
     return (
-        <div>
+        <div className="login shadow-sm">
+            <Image className="logo-pong" src={LogoPong} alt="pong logo"/>
+            <h1>Pong</h1>
             <Form onSubmit={SubmitCode} >
             <Form.Control type="code" value={code} name="code" placeholder="Enter the 6 digits code" onChange={ChangeCode} />
                 <Button variant="success" type="submit">
-                    activate
+                    Submit two factor authentication code
                 </Button>
             </Form>
             {showAlert()}
+            <span className="credits">Codé avec beaucoup de <i style={{color: "pink"}}>♥</i> par <a href="https://profile.intra.42.fr/users/abourbou" title="Arthur Bourbousson">abourbou</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/lolopez" title="Lou Lopez">lolopez</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/fgalaup" title="Félix Galaup">fgalaup</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/yictseng" title="Yiching Tseng">yictseng</a>,{' '}
+            <a href="https://profile.intra.42.fr/users/fbuthod-" title="Fabien Buthod Garcon">fbuthod-</a>.
+    </span>
         </div>
     )
 }

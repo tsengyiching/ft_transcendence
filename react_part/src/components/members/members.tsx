@@ -18,7 +18,7 @@ export default function InterfaceMembers()
     ]
     return (
 		<div>
-		    <ButtonGroup vertical>
+		    <ButtonGroup className='userListMenu' vertical>
 			{membersradios.map((radio, idx) => (
 			    <ToggleButton
 			    id={`membersRadio-${idx}`}

@@ -8,13 +8,8 @@
 	padding-top: 2px;
 }
 
-.ButtonCreate {
-	border-radius: 5px;
-	border-color: none;
-	font-size: 1.5em;
-	height: 4em;
-	margin: 1px;
-}
+.ButtonCreate
+{ width: 50%; }
 
 .ColumChat {
 	height: 40%;
