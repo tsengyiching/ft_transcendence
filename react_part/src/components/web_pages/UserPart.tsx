@@ -114,7 +114,7 @@ function InterfaceUser() {
         </Col>
         <Col>
             {interfaceRadioValue ==='Channel' ?
-                <div>
+                <div style={{ marginBottom: '5px'}}>
                     <CreateChannelButton socketid={socket}/>
                     { channelSelected !== undefined ?
                         <LeaveChannelButton channel={channelSelected} CallBackFunction={ResetChannel} />
