@@ -69,12 +69,14 @@ export class ChatGateway
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
-        await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+        if (!this.NumClientsInRoom('user-' + user.id)) {
+          await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.AVAILABLE,
+          });
+        }
         client.join('user-' + user.id);
-        this.server.emit('reload-status', {
-          user_id: user.id,
-          status: OnlineStatus.AVAILABLE,
-        });
         console.log('New User Join');
         const [channels_in, channels_out] = await Promise.all([
           this.chatService.getUserChannels(user.id),
@@ -99,12 +101,14 @@ export class ChatGateway
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
-        await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
         client.leave('user-' + user.id);
-        this.server.emit('reload-status', {
-          user_id: user.id,
-          status: OnlineStatus.OFFLINE,
-        });
+        if (!this.NumClientsInRoom('user-' + user.id)) {
+          await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.OFFLINE,
+          });
+        }
         console.log('Remove active user');
       } catch (error) {
         console.log(error);
@@ -514,5 +518,14 @@ export class ChatGateway
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
+  }
+
+  NumClientsInRoom(room: string) {
+    const clients = this.server.sockets.adapter.rooms.get(room);
+    if (clients) return clients.size;
+    return 0;
+    // console.log(room);
+    // console.log(this.server.sockets.adapter.rooms);
+    // console.log(this.server.sockets.adapter.rooms.get(room));
   }
 }
