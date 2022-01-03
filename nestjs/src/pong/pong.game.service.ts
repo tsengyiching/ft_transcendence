@@ -396,8 +396,8 @@ export class PongService {
   gameInfosBonusType(matchId: number) {
     const currentGame = this.matches.find((e) => e.id === matchId);
     return {
-      typeL: currentGame.bonus.left.type,
-      typeR: currentGame.bonus.right.type,
+      typeL: currentGame.bonus.left.start ? 0 : currentGame.bonus.left.type,
+      typeR: currentGame.bonus.right.start ? 0 : currentGame.bonus.right.type,
     };
   }
 
@@ -676,17 +676,18 @@ export class PongService {
             y: this.placesY[i],
           },
         ];
+
       }
     }
     match.bonus.leftBH = posL;
     match.bonus.rightBH = posR;
+
   }
   private createBlackHoles(blackhole: string) {
     const placeLeft = Math.floor(Math.random() * 3.99) + 1;
     const placeRight = Math.floor(Math.random() * 3.99) + 5;
     const voidLeft = Math.floor(Math.random() * 3.99);
     const voidRight = Math.floor(Math.random() * 3.99) + 4;
-
     const replace = blackhole.split('');
     replace[voidLeft] = placeLeft.toString();
     replace[voidRight] = placeRight.toString();
@@ -705,7 +706,9 @@ export class PongService {
         );
         if (dist < 30 && dist !== 0) {
           const arr = [...match.bonus.rightBH];
-          match.ball.pos = arr[Math.floor(Math.random() * (arr.length - 0.01))];
+          const index = Math.floor(Math.random() * (arr.length - 0.01));
+          match.ball.pos.x = arr[index].x;
+          match.ball.pos.y = arr[index].y;
           match.bonus.lastBH = 1;
           return;
         }
@@ -719,7 +722,9 @@ export class PongService {
         );
         if (dist < 30 && dist !== 0) {
           const arr = [...match.bonus.leftBH];
-          match.ball.pos = arr[Math.floor(Math.random() * (arr.length - 0.01))];
+          const index = Math.floor(Math.random() * (arr.length - 0.01));
+          match.ball.pos.x = arr[index].x;
+          match.ball.pos.y = arr[index].y;
           match.bonus.lastBH = 1;
 
           return;
@@ -778,7 +783,7 @@ export class PongService {
       } else if (side.type === 1) {
         // do ball speedup
         ball.speed = 100;
-        if (Date.now() - side.start > 500) {
+        if (Date.now() - side.start > 300) {
           //undo speedup
           ball.speed = BALLSPEED;
           side.start = 0;
@@ -795,7 +800,7 @@ export class PongService {
           side.y = -1;
         } else {
           side.bonusUp = BONUSY;
-          side.yStart = Date.now();
+        //   side.yStart = Date.now();
         }
       }
     }
@@ -902,6 +907,7 @@ export class PongService {
 
         if (match.ball.pos.y < 0 || match.ball.pos.y > H) {
           match.ball.pos = this.saveLostBall(match.ball);
+          match.ball.vy *= -1;
         }
         match.ball.speed += 0.001;
         if (mouv[0]) {

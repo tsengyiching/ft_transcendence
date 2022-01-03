@@ -184,7 +184,6 @@ export class PongGateway {
       }
       client.emit('sendScore', this.pongService.sendScore(game));
     } catch (error) {
-      console.log(error);
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
