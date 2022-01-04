@@ -233,25 +233,25 @@ export class PongService {
     }
   }
 
-  setKeyValue(up: boolean, socketId: string, value: boolean) {
+  setKeyValue(up: boolean, id: number, value: boolean) {
     this.matches.forEach((match) => {
-      if (match.pOne.client.id === socketId) {
+      if (match.pOne.id === id) {
         if (up) match.pOne.up = value;
         else match.pOne.down = value;
       }
-      if (match.pTwo.client.id === socketId) {
+      if (match.pTwo.id === id) {
         if (up) match.pTwo.up = value;
         else match.pTwo.down = value;
       }
     });
   }
 
-  setSpace(socketId: string, value: boolean) {
+  setSpace(id: number, value: boolean) {
     this.matches.forEach((match) => {
-      if (match.pOne.client.id === socketId) {
+      if (match.pOne.id === id) {
         match.pOne.space = value;
       }
-      if (match.pTwo.client.id === socketId) {
+      if (match.pTwo.id === id) {
         match.pTwo.space = value;
       }
     });
@@ -676,12 +676,10 @@ export class PongService {
             y: this.placesY[i],
           },
         ];
-
       }
     }
     match.bonus.leftBH = posL;
     match.bonus.rightBH = posR;
-
   }
   private createBlackHoles(blackhole: string) {
     const placeLeft = Math.floor(Math.random() * 3.99) + 1;
@@ -800,7 +798,7 @@ export class PongService {
           side.y = -1;
         } else {
           side.bonusUp = BONUSY;
-        //   side.yStart = Date.now();
+          //   side.yStart = Date.now();
         }
       }
     }

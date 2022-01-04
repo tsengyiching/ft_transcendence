@@ -219,18 +219,16 @@ export class PongGateway {
   @SubscribeMessage('inviteAnsw')
   async getResponse(client: Socket, payload: { id: number; resp: number }) {
     try {
-        const user: User = await this.authService.getUserFromSocket(client);
+      const user: User = await this.authService.getUserFromSocket(client);
 
       if (user.userStatus !== OnlineStatus.AVAILABLE) {
-      this.server.to(payload.id.toString()).emit(`alert`, {
-        alert: {
-          type: `warning`,
-          message:
-              `${user.nickname} has started another game!`
-        },
-      });
-    }
-    else if (payload.resp > 0) {
+        this.server.to(payload.id.toString()).emit(`alert`, {
+          alert: {
+            type: `warning`,
+            message: `${user.nickname} has started another game!`,
+          },
+        });
+      } else if (payload.resp > 0) {
         this.server.to(payload.id.toString()).emit(`alert`, {
           alert: {
             type: `warning`,
@@ -250,12 +248,12 @@ export class PongGateway {
           true,
         );
         userArray.forEach((e) => {
-            if (this.pongUsersService.isInMatchmaking(e)) {
-                this.pongUsersService.removePlayer(e);
-              }
-            if (this.pongUsersService.isInMatchmakingBonus(e)) {
-                this.pongUsersService.removePlayerBonus(e);
-        }
+          if (this.pongUsersService.isInMatchmaking(e)) {
+            this.pongUsersService.removePlayer(e);
+          }
+          if (this.pongUsersService.isInMatchmakingBonus(e)) {
+            this.pongUsersService.removePlayerBonus(e);
+          }
           this.server.to(e.toString()).emit('inMatchMaking', false);
           this.server.to(e.toString()).emit('inGameBonus', GameId);
         });
@@ -267,16 +265,38 @@ export class PongGateway {
 
   @SubscribeMessage('down')
   onDown(client: Socket, payload: boolean) {
-    this.pongService.setKeyValue(false, client.id, payload);
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.pongService.setKeyValue(false, user.id, payload);
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
   }
+
   @SubscribeMessage('up')
   onUp(client: Socket, payload: boolean) {
-    this.pongService.setKeyValue(true, client.id, payload);
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.pongService.setKeyValue(true, user.id, payload);
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
   }
 
   @SubscribeMessage('space')
   onSpace(client: Socket, payload: boolean) {
-    this.pongService.setSpace(client.id, payload);
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.pongService.setSpace(user.id, payload);
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
   }
 
   @SubscribeMessage('gameOff')
