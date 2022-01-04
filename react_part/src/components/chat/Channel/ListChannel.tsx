@@ -125,19 +125,19 @@ function ListChannel(props: IUseStateChannel) {
 
 	return(
                 <Row className="ScrollingListChannel">
-                        <Col className="ChannelsJoined" lg={6} >
+                        <Col className="ChannelsJoined" sm={6} >
                                 { MyChannels.length !== 0
                                         ?
                                         <div>
                                                 <h4> My Channels </h4>
-                                                <div style={{overflow: 'auto', height: '15em'}} >
+                                                <div style={{overflow: 'auto', maxHeight: '15em'}} >
                                                         { MyChannels.map(ButtonMyChannel) }
                                                 </div>
                                         </div>
                                         : <div/>
                                 }
                         </Col>
-                        <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} lg={6}>
+                        <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} sm={6}>
                                 { OthersChannels.length !== 0
                                         ?
                                         <div>

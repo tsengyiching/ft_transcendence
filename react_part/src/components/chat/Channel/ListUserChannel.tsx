@@ -1,4 +1,3 @@
-
 import {Button} from 'react-bootstrap'
 import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
 import {InvitateToGame, SpectateGame} from '../../members/ContextMenuFunctions';
@@ -141,7 +140,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
 	return (
-		<div className="overflow-auto" style={{marginTop: "15%"}}>
+		<div className="overflow-auto" style={{marginTop: "10px"}}>
 			{props.ListUsers.map((User: IUser) =>
 			<ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/>)}
 		</div>

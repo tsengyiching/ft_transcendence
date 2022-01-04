@@ -131,11 +131,11 @@ function InterfaceUser() {
         <div>
         <Row as={InterfaceChannel}/>
         <Row>
-          <Col className="ColumnChat" lg={{span: 8, offset: 0}} style={{borderRight:"1px solid #aaa", height: "48em"}}>
+          <Col className="ColumnChat" sm={{span: 8}} style={{borderRight:"1px solid #aaa", height: "48em"}}>
               <InterfaceChat channelSelected={channelSelected} privateSelected={UserConversationSelected}
               messageType={interfaceRadioValue === 'MP' ? 'MP' : 'Channel'}/>
           </Col>
-          <Col className="ColumnChat" lg={{span: 4, offset: 0}} >
+          <Col className="ColumnChat" sm={{span: 4}} >
             <InterfaceMembers />
           </Col>
         </Row>

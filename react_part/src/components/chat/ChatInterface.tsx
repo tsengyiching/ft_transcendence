@@ -63,13 +63,11 @@ export function Message(props: {message: IMessage, userData: Data})
 	return (
 	<div className={`MsgBubble`} style={{backgroundColor: color}}>
 		<Row>
-			<Col>
+			<Col className='author'>
 				<Image src={props.message.author_avatar} roundedCircle fluid className="pictureChat" />
-			</Col>
-			<Col>
 				{props.message.author_nickname}
 			</Col>
-			<Col>
+			<Col className='creationDate'>
 				{ timeSince(new Date(props.message.message_createDate))}
 			</Col>
 		</Row>
