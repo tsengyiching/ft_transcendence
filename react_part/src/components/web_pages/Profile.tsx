@@ -141,12 +141,11 @@ export default function Profile() {
 			return (
 				<h5>They have no friend but they have curly ! 😀🍫</h5>
 			);
-			console.log(friends);
         return (
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" key={"printFriendsList"}>
                 {friends.map(({user_id, user_nickname, user_avatar, user_siteStatus}) => {
                     return (
-						<ListGroup.Item>
+						<ListGroup.Item key={`profile-${user_id}`}>
 							<a href={'/profile/'+user_id}>
 								<Row>
 									<Col><Image src={`${user_avatar}`} className="Avatar" alt="Friend Avatar"/></Col>
@@ -164,7 +163,7 @@ export default function Profile() {
 
     function printMatchsScore () {
         return (
-            <div>
+            <div key={"printMatchsScore"}>
                 {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
                     return ( 
                         <div key={`${gameId}-matchsScore`}>
@@ -221,9 +220,9 @@ export default function Profile() {
 
     function PrintProfile() {
         if (validate === false)
-            return Unvalidate();
+            return <Unvalidate/>;
         else
-            return Validate();
+            return <Validate/>;
     }
 
     return (

@@ -75,12 +75,15 @@ function Router() {
       }
     })
     .catch(res => {
-        console.log(res.response.data.message)
-        if (res.response.data.message === "User is banned by the site.") {
-            setConnection(3);
-        }
-        else 
-            setConnection(2)
+		if (res.response !== undefined)
+		{
+			console.log(res.response.data.message)
+			if (res.response.data.message === "User is banned by the site.") {
+				setConnection(3);
+			}
+			else 
+            	setConnection(2)
+		}
     })
   }, [twofa])
 

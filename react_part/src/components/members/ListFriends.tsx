@@ -97,7 +97,7 @@ export default function ListFriends()
 			SetFriends(res.data);
 		})
 		.catch(res => { if (isMounted) {
-            if (res.response.data.message === "User is banned by the site.")
+            if (res.response !== undefined && res.response.data.message === "User is banned by the site.")
             {
                 window.location.reload();
             }
