@@ -77,7 +77,7 @@ function Router() {
     .catch(res => {
 		if (res.response !== undefined)
 		{
-			console.log(res.response.data.message)
+			// console.log(res.response.data.message)
 			if (res.response.data.message === "User is banned by the site.") {
 				setConnection(3);
 			}

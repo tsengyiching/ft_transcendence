@@ -43,7 +43,7 @@ function App():React.ReactElement {
     let isMounted = true;
     axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me', {withCredentials: true})
     .then((res) => {if(isMounted) {SetuserData(res.data)} })
-    .catch(res => {if(isMounted) {console.log(`error in context user : ${res.data}`)}})
+    .catch(res => {if(isMounted) {console.log(`You must login : ${res.data}`)}})
     return (() => {isMounted = false});
   }, [])
 

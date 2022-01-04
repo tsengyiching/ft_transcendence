@@ -262,6 +262,29 @@ export class PongGateway {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
   }
+  @SubscribeMessage('reloadStartGame')
+  reloadStartGame(client: Socket) {
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.server.to(user.id.toString()).emit('resetGameModal');
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
+
+  @SubscribeMessage('reloadInvite')
+  reloadInvite(client: Socket) {
+    try {
+      const user = this.authService.getPayloadFromAuthenticationToken(
+        client.handshake.headers.cookie,
+      );
+      this.server.to(user.id.toString()).emit('inviteRemove');
+    } catch (error) {
+      client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
+    }
+  }
 
   @SubscribeMessage('down')
   onDown(client: Socket, payload: boolean) {

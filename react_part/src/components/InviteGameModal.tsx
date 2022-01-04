@@ -10,16 +10,19 @@ const InviteGameModal:React.FC = () => {
     const [modalShow, setModalShow] = useState<boolean>(false);
 	const Okay = () => {
         socket.emit('inviteAnsw', {id:opponentId, resp: 0});
+		socket.emit('reloadInvite');
         setModalShow(false);
 	}
 
     const Nope = () => {
         socket.emit('inviteAnsw', {id:opponentId, resp: 1});
+		socket.emit('reloadInvite');
         setModalShow(false);
 	}
 
     const NopeButMean = () => {
         socket.emit('inviteAnsw', {id:opponentId, resp: 2});
+		socket.emit('reloadInvite');
         setModalShow(false);
 	}
 
@@ -32,9 +35,14 @@ const InviteGameModal:React.FC = () => {
             setModalShow(e.modal);
 		});
 		}
+		socket.on('inviteRemove', () =>
+		{
+			setModalShow(false);
+		});
 		return (() => {
 			isMounted = false;
 			socket.off('invite');
+			socket.off('inviteRemove');
 		})
 	})
 	return (

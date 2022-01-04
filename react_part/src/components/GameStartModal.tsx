@@ -20,6 +20,7 @@ const GameStartModal:React.FC = () => {
 			socket.emit('readyBonus', gameId)
 		}
 		setGameState(0);
+		socket.emit('reloadStartGame');
 		history.push("/home");
 	}
 

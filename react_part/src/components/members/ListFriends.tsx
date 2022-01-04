@@ -100,8 +100,8 @@ export default function ListFriends()
             if (res.response !== undefined && res.response.data.message === "User is banned by the site.")
             {
                 window.location.reload();
+				console.log(res.response.data);
             }
-			console.log(res.response.data);
         }
 		})
 

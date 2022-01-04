@@ -53,12 +53,17 @@ const Game:React.FC = () => {
             useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
             }
         } );
+		socket.on('resetGameModal', () => {
+			if (gameStatus === 1 || gameStatus === 3)
+				setGameStatus(0);
+		});
         return (() => {
 			socket.off('spectateOn');
             socket.off('startPong');
             socket.off('inMatchMaking');
 			socket.off('startPongBonus');
             socket.off('startWatch');
+			socket.off('resetGameModal');
             isMounted = false;
         })
     }, [gameStatus, socket, setGameStatus])
