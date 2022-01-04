@@ -6,6 +6,7 @@ import { stringify } from 'querystring';
 import { lastValueFrom } from 'rxjs';
 import { UserService } from 'src/user/service/user.service';
 import { User } from 'src/user/model/user.entity';
+import { UserGateway } from 'src/user/user.gateway';
 
 const clientID = process.env.OAUTH_42_APP_ID;
 const clientSecret = process.env.OAUTH_42_APP_SECRET;
@@ -14,7 +15,11 @@ const callbackURL =
 
 @Injectable()
 export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two') {
-  constructor(private userServices: UserService, private http: HttpService) {
+  constructor(
+    private userServices: UserService,
+    private http: HttpService,
+    private userGateway: UserGateway,
+  ) {
     super({
       authorizationURL: `https://api.intra.42.fr/oauth/authorize?${stringify({
         client_id: clientID,
@@ -43,7 +48,19 @@ export class FortyTwoStrategy extends PassportStrategy(Strategy, 'forty-two') {
     let user = await this.userServices.getOneById(data.id);
 
     /* If not, create new user in database */
-    if (!user) user = await this.userServices.createUser(data);
+
+    if (!user) {
+      user = await this.userServices.createUser(data);
+      setTimeout(() => {
+        this.userGateway.server.to('user-' + user.id).emit(`alert`, {
+          alert: {
+            type: `info`,
+            message:
+              'You can change your name, avatar by going to your settings page.',
+          },
+        });
+      }, 2000);
+    }
 
     return user;
   }
