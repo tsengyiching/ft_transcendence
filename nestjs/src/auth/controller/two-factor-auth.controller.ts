@@ -74,7 +74,10 @@ export class TwoFactorAuthController {
     }
     await this.userService.turnOnTwoFactorAuthentication(user.id);
     const { accessToken } = this.authService.login(user, true);
-    res.cookie('jwt-two-factor', accessToken);
+    res.cookie('jwt-two-factor', accessToken, {
+      sameSite: 'none',
+      secure: true,
+    });
     return {
       userId: user.id,
       twoFactorEnabled: true,
@@ -108,7 +111,10 @@ export class TwoFactorAuthController {
       throw new UnauthorizedException('Wrong authentication code');
     }
     const { accessToken } = this.authService.login(user, true);
-    res.cookie('jwt-two-factor', accessToken);
+    res.cookie('jwt-two-factor', accessToken, {
+      sameSite: 'none',
+      secure: true,
+    });
     userPayload.twoFA = true;
     return userPayload;
   }
