@@ -330,7 +330,7 @@ export class UserService {
       (operator.siteStatus === SiteStatus.MODERATOR &&
         user.siteStatus === SiteStatus.OWNER) ||
       (operator.siteStatus === SiteStatus.MODERATOR &&
-        operator.siteStatus === SiteStatus.MODERATOR)
+        user.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
         `You don't have the right to change the status of the site owner 
@@ -362,7 +362,7 @@ export class UserService {
       (operator.siteStatus === SiteStatus.MODERATOR &&
         user.siteStatus === SiteStatus.OWNER) ||
       (operator.siteStatus === SiteStatus.MODERATOR &&
-        operator.siteStatus === SiteStatus.MODERATOR)
+        user.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
         `You don't have the right to ban the site owner or moderator,

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Form, Col, Row, Button, Image, Modal} from "react-bootstrap";
+import { Form, Col, Row, Button, Image, Modal, Alert} from "react-bootstrap";
 import { Data, DataContext, } from "../../App";
 import { SocketContext } from "../../context/socket";
 
@@ -59,18 +59,21 @@ function UserButton(props: {thisUser: Data, myData: Data, setSiteUser: any, setV
 function UserModal(props: IPropsModal)
 {
 	const [NewSiteStatus, setNewSiteStatus] = useState<string>("");
+    const [errorMsg, setErrorMsg] = useState<any>(undefined);
 
 	function SubmitForm(event: any) {
 		event.preventDefault();
+        setErrorMsg(undefined);
 		if (props.user !== undefined && NewSiteStatus !== "")
 		{
 			axios.patch('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/admin/set', {id: props.user.id, newStatus: NewSiteStatus}, {withCredentials: true})
 			.then((res) => onHide())
-			.catch(res => console.log("error change site status : " + res.data));
+			.catch(res => {if (res.response.data.message) setErrorMsg(res.response.data.message); });
 		}
 	}
  
 	function onHide(){
+        setErrorMsg(undefined);
 		setNewSiteStatus("");
 		props.onHide();
 	}
@@ -93,6 +96,7 @@ function UserModal(props: IPropsModal)
 		</Modal.Header>
 		<Modal.Body>
 			<Form>
+                {errorMsg && <Alert key={"alertkey"} variant='danger'> {errorMsg}  </Alert>}
 			<Form.Select aria-label="Change Status Site"
 				onChange={(e: any) => {setNewSiteStatus(e.target.value)}}
 				>
