@@ -31,7 +31,7 @@ export type Ball = {
 export type Player = {
   name: string;
   id: number;
-  client: Socket | undefined;
+  client: string;
   avatar: string;
   paddle: number;
   score: number;

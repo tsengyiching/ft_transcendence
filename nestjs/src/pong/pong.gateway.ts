@@ -80,9 +80,16 @@ export class PongGateway {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
         client.leave(user.id.toString());
-        const currentGame = this.pongService.userDiconnectFromGame(user.id);
+        const currentGame = this.pongService.userDiconnectFromGame(client.id);
         this.pongService.setDisconnected(user.id, false);
-        if (currentGame) client.leave(currentGame.toString() + '-Game');
+        if (currentGame) {
+          await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.AVAILABLE,
+          });
+          client.leave(currentGame.toString() + '-Game');
+        }
         await sleep(2000);
         const left = this.pongUsersService.userDisconnect(user.id);
         if (this.pongUsersService.isInMatchmaking(user.id) && !left) {
@@ -342,7 +349,11 @@ export class PongGateway {
   async readyForGame(client: Socket, payload: number) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      const infos = this.pongService.playersSetReady(payload, user.id, client);
+      const infos = this.pongService.playersSetReady(
+        payload,
+        user.id,
+        client.id,
+      );
       const toLeave = this.pongService.getAllMatchIdButThisOne(infos.GameId);
       toLeave.forEach((gameId) => client.leave(gameId.toString() + '-Game'));
       client.emit('spectate', 0);
@@ -477,7 +488,11 @@ export class PongGateway {
   async readyForGameBonus(client: Socket, payload: number) {
     try {
       const user: User = await this.authService.getUserFromSocket(client);
-      const infos = this.pongService.playersSetReady(payload, user.id, client);
+      const infos = this.pongService.playersSetReady(
+        payload,
+        user.id,
+        client.id,
+      );
       const toLeave = this.pongService.getAllMatchIdButThisOne(infos.GameId);
       toLeave.forEach((gameId) => client.leave(gameId.toString() + '-Game'));
       client.emit('spectate', 0);

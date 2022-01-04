@@ -62,7 +62,6 @@ const GameCanvasBackground:React.VFC<{}> = () => {
 		drawPaddle(ctx!, PaddleL);
 		drawPaddle(ctx!, PaddleR);
 		drawBall(ctx!, ball);
-
 	});
 	return (
 		<canvas id="background-layer" ref={canvasRef} ></canvas>

@@ -7,6 +7,7 @@ import { IUserConversation } from '../../web_pages/UserPart'
 import {IMessage, Message} from '../ChatInterface'
 import './ChatPrivate.css'
 
+
 interface IUser {
 	channel_id: number,
 	user_id: number,

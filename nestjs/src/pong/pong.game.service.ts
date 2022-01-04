@@ -217,7 +217,7 @@ export class PongService {
       const newPlayer: Player = {
         name: user.nickname,
         id: id,
-        client: undefined,
+        client: '',
         avatar: user.avatar,
         paddle: paddle,
         score: 0,
@@ -270,7 +270,7 @@ export class PongService {
   playersSetReady(
     gameId: number,
     playerId: number,
-    client: Socket,
+    client: string,
   ): { GameId: number; Player: number } {
     let player = 0;
     this.matches.forEach((match) => {
@@ -385,7 +385,6 @@ export class PongService {
    */
 
   gameInfosBonusY(matchId: number) {
-    // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
     return {
       yL: currentGame.bonus.left.y,
@@ -402,7 +401,6 @@ export class PongService {
   }
 
   gameInfosBonusLaunch(matchId: number) {
-    // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
     return {
       startL:
@@ -412,7 +410,6 @@ export class PongService {
     };
   }
   gameInfosBonusBH(matchId: number) {
-    // TODO
     const currentGame = this.matches.find((e) => e.id === matchId);
     return currentGame.bonus.blackHoles;
   }
@@ -923,14 +920,14 @@ export class PongService {
       }
     });
   }
-  userDiconnectFromGame(userId: number) {
+  userDiconnectFromGame(clientId: string) {
     let ret = 0;
     this.matches.forEach((match) => {
-      if (match.pOne.id === userId) {
+      if (match.pOne.client === clientId) {
         match.run = false;
         match.pOne.ready = false;
         ret = match.id;
-      } else if (match.pTwo.id === userId) {
+      } else if (match.pTwo.client === clientId) {
         match.run = false;
         match.pTwo.ready = false;
         ret = match.id;
