@@ -6,6 +6,7 @@ import {GameSocketContext} from './../context/gameSocket';
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
 import Pong from './pong/components/Pong';
+import clearStore from './pong/components/ClearStore';
 
 type GameInfos = {
     pLName: string;
@@ -50,6 +51,7 @@ const Game:React.FC = () => {
         } );
         socket.on('startWatch', (e:GameInfos) => {
             if (isMounted) {
+            clearStore();
             useStore.setState((s) => ({...s, bonus:true, playerR:{name:e.pRName, avatar:e.pRAvatar}, playerL:{name:e.pLName, avatar:e.pLAvatar} }));
             }
         } );
