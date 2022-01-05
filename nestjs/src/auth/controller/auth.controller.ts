@@ -37,7 +37,7 @@ export class AuthController {
     if (process.env.ENVIRONMENT != 'DEV') throw new NotFoundException('');
     const user: User = await this.userService.getOneById(id);
     const { accessToken } = this.authService.login(user);
-    res.cookie('jwt', accessToken, { sameSite: 'none', secure: true });
+    res.cookie('jwt', accessToken);
     return user;
   }
 
@@ -62,10 +62,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const { accessToken } = this.authService.login(req.user);
-    res.cookie('jwt', accessToken, {
-      sameSite: 'none',
-      secure: true,
-    });
+    res.cookie('jwt', accessToken);
     if (req.user.isTwoFactorAuthenticationEnabled) {
       res.redirect('http://' + process.env.DOMAIN_FRONTEND + '/2fa');
     } else {
@@ -79,13 +76,7 @@ export class AuthController {
    */
   @Get('disconnect')
   disconnect(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('jwt', {
-      sameSite: 'none',
-      secure: true,
-    });
-    res.clearCookie('jwt-two-factor', {
-      sameSite: 'none',
-      secure: true,
-    });
+    res.clearCookie('jwt');
+    res.clearCookie('jwt-two-factor');
   }
 }
