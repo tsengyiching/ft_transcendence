@@ -359,39 +359,46 @@ export class PongGateway {
       client.emit('spectate', 0);
       client.join(infos.GameId.toString() + '-Game');
       const waitForReady = setInterval(async () => {
-        try {
-          if (this.pongService.playersReadyCheck(payload)) {
-            clearInterval(waitForReady);
-            await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
-            this.server.emit('reload-status', {
-              user_id: user.id,
-              status: OnlineStatus.PALYING,
-            });
-            if (infos.Player === 1) {
-              const ret = await this.gameService.createGame(
-                this.pongService.getPlayers(infos.GameId),
-                GameMode.NORMAL,
-              );
-              this.pongService.setDatabaseId(infos.GameId, ret.id);
-              this.server
-                .to(infos.GameId.toString() + '-Game')
-                .emit('startPong', this.pongService.sendPlayersInfos(payload));
-              this.startGame(infos.GameId);
-            }
-          }
-          if (this.pongService.playersDisconnectCheck(infos.GameId)) {
-            clearInterval(waitForReady);
-            client.leave(infos.GameId.toString() + '-Game');
-            client.emit(`alert`, {
-              alert: {
-                type: `warning`,
-                message:
-                  'your opponent is running away, you must go back to matchmaking',
-              },
-            });
-          }
-        } catch (error) {
+        const ready = this.pongService.playersReadyCheck(payload);
+        if (ready === undefined) {
           clearInterval(waitForReady);
+          client.emit(`alert`, {
+            alert: {
+              type: `danger`,
+              message: 'This Game already took place, just start another game.',
+            },
+          });
+          return;
+        }
+        if (ready) {
+          clearInterval(waitForReady);
+          await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.PALYING,
+          });
+          if (infos.Player === 1) {
+            const ret = await this.gameService.createGame(
+              this.pongService.getPlayers(infos.GameId),
+              GameMode.NORMAL,
+            );
+            this.pongService.setDatabaseId(infos.GameId, ret.id);
+            this.server
+              .to(infos.GameId.toString() + '-Game')
+              .emit('startPong', this.pongService.sendPlayersInfos(payload));
+            this.startGame(infos.GameId);
+          }
+        }
+        if (this.pongService.playersDisconnectCheck(infos.GameId)) {
+          clearInterval(waitForReady);
+          client.leave(infos.GameId.toString() + '-Game');
+          client.emit(`alert`, {
+            alert: {
+              type: `warning`,
+              message:
+                'your opponent is running away, you must go back to matchmaking',
+            },
+          });
         }
       }, 100);
     } catch (error) {
@@ -501,7 +508,18 @@ export class PongGateway {
       client.emit('spectate', 0);
       client.join(infos.GameId.toString() + '-Game');
       const waitForReady = setInterval(async () => {
-        if (this.pongService.playersReadyCheck(payload)) {
+        const ready = this.pongService.playersReadyCheck(payload);
+        if (ready === undefined) {
+          clearInterval(waitForReady);
+          client.emit(`alert`, {
+            alert: {
+              type: `danger`,
+              message: 'This Game already took place, just start another game.',
+            },
+          });
+          return;
+        }
+        if (ready) {
           clearInterval(waitForReady);
           await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
           this.server.emit('reload-status', {

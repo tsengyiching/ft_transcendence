@@ -59,12 +59,9 @@ export class PongService {
     return 0;
   }
 
-  playersReadyCheck(gameId): boolean {
+  playersReadyCheck(gameId): boolean | undefined {
     const currentGame = this.matches.find((e) => e.id === gameId);
-    if (!currentGame.pOne || !currentGame.pTwo) {
-      this.deleteGame(gameId);
-      throw new WsException(`This Game can't start, just start a new one.`);
-    }
+    if (!currentGame.pOne || !currentGame.pTwo) return undefined;
     if (currentGame.pOne.ready && currentGame.pTwo.ready) return true;
     return false;
   }
