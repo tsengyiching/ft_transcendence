@@ -129,6 +129,22 @@ export class PongService {
     });
     return newArr;
   }
+
+  userDiconnectFromGame(clientId: string) {
+    let ret = 0;
+    this.matches.forEach((match) => {
+      if (match.pOne.client === clientId) {
+        match.run = false;
+        match.pOne.ready = false;
+        ret = match.id;
+      } else if (match.pTwo.client === clientId) {
+        match.run = false;
+        match.pTwo.ready = false;
+        ret = match.id;
+      }
+    });
+    return ret;
+  }
   /*
 ░██████╗███████╗████████╗████████╗███████╗██████╗░░██████╗
 ██╔════╝██╔════╝╚══██╔══╝╚══██╔══╝██╔════╝██╔══██╗██╔════╝
@@ -920,21 +936,7 @@ export class PongService {
       }
     });
   }
-  userDiconnectFromGame(clientId: string) {
-    let ret = 0;
-    this.matches.forEach((match) => {
-      if (match.pOne.client === clientId) {
-        match.run = false;
-        match.pOne.ready = false;
-        ret = match.id;
-      } else if (match.pTwo.client === clientId) {
-        match.run = false;
-        match.pTwo.ready = false;
-        ret = match.id;
-      }
-    });
-    return ret;
-  }
+
 
   // https://gamedev.stackexchange.com/questions/174240/server-game-loop
 }

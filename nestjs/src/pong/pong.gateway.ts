@@ -377,7 +377,6 @@ export class PongGateway {
               .emit('startPong', this.pongService.sendPlayersInfos(payload));
             this.startGame(infos.GameId);
           }
-          // TODO compteur pour relancer le matchmaking (15 sec) si pas de reponse
         }
         if (this.pongService.playersDisconnectCheck(infos.GameId)) {
           clearInterval(waitForReady);
@@ -546,7 +545,7 @@ export class PongGateway {
     const roomName = gameId.toString() + '-Game';
     if (gameId >= 0) {
       this.server.to(roomName).emit('sendScore', { scoreL: 0, scoreR: 0 });
-      const GameLoop = () => {
+      const GameLoop = async () => {
         const now = Date.now();
         if (lastRefresh + refreshTime <= now) {
           lastRefresh = now;
@@ -575,6 +574,23 @@ export class PongGateway {
             this.pongService.getDatabaseId(gameId),
             this.pongService.getResults(gameId),
           );
+          const players = this.pongService.getPlayers(gameId);
+          await this.userService.setUserStatus(
+            players.leftUserId,
+            OnlineStatus.AVAILABLE,
+          );
+          this.server.emit('reload-status', {
+            user_id: players.leftUserId,
+            status: OnlineStatus.AVAILABLE,
+          });
+          await this.userService.setUserStatus(
+            players.rightUserId,
+            OnlineStatus.AVAILABLE,
+          );
+          this.server.emit('reload-status', {
+            user_id: players.rightUserId,
+            status: OnlineStatus.AVAILABLE,
+          });
           this.pongService.deleteGame(gameId);
           return;
         }
