@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { WsException } from '@nestjs/websockets';
 import {
   Ball,
   Paddle,
@@ -50,15 +51,20 @@ export class PongService {
   }
 
   getMatchIdByPlayerId(playerId: number) {
-    const found = this.matches.find(
-      (e) => e.pOne.id === playerId || e.pTwo.id === playerId,
-    );
+    const found = this.matches
+      .slice()
+      .reverse()
+      .find((e) => e.pOne.id === playerId || e.pTwo.id === playerId);
     if (found) return found.id;
     return 0;
   }
 
   playersReadyCheck(gameId): boolean {
     const currentGame = this.matches.find((e) => e.id === gameId);
+    if (!currentGame.pOne || !currentGame.pTwo) {
+      this.deleteGame(gameId);
+      throw new WsException(`This Game can't start, just start a new one.`);
+    }
     if (currentGame.pOne.ready && currentGame.pTwo.ready) return true;
     return false;
   }
@@ -936,7 +942,6 @@ export class PongService {
       }
     });
   }
-
 
   // https://gamedev.stackexchange.com/questions/174240/server-game-loop
 }

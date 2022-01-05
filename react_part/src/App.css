@@ -1,6 +1,10 @@
 body
 { background-color: #f8f9fa !important; }
 
+/* Fuke you safary */
+iframe
+{ display: none; }
+
 .Body
 { padding: 1rem; }
 
