@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { useState, useEffect } from "react";
 import {Image, Table} from 'react-bootstrap'
+import { LinkContainer } from 'react-router-bootstrap';
 
 export default function Ladder() {
     const [games, setGames] = useState([]);
@@ -107,10 +108,10 @@ export default function Ladder() {
                     return (
 						<tr key={`${id}`}>
 							<td>{position}</td>
-							<td>                      
-								<a href={'/profile/'+id}>
+							<td> 
+								<LinkContainer to={'/profile/'+id}>
                                     <Image src={`${image}`} width="40" height="40" alt="Avatar" rounded/>
-                                </a>
+                                </LinkContainer>
 							</td>
 							<td>{name}</td>
 							<td>{score}</td>

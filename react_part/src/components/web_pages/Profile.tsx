@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import '../members/Status';
 import axios from 'axios';
 import {Image, Row, Col, Badge, ListGroup} from 'react-bootstrap'
-
+import { LinkContainer } from "react-router-bootstrap";
 import {useParams} from "react-router-dom";
 import './Profile.css'
 import status from "../members/Status";
@@ -146,13 +146,13 @@ export default function Profile() {
                 {friends.map(({user_id, user_nickname, user_avatar, user_siteStatus}) => {
                     return (
 						<ListGroup.Item key={`profile-${user_id}`}>
-							<a href={'/profile/'+user_id}>
+							<LinkContainer to={"/profile/"+user_id}>
 								<Row>
 									<Col><Image src={`${user_avatar}`} className="Avatar" alt="Friend Avatar"/></Col>
 										<Col>{status(user_siteStatus)}</Col> {/* because is triangle */}
 									<Col>{user_nickname}</Col>
 								</Row>
-							</a>
+							</LinkContainer>
 						</ListGroup.Item>
                     );
                 })
@@ -176,9 +176,9 @@ export default function Profile() {
 									<div>{` ${name} ` } Vs {` ${getName(opponentId)} `}</div>      
                                 </Col>
                                 <Col style={{ maxWidth: '4.5rem'}}>
-                                    <a href={'/profile/'+opponentId}>
+									<LinkContainer to={'/profile/'+opponentId}>
                                         <Image className="Avatar" src={`${getPicture(opponentId)}`} alt="Avatar"/>
-                                    </a>
+                                    </LinkContainer>
                                 </Col>
                             </Row>
                         </div>
