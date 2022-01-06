@@ -372,16 +372,19 @@ export class PongGateway {
         }
         if (ready) {
           clearInterval(waitForReady);
+          let ret;
+          if (infos.Player === 1) {
+            ret = await this.gameService.createGame(
+              this.pongService.getPlayers(infos.GameId),
+              GameMode.NORMAL,
+            );
+          }
           await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
           this.server.emit('reload-status', {
             user_id: user.id,
             status: OnlineStatus.PALYING,
           });
           if (infos.Player === 1) {
-            const ret = await this.gameService.createGame(
-              this.pongService.getPlayers(infos.GameId),
-              GameMode.NORMAL,
-            );
             this.pongService.setDatabaseId(infos.GameId, ret.id);
             this.server
               .to(infos.GameId.toString() + '-Game')
@@ -538,16 +541,19 @@ export class PongGateway {
         }
         if (ready) {
           clearInterval(waitForReady);
+          let ret;
+          if (infos.Player === 1) {
+            ret = await this.gameService.createGame(
+              this.pongService.getPlayers(infos.GameId),
+              GameMode.NORMAL,
+            );
+          }
           await this.userService.setUserStatus(user.id, OnlineStatus.PALYING);
           this.server.emit('reload-status', {
             user_id: user.id,
             status: OnlineStatus.PALYING,
           });
           if (infos.Player === 1) {
-            const ret = await this.gameService.createGame(
-              this.pongService.getPlayers(infos.GameId),
-              GameMode.BONUS,
-            );
             this.pongService.setDatabaseId(infos.GameId, ret.id);
             this.server
               .to(infos.GameId.toString() + '-Game')
@@ -584,6 +590,10 @@ export class PongGateway {
     const roomName = gameId.toString() + '-Game';
     if (gameId >= 0) {
       this.server.to(roomName).emit('sendScore', { scoreL: 0, scoreR: 0 });
+      if (!this.pongService.checkOk(gameId))
+        throw new WsException(
+          'there is an error with this game, please start a new one.',
+        );
       const GameLoop = async () => {
         const now = Date.now();
         if (lastRefresh + refreshTime <= now) {

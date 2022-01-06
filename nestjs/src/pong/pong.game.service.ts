@@ -595,72 +595,74 @@ export class PongService {
 
   UpdateGame(gameId: number) {
     this.matches.forEach((match) => {
-      const mouv: number[] = [0, 0];
+      if (match.id === gameId) {
+        const mouv: number[] = [0, 0];
 
-      mouv[0] =
-        match.pOne.down && !match.pOne.up
-          ? 1
-          : match.pOne.up && !match.pOne.down
-          ? -1
-          : 0;
-      mouv[1] =
-        match.pTwo.down && !match.pTwo.up
-          ? 1
-          : match.pTwo.up && !match.pTwo.down
-          ? -1
-          : 0;
-      if (match.id === gameId && match.run) {
-        const touch = this.ballCollisionToPaddle(
-          match.ball,
-          match.paddleL,
-          match.paddleR,
-          mouv,
-        );
-        if (touch.x || touch.y) {
-          if (match.lastp === false) {
-            match.ball.vx = touch.x;
-            match.ball.vy = touch.y;
-            match.lastp = true;
-            if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+        mouv[0] =
+          match.pOne.down && !match.pOne.up
+            ? 1
+            : match.pOne.up && !match.pOne.down
+            ? -1
+            : 0;
+        mouv[1] =
+          match.pTwo.down && !match.pTwo.up
+            ? 1
+            : match.pTwo.up && !match.pTwo.down
+            ? -1
+            : 0;
+        if (match.id === gameId && match.run) {
+          const touch = this.ballCollisionToPaddle(
+            match.ball,
+            match.paddleL,
+            match.paddleR,
+            mouv,
+          );
+          if (touch.x || touch.y) {
+            if (match.lastp === false) {
+              match.ball.vx = touch.x;
+              match.ball.vy = touch.y;
+              match.lastp = true;
+              if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+            }
+          } else {
+            match.lastp = false;
+            const toWall = this.ballCollisiontoWall(match.ball, {
+              tl: { x: 0, y: 0 },
+              tr: { x: W, y: 0 },
+              bl: { x: 0, y: H },
+              br: { x: W, y: H },
+            });
+            if (toWall === XR || toWall === XL) {
+              this.afterGoalUpdateref(match, !!(toWall === XL));
+              return;
+            } else if (toWall === Y && !match.lasty) {
+              match.lasty = true;
+              match.ball.vy *= -1;
+            }
+            if (toWall !== Y) {
+              match.lasty = false;
+            }
           }
-        } else {
-          match.lastp = false;
-          const toWall = this.ballCollisiontoWall(match.ball, {
-            tl: { x: 0, y: 0 },
-            tr: { x: W, y: 0 },
-            bl: { x: 0, y: H },
-            br: { x: W, y: H },
-          });
-          if (toWall === XR || toWall === XL) {
-            this.afterGoalUpdateref(match, !!(toWall === XL));
-            return;
-          } else if (toWall === Y && !match.lasty) {
-            match.lasty = true;
-            match.ball.vy *= -1;
+          if (match.ball.acceleration > 1) {
+            match.ball.acceleration -= 0.005;
           }
-          if (toWall !== Y) {
-            match.lasty = false;
+          match.ball.pos.x +=
+            match.ball.vx * match.ball.speed * match.ball.acceleration;
+          match.ball.pos.y +=
+            match.ball.vy * match.ball.speed * match.ball.acceleration;
+          match.ball.speed += 0.001;
+          if (mouv[0]) {
+            match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+            if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+            if (match.paddleL.pos.y + match.paddleL.h > H)
+              match.paddleL.pos.y = H - match.paddleL.h;
           }
-        }
-        if (match.ball.acceleration > 1) {
-          match.ball.acceleration -= 0.005;
-        }
-        match.ball.pos.x +=
-          match.ball.vx * match.ball.speed * match.ball.acceleration;
-        match.ball.pos.y +=
-          match.ball.vy * match.ball.speed * match.ball.acceleration;
-        match.ball.speed += 0.001;
-        if (mouv[0]) {
-          match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
-          if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
-          if (match.paddleL.pos.y + match.paddleL.h > H)
-            match.paddleL.pos.y = H - match.paddleL.h;
-        }
-        if (mouv[1]) {
-          match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
-          if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
-          if (match.paddleR.pos.y + match.paddleR.h > H)
-            match.paddleR.pos.y = H - match.paddleR.h;
+          if (mouv[1]) {
+            match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+            if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+            if (match.paddleR.pos.y + match.paddleR.h > H)
+              match.paddleR.pos.y = H - match.paddleR.h;
+          }
         }
       }
     });
@@ -858,83 +860,92 @@ export class PongService {
     return { x: newX, y: newY };
   }
 
+  checkOk(gameId: number) {
+    const currentGame = this.matches.find((e) => e.id === gameId);
+
+    if (currentGame.bonus.lastBH === undefined) return false;
+    else return true;
+  }
+
   UpdateGameBonus(gameId: number) {
     this.matches.forEach((match) => {
-      const mouv: number[] = [0, 0];
-      if (match.bonus.lastBH !== 0)
-        match.bonus.lastBH =
-          match.bonus.lastBH > 6 ? 0 : match.bonus.lastBH + 1;
-      mouv[0] =
-        match.pOne.down && !match.pOne.up
-          ? 1
-          : match.pOne.up && !match.pOne.down
-          ? -1
-          : 0;
-      mouv[1] =
-        match.pTwo.down && !match.pTwo.up
-          ? 1
-          : match.pTwo.up && !match.pTwo.down
-          ? -1
-          : 0;
-      this.updateBallBonus(match);
-      this.updateBonus(match, mouv);
-      if (match.id === gameId && match.run) {
-        const touch = this.ballCollisionToPaddle(
-          match.ball,
-          match.paddleL,
-          match.paddleR,
-          mouv,
-        );
-        if (touch.x || touch.y) {
-          if (match.lastp === false) {
-            match.ball.vx = touch.x;
-            match.ball.vy = touch.y;
-            match.lastp = true;
-            if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+      if (match.id === gameId) {
+        const mouv: number[] = [0, 0];
+        if (match.bonus.lastBH !== 0)
+          match.bonus.lastBH =
+            match.bonus.lastBH > 6 ? 0 : match.bonus.lastBH + 1;
+        mouv[0] =
+          match.pOne.down && !match.pOne.up
+            ? 1
+            : match.pOne.up && !match.pOne.down
+            ? -1
+            : 0;
+        mouv[1] =
+          match.pTwo.down && !match.pTwo.up
+            ? 1
+            : match.pTwo.up && !match.pTwo.down
+            ? -1
+            : 0;
+        this.updateBallBonus(match);
+        this.updateBonus(match, mouv);
+        if (match.id === gameId && match.run) {
+          const touch = this.ballCollisionToPaddle(
+            match.ball,
+            match.paddleL,
+            match.paddleR,
+            mouv,
+          );
+          if (touch.x || touch.y) {
+            if (match.lastp === false) {
+              match.ball.vx = touch.x;
+              match.ball.vy = touch.y;
+              match.lastp = true;
+              if (mouv[0] || mouv[1]) match.ball.acceleration += 0.6;
+            }
+          } else {
+            match.lastp = false;
+            const toWall = this.ballCollisiontoWall(match.ball, {
+              tl: { x: 0, y: 0 },
+              tr: { x: W, y: 0 },
+              bl: { x: 0, y: H },
+              br: { x: W, y: H },
+            });
+            if (toWall === XR || toWall === XL) {
+              this.afterGoalUpdateref(match, !!(toWall === XL));
+              return;
+            } else if (toWall === Y && !match.lasty) {
+              match.lasty = true;
+              match.ball.vy *= -1;
+            }
+            if (toWall !== Y) {
+              match.lasty = false;
+            }
           }
-        } else {
-          match.lastp = false;
-          const toWall = this.ballCollisiontoWall(match.ball, {
-            tl: { x: 0, y: 0 },
-            tr: { x: W, y: 0 },
-            bl: { x: 0, y: H },
-            br: { x: W, y: H },
-          });
-          if (toWall === XR || toWall === XL) {
-            this.afterGoalUpdateref(match, !!(toWall === XL));
-            return;
-          } else if (toWall === Y && !match.lasty) {
-            match.lasty = true;
+          if (match.ball.acceleration > 1) {
+            match.ball.acceleration -= 0.005;
+          }
+          match.ball.pos.x +=
+            match.ball.vx * match.ball.speed * match.ball.acceleration;
+          match.ball.pos.y +=
+            match.ball.vy * match.ball.speed * match.ball.acceleration;
+
+          if (match.ball.pos.y < 0 || match.ball.pos.y > H) {
+            match.ball.pos = this.saveLostBall(match.ball);
             match.ball.vy *= -1;
           }
-          if (toWall !== Y) {
-            match.lasty = false;
+          match.ball.speed += 0.001;
+          if (mouv[0]) {
+            match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
+            if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
+            if (match.paddleL.pos.y + match.paddleL.h > H)
+              match.paddleL.pos.y = H - match.paddleL.h;
           }
-        }
-        if (match.ball.acceleration > 1) {
-          match.ball.acceleration -= 0.005;
-        }
-        match.ball.pos.x +=
-          match.ball.vx * match.ball.speed * match.ball.acceleration;
-        match.ball.pos.y +=
-          match.ball.vy * match.ball.speed * match.ball.acceleration;
-
-        if (match.ball.pos.y < 0 || match.ball.pos.y > H) {
-          match.ball.pos = this.saveLostBall(match.ball);
-          match.ball.vy *= -1;
-        }
-        match.ball.speed += 0.001;
-        if (mouv[0]) {
-          match.paddleL.pos.y += mouv[0] * match.paddleL.speed;
-          if (match.paddleL.pos.y < 0) match.paddleL.pos.y = 0;
-          if (match.paddleL.pos.y + match.paddleL.h > H)
-            match.paddleL.pos.y = H - match.paddleL.h;
-        }
-        if (mouv[1]) {
-          match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
-          if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
-          if (match.paddleR.pos.y + match.paddleR.h > H)
-            match.paddleR.pos.y = H - match.paddleR.h;
+          if (mouv[1]) {
+            match.paddleR.pos.y += mouv[1] * match.paddleR.speed;
+            if (match.paddleR.pos.y < 0) match.paddleR.pos.y = 0;
+            if (match.paddleR.pos.y + match.paddleR.h > H)
+              match.paddleR.pos.y = H - match.paddleR.h;
+          }
         }
       }
     });
