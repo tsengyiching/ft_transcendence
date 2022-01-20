@@ -6,6 +6,7 @@ import axios from 'axios';
 export const ChangeImage = () => {
     const [alert, setAlert] = useState(0);
     const [selectedFile, setSelectedFile] = useState<File | undefined>(undefined)
+    const [msg, setMsg] = useState([])
 
     const handleImageChange = function (e: React.ChangeEvent<HTMLInputElement>) {
         const fileList = e.target.files;
@@ -30,16 +31,32 @@ export const ChangeImage = () => {
         })
         .catch(res => {
             setAlert(1)
+            setMsg(res.response.data.message);
         });
     };
 
     function showAlert () {
-        if (alert === 1)
-        return (
-			<Alert variant={'danger'}>
-				Image not acceptable
-			</Alert>
-        )
+        let items = []
+
+        if (alert === 1){
+            if (msg.length <= 2) {
+                for(let i = 0; i < msg.length; i++) {
+                    items.push(<Alert key={i} variant={'danger'}> {msg[i]} </Alert>)
+                }
+                return (
+                    <div>
+                        {items}
+                    </div>
+                )
+            }
+            else {
+                return (
+                    <div>
+                        <Alert variant={'danger'}> {msg} </Alert>
+                    </div>
+                )
+            }
+        }
     }
 
     return (

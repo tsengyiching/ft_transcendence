@@ -3,11 +3,12 @@ import { ContextMenu, MenuItem, ContextMenuTrigger } from "react-contextmenu";
 import {Image, Col, Row} from 'react-bootstrap'
 import {useHistory} from "react-router-dom"
 import axios from 'axios'
+import { gameSocket } from "../../context/gameSocket";
 import { socket } from "../../context/socket";
 import { SwitchContext } from "../web_pages/UserPart";
 import status from './Status'
 import {SiteStatus} from "../../App"
-import {Unfriend, Askfriend, Block, } from "./ContextMenuFunctions";
+import {Unfriend, Askfriend, Block, InvitateToGame, SpectateGame } from "./ContextMenuFunctions";
 import './members.css'
 import "./ListUsers.css"
 
@@ -38,7 +39,15 @@ export default function ListUsers()
 			<MenuItem onClick={() => history.push(`/profile/${props.User.id}`)}>
 				View Profile
 			</MenuItem>
+            { props.User.userStatus === 'Available' &&
+			<MenuItem onClick={() => InvitateToGame(props.User.id, gameSocket)}>
+				Invite to game
+			</MenuItem>}
 
+			{ props.User.userStatus === 'Playing' &&
+			<MenuItem onClick={() => SpectateGame(props.User.id, gameSocket)}>
+				Spectate Game
+			</MenuItem>}
 			{ props.User.relationship !== 'Friend' &&
 			<MenuItem onClick={() => Askfriend(props.User.id)}>
 				Add Friend
@@ -82,10 +91,9 @@ export default function ListUsers()
 	}
 
 	const [Users, SetUsers] = useState<IUser[]>([]);
-	//const [ReloadUserlist, SetReloadUserlist] = useState<{user_id1: number, user_id2: number}>({user_id1: -1, user_id2: -1});
 	const [Reload, setReload] = useState(0);
 	const [ReloadStatus, SetReloadStatus] = useState<{user_id: number, status: StatusType}>({user_id: 0, status: 'Available'});
-	//const userData = useContext(DataContext);
+	const [RefreshVar, SetRefreshVar] = useState<boolean>(false);
 	let history = useHistory();
 	const SwitchToPrivate = useContext(SwitchContext);
 
@@ -99,10 +107,12 @@ export default function ListUsers()
 			console.log("error");
 		})
 		socket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+		gameSocket.on('reload-status', (data: {user_id: number, status: StatusType}) => {SetReloadStatus(data)});
+
 		socket.on('reload-users', () => {
 			setReload(Reload + 1)
 		});
-		return (() => {socket.off('reload-status'); socket.off('reload-users'); isMounted = false;});
+		return (() => {socket.off('reload-status'); gameSocket.off('reload-status');socket.off('reload-users'); isMounted = false;});
 		//console.log(Users);
 	}, [Reload]);
 
@@ -110,13 +120,11 @@ export default function ListUsers()
 	useEffect(() => {
 		if (ReloadStatus.user_id !== 0)
 		{
-			//console.log("in reloadstatus effect");
 			const user = Users.find(element => element.id === ReloadStatus.user_id)
 			if (user !== undefined)
 			{
-			//console.log("change status");
-			user.userStatus = ReloadStatus.status;
-			//SetRefreshVar(!RefreshVar);
+				user.userStatus = ReloadStatus.status;
+				SetRefreshVar(!RefreshVar);
 			}
 		}
 		// eslint-disable-next-line react-hooks/exhaustive-deps

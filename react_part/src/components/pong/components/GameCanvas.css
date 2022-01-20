@@ -11,15 +11,17 @@ body {
 
 
 
-#wrapper { position:static;
-}
-#stage { position: sticky; 
+#wrapper { position: static; }
+#stage
+{
+	position: sticky;
+	position: -webkit-sticky;
 }
 
 #stage canvas{
     top:0;
 	left:0;
-	position:absolute;
+	position: absolute;
 }
 #bonus-layer{ z-index:2; }
 #background-layer{ z-index:1;

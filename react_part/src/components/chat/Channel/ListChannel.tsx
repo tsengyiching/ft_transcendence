@@ -70,30 +70,30 @@ function ListChannel(props: IUseStateChannel) {
 
                 return (
                 <div key={channel_id}>
-                <Button className="ButtonChannel ButtonMyChannel " onClick={(e) => {
-                        if (!isDestroying)
-                                props.setChannelSelected({channel_id, channel_name, channel_type, role,})
-                        else
-                                isDestroying = false;
-                        }}>
-                        {Channel.channel_type === 'Private' ?
-                        <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
-                        : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
+					<Button className="ButtonChannel ButtonMyChannel " onClick={(e) => {
+							if (!isDestroying)
+									props.setChannelSelected({channel_id, channel_name, channel_type, role,})
+							else
+									isDestroying = false;
+							}}>
+							{Channel.channel_type === 'Private' ?
+							<Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
+							: <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
 
-                        {Channel.channel_name}
+							{Channel.channel_name}
 
-                        {Channel.role === 'Owner' ?
-                        <Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
-                        : Channel.role === "Admin" ?
-                        <Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
-                        : <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
+							{Channel.role === 'Owner' ?
+							<Image src={CrownImage} className="LogoChannel" roundedCircle alt="crown"/>
+							: Channel.role === "Admin" ?
+							<Image src={StarImage} className="LogoChannel" roundedCircle alt="star"/>
+							: <Image src={MSNImage} className="LogoChannel" roundedCircle alt="people"/>}
 
-                        {Channel.status === 'Normal' ?
-                        <Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
-                        : Channel.status !== "Mute" ?
-                        <Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
-                        : <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
-                </Button>
+							{Channel.status === 'Normal' ?
+							<Image src={NormalImage} className="LogoChannel" roundedCircle alt="normal"/>
+							: Channel.status !== "Mute" ?
+							<Image src={MuteImage} className="LogoChannel" roundedCircle alt="mute"/>
+							: <Image src={BlockImage} className="LogoChannel" roundedCircle alt="block"/>}
+					</Button>
                 </div>
                 )
         }
@@ -105,39 +105,39 @@ function ListChannel(props: IUseStateChannel) {
 
                 return (
                         <div key={channel_id}>
-                        <Button  className="ButtonChannel ButtonOtherChannel"
-                        onClick={(event) => { !isDestroying ? setShowJoinModal(channel_id) : isDestroying = false; }}>
+							<Button  className="ButtonChannel ButtonOtherChannel"
+							onClick={(event) => { !isDestroying ? setShowJoinModal(channel_id) : isDestroying = false; }}>
 
-                                {Channel.channel_type === 'Private' ?
-                                <Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
-                                : <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
-                                {channel_name}
-                        </Button>
-                        <JoinChannelModal
-                        show={ShowJoinModal === channel_id}
-                        onHide={() => {setShowJoinModal(0);}}
-                        backdrop="static"
-                        channel={Channel}
-                        />
+									{Channel.channel_type === 'Private' ?
+									<Image src={PadlockImage} className="LogoChannel" roundedCircle alt="padlock"/>
+									: <Image src={GlobeImage} className="LogoChannel" roundedCircle alt="globe"/>}
+									{channel_name}
+							</Button>
+							<JoinChannelModal
+							show={ShowJoinModal === channel_id}
+							onHide={() => {setShowJoinModal(0);}}
+							backdrop="static"
+							channel={Channel}
+							/>
                         </div>
                 )
         }
 
 	return(
                 <Row className="ScrollingListChannel">
-                        <Col className="ChannelsJoined" lg={6} >
+                        <Col className="ChannelsJoined" sm={6} >
                                 { MyChannels.length !== 0
                                         ?
                                         <div>
                                                 <h4> My Channels </h4>
-                                                <div style={{overflow: 'auto', height: '7.9em'}} >
+                                                <div style={{overflow: 'auto', maxHeight: '15em'}} >
                                                         { MyChannels.map(ButtonMyChannel) }
                                                 </div>
                                         </div>
                                         : <div/>
                                 }
                         </Col>
-                        <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} lg={6}>
+                        <Col className="ChannelsNotJoinded" style={{overflow: 'auto'}} sm={6}>
                                 { OthersChannels.length !== 0
                                         ?
                                         <div>

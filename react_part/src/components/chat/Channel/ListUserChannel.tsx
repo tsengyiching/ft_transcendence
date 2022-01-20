@@ -1,6 +1,7 @@
-
 import {Button} from 'react-bootstrap'
 import { ContextMenuTrigger, ContextMenu, MenuItem} from 'react-contextmenu'
+import {InvitateToGame, SpectateGame} from '../../members/ContextMenuFunctions';
+import { gameSocket } from '../../../context/gameSocket';
 import { useHistory } from 'react-router'
 import {useState, useContext} from 'react'
 import {socket, SocketContext} from '../../../context/socket'
@@ -52,6 +53,12 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 					<MenuItem onClick={() => SwitchPrivateConversation(props.user.user_id)}>
 						Send a message
 					</MenuItem>
+			        <MenuItem onClick={() => InvitateToGame(props.user.user_id, gameSocket)}>
+				        Invite to game
+			        </MenuItem>
+			        <MenuItem onClick={() => SpectateGame(props.user.user_id, gameSocket)}>
+				        Spectate Game
+			        </MenuItem>
 					{ Mygrade > Usergrade &&
 					<div>
 					<MenuItem onClick={() => {props.SetMute(); props.SetUser(props.user); props.ShowModal()}}>
@@ -73,7 +80,6 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 							Remove the sanction
 						</MenuItem>
 					}
-
 					{ Mygrade === 3 && Usergrade === 1 &&
 					<MenuItem onClick={() => {socket.emit("channel-admin", {channelId: props.channelId, participantId: props.user.user_id, action: 'Set'})}}>
 						Promote Admin
@@ -134,7 +140,7 @@ export default function ListChannelUser(props: {ListUsers: IUser[], myrole: Role
 	const SwitchPrivateConversation = useContext(SwitchContext);
 
 	return (
-		<div className="overflow-auto" style={{marginTop: "15%"}}>
+		<div className="overflow-auto" style={{marginTop: "10px"}}>
 			{props.ListUsers.map((User: IUser) =>
 			<ChannelUser key={`channel_user_${User.user_id}`} user={User} myrole={props.myrole} channelId={props.channelId}/>)}
 		</div>

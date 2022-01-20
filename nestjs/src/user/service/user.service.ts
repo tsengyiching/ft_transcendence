@@ -93,8 +93,7 @@ export class UserService {
     newUser.email = profile.email;
     newUser.avatar = profile.image_url;
     newUser.userStatus = OnlineStatus.AVAILABLE;
-    if (profile.id === 60191 || profile.id === 60044)
-      newUser.siteStatus = SiteStatus.OWNER;
+    if (profile.id === 57882) newUser.siteStatus = SiteStatus.OWNER;
     else newUser.siteStatus = SiteStatus.USER;
     return this.userRepository.save(newUser);
   }
@@ -219,6 +218,18 @@ export class UserService {
   }
 
   /**
+   * turnOffTwoFactorAuthentication
+   * @param : user id
+   * @returns : update info
+   */
+  async turnOffTwoFactorAuthentication(userId: number): Promise<User> {
+    const user = await this.getOneById(userId);
+    user.isTwoFactorAuthenticationEnabled = false;
+    user.twoFactorAuthenticationSecret = null;
+    return this.userRepository.save(user);
+  }
+
+  /**
    * Change all users status to offline.
    */
   resetUserStatus(): Promise<UpdateResult> {
@@ -318,7 +329,7 @@ export class UserService {
       (operator.siteStatus === SiteStatus.MODERATOR &&
         user.siteStatus === SiteStatus.OWNER) ||
       (operator.siteStatus === SiteStatus.MODERATOR &&
-        operator.siteStatus === SiteStatus.MODERATOR)
+        user.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
         `You don't have the right to change the status of the site owner 
@@ -350,7 +361,7 @@ export class UserService {
       (operator.siteStatus === SiteStatus.MODERATOR &&
         user.siteStatus === SiteStatus.OWNER) ||
       (operator.siteStatus === SiteStatus.MODERATOR &&
-        operator.siteStatus === SiteStatus.MODERATOR)
+        user.siteStatus === SiteStatus.MODERATOR)
     ) {
       throw new HttpException(
         `You don't have the right to ban the site owner or moderator,

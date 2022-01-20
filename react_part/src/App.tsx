@@ -5,7 +5,6 @@ import {SocketContext, socket} from './context/socket'
 
 import axios from 'axios'
 import React, { useState, useEffect } from 'react';
-import "bootswatch/dist/lux/bootstrap.min.css";
 // import './bootswatch.scss';
 
 enum OnlineStatus {
@@ -44,8 +43,7 @@ function App():React.ReactElement {
     let isMounted = true;
     axios.get('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/profile/me', {withCredentials: true})
     .then((res) => {if(isMounted) {SetuserData(res.data)} })
-    .catch(res => {if(isMounted) {console.log(`error in context user : ${res.data}`)}})
-
+    .catch(res => {if(isMounted) {console.log(`You must login : ${res.data}`)}})
     return (() => {isMounted = false});
   }, [])
 

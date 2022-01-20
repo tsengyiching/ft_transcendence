@@ -1,15 +1,16 @@
 /* * Interface .ChatTitle */
 
-
 .TitleChannel {
-	font-size: large;
 	background-color: #A0B4D1;
 	text-align: center;
 	max-height: 40px;
 	max-width: 100%;
-	margin: 0;
 	border: 1px solid black
 }
+
+.TitleChannel h2
+{ display: inline-block; }
+
 
 .FormSendMessage {
 	width: 100%;
@@ -18,10 +19,22 @@
 }
 
 .MsgBubble {
-	width: 70%;
-	height: 5em;
-	margin: 2em;
-	border-radius: 2em;
+	margin: 10px;
+	padding: 5px;
+	word-wrap: break-word;
+}
+
+.MsgBubble .author {
+ text-align: left;
+ font-weight: bold;
+}
+.MsgBubble .author img {
+	margin-right: 10px;
+}
+
+.MsgBubble .creationDate {
+	text-align: right;
+	font-size: 0.7em;
 }
 
 .pictureChat {
@@ -30,9 +43,10 @@
 }
 
 .iconParameters {
-  width: 80%;
-  height: 55%;
-  margin-top: 20%;
+	float: right;
+	margin: 0.4em;
+	width: 1.5rem;
+	height: 1.5rem;
 }
 
 /* Context menu css */

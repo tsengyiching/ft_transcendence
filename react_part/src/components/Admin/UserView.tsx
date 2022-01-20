@@ -1,8 +1,9 @@
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
-import { Form, Col, Row, Button, Image, Modal} from "react-bootstrap";
+import { Form, Col, Row, Button, Image, Modal, Alert} from "react-bootstrap";
 import { Data, DataContext, } from "../../App";
 import { SocketContext } from "../../context/socket";
+
 
 enum SiteStatus {
 	OWNER = 'Owner',
@@ -22,21 +23,33 @@ interface IPropsModal {
 
 function UserButton(props: {thisUser: Data, myData: Data, setSiteUser: any, setViewModal: any})
 {
+
+
 	return(
-		<Row style={{backgroundColor: 'blueviolet', borderStyle: 'solid', borderWidth: '0.01em'}}>
+		<Row style={{backgroundColor: 'grey', borderStyle: 'solid', borderWidth: '0.01em'}}>
 			<Col ><Image src={props.thisUser.avatar} fluid style={{height: '3em'}}></Image></Col>
 			<Col>{props.thisUser.nickname}</Col>
 			<Col>{props.thisUser.siteStatus}</Col>
 			<Col>
 			{ 	props.thisUser.siteStatus !== SiteStatus.OWNER &&
 				props.thisUser.id !== props.myData.id &&
-				<Button
+				<div>
+				<style type="text/css">
+					{`
+					.btn-black {
+					background-color: black;
+					color: white;
+					}
+					`}
+				</style>
+				<Button variant="black" size="lg"
 				onClick={() => {
-						props.setSiteUser(props.thisUser);
-						props.setViewModal(true);
+					props.setSiteUser(props.thisUser);
+					props.setViewModal(true);
 				}}>
 					Change Status
 				</Button>
+				</div>
 			}
 			</Col>
 		</Row>
@@ -46,18 +59,21 @@ function UserButton(props: {thisUser: Data, myData: Data, setSiteUser: any, setV
 function UserModal(props: IPropsModal)
 {
 	const [NewSiteStatus, setNewSiteStatus] = useState<string>("");
+    const [errorMsg, setErrorMsg] = useState<any>(undefined);
 
 	function SubmitForm(event: any) {
 		event.preventDefault();
+        setErrorMsg(undefined);
 		if (props.user !== undefined && NewSiteStatus !== "")
 		{
 			axios.patch('http://' + process.env.REACT_APP_DOMAIN_BACKEND + '/admin/set', {id: props.user.id, newStatus: NewSiteStatus}, {withCredentials: true})
 			.then((res) => onHide())
-			.catch(res => console.log("error change site status : " + res.data));
+			.catch(res => {if (res.response.data.message) setErrorMsg(res.response.data.message); });
 		}
 	}
  
 	function onHide(){
+        setErrorMsg(undefined);
 		setNewSiteStatus("");
 		props.onHide();
 	}
@@ -80,8 +96,9 @@ function UserModal(props: IPropsModal)
 		</Modal.Header>
 		<Modal.Body>
 			<Form>
+                {errorMsg && <Alert key={"alertkey"} variant='danger'> {errorMsg}  </Alert>}
 			<Form.Select aria-label="Change Status Site"
-				onChange={(e: any) => {console.log(`new status : ${e.target.value}`); setNewSiteStatus(e.target.value)}}
+				onChange={(e: any) => {setNewSiteStatus(e.target.value)}}
 				>
 				<option value={""}> Change Status Site </option>
 				{props.user.siteStatus !== SiteStatus.MODERATOR && <option value={SiteStatus.MODERATOR}>Set to Moderator </option>}
@@ -136,7 +153,7 @@ export default function UserView()
 	}, [ReloadUserList, socket])
 
 	return (
-		<div style={{overflow: 'auto', backgroundColor: 'grey', height: '70em', fontSize: '2em'}}>
+		<div style={{overflow: 'auto', backgroundColor: '#D7DBDD', height: '70em', fontSize: '2em'}}>
 			{ listUser.map((user) =>
 			(<UserButton
 				thisUser={user}

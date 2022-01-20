@@ -1,6 +1,7 @@
 import React, {useContext, useEffect, useState} from "react";
 import { GameSocketContext } from "../context/gameSocket";
 import {Modal, Button} from 'react-bootstrap';
+import { useHistory } from "react-router-dom";
 import {Socket} from 'socket.io-client';
 import useStore from './pong/hooks/useStore';
 import clearStore from "./pong/components/ClearStore";
@@ -10,6 +11,7 @@ const GameStartModal:React.FC = () => {
 	const [gameId, setGameId] =useState<number>(-1);
 	const setGameState = useStore(s => s.setGameStatus);
 	const gameState = useStore(s => s.gameStatus);
+	let history = useHistory();
 	const enter = () => {
 		clearStore();
 		if (gameState === 1)
@@ -18,6 +20,8 @@ const GameStartModal:React.FC = () => {
 			socket.emit('readyBonus', gameId)
 		}
 		setGameState(0);
+		socket.emit('reloadStartGame');
+		history.push("/home");
 	}
 
 	useEffect(() => {

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import '../members/Status';
 import axios from 'axios';
 import {Image, Row, Col, Badge, ListGroup} from 'react-bootstrap'
-
+import { LinkContainer } from "react-router-bootstrap";
 import {useParams} from "react-router-dom";
 import './Profile.css'
 import status from "../members/Status";
@@ -137,23 +137,22 @@ export default function Profile() {
     }
 
     function printFriendsList () {
-		if (friends.length == 0)
+		if (friends.length === 0)
 			return (
-				<h5>He has no friend but he has curly ! 😀🍫</h5>
+				<h5>They have no friend but they have curly ! 😀🍫</h5>
 			);
-			console.log(friends);
         return (
-            <ListGroup variant="flush">
+            <ListGroup variant="flush" key={"printFriendsList"}>
                 {friends.map(({user_id, user_nickname, user_avatar, user_siteStatus}) => {
                     return (
-						<ListGroup.Item>
-							<a href={'/profile/'+user_id}>
+						<ListGroup.Item key={`profile-${user_id}`}>
+							<LinkContainer to={"/profile/"+user_id}>
 								<Row>
 									<Col><Image src={`${user_avatar}`} className="Avatar" alt="Friend Avatar"/></Col>
 										<Col>{status(user_siteStatus)}</Col> {/* because is triangle */}
 									<Col>{user_nickname}</Col>
 								</Row>
-							</a>
+							</LinkContainer>
 						</ListGroup.Item>
                     );
                 })
@@ -164,22 +163,22 @@ export default function Profile() {
 
     function printMatchsScore () {
         return (
-            <div>
+            <div key={"printMatchsScore"}>
                 {games.map(({gameId, mode, date, updateDate, userScore, opponentId, opponentScore, userGameStatus}) => {
                     return ( 
-                        <div key={`${gameId}-matchsScore`}> 
+                        <div key={`${gameId}-matchsScore`}>
                             <Row>
-                                <Col xs='auto'>
+                                <Col style={{ maxWidth: '4.5rem'}}>
                                     <Image className="Avatar" src={`${getPicture(idMain)}`} alt="Avartar"/>
                                 </Col>
-                                <Col xs={10} style={{textAlign: 'center'}}>
+                                <Col style={{textAlign: 'center'}}>
 									<div>{` ${userScore} - ${opponentScore} `}</div>
 									<div>{` ${name} ` } Vs {` ${getName(opponentId)} `}</div>      
                                 </Col>
-                                <Col xs='auto'>
-                                    <a href={'/profile/'+opponentId}>
+                                <Col style={{ maxWidth: '4.5rem'}}>
+									<LinkContainer to={'/profile/'+opponentId}>
                                         <Image className="Avatar" src={`${getPicture(opponentId)}`} alt="Avatar"/>
-                                    </a>
+                                    </LinkContainer>
                                 </Col>
                             </Row>
                         </div>
@@ -221,9 +220,9 @@ export default function Profile() {
 
     function PrintProfile() {
         if (validate === false)
-            return Unvalidate();
+            return <Unvalidate/>;
         else
-            return Validate();
+            return <Validate/>;
     }
 
     return (

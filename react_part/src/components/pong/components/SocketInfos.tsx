@@ -13,8 +13,6 @@ type Infos = {
  const SocketInfos:React.VFC<{}> = () => {
 	const socket:Socket = useContext(GameSocketContext);
 	const setPosition = useStore( s => s.setNewPos);
-	const scoreL = useStore(s => s.left);
-	const scoreR = useStore(s => s.right);
 	const setScore = useStore(s => s.setScore);
 	const [infos, setinfos] = useState<Infos>({
 		pOneY: 0,
@@ -31,7 +29,6 @@ type Infos = {
 		})
 		socket.on('sendScore', (d) => {
 			setScore(d.scoreL, d.scoreR);
-			console.log(`SCORED ${scoreL} - ${scoreR}`)
 		})
 		return (() => {
 			socket.off('infos');

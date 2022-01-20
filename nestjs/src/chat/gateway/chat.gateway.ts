@@ -69,12 +69,14 @@ export class ChatGateway
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
-        await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+        if (!this.NumClientsInRoom('user-' + user.id)) {
+          await this.userService.setUserStatus(user.id, OnlineStatus.AVAILABLE);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.AVAILABLE,
+          });
+        }
         client.join('user-' + user.id);
-        this.server.emit('reload-status', {
-          user_id: user.id,
-          status: OnlineStatus.AVAILABLE,
-        });
         console.log('New User Join');
         const [channels_in, channels_out] = await Promise.all([
           this.chatService.getUserChannels(user.id),
@@ -99,12 +101,14 @@ export class ChatGateway
     if (jwtCookie !== undefined) {
       try {
         const user: User = await this.authService.getUserFromSocket(client);
-        await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
         client.leave('user-' + user.id);
-        this.server.emit('reload-status', {
-          user_id: user.id,
-          status: OnlineStatus.OFFLINE,
-        });
+        if (!this.NumClientsInRoom('user-' + user.id)) {
+          await this.userService.setUserStatus(user.id, OnlineStatus.OFFLINE);
+          this.server.emit('reload-status', {
+            user_id: user.id,
+            status: OnlineStatus.OFFLINE,
+          });
+        }
         console.log('Remove active user');
       } catch (error) {
         console.log(error);
@@ -453,8 +457,10 @@ export class ChatGateway
           this.userService.getUserProfileById(body.userId),
         ]);
         channelId = await this.chatService.createDirectChannel(user1, user2);
-        const direct = await this.chatService.getDirectChannelList(user1.id);
-        client.emit('private-list', direct);
+        const direct1 = await this.chatService.getDirectChannelList(user1.id);
+        const direct2 = await this.chatService.getDirectChannelList(user2.id);
+        this.server.to('user-' + user1.id).emit('private-list', direct1);
+        this.server.to('user-' + user2.id).emit('private-list', direct2);
       } else throw new WsException('Invalid socket request.');
       client.join('private-' + channelId);
       const [messages, channelInfo] = await Promise.all([
@@ -512,5 +518,14 @@ export class ChatGateway
     } catch (error) {
       client.emit(`alert`, { alert: { type: `danger`, message: error.error } });
     }
+  }
+
+  NumClientsInRoom(room: string) {
+    const clients = this.server.sockets.adapter.rooms.get(room);
+    if (clients) return clients.size;
+    return 0;
+    // console.log(room);
+    // console.log(this.server.sockets.adapter.rooms);
+    // console.log(this.server.sockets.adapter.rooms.get(room));
   }
 }
